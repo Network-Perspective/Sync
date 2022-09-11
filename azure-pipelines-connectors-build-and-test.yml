@@ -1,0 +1,46 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- "*"
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    version: '6.0.x'
+    includePreviewVersions: true # Required for preview versions
+  
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'build'
+    configuration: $(buildConfiguration)    
+    projects: 'src/NetworkPerspective.Sync.sln'
+  
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test'
+  inputs:
+    command: 'test'
+    arguments: '--configuration $(buildConfiguration) --filter SkipInCi!=true --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura'
+    publishTestResults: true    
+    projects: 'src/NetworkPerspective.Sync.sln'
+
+- task: reportgenerator@5
+  inputs:
+    reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+    targetdir: $(Pipeline.Workspace)/coveragereport
+    classfilters: "-NetworkPerspective.Sync.Infrastructure.Core.*"
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: "Cobertura"
+    summaryFileLocation: $(Pipeline.Workspace)/coveragereport/Cobertura.xml
+
