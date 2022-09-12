@@ -28,7 +28,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             _httpClientFactory = slackClientFixture.HttpClientFactory;
         }
 
-        [Fact]
+        [SkippableFact]
         [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
         public async Task ShouldReturnNonEmptyInteractionList()
         {
@@ -45,11 +45,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                 .Add(existingEmail);
             var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", emailLookuptable);
 
-            // Act
-            var result = await chatclient.GetInteractions(slackClientFacade, network, interactionFactory, timeRange);
+            try
+            {
+                // Act
+                var result = await chatclient.GetInteractions(slackClientFacade, network, interactionFactory, timeRange);
 
-            // Assert
-            result.Should().NotBeEmpty();
+                // Assert
+                result.Should().NotBeEmpty();
+            }
+            catch (Slack.Client.Exceptions.ApiException exception)
+            {                
+                Skip.If(exception.Message.Contains("invalid_auth"), "Please setup slack auth for slack api changes testing");
+                
+                throw;                
+            }
         }
     }
 }

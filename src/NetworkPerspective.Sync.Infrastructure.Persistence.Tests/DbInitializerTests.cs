@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using DotNet.Testcontainers.Containers.Builders;
@@ -17,7 +18,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Tests
 {
     public class DbInitializerTests
     {
-        [Fact]
+        [SkippableFact]
         [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
         public async Task ShoudInitialize()
         {
@@ -30,8 +31,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Tests
 
             await using var testcontainer = testcontainersBuilder.Build();
 
-            await testcontainer
-                .StartAsync();
+            try
+            {
+                await testcontainer
+                    .StartAsync();
+            } 
+            catch (Exception e)
+            {
+                Skip.If(e is System.TimeoutException, "Setup docker for creating test containers");
+            }
 
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string>

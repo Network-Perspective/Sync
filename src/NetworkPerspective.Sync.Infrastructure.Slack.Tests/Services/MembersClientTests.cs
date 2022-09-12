@@ -23,8 +23,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
         {
             _httpClientFactory = slackClientFixture.HttpClientFactory;
         }
-
-        [Fact]
+        
+        [SkippableFact]
         [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
         public async Task ShouldReturnNonEmptyLookupTable()
         {
@@ -37,11 +37,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             var slackClientFacade = new SlackClientFacade(_httpClientFactory, paginationHandler);
             var membersClient = new MembersClient(clientLogger);
 
-            // Act
-            var result = await membersClient.GetEmployees(slackClientFacade, EmailFilter.Empty);
+            try
+            {
+                // Act
+                var result = await membersClient.GetEmployees(slackClientFacade, EmailFilter.Empty);
 
-            // Assert
-            result.GetAllInternal().Should().NotBeEmpty();
+                // Assert
+                result.GetAllInternal().Should().NotBeEmpty();
+            }
+            catch (Slack.Client.Exceptions.ApiException exception)
+            {                
+                Skip.If(exception.Message.Contains("invalid_auth"), "Please setup slack auth for slack api changes testing");
+                
+                throw;                
+            }
         }
     }
 }
