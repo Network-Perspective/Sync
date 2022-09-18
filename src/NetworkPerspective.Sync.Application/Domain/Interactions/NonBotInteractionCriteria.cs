@@ -1,0 +1,30 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using Microsoft.Extensions.Logging;
+
+namespace NetworkPerspective.Sync.Application.Domain.Interactions
+{
+    internal class NonBotInteractionCriteria : IInteractionCritieria
+    {
+        private readonly ILogger<NonBotInteractionCriteria> _logger;
+
+        public NonBotInteractionCriteria(ILogger<NonBotInteractionCriteria> logger)
+        {
+            _logger = logger;
+        }
+
+        public IEnumerable<Interaction> MeetCriteria(IEnumerable<Interaction> input)
+        {
+            _logger.LogDebug("Filtering out bot interactions. Input has {count} interactions", input.Count());
+
+            var result = input
+                .Where(x => !x.Source.IsBot)
+                .Where(x => !x.Target.IsBot);
+
+            _logger.LogDebug("Filtering bot interactions completed. Output has {count} interactions", result.Count());
+
+            return result;
+        }
+    }
+}

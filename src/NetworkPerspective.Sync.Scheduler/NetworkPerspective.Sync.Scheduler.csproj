@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.4.0" />
+        <PackageReference Include="Quartz.Serialization.Json" Version="3.4.0" />
+        <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NetworkPerspective.Sync.Application\NetworkPerspective.Sync.Application.csproj" />
+    </ItemGroup>
+
+</Project>

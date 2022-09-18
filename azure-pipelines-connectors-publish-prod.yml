@@ -1,0 +1,93 @@
+# With docker
+# Build and push connector images to Azure Container Registry
+# Update infrastructure repository
+
+trigger:
+- master
+
+# exclude from pull-requests 
+# publish to production only on merge to master
+pr: none
+
+resources:
+  repositories:
+  - repository: Infrastructure
+    type: bitbucket
+    endpoint: BitbucketAzureServiceConnection
+    name: NetworkPerspective/NetworkPerspective.Infrastructure
+
+variables:
+  version: '2.1'
+  tag: '$(version).$(Build.BuildId)'
+
+  commitTagFile: 'Connectors/Prod/Tag.txt'
+  commitTagMessage: 'Connectors PROD release v$(tag)'
+
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '186fdce6-dcaa-4d2e-ad98-fd7fb7793956'
+  containerRegistry: 'networkperspective.azurecr.io'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - checkout: self
+      persistCredentials: true
+      displayName: Checkout repo
+    - task: Docker@2
+      displayName: Build and push GSuite connector
+      inputs:
+        command: buildAndPush
+        repository: 'connectors/gsuite'
+        dockerfile: '$(Build.SourcesDirectory)/src/GSuite.Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          latest
+    - task: Docker@2
+      displayName: Build and push Slack connector
+      inputs:
+        command: buildAndPush
+        repository: 'connectors/slack'
+        dockerfile: '$(Build.SourcesDirectory)/src/Slack.Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          latest
+    - script: |
+        git tag v$(tag)
+        git push origin v$(tag)
+      workingDirectory: $(Build.SourcesDirectory)
+      displayName: Add tag to repository
+
+- stage: UpdateInfrastructure 
+  displayName: Update infrastructure 
+  jobs:
+  - job: BumpVersion
+    displayName: Bump version
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+      - checkout: Infrastructure
+        displayName: Checkout infrastructure
+        clean: true
+        persistCredentials: true
+
+      - script: |
+         git config --global user.email azure@networkperspective.io & git config --global user.name "Azure Pipeline"
+         git checkout -b master
+         git pull origin master
+         echo $(tag) > $(commitTagFile)
+         git add -A
+         git commit -m "$(commitTagMessage)"
+         git push --set-upstream origin master 
+        displayName: Update PROD release version
+        workingDirectory: $(Build.SourcesDirectory)

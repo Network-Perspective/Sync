@@ -1,0 +1,12 @@
+﻿using System.Collections.Generic;
+
+namespace NetworkPerspective.Sync.Application.Domain.StatusLogs
+{
+    public class Status
+    {
+        public bool Authorized { get; set; }
+        public bool Scheduled { get; set; }
+        public bool Running { get; set; }
+        public IEnumerable<StatusLog> Logs { get; set; }
+    }
+}

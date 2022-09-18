@@ -1,0 +1,6 @@
+swagger-codegen
+swagger-codegen-cli.jar
+.config
+typescript
+gsuite.json
+slack.json
