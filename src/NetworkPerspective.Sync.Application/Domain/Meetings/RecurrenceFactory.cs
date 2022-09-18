@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using NetworkPerspective.Sync.Application.Exceptions;
+
+using Newtonsoft.Json.Linq;
 
 namespace NetworkPerspective.Sync.Application.Domain.Meetings
 {
@@ -23,19 +26,41 @@ namespace NetworkPerspective.Sync.Application.Domain.Meetings
 
                 var parts = rrule.Split(new[] { ':', ';' });
 
-                var frequency = parts.Single(x => x.StartsWith("FREQ"));
-                var interval = parts.SingleOrDefault(x => x.StartsWith("INTERVAL"));
+                var frequency = GetValue(parts, "FREQ");
+                var byDay = GetValue(parts, "BYDAY");
+                var interval = GetValue(parts, "INTERVAL");
+
+                var recurrenceType = StringToReocurrenceType(frequency);
+
+                if (recurrenceType == RecurrenceType.Weekly)
+                {
+                    var daysCount = byDay?.Split(',').Length;
+
+                    if (daysCount > 1)
+                        recurrenceType = RecurrenceType.Daily;
+                }
 
                 return new Recurrence
                 {
-                    Type = StringToReocurrenceType(frequency[5..]),
-                    Interval = interval == null ? DefaultInterval : int.Parse(interval[9..]),
+                    Type = recurrenceType,
+                    Interval = interval == null ? DefaultInterval : int.Parse(interval),
                 };
             }
             catch (Exception)
             {
                 throw new UnexpectedRecurrenceFormatException(rrule);
             }
+        }
+
+        private static string GetValue(IEnumerable<string> parts, string key)
+        {
+            var value = parts.SingleOrDefault(x => x.StartsWith(key));
+
+            if (value == null)
+                return null;
+
+            return value[key.Length..]
+                .Trim('=');
         }
 
         private RecurrenceType StringToReocurrenceType(string input)

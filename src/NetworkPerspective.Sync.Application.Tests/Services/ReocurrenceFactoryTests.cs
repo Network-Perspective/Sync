@@ -21,6 +21,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
         [InlineData("RRULE:FREQ=MINUTELY", RecurrenceType.Minutely, 1)]
         [InlineData("RRULE:FREQ=SECONDLY", RecurrenceType.Secondly, 1)]
         [InlineData("RRULE:FREQ=WEEKLY;BYDAY=FR", RecurrenceType.Weekly, 1)]
+        [InlineData("RRULE:FREQ=WEEKLY;BYDAY=FR,SU", RecurrenceType.Daily, 1)]
         [InlineData("RRULE:FREQ=MONTHLY;UNTIL=20230204T233000Z;INTERVAL=1;BYDAY=1SA", RecurrenceType.Monthly, 1)]
         public void ShouldCreateFromRfc5545(string input, RecurrenceType expectedType, int expectedInterval)
         {
