@@ -198,3 +198,4 @@ Data/
 *.db-shm
 *.db-wal
 appsettings.development.json
+swagger.json
