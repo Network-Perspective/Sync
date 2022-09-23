@@ -25,9 +25,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
         {
             var customAttributes = new CustomAttributesConfig(
                 groupAttributes: new[] { "NP-Test.Role" },
-                propAttributes: new[] { "NP-Test.Employment_Date" },
-                pathAttributes: new[] { "NP-Test.Formal_Group" }
-                );
+                propAttributes: new[] { "NP-Test.Employment_Date" });
 
             return Task.FromResult(new NetworkConfig(EmailFilter.Empty, customAttributes));
         }

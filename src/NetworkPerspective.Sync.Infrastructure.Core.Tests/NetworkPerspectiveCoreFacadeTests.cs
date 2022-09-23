@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using HandlebarsDotNet;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -16,6 +18,7 @@ using Moq;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
@@ -132,11 +135,39 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
 
                 // Act
-                await facade.PushGroupsAsync(new NetworkCredential(string.Empty, "foo").SecurePassword, groups);
+                await facade.PushGroupsAsync("foo".ToSecureString(), groups);
 
                 // Assert
                 var expectedSentGroups = new[] { group1 }.Select(GroupsMapper.ToGroup);
                 sentGroups.Should().BeEquivalentTo(expectedSentGroups);
+            }
+        }
+
+        public class GetNetworkConfig : NetworkPerspectiveCoreFacadeTests
+        {
+            [Fact]
+            public async Task ShouldBeAbleToHandleNullReponses()
+            {
+                // Arrange
+                var responseFromApiDto = new HashedDataSourceSettingsResult
+                {
+                    Blacklist = null,
+                    Whitelist = null,
+                    CustomAttributes = null
+                };
+
+                _clientMock.Setup(x => x.SettingsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(responseFromApiDto);
+
+                var options = CreateNpCoreOptions();
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+
+                // Act
+                var result = await facade.GetNetworkConfigAsync("foo".ToSecureString());
+
+                // Assert
+                var expectedResult = new NetworkConfig(EmailFilter.Empty, CustomAttributesConfig.Empty);
+
             }
         }
 
