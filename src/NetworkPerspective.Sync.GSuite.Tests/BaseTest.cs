@@ -72,7 +72,7 @@ namespace NetworkPerspective.Sync.GSuite.Tests
             var exception = await Record.ExceptionAsync(() => client.NetworksPostAsync("foo@networkperspective.io", null));
 
             // Assert
-            (exception as SlackClientException).StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
+            (exception as GSuiteClientException).StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
         }
     }
 }
