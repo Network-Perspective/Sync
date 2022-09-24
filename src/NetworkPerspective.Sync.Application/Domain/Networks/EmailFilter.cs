@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
 
@@ -27,6 +28,16 @@ namespace NetworkPerspective.Sync.Application.Domain.Networks
                 return false;
 
             return _domainWhitelist.IsInAllowedDomain(email);
+        }
+
+        public override string ToString()
+        {
+            var stringBuilder = new StringBuilder();
+
+            stringBuilder.AppendLine($"Whitelist users: {_domainWhitelist.ToString()};");
+            stringBuilder.AppendLine($"Blacklist users: {_emailBlacklist.ToString()};");
+
+            return stringBuilder.ToString();
         }
     }
 }

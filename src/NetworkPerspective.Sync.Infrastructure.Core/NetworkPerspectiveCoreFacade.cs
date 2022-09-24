@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +13,7 @@ using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
@@ -57,7 +57,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
                     var command = new SyncHashedInteractionsCommand
                     {
-                        ServiceToken = new NetworkCredential(string.Empty, accessToken).Password,
+                        ServiceToken = accessToken.ToSystemString(),
                         Interactions = interactionsToPush
                     };
 
@@ -85,7 +85,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
                 var command = new SyncUsersCommand
                 {
-                    ServiceToken = new NetworkCredential(string.Empty, accessToken).Password,
+                    ServiceToken = accessToken.ToSystemString(),
                     Users = employeesList.ToList()
                 };
 
@@ -118,7 +118,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
                 var command = new SyncHashedEntitesCommand
                 {
-                    ServiceToken = new NetworkCredential(string.Empty, accessToken).Password,
+                    ServiceToken = accessToken.ToSystemString(),
                     Entites = entities
                 };
 
@@ -145,7 +145,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
                 var command = new SyncHashedGroupStructureCommand
                 {
-                    ServiceToken = new NetworkCredential(string.Empty, accessToken).Password,
+                    ServiceToken = accessToken.ToSystemString(),
                     Groups = hashedGroups
                 };
 
@@ -164,18 +164,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             try
             {
                 _logger.LogDebug("Getting network settings from Core app...");
-                var response = await _client.SettingsAsync(new NetworkCredential(string.Empty, accessToken).Password, stoppingToken);
-                _logger.LogDebug("Whitelist users: {whitelist}", string.Join(", ", response.Whitelist));
-                _logger.LogDebug("Blacklist users: {blacklist}", string.Join(", ", response.Blacklist));
-                _logger.LogDebug("Custom Attributes (Group): {group}", string.Join(", ", response.CustomAttributes.Group));
-                _logger.LogDebug("Custom Attributes (Prop): {prop}", string.Join(", ", response.CustomAttributes.Prop));
+                var response = await _client.SettingsAsync(accessToken.ToSystemString(), stoppingToken);
 
                 var emailFilter = new EmailFilter(response.Whitelist, response.Blacklist);
+                _logger.LogDebug("Email filter: {emailFilter}", emailFilter.ToString());
+
                 var customAttributes = new CustomAttributesConfig(
-                    groupAttributes: response.CustomAttributes.Group,
-                    propAttributes: response.CustomAttributes.Prop,
-                    pathAttributes: Array.Empty<string>()
+                    groupAttributes: response.CustomAttributes?.Group,
+                    propAttributes: response.CustomAttributes?.Prop
                     );
+                _logger.LogDebug("Custom attributes: {customAttributes}", customAttributes.ToString());
+
 
                 return new NetworkConfig(emailFilter, customAttributes);
             }
@@ -189,7 +188,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
         {
             try
             {
-                var result = await _client.QueryAsync(new NetworkCredential(string.Empty, accessToken).Password, stoppingToken);
+                var result = await _client.QueryAsync(accessToken.ToSystemString(), stoppingToken);
 
                 return new TokenValidationResponse(result.NetworkId.Value, result.ConnectorId.Value);
             }
