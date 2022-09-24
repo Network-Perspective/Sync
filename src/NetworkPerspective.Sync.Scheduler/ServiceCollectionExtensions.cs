@@ -24,15 +24,24 @@ namespace NetworkPerspective.Sync.Application.Scheduler
             services.AddQuartz(q =>
             {
                 q.SchedulerId = "scheduler-connector";
-                q.UsePersistentStore(store =>
+
+                if (schedulerConfig.UsePersistentStore)
                 {
-                    store.UseProperties = true;
-                    store.UseJsonSerializer();
-                    store.UseSqlServer(db =>
+                    q.UsePersistentStore(store =>
                     {
-                        db.ConnectionString = dbConnectionString;
+                        store.UseProperties = true;
+                        store.UseJsonSerializer();
+                        store.UseSqlServer(db =>
+                        {
+                            db.ConnectionString = dbConnectionString;
+                        });
                     });
-                });
+                }
+                else
+                {
+                    q.UseInMemoryStore();
+                }
+
                 q.InterruptJobsOnShutdown = true;
                 q.UseMicrosoftDependencyInjectionJobFactory();
 

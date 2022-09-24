@@ -17,7 +17,6 @@ namespace NetworkPerspective.Sync.Framework.Controllers
             _errorService = errorService;
         }
 
-        [HttpGet]
         [Route(ErrorRoute)]
         [ApiExplorerSettings(IgnoreApi = true)]
         public ProblemDetails HandleException()
