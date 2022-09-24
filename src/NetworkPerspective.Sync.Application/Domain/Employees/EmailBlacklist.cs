@@ -15,5 +15,10 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
         public bool IsForbiddenEmail(string email)
             => _forbiddenEmails.Contains(email);
+
+        public override string ToString()
+            => _forbiddenEmails.Any()
+            ? string.Join(", ", _forbiddenEmails)
+            : "<empty>";
     }
 }

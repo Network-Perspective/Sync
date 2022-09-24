@@ -24,8 +24,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
 
         readonly CustomAttributesConfig config = new CustomAttributesConfig(
             groupAttributes: groupAttributes,
-            propAttributes: propAttributes,
-            pathAttributes: Array.Empty<string>());
+            propAttributes: propAttributes);
 
         public class GetGroupsForHashedEmployee : CustomAttributesServiceTests
         {

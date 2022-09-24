@@ -149,8 +149,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
 
             var customAttributesConfig = new CustomAttributesConfig(
                 groupAttributes: new[] { "CustomProps.Location" },
-                propAttributes: Array.Empty<string>(),
-                pathAttributes: Array.Empty<string>());
+                propAttributes: Array.Empty<string>());
 
             var mapper = new EmployeesMapper(new CompanyStructureService(), new CustomAttributesService(customAttributesConfig));
 
