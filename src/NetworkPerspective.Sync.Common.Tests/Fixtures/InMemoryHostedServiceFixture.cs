@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 
@@ -33,28 +35,20 @@ namespace NetworkPerspective.Sync.Common.Tests.Fixtures
         {
             base.ConfigureWebHost(builder);
 
+            var configOverride = new Dictionary<string, string>
+            {
+                { "Connector:Scheduler:UsePersistentStore", "false" }
+            };
+
+            builder.ConfigureAppConfiguration(config =>
+            {
+                config.AddInMemoryCollection(configOverride);
+            });
+
             builder.ConfigureTestServices(services =>
             {
                 services.AddSingleton<IUnitOfWorkFactory>(UnitOfWorkFactory);
                 services.AddSingleton(Mock.Of<IDbInitializer>());
-
-                services.AddQuartz(q =>
-                {
-                    q.SchedulerId = "scheduler-connector";
-                    q.UseInMemoryStore();
-                    q.InterruptJobsOnShutdown = true;
-                    q.UseMicrosoftDependencyInjectionJobFactory();
-
-                    q.UseSimpleTypeLoader();
-                    q.UseDefaultThreadPool(threadPool =>
-                    {
-                        threadPool.MaxConcurrency = 4;
-                    });
-                });
-                services.AddQuartzHostedService(q =>
-                {
-                    q.WaitForJobsToComplete = true;
-                });
 
                 services.AddSingleton(NetworkPerspectiveCoreMock.Object);
                 services.AddSingleton(SecretRepositoryFactoryMock.Object);
