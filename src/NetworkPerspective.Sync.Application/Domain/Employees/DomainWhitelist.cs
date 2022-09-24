@@ -30,5 +30,10 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             var innerPart = Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*");
             return $"^{innerPart}$";
         }
+
+        public override string ToString()
+            => _allowedDomainsRegexExpressions.Any()
+            ? string.Join(", ", _allowedDomainsRegexExpressions)
+            : "<empty>";
     }
 }
