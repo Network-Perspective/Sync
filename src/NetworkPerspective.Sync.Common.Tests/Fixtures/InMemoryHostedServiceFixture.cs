@@ -14,6 +14,8 @@ using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 
+using Quartz;
+
 namespace NetworkPerspective.Sync.Common.Tests.Fixtures
 {
     public class InMemoryHostedServiceFixture<TStartup> : WebApplicationFactory<TStartup>
@@ -35,6 +37,23 @@ namespace NetworkPerspective.Sync.Common.Tests.Fixtures
             {
                 services.AddSingleton<IUnitOfWorkFactory>(UnitOfWorkFactory);
                 services.AddSingleton(Mock.Of<IDbInitializer>());
+
+                services.AddQuartz(q =>
+                {
+                    q.SchedulerId = "scheduler-connector";
+                    q.InterruptJobsOnShutdown = true;
+                    q.UseMicrosoftDependencyInjectionJobFactory();
+
+                    q.UseSimpleTypeLoader();
+                    q.UseDefaultThreadPool(threadPool =>
+                    {
+                        threadPool.MaxConcurrency = 4;
+                    });
+                });
+                services.AddQuartzHostedService(q =>
+                {
+                    q.WaitForJobsToComplete = true;
+                });
 
                 services.AddSingleton(NetworkPerspectiveCoreMock.Object);
                 services.AddSingleton(SecretRepositoryFactoryMock.Object);

@@ -12,7 +12,7 @@ namespace NetworkPerspective.Sync.Common.Tests
     {
         private const string ConnectionStringTemplate = "DataSource=file:{0}?mode=memory&cache=shared";
         private readonly DbContextOptions<ConnectorDbContext> _options;
-        private readonly SqliteConnection keepAliveConnection;
+        private readonly SqliteConnection _keepAliveConnection;
 
         public SqliteUnitOfWorkFactory()
         {
@@ -27,8 +27,8 @@ namespace NetworkPerspective.Sync.Common.Tests
 
             dbContext.Database.EnsureCreated();
 
-            keepAliveConnection = new SqliteConnection(connectionString);
-            keepAliveConnection.Open();
+            _keepAliveConnection = new SqliteConnection(connectionString);
+            _keepAliveConnection.Open();
         }
 
         public IUnitOfWork Create()
@@ -36,8 +36,8 @@ namespace NetworkPerspective.Sync.Common.Tests
 
         public void Dispose()
         {
-            keepAliveConnection.Close();
-            keepAliveConnection.Dispose();
+            _keepAliveConnection.Close();
+            _keepAliveConnection.Dispose();
         }
     }
 }
