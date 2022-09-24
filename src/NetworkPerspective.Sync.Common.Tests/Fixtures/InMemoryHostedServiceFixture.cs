@@ -41,6 +41,7 @@ namespace NetworkPerspective.Sync.Common.Tests.Fixtures
                 services.AddQuartz(q =>
                 {
                     q.SchedulerId = "scheduler-connector";
+                    q.UseInMemoryStore();
                     q.InterruptJobsOnShutdown = true;
                     q.UseMicrosoftDependencyInjectionJobFactory();
 
