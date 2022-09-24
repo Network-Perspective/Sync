@@ -18,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\NetworkPerspective.Sync.GSuite\NetworkPerspective.GSuite.csproj">
+        <ProjectReference Include="..\NetworkPerspective.Sync.GSuite\NetworkPerspective.Sync.GSuite.csproj">
             <ReferenceOutputAssembly>False</ReferenceOutputAssembly>
         </ProjectReference>
     </ItemGroup>
