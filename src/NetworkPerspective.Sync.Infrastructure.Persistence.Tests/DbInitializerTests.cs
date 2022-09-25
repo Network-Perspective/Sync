@@ -38,7 +38,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Tests
             }
             catch (Exception e)
             {
-                Skip.If(e is System.TimeoutException, "Setup docker for creating test containers");
+                Skip.If(e is TimeoutException, "Setup docker for creating test containers");
             }
 
             var config = new ConfigurationBuilder()

@@ -9,8 +9,11 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.5" />
+        <PackageReference Include="Moq" Version="4.17.2" />
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.4.0" />
     </ItemGroup>
 
     <ItemGroup>
