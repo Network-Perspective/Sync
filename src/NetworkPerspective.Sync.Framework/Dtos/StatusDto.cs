@@ -25,7 +25,7 @@ namespace NetworkPerspective.Sync.Framework.Dtos
         /// <summary>
         /// Current task status
         /// </summary>
-        public TaskStatusDto CurrentTask { get; set; }
+        public SynchronizationTaskStatusDto CurrentTask { get; set; }
         /// <summary>
         /// List of recent logs
         /// </summary>

@@ -51,25 +51,25 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _clock = clock;
         }
 
-        public async Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
-            _logger.LogInformation("Evaluating interactions based on mailbox since {timestamp} for {count} users...", startDate, userEmails.Count());
+            var usersCount = users.Count();
+            _logger.LogInformation("Evaluating interactions based on mailbox since {timestamp} for {count} users...", startDate, usersCount);
 
             var result = new HashSet<Interaction>(new InteractionEqualityComparer());
             var maxMessagesCountPerUser = CalculateMaxMessagesCount(startDate);
 
-            var userEmailsCount = userEmails.Count();
-            var processedEmailsCount = 0;
+            var processedUsersCount = 0;
 
             await _tasksStatusesCache.SetStatusAsync(networkId, new SynchronizationTaskStatus(TaskCaption, TaskDescription, 0), stoppingToken);
 
-            foreach (var userEmail in userEmails)
+            foreach (var userEmail in users)
             {
                 try
                 {
                     var interactions = await GetSingleUserInteractionsAsync(userEmail.Email, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
 
-                    var taskStatus = new SynchronizationTaskStatus(TaskCaption, TaskDescription, processedEmailsCount++ / userEmailsCount);
+                    var taskStatus = new SynchronizationTaskStatus(TaskCaption, TaskDescription, (processedUsersCount++ / (double)usersCount) * 100);
                     await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);
 
                     result.UnionWith(interactions);
@@ -84,6 +84,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                     _logger.LogWarning(ex, "Unable to evaluate interactions based on mailbox for given user. Please see inner exception\n");
                 }
             }
+
+            await _tasksStatusesCache.SetStatusAsync(networkId, new SynchronizationTaskStatus(TaskCaption, TaskDescription, 100), stoppingToken);
 
             _logger.LogInformation("Evaluation of interactions based on mailbox since '{timestamp}' completed", startDate);
 

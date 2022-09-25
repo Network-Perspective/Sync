@@ -14,6 +14,7 @@ namespace NetworkPerspective.Sync.Framework.Mappers
                 Authorized = status.Authorized,
                 Scheduled = status.Scheduled,
                 Running = status.Running,
+                CurrentTask = SynchronizationTaskStatusMapper.DomainTaskStatusToDto(status.CurrentTask),
                 Logs = status.Logs.Select(StatusLogMapper.DomainStatusLogToDto)
             };
         }

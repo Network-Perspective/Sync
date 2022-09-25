@@ -3,7 +3,7 @@
     /// <summary>
     /// Single synchronization task status
     /// </summary>
-    public class TaskStatusDto
+    public class SynchronizationTaskStatusDto
     {
         /// <summary>
         /// Task Caption

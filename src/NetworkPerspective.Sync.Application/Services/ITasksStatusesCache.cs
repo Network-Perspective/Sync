@@ -31,8 +31,11 @@ namespace NetworkPerspective.Sync.Application.Services
             }
             catch (Exception)
             {
-                _semaphore.Release();
                 return SynchronizationTaskStatus.Empty;
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }
 
@@ -43,7 +46,7 @@ namespace NetworkPerspective.Sync.Application.Services
                 await _semaphore.WaitAsync(stoppingToken);
                 _statuses[networkId] = synchronizationTaskStatus;
             }
-            catch(Exception)
+            finally
             {
                 _semaphore.Release();
             }

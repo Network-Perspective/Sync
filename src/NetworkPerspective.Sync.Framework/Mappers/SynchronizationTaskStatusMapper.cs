@@ -3,11 +3,14 @@ using NetworkPerspective.Sync.Framework.Dtos;
 
 namespace NetworkPerspective.Sync.Framework.Mappers
 {
-    public static class TaskStatusMapper
+    public static class SynchronizationTaskStatusMapper
     {
-        public static TaskStatusDto DomainTaskStatusToDto(SynchronizationTaskStatus status)
+        public static SynchronizationTaskStatusDto DomainTaskStatusToDto(SynchronizationTaskStatus status)
         {
-            return new TaskStatusDto
+            if (status == null)
+                return null;
+
+            return new SynchronizationTaskStatusDto
             {
                 Caption = status.Caption,
                 Description = status.Description,
