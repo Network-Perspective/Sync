@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 using NetworkPerspective.Sync.Application.Domain.Networks;
-using NetworkPerspective.Sync.Application.Domain.StatusLogs;
+using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Services;
@@ -68,7 +68,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 .Setup(x => x.IsRunningAsync(networkId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
-            var statuService = new StatusService(unitOfWorkFactory, _tokenServiceMock.Object, _dataSourceFactoryMock.Object, _schedulerMock.Object, NullLogger);
+            var statuService = new StatusService(unitOfWorkFactory, _tokenServiceMock.Object, _dataSourceFactoryMock.Object, _schedulerMock.Object, Mock.Of<ITasksStatusesCache>(), NullLogger);
 
             // Act
             var result = await statuService.GetStatusAsync(networkId);

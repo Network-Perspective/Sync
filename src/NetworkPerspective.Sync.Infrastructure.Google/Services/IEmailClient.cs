@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using NetworkPerspective.Sync.Application.Domain.Aggregation;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Exceptions;
@@ -29,19 +30,23 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
     internal sealed class EmailClient : IEmailClient
     {
         private static readonly int MinutesInDay = 24 * 60;
+        private const string TaskCaption = "Synchronizing email interactions";
+        private const string TaskDescription = "Fetching emails metadata from Google API";
 
         private readonly GoogleConfig _config;
         private readonly ILogger<EmailClient> _logger;
         private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
         private readonly IStatusLogger _statusLogger;
+        private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IClock _clock;
 
-        public EmailClient(IStatusLogger statusService, IOptions<GoogleConfig> config, ILoggerFactory loggerFactory, IClock clock)
+        public EmailClient(IStatusLogger statusService, ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILoggerFactory loggerFactory, IClock clock)
         {
             _config = config.Value;
             _logger = loggerFactory.CreateLogger<EmailClient>();
             _statusLogger = statusService;
+            _tasksStatusesCache = tasksStatusesCache;
             _loggerFactory = loggerFactory;
             _clock = clock;
         }
@@ -53,11 +58,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             var result = new HashSet<Interaction>(new InteractionEqualityComparer());
             var maxMessagesCountPerUser = CalculateMaxMessagesCount(startDate);
 
+            var userEmailsCount = userEmails.Count();
+            var processedEmailsCount = 0;
+
+            await _tasksStatusesCache.SetStatusAsync(networkId, new SynchronizationTaskStatus(TaskCaption, TaskDescription, 0), stoppingToken);
+
             foreach (var userEmail in userEmails)
             {
                 try
                 {
                     var interactions = await GetSingleUserInteractionsAsync(userEmail.Email, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
+
+                    var taskStatus = new SynchronizationTaskStatus(TaskCaption, TaskDescription, processedEmailsCount++ / userEmailsCount);
+                    await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);
+
                     result.UnionWith(interactions);
                 }
                 catch (TooManyMailsPerUserException tmmpuex)

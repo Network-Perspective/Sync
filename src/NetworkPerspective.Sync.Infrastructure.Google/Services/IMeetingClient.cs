@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Aggregation;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Services
@@ -27,13 +28,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
     internal sealed class MeetingClient : IMeetingClient
     {
+        private const string TaskCaption = "Synchronizing callendar interactions";
+        private const string TaskDescription = "Fetching callendar metadata from Google API";
+
         private readonly GoogleConfig _config;
+        private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ILogger<MeetingClient> _logger;
         private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
 
-        public MeetingClient(IOptions<GoogleConfig> config, ILogger<MeetingClient> logger)
+        public MeetingClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILogger<MeetingClient> logger)
         {
             _config = config.Value;
+            _tasksStatusesCache = tasksStatusesCache;
             _logger = logger;
         }
 
