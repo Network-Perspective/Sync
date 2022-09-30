@@ -6,6 +6,8 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
+using Moq;
+
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Services;
@@ -39,7 +41,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
                 ApplicationName = "gmail_app",
             };
 
-            var client = new MeetingClient(Options.Create(googleConfig), NullLogger<MeetingClient>.Instance);
+            var client = new MeetingClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLogger<MeetingClient>.Instance);
             var timeRange = new TimeRange(DateTime.MinValue, DateTime.MaxValue);
 
             var emailLookuptable = new EmployeeCollection(null)
@@ -47,7 +49,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", emailLookuptable, new Clock());
 
             // Act
-            var result = await client.GetInteractionsAsync(email, timeRange, _googleClientFixture.Credential, interactionFactory);
+            var result = await client.GetInteractionsAsync(Guid.NewGuid(), emailLookuptable.GetAllInternal(), timeRange, _googleClientFixture.Credential, interactionFactory);
 
             // Assert
             result.Should().NotBeNullOrEmpty();

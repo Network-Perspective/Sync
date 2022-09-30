@@ -44,7 +44,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             var clock = new Clock();
 
-            var emailClient = new EmailClient(Mock.Of<IStatusLogger>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
+            var emailClient = new EmailClient(Mock.Of<IStatusLogger>(), Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
 
             var emailLookuptable = new EmployeeCollection(null)
                 .Add(existingEmail);

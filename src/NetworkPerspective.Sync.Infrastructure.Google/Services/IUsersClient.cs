@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Criterias;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Services
@@ -24,14 +26,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
     internal sealed class UsersClient : IUsersClient
     {
+        private const string TaskCaption = "Synchronizing users";
+        private const string TaskDescription = "Fetching users data from Google API";
+
         private readonly GoogleConfig _config;
+        private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly IEnumerable<ICriteria> _criterias;
         private readonly ILogger<UsersClient> _logger;
         private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
 
-        public UsersClient(IOptions<GoogleConfig> config, IEnumerable<ICriteria> criterias, ILogger<UsersClient> logger)
+        public UsersClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, IEnumerable<ICriteria> criterias, ILogger<UsersClient> logger)
         {
             _config = config.Value;
+            _tasksStatusesCache = tasksStatusesCache;
             _criterias = criterias;
             _logger = logger;
         }
@@ -39,6 +46,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         public async Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, GoogleCredential credentials, CancellationToken stoppingToken = default)
         {
             _logger.LogDebug("Fetching users for network '{networkId}'...", network.NetworkId);
+
+            await _tasksStatusesCache.SetStatusAsync(network.NetworkId, new SingleTaskStatus(TaskCaption, TaskDescription, null), stoppingToken);
 
             var users = await GetAllGoogleUsers(network, credentials, stoppingToken);
             var filteredUsers = FilterUsers(networkConfig.EmailFilter, users);

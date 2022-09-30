@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -90,6 +91,14 @@ namespace NetworkPerspective.Sync.Framework
                             title: "Application Error",
                             details: $"Network '{nnfex.NetworkId}' doesn't exist. Please add network",
                             statusCode: StatusCodes.Status404NotFound);
+                    }
+                case TaskCanceledException:
+                    {
+                        return new Error(
+                            type: Error.Types.Client,
+                            title: "Client Error",
+                            details: "Client cancelled the request",
+                            statusCode: StatusCodes.Status400BadRequest);
                     }
                 default:
                     {

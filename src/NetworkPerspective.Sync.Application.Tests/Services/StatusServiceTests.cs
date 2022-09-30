@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 using NetworkPerspective.Sync.Application.Domain.Networks;
-using NetworkPerspective.Sync.Application.Domain.StatusLogs;
+using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Services;
@@ -27,6 +27,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
         private readonly Mock<ISyncScheduler> _schedulerMock = new Mock<ISyncScheduler>();
         private readonly Mock<IDataSourceFactory> _dataSourceFactoryMock = new Mock<IDataSourceFactory>();
         private readonly Mock<IDataSource> _dataSourceMock = new Mock<IDataSource>();
+        private readonly Mock<ITasksStatusesCache> _tasksStatusesCache = new Mock<ITasksStatusesCache>();
 
         public StatusServiceTests()
         {
@@ -34,6 +35,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             _schedulerMock.Reset();
             _dataSourceFactoryMock.Reset();
             _dataSourceMock.Reset();
+            _tasksStatusesCache.Reset();
 
             _dataSourceFactoryMock
                 .Setup(x => x.CreateAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
@@ -47,6 +49,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
 
             var networkId = Guid.NewGuid();
+            var taskStatus = new SingleTaskStatus("Task", "One of many tasks", 33.922);
             var status1 = StatusLog.Create(networkId, "Dummy message Error", StatusLogLevel.Error, DateTime.UtcNow);
             var status2 = StatusLog.Create(networkId, "Dummy message Info", StatusLogLevel.Info, DateTime.UtcNow);
 
@@ -66,9 +69,13 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
 
             _schedulerMock
                 .Setup(x => x.IsRunningAsync(networkId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(false);
+                .ReturnsAsync(true);
 
-            var statuService = new StatusService(unitOfWorkFactory, _tokenServiceMock.Object, _dataSourceFactoryMock.Object, _schedulerMock.Object, NullLogger);
+            _tasksStatusesCache
+                .Setup(x => x.GetStatusAsync(networkId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(taskStatus);
+
+            var statuService = new StatusService(unitOfWorkFactory, _tokenServiceMock.Object, _dataSourceFactoryMock.Object, _schedulerMock.Object, _tasksStatusesCache.Object, NullLogger);
 
             // Act
             var result = await statuService.GetStatusAsync(networkId);
@@ -76,7 +83,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             // Assert
             result.Authorized.Should().BeTrue();
             result.Scheduled.Should().BeTrue();
-            result.Running.Should().BeFalse();
+            result.Running.Should().BeTrue();
+            result.CurrentTask.Should().BeEquivalentTo(taskStatus);
             result.Logs.Should().BeEquivalentTo(new[] { status1, status2 });
         }
 
