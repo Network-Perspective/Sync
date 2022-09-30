@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetworkPerspective.Sync.Application.Domain.StatusLogs
+namespace NetworkPerspective.Sync.Application.Domain.Statuses
 {
     public class StatusLog
     {

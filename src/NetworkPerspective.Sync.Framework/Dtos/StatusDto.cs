@@ -23,6 +23,10 @@ namespace NetworkPerspective.Sync.Framework.Dtos
         /// <example>false</example>
         public bool Running { get; set; }
         /// <summary>
+        /// Current task status
+        /// </summary>
+        public SynchronizationTaskStatusDto CurrentTask { get; set; }
+        /// <summary>
         /// List of recent logs
         /// </summary>
         public IEnumerable<StatusLogDto> Logs { get; set; }

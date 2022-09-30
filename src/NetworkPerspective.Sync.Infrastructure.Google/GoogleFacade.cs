@@ -84,11 +84,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var emailInteractions = context.Get<ISet<Interaction>>();
             result.UnionWith(emailInteractions.Where(x => context.CurrentRange.IsInRange(x.Timestamp)));
 
-            foreach (var email in employeeCollection.GetAllInternal())
-            {
-                var meetingInteractions = await _meetingClient.GetInteractionsAsync(email.Email, context.CurrentRange, credentials, interactionFactory, stoppingToken);
-                result.UnionWith(meetingInteractions);
-            }
+            var meetingInteractions = await _meetingClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, interactionFactory, stoppingToken);
+            result.UnionWith(meetingInteractions);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
 

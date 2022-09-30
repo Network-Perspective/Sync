@@ -6,6 +6,7 @@
         {
             public const string Unknown = "Unknown";
             public const string Security = "Security";
+            public const string Client = "Client";
             public const string NetworkPerspectiveCore = "Infrastructure - Network Perspective Core";
             public const string SecretStorage = "Infrastructure - Secret Storage";
             public const string Database = "Infrastructure - Database";

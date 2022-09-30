@@ -25,7 +25,15 @@ namespace NetworkPerspective.Sync.Application.Scheduler
         private readonly IStatusLogger _statusLogger;
         private readonly ILogger<SyncJob> _logger;
 
-        public SyncJob(ISyncServiceFactory syncServiceFactory, INetworkPerspectiveCore networkPerspectiveCore, ITokenService tokenService, ISyncHistoryService syncHistoryService, INetworkService networkService, IClock clock, IStatusLogger statusLogger, ILogger<SyncJob> logger)
+        public SyncJob(
+            ISyncServiceFactory syncServiceFactory,
+            INetworkPerspectiveCore networkPerspectiveCore,
+            ITokenService tokenService,
+            ISyncHistoryService syncHistoryService,
+            INetworkService networkService,
+            IClock clock,
+            IStatusLogger statusLogger,
+            ILogger<SyncJob> logger)
         {
             _syncServiceFactory = syncServiceFactory;
             _networkPerspectiveCore = networkPerspectiveCore;
@@ -68,7 +76,7 @@ namespace NetworkPerspective.Sync.Application.Scheduler
 
                 do
                 {
-                    await _statusLogger.LogInfoAsync(networkId, $"Syncronizing interactions {syncContext.CurrentRange}", context.CancellationToken);
+                    await _statusLogger.LogInfoAsync(networkId, $"Synchronizing interactions {syncContext.CurrentRange}", context.CancellationToken);
 
                     await syncService.SyncInteractionsAsync(syncContext, context.CancellationToken);
                     lastSyncedTimeStamp = syncContext.CurrentRange.End;

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-using NetworkPerspective.Sync.Application.Domain.StatusLogs;
+using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Framework.Dtos;
 
 namespace NetworkPerspective.Sync.Framework.Mappers
@@ -14,6 +14,7 @@ namespace NetworkPerspective.Sync.Framework.Mappers
                 Authorized = status.Authorized,
                 Scheduled = status.Scheduled,
                 Running = status.Running,
+                CurrentTask = SynchronizationTaskStatusMapper.DomainTaskStatusToDto(status.CurrentTask),
                 Logs = status.Logs.Select(StatusLogMapper.DomainStatusLogToDto)
             };
         }

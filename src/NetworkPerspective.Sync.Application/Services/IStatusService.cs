@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Domain.StatusLogs;
+using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 
@@ -21,14 +21,16 @@ namespace NetworkPerspective.Sync.Application.Services
         private readonly ITokenService _tokenService;
         private readonly IDataSourceFactory _dataSourceFactory;
         private readonly ISyncScheduler _scheduler;
+        private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ILogger<StatusService> _logger;
 
-        public StatusService(IUnitOfWorkFactory unitOfWorkFactory, ITokenService tokenService, IDataSourceFactory dataSourceFactory, ISyncScheduler scheduler, ILogger<StatusService> logger)
+        public StatusService(IUnitOfWorkFactory unitOfWorkFactory, ITokenService tokenService, IDataSourceFactory dataSourceFactory, ISyncScheduler scheduler, ITasksStatusesCache tasksStatusesCache, ILogger<StatusService> logger)
         {
             _unitOfWorkFactory = unitOfWorkFactory;
             _tokenService = tokenService;
             _dataSourceFactory = dataSourceFactory;
             _scheduler = scheduler;
+            _tasksStatusesCache = tasksStatusesCache;
             _logger = logger;
         }
 
@@ -50,6 +52,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             var dataSource = await _dataSourceFactory.CreateAsync(networkId, stoppingToken);
             var isAuthorizedToDataSource = await dataSource.IsAuthorized(networkId, stoppingToken);
+            var isRunning = await _scheduler.IsRunningAsync(networkId, stoppingToken);
 
             _logger.LogDebug("Network '{networkId}' authorization status to data source is '{status}'", networkId, isAuthorizedToDataSource);
 
@@ -57,7 +60,8 @@ namespace NetworkPerspective.Sync.Application.Services
             {
                 Authorized = isAuthorizedToCoreApp && isAuthorizedToDataSource,
                 Scheduled = await _scheduler.IsScheduledAsync(networkId, stoppingToken),
-                Running = await _scheduler.IsRunningAsync(networkId, stoppingToken),
+                Running = isRunning,
+                CurrentTask = isRunning ? await _tasksStatusesCache.GetStatusAsync(networkId, stoppingToken) : null,
                 Logs = logs
             };
         }

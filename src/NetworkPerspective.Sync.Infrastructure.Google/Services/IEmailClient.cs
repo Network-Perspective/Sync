@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Gmail.v1;
 using Google.Apis.Services;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.Options;
 using NetworkPerspective.Sync.Application.Domain.Aggregation;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Exceptions;
@@ -29,35 +31,48 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
     internal sealed class EmailClient : IEmailClient
     {
         private static readonly int MinutesInDay = 24 * 60;
+        private const string TaskCaption = "Synchronizing email interactions";
+        private const string TaskDescription = "Fetching emails metadata from Google API";
 
         private readonly GoogleConfig _config;
         private readonly ILogger<EmailClient> _logger;
         private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
         private readonly IStatusLogger _statusLogger;
+        private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IClock _clock;
 
-        public EmailClient(IStatusLogger statusService, IOptions<GoogleConfig> config, ILoggerFactory loggerFactory, IClock clock)
+        public EmailClient(IStatusLogger statusService, ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILoggerFactory loggerFactory, IClock clock)
         {
             _config = config.Value;
             _logger = loggerFactory.CreateLogger<EmailClient>();
             _statusLogger = statusService;
+            _tasksStatusesCache = tasksStatusesCache;
             _loggerFactory = loggerFactory;
             _clock = clock;
         }
 
-        public async Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
-            _logger.LogInformation("Evaluating interactions based on mailbox since {timestamp} for {count} users...", startDate, userEmails.Count());
+            var usersCount = users.Count();
+            _logger.LogInformation("Evaluating interactions based on mailbox since {timestamp} for {count} users...", startDate, usersCount);
 
             var result = new HashSet<Interaction>(new InteractionEqualityComparer());
             var maxMessagesCountPerUser = CalculateMaxMessagesCount(startDate);
 
-            foreach (var userEmail in userEmails)
+            var processedUsersCount = 0;
+
+            await _tasksStatusesCache.SetStatusAsync(networkId, new SingleTaskStatus(TaskCaption, TaskDescription, 0), stoppingToken);
+
+            foreach (var userEmail in users)
             {
                 try
                 {
                     var interactions = await GetSingleUserInteractionsAsync(userEmail.Email, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
+
+                    var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, (processedUsersCount++ / (double)usersCount) * 100);
+                    await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);
+
                     result.UnionWith(interactions);
                 }
                 catch (TooManyMailsPerUserException tmmpuex)
@@ -65,11 +80,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                     await _statusLogger.LogWarningAsync(networkId, $"Skipping mailbox '{tmmpuex.Email}' too many messages", stoppingToken);
                     _logger.LogWarning("Skipping mailbox '{email}' too many messages", tmmpuex.Email);
                 }
+                catch (GoogleApiException gaex) when (IsMailServiceNotEnabledException(gaex))
+                {
+                    _logger.LogWarning("Skipping mailbox '{email}' gmail service not enabled", "***");
+                    _logger.LogTrace("Skipping mailbox '{email}' gmail service not enabled", userEmail);
+                }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Unable to evaluate interactions based on mailbox for given user. Please see inner exception\n");
                 }
             }
+
+            await _tasksStatusesCache.SetStatusAsync(networkId, new SingleTaskStatus(TaskCaption, TaskDescription, 100), stoppingToken);
 
             _logger.LogInformation("Evaluation of interactions based on mailbox since '{timestamp}' completed", startDate);
 
@@ -130,5 +152,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             });
         }
 
+        private static bool IsMailServiceNotEnabledException(GoogleApiException exception)
+        {
+            const string exceptionDomain = "global";
+            const string exceptionReason = "failedPrecondition";
+            const string exceptionMessage = "Mail service not enabled";
+            return exception.Error.Errors.Any(x => x.Domain == exceptionDomain && x.Reason == exceptionReason && x.Message == exceptionMessage);
+        }
     }
 }
