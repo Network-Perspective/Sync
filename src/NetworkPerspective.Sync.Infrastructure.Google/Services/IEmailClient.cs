@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Gmail.v1;
 using Google.Apis.Services;
@@ -79,6 +80,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                     await _statusLogger.LogWarningAsync(networkId, $"Skipping mailbox '{tmmpuex.Email}' too many messages", stoppingToken);
                     _logger.LogWarning("Skipping mailbox '{email}' too many messages", tmmpuex.Email);
                 }
+                catch (GoogleApiException gaex) when (IsMailServiceNotEnabledException(gaex))
+                {
+                    _logger.LogWarning("Skipping mailbox '{email}' gmail service not enabled", "***");
+                    _logger.LogTrace("Skipping mailbox '{email}' gmail service not enabled", userEmail);
+                }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Unable to evaluate interactions based on mailbox for given user. Please see inner exception\n");
@@ -146,5 +152,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             });
         }
 
+        private static bool IsMailServiceNotEnabledException(GoogleApiException exception)
+        {
+            const string exceptionDomain = "global";
+            const string exceptionReason = "failedPrecondition";
+            const string exceptionMessage = "Mail service not enabled";
+            return exception.Error.Errors.Any(x => x.Domain == exceptionDomain && x.Reason == exceptionReason && x.Message == exceptionMessage);
+        }
     }
 }
