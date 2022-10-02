@@ -23,7 +23,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             const string alias_2 = "U12345ASD";
 
             var lookupTable = new EmployeeCollection(null);
-            lookupTable.Add(Employee.CreateInternal(mainEmail, id, string.Empty, Array.Empty<Group>()), new[] { alias_1, alias_2 }.ToHashSet());
+            lookupTable.Add(Employee.CreateInternal(mainEmail, id, Array.Empty<Group>()), new[] { alias_1, alias_2 }.ToHashSet());
 
             // Act
             var employee1 = lookupTable.Find(mainEmail);
@@ -61,21 +61,21 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
         public void ShouldCorrectlyEvaluteHierarchy()
         {
             // Arrange
-            var ic1 = Employee.CreateInternal("ic1", string.Empty, "manager1", Array.Empty<Group>());
-            var ic2 = Employee.CreateInternal("ic2", string.Empty, "manager1_1", Array.Empty<Group>());
-            var ic3 = Employee.CreateInternal("ic3", string.Empty, "manager2", Array.Empty<Group>());
-            var ic4 = Employee.CreateInternal("ic4", string.Empty, "manager3", Array.Empty<Group>());
-            var ic5 = Employee.CreateInternal("ic5", string.Empty, "director1", Array.Empty<Group>());
+            var ic1 = Employee.CreateInternal("ic1", string.Empty, Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "manager1") }));
+            var ic2 = Employee.CreateInternal("ic2", string.Empty, Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "manager1_1") }));
+            var ic3 = Employee.CreateInternal("ic3", string.Empty, Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "manager2") }));
+            var ic4 = Employee.CreateInternal("ic4", string.Empty, Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "manager3") }));
+            var ic5 = Employee.CreateInternal("ic5", string.Empty, Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "director1") }));
 
-            var manager1 = Employee.CreateInternal("manager1", string.Empty, "director1", Array.Empty<Group>());
-            var manager2 = Employee.CreateInternal("manager2", string.Empty, "director2", Array.Empty<Group>());
-            var manager3 = Employee.CreateInternal("manager3", string.Empty, "board2", Array.Empty<Group>());
+            var manager1 = Employee.CreateInternal("manager1", string.Empty, Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "director1") }));
+            var manager2 = Employee.CreateInternal("manager2", string.Empty, Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "director2") }));
+            var manager3 = Employee.CreateInternal("manager3", string.Empty, Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "board2") }));
 
-            var director1 = Employee.CreateInternal("director1", string.Empty, "board1", Array.Empty<Group>());
-            var director2 = Employee.CreateInternal("director2", string.Empty, "board1", Array.Empty<Group>());
+            var director1 = Employee.CreateInternal("director1", string.Empty, Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "board1") }));
+            var director2 = Employee.CreateInternal("director2", string.Empty, Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "board1") }));
 
-            var board1 = Employee.CreateInternal("board1", string.Empty, null, Array.Empty<Group>());
-            var board2 = Employee.CreateInternal("board2", string.Empty, null, Array.Empty<Group>());
+            var board1 = Employee.CreateInternal("board1", string.Empty, Array.Empty<Group>(), null, RelationsCollection.Empty);
+            var board2 = Employee.CreateInternal("board2", string.Empty, Array.Empty<Group>(), null, RelationsCollection.Empty);
 
             var employeesCollection = new EmployeeCollection(null);
             employeesCollection.Add(ic1, Array.Empty<string>().ToHashSet());

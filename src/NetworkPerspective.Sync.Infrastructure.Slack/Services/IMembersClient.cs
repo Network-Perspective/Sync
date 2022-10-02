@@ -65,7 +65,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             {
                 var usersChannels = await slackClientFacade.GetAllUsersChannels(slackUser.Id, stoppingToken);
                 var groups = usersChannels.Select(x => Group.Create(x.Id, x.Name, "Project"));
-                var employee = Employee.CreateInternal(slackUser.Profile.Email, slackUser.Id, string.Empty, groups);
+                var employee = Employee.CreateInternal(slackUser.Profile.Email, slackUser.Id, groups);
                 employees.Add(employee, ImmutableHashSet<string>.Empty);
                 _logger.LogTrace("User: '{email}'", slackUser.Profile.Email);
             }

@@ -27,7 +27,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
 
             Func<string, string> hashingFunction = (x) => $"{x}_hashed";
 
-            var employee = Employee.CreateInternal(email, sourceInternalId, managerEmail, new[] { group });
+            var relation = new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, managerEmail) });
+            var employee = Employee.CreateInternal(email, sourceInternalId, new[] { group }, null, relation);
 
             // Act
             var hashedEmployee = employee.Hash(hashingFunction);
@@ -41,6 +42,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             hashedEmployee.Groups.Single().Name.Should().Be($"{groupName}");
             hashedEmployee.Groups.Single().Category.Should().Be(groupCategory);
             hashedEmployee.Groups.Single().ParentId.Should().Be($"{groupParentId}_hashed");
+
+            hashedEmployee.Relations.GetTargetEmployeeEmail(Employee.SupervisorRelationName).Should().Be($"{managerEmail}_hashed");
         }
 
         [Fact]
@@ -52,7 +55,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             var group = Group.CreateWithParentId(expectedTeam, "foo", Group.TeamCatergory, "/Marketing");
 
             // Act
-            var employee = Employee.CreateInternal("bar", "baz", "", new[] { group });
+            var employee = Employee.CreateInternal("bar", "baz", new[] { group });
 
             // Assert
             employee.Props["Team"].Should().Be(expectedTeam);
@@ -65,7 +68,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             var group = Group.CreateWithParentId("Marketing", "foo", Group.CompanyCatergory, "/");
 
             // Act
-            var employee = Employee.CreateInternal("bar", "baz", "", new[] { group });
+            var employee = Employee.CreateInternal("bar", "baz", new[] { group });
 
             // Assert
             ((string)employee.Props["Team"]).Should().BeEmpty();
@@ -83,7 +86,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             };
 
             // Act
-            var employee = Employee.CreateInternal("bar", "baz", "", groups);
+            var employee = Employee.CreateInternal("bar", "baz", groups);
 
             // Assert
             employee.Props["Department"].Should().BeEquivalentTo(new[] { "IT", "Security", "Administration" });

@@ -18,8 +18,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
         public void ShouldFilterOutInteractionOutsideTimeRange()
         {
             // Arrange
-            var source = Employee.CreateInternal("foo", "foo_id", string.Empty, Array.Empty<Group>());
-            var target = Employee.CreateInternal("bar", "foo_id", string.Empty, Array.Empty<Group>());
+            var source = Employee.CreateInternal("foo", "foo_id", Array.Empty<Group>());
+            var target = Employee.CreateInternal("bar", "foo_id", Array.Empty<Group>());
             var interactions = new[] { Interaction.CreateEmail(new DateTime(2020, 01, 03), source, target, "id1") };
 
             var timeRange = new TimeRange(
@@ -38,8 +38,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
         public void ShouldNotFilterOutInteractionWithinTimeRange()
         {
             // Arrange
-            var source = Employee.CreateInternal("foo", "foo_id", string.Empty, Array.Empty<Group>());
-            var target = Employee.CreateInternal("bar", "bar_id", string.Empty, Array.Empty<Group>());
+            var source = Employee.CreateInternal("foo", "foo_id", Array.Empty<Group>());
+            var target = Employee.CreateInternal("bar", "bar_id", Array.Empty<Group>());
             var interactions = new[] { Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10), source, target, "id1") };
 
             var timeRange = new TimeRange(

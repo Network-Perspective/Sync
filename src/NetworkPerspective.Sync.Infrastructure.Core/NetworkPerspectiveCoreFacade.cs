@@ -171,7 +171,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
                 var customAttributes = new CustomAttributesConfig(
                     groupAttributes: response.CustomAttributes?.Group,
-                    propAttributes: response.CustomAttributes?.Prop
+                    propAttributes: response.CustomAttributes?.Prop,
+                    relationships: Array.Empty<CustomAttributeRelationship>()
+
                     );
                 _logger.LogDebug("Custom attributes: {customAttributes}", customAttributes.ToString());
 

@@ -38,7 +38,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
 
         private static ICollection<HashedEntityRelationship> ToRelationships(Employee employee, Employee employeeManager, string dataSourceIdName)
         {
-            if (string.IsNullOrEmpty(employee.ManagerEmail))
+            if (!employee.HasManager)
                 return null;
 
             return new List<HashedEntityRelationship>()

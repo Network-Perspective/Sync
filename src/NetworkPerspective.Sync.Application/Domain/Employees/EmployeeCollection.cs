@@ -68,7 +68,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
                 if (subordinates.Any(x => x.GetHierarchy() == EmployeeHierarchy.Manager))
                     employee.SetHierarchy(EmployeeHierarchy.Director);
 
-                if (string.IsNullOrEmpty(employee.ManagerEmail))
+                if (!employee.HasManager)
                     employee.SetHierarchy(EmployeeHierarchy.Board);
             }
         }
@@ -78,7 +78,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
         private IEnumerable<Employee> GetSubordinates(Employee employee, IEnumerable<Employee> allEmployees)
             => allEmployees
-                .Where(x => x.ManagerEmail is not null)
+                .Where(x => x.HasManager)
                 .Where(x => Find(x.ManagerEmail).Email == employee.Email);
     }
 }

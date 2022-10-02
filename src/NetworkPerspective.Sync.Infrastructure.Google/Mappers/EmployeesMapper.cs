@@ -37,8 +37,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
 
                 var employeeGroups = GetEmployeeGroups(user, organizationGroups);
                 var employeeProps = GetEmployeeProps(user);
+                var employeeRelations = GetEmployeeRelations(user);
 
-                var employee = Employee.CreateInternal(user.PrimaryEmail, user.Id, managerEmail, employeeGroups, employeeProps);
+                var employee = Employee.CreateInternal(user.PrimaryEmail, user.Id, employeeGroups, employeeProps, employeeRelations);
                 var employeeAliases = user.Emails.Select(x => x.Address).ToHashSet();
 
                 employees.Add(employee, employeeAliases);
@@ -74,6 +75,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
             }
 
             return props;
+        }
+
+        private RelationsCollection GetEmployeeRelations(User user)
+        {
+            var relations = new List<Relation>();
+
+            var managerEmail = user.GetManagerEmail();
+
+            if (!string.IsNullOrEmpty(managerEmail))
+                relations.Add(Relation.Create(Employee.SupervisorRelationName, managerEmail));
+
+            return new RelationsCollection(relations);
         }
     }
 }
