@@ -51,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", emailLookuptable, clock);
 
             // Act
-            var result = await emailClient.GetInteractionsAsync(Guid.NewGuid(), new[] { Employee.CreateInternal(existingEmail, existingEmail, Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
+            var result = await emailClient.GetInteractionsAsync(Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
 
             // Assert
             result.Should().NotBeNullOrEmpty();

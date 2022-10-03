@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NetworkPerspective.Sync.Application.Domain.Employees
+﻿namespace NetworkPerspective.Sync.Application.Domain.Employees
 {
     public class Relation
     {
@@ -18,7 +16,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public static Relation Create(string name, string targetEmployeeEmail)
             => new Relation(name, targetEmployeeEmail, false);
 
-        public Relation Hash(Func<string, string> hash)
+        public Relation Hash(HashFunction hash)
             => new Relation(Name, hash(TargetEmployeeEmail), true);
 
         public override string ToString()

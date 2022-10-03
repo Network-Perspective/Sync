@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using Google.Apis.Calendar.v3.Data;
 using Google.Apis.Gmail.v1.Data;
 
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Services;
@@ -13,12 +13,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal class InteractionFactory
     {
-        private readonly Func<string, string> _hashFunc;
+        private readonly HashFunction _hashFunc;
         private readonly EmployeeCollection _employeeLookupTable;
         private readonly IClock _clock;
         private readonly ICombinationFactory _combinationFactory = new CombinationFactory();
 
-        public InteractionFactory(Func<string, string> hash, EmployeeCollection employeeLookupTable, IClock clock)
+        public InteractionFactory(HashFunction hash, EmployeeCollection employeeLookupTable, IClock clock)
         {
             _hashFunc = hash;
             _employeeLookupTable = employeeLookupTable;

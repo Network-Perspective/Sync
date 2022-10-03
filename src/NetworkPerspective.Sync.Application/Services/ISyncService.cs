@@ -54,8 +54,6 @@ namespace NetworkPerspective.Sync.Application.Services
             var employees = await _dataSource.GetEmployees(context, stoppingToken);
             await _statusLogger.LogInfoAsync(context.NetworkId, $"Received employees profiles", stoppingToken);
 
-            employees.EvaluateHierarchy();
-
             await _networkPerspectiveCore.PushUsersAsync(context.AccessToken, employees, stoppingToken);
             await _statusLogger.LogInfoAsync(context.NetworkId, $"Uploaded profiles", stoppingToken);
 

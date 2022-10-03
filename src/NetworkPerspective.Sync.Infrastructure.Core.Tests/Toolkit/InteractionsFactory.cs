@@ -25,8 +25,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Toolkit
             var group1 = Group.Create(Guid.NewGuid().ToString(), $"group1Name_{_counter}", $"category1_{_counter}");
             var group2 = Group.Create(Guid.NewGuid().ToString(), $"group2Name_{_counter}", $"category2_{_counter}");
 
-            var source = Employee.CreateInternal($"email_source_{_counter}@networkperspective.io", $"email_source_{_counter}_manager@networkperspective.io", new[] { group1, group2 });
-            var target = Employee.CreateInternal($"email_target_{_counter}@networkperspective.io", $"email_target_{_counter}_manager@networkperspective.io", new[] { group2 });
+            var sourceId = EmployeeId.Create($"email_source_{_counter}@networkperspective.io", $"email_source_{_counter}_manager@networkperspective.io");
+            var source = Employee.CreateInternal(sourceId, new[] { group1, group2 });
+            var targetId = EmployeeId.Create($"email_target_{_counter}@networkperspective.io", $"email_target_{_counter}_manager@networkperspective.io");
+            var target = Employee.CreateInternal(targetId, new[] { group2 });
 
             _counter++;
 

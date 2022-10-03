@@ -52,7 +52,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
             {
             };
             var exectedRelations1 = new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, manager_email) });
-            var expectedEmployee1 = Employee.CreateInternal(user_1_email, user_1_id, expectedGroups1, expectedProps1, exectedRelations1);
+            var expectedEmployeeId1 = EmployeeId.CreateWithAliases(user_1_email, user_1_id, new[] { user_1_email });
+            var expectedEmployee1 = Employee.CreateInternal(expectedEmployeeId1, expectedGroups1, expectedProps1, exectedRelations1);
             expectedEmployees.Add(expectedEmployee1, ImmutableHashSet<string>.Empty);
 
             var expectedGroups2 = new[]
@@ -67,7 +68,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
             {
             };
             var expectedRelations2 = new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, manager_email) });
-            var expectedEmployee2 = Employee.CreateInternal(user_2_email, user_2_id, expectedGroups2, expectedProps2, expectedRelations2);
+            var expectedEmployeeId2 = EmployeeId.CreateWithAliases(user_2_email, user_2_id, new[] { user_2_email });
+            var expectedEmployee2 = Employee.CreateInternal(expectedEmployeeId2, expectedGroups2, expectedProps2, expectedRelations2);
             expectedEmployees.Add(expectedEmployee2, ImmutableHashSet<string>.Empty);
 
             var users = new[]

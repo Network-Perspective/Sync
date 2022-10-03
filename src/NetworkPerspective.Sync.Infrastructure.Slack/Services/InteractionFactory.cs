@@ -12,10 +12,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
     internal class InteractionFactory
     {
-        private readonly Func<string, string> _hash;
+        private readonly HashFunction _hash;
         private readonly EmployeeCollection _employeeLookupTable;
 
-        public InteractionFactory(Func<string, string> hash, EmployeeCollection employeeLookupTable)
+        public InteractionFactory(HashFunction hash, EmployeeCollection employeeLookupTable)
         {
             _hash = hash;
             _employeeLookupTable = employeeLookupTable;

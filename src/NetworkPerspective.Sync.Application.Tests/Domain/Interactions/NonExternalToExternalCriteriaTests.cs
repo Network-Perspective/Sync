@@ -13,8 +13,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
 {
     public class NonExternalToExternalCriteriaTests
     {
-        private static readonly Employee Internal1 = Employee.CreateInternal("internal1", "internal1_id", Array.Empty<Group>());
-        private static readonly Employee Internal2 = Employee.CreateInternal("internal2", "internal2_id", Array.Empty<Group>());
+        private static readonly Employee Internal1 = Employee.CreateInternal(EmployeeId.Create("internal1", "internal1_id"), Array.Empty<Group>());
+        private static readonly Employee Internal2 = Employee.CreateInternal(EmployeeId.Create("internal2", "internal2_id"), Array.Empty<Group>());
         private static readonly Employee External1 = Employee.CreateExternal("external1");
         private static readonly Employee External2 = Employee.CreateExternal("external2");
 

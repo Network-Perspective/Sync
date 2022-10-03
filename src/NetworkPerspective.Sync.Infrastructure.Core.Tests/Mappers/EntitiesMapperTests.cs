@@ -22,7 +22,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
                 {Employee.PropKeyTeam, "Super Team" },
                 {Employee.PropKeyDepartment, new[] {"IT", "DevOps"} }
             };
-            var employee = Employee.CreateInternal("foo", "bar", Array.Empty<Group>(), props);
+            var employee = Employee.CreateInternal(EmployeeId.Create("foo", "bar"), Array.Empty<Group>(), props);
 
             // Act
             var result = EntitiesMapper.ToEntity(employee, null, "test");
@@ -41,11 +41,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
             const string managerEmail = "baz@networkperspective.io";
             const string managerDataSourceId = "someId";
 
-            var manager = Employee.CreateInternal(managerEmail, managerDataSourceId, Array.Empty<Group>());
+            var manager = Employee.CreateInternal(EmployeeId.Create(managerEmail, managerDataSourceId), Array.Empty<Group>());
 
             var relations = new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, managerEmail) });
 
-            var employee = Employee.CreateInternal("foo", "bar", Array.Empty<Group>(), null, relations);
+            var employee = Employee.CreateInternal(EmployeeId.Create("foo", "bar"), Array.Empty<Group>(), null, relations);
 
             // Act
             var result = EntitiesMapper.ToEntity(employee, manager, dataSourceId);

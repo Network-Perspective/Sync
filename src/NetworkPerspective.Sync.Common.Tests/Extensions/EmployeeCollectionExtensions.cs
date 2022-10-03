@@ -8,7 +8,7 @@ namespace NetworkPerspective.Sync.Common.Tests.Extensions
     {
         public static EmployeeCollection Add(this EmployeeCollection employees, string mail)
         {
-            employees.Add(Employee.CreateInternal(mail, mail, ImmutableArray<Group>.Empty), ImmutableHashSet<string>.Empty);
+            employees.Add(Employee.CreateInternal(EmployeeId.Create(mail, mail), ImmutableArray<Group>.Empty), ImmutableHashSet<string>.Empty);
             return employees;
         }
     }

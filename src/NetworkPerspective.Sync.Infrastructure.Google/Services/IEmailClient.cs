@@ -68,7 +68,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             {
                 try
                 {
-                    var interactions = await GetSingleUserInteractionsAsync(userEmail.Email, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
+                    var interactions = await GetSingleUserInteractionsAsync(userEmail.Id.PrimaryId, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
 
                     var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, (processedUsersCount++ / (double)usersCount) * 100);
                     await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);

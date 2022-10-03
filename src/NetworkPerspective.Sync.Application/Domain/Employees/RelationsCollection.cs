@@ -23,7 +23,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         }
 
 
-        public RelationsCollection Hash(Func<string, string> hashFunction)
+        public RelationsCollection Hash(HashFunction hashFunction)
         {
             var hashedRelations = _relations.Select(x => x.Hash(hashFunction));
             return new RelationsCollection(hashedRelations, true);

@@ -33,14 +33,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
 
             foreach (var user in users)
             {
-                var managerEmail = user.GetManagerEmail();
-
                 var employeeGroups = GetEmployeeGroups(user, organizationGroups);
                 var employeeProps = GetEmployeeProps(user);
                 var employeeRelations = GetEmployeeRelations(user);
 
-                var employee = Employee.CreateInternal(user.PrimaryEmail, user.Id, employeeGroups, employeeProps, employeeRelations);
                 var employeeAliases = user.Emails.Select(x => x.Address).ToHashSet();
+                var employeeId = EmployeeId.CreateWithAliases(user.PrimaryEmail, user.Id, employeeAliases);
+                var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations);
 
                 employees.Add(employee, employeeAliases);
             }

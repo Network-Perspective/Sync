@@ -23,8 +23,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         private readonly IList<Group> _groups;
         private readonly IDictionary<string, object> _props;
 
-        public string Email { get; }
-        public string SourceInternalId { get; }
+        public EmployeeId Id { get; }
         public bool IsExternal { get; }
         public bool IsBot { get; }
         public bool IsHashed { get; }
@@ -35,10 +34,9 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public IReadOnlyCollection<Group> Groups => new ReadOnlyCollection<Group>(_groups);
         public RelationsCollection Relations { get; }
 
-        private Employee(string email, string sourceInternalId, IEnumerable<Group> groups, bool isExternal, bool isBot, bool isHashed, IDictionary<string, object> props, RelationsCollection relations)
+        private Employee(EmployeeId id, IEnumerable<Group> groups, bool isExternal, bool isBot, bool isHashed, IDictionary<string, object> props, RelationsCollection relations)
         {
-            Email = email;
-            SourceInternalId = sourceInternalId;
+            Id = id;
             IsExternal = isExternal;
             IsBot = isBot;
             IsHashed = isHashed;
@@ -53,26 +51,25 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             }
         }
 
-        public static Employee CreateInternal(string email, string sourceInternalId, IEnumerable<Group> groups, IDictionary<string, object> props = null, RelationsCollection relations = null)
-            => new Employee(email, sourceInternalId, groups, false, false, false, props ?? new Dictionary<string, object>(), relations ?? RelationsCollection.Empty);
+        public static Employee CreateInternal(EmployeeId id, IEnumerable<Group> groups, IDictionary<string, object> props = null, RelationsCollection relations = null)
+            => new Employee(id, groups, false, false, false, props ?? new Dictionary<string, object>(), relations ?? RelationsCollection.Empty);
 
         public static Employee CreateExternal(string email)
-            => new Employee(email, string.Empty, Array.Empty<Group>(), true, false, false, ImmutableDictionary<string, object>.Empty, RelationsCollection.Empty);
+            => new Employee(EmployeeId.Create(email, string.Empty), Array.Empty<Group>(), true, false, false, ImmutableDictionary<string, object>.Empty, RelationsCollection.Empty);
 
         public static Employee CreateBot(string email)
-            => new Employee(email, string.Empty, Array.Empty<Group>(), false, true, false, ImmutableDictionary<string, object>.Empty, RelationsCollection.Empty);
+            => new Employee(EmployeeId.Create(email, string.Empty), Array.Empty<Group>(), false, true, false, ImmutableDictionary<string, object>.Empty, RelationsCollection.Empty);
 
-        public Employee Hash(Func<string, string> hashFunc)
+        public Employee Hash(HashFunction hashFunc)
         {
             if (IsHashed)
                 throw new DoubleHashingException(nameof(Employee));
 
-            var hashedEmail = hashFunc(Email);
-            var hashedSourceInternalId = string.IsNullOrEmpty(SourceInternalId) ? SourceInternalId : hashFunc(SourceInternalId);
+            var hashedId = Id.Hash(hashFunc);
             var hashedGroups = Groups.Select(x => x.Hash(hashFunc));
             var hashedRelations = Relations.Hash(hashFunc);
 
-            return new Employee(hashedEmail, hashedSourceInternalId, hashedGroups, IsExternal, IsBot, true, Props.ToDictionary(x => x.Key, y => y.Value), hashedRelations);
+            return new Employee(hashedId, hashedGroups, IsExternal, IsBot, true, Props.ToDictionary(x => x.Key, y => y.Value), hashedRelations);
         }
 
         public void SetHierarchy(EmployeeHierarchy hierarchy)

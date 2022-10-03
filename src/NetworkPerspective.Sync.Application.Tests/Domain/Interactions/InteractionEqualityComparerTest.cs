@@ -17,8 +17,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
             // Arrange
             var timestamp1 = DateTime.UtcNow;
             var timestamp2 = timestamp1.AddHours(1);
-            var source = Employee.CreateInternal("source", "souce_1", Array.Empty<Group>());
-            var target = Employee.CreateInternal("target", "target_1", Array.Empty<Group>());
+            var source = Employee.CreateInternal(EmployeeId.Create("source", "souce_1"), Array.Empty<Group>());
+            var target = Employee.CreateInternal(EmployeeId.Create("target", "target_1"), Array.Empty<Group>());
             var eventId = "eventId";
             var parentEventId = "parentEventId";
             var channelId = "channelId";
@@ -41,9 +41,9 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
         {
             // Arrange
             var timestamp = DateTime.UtcNow;
-            var source1 = Employee.CreateInternal("source1", "source1_id", Array.Empty<Group>());
-            var source2 = Employee.CreateInternal("source2", "source2_id", Array.Empty<Group>());
-            var target = Employee.CreateInternal("target", "target_id", Array.Empty<Group>());
+            var source1 = Employee.CreateInternal(EmployeeId.Create("source1", "source1_id"), Array.Empty<Group>());
+            var source2 = Employee.CreateInternal(EmployeeId.Create("source2", "source2_id"), Array.Empty<Group>());
+            var target = Employee.CreateInternal(EmployeeId.Create("target", "target_id"), Array.Empty<Group>());
             var eventId = "eventId";
             var parentEventId = "parentEventId";
             var channelId = "channelId";
@@ -66,9 +66,9 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
         {
             // Arrange
             var timestamp = DateTime.UtcNow;
-            var source = Employee.CreateInternal("source", "source_id", Array.Empty<Group>());
-            var target1 = Employee.CreateInternal("target1", "target1_id", Array.Empty<Group>());
-            var target2 = Employee.CreateInternal("target2", "target2_id", Array.Empty<Group>());
+            var source = Employee.CreateInternal(EmployeeId.Create("source", "source_id"), Array.Empty<Group>());
+            var target1 = Employee.CreateInternal(EmployeeId.Create("target1", "target1_id"), Array.Empty<Group>());
+            var target2 = Employee.CreateInternal(EmployeeId.Create("target2", "target2_id"), Array.Empty<Group>());
             var eventId = "eventId";
             var parentEventId = "parentEventId";
             var channelId = "channelId";
@@ -91,8 +91,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
         {
             // Arrange
             var timestamp = DateTime.UtcNow;
-            var source = Employee.CreateInternal("source", "source_id", Array.Empty<Group>());
-            var target = Employee.CreateInternal("target", "targer_id", Array.Empty<Group>());
+            var source = Employee.CreateInternal(EmployeeId.Create("source", "source_id"), Array.Empty<Group>());
+            var target = Employee.CreateInternal(EmployeeId.Create("target", "targer_id"), Array.Empty<Group>());
             var eventId = "eventId";
             var parentEventId = "parentEventId";
             var channelId = "channelId";

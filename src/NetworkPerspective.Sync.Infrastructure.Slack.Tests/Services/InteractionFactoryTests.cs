@@ -55,14 +55,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             var rectionsInteractions = reactions.Where(x => x.UserAction.SetEquals(new HashSet<UserActionType> { UserActionType.Reaction }));
 
             threadInteractions.Should().HaveCount(4); //self also included, filtered later
-            threadInteractions.Where(x => x.Source.Email == $"{channelMember1}_hashed" && x.Target.Email == $"{channelMember2}_hashed").Should().ContainSingle();
-            threadInteractions.Where(x => x.Source.Email == $"{channelMember1}_hashed" && x.Target.Email == $"{channelMember3}_hashed").Should().ContainSingle();
-            threadInteractions.Where(x => x.Source.Email == $"{channelMember1}_hashed" && x.Target.Email == $"{channelMember4}_hashed").Should().ContainSingle();
+            threadInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember1}_hashed" && x.Target.Id.PrimaryId == $"{channelMember2}_hashed").Should().ContainSingle();
+            threadInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember1}_hashed" && x.Target.Id.PrimaryId == $"{channelMember3}_hashed").Should().ContainSingle();
+            threadInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember1}_hashed" && x.Target.Id.PrimaryId == $"{channelMember4}_hashed").Should().ContainSingle();
 
             rectionsInteractions.Should().HaveCount(3);
-            rectionsInteractions.Where(x => x.Source.Email == $"{channelMember2}_hashed" && x.Target.Email == $"{channelMember1}_hashed").Should().ContainSingle();
-            rectionsInteractions.Where(x => x.Source.Email == $"{channelMember3}_hashed" && x.Target.Email == $"{channelMember1}_hashed").Should().ContainSingle();
-            rectionsInteractions.Where(x => x.Source.Email == $"{channelMember4}_hashed" && x.Target.Email == $"{channelMember1}_hashed").Should().ContainSingle();
+            rectionsInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember2}_hashed" && x.Target.Id.PrimaryId == $"{channelMember1}_hashed").Should().ContainSingle();
+            rectionsInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember3}_hashed" && x.Target.Id.PrimaryId == $"{channelMember1}_hashed").Should().ContainSingle();
+            rectionsInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember4}_hashed" && x.Target.Id.PrimaryId == $"{channelMember1}_hashed").Should().ContainSingle();
         }
 
         [Fact]
@@ -116,14 +116,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             threadInteractions.Should().BeEmpty();
 
             replyInteractions.Should().HaveCount(3); //self also included, filtered later
-            replyInteractions.Where(x => x.Source.Email == $"{channelMember1}_hashed" && x.Target.Email == $"{channelMember4}_hashed").Should().ContainSingle();
-            replyInteractions.Where(x => x.Source.Email == $"{channelMember2}_hashed" && x.Target.Email == $"{channelMember1}_hashed").Should().ContainSingle();
-            replyInteractions.Where(x => x.Source.Email == $"{channelMember2}_hashed" && x.Target.Email == $"{channelMember4}_hashed").Should().ContainSingle();
+            replyInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember1}_hashed" && x.Target.Id.PrimaryId == $"{channelMember4}_hashed").Should().ContainSingle();
+            replyInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember2}_hashed" && x.Target.Id.PrimaryId == $"{channelMember1}_hashed").Should().ContainSingle();
+            replyInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember2}_hashed" && x.Target.Id.PrimaryId == $"{channelMember4}_hashed").Should().ContainSingle();
 
             rectionsInteractions.Should().HaveCount(3);
-            rectionsInteractions.Where(x => x.Source.Email == $"{channelMember2}_hashed" && x.Target.Email == $"{channelMember1}_hashed").Should().ContainSingle();
-            rectionsInteractions.Where(x => x.Source.Email == $"{channelMember3}_hashed" && x.Target.Email == $"{channelMember2}_hashed").Should().ContainSingle();
-            rectionsInteractions.Where(x => x.Source.Email == $"{channelMember4}_hashed" && x.Target.Email == $"{channelMember2}_hashed").Should().ContainSingle();
+            rectionsInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember2}_hashed" && x.Target.Id.PrimaryId == $"{channelMember1}_hashed").Should().ContainSingle();
+            rectionsInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember3}_hashed" && x.Target.Id.PrimaryId == $"{channelMember2}_hashed").Should().ContainSingle();
+            rectionsInteractions.Where(x => x.Source.Id.PrimaryId == $"{channelMember4}_hashed" && x.Target.Id.PrimaryId == $"{channelMember2}_hashed").Should().ContainSingle();
         }
     }
 }

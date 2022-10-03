@@ -10,8 +10,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
         {
             return new Dictionary<string, string>
             {
-                { "Email", employee.IsExternal ? "external" : employee.Email },
-                { dataSourceIdName, employee.IsExternal ? "external" : employee.SourceInternalId },
+                { "Email", employee.IsExternal ? "external" : employee.Id.PrimaryId},
+                { dataSourceIdName, employee.IsExternal ? "external" : employee.Id.DataSourceId},
             };
         }
     }
