@@ -22,12 +22,14 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             IsHashed = isHashed;
         }
 
-
         public RelationsCollection Hash(HashFunction hashFunction)
         {
             var hashedRelations = _relations.Select(x => x.Hash(hashFunction));
             return new RelationsCollection(hashedRelations, true);
         }
+
+        public IEnumerable<Relation> GetAll()
+            => _relations.ToList();
 
         public bool Contains(string relationName)
             => _relations.Any(x => x.Name == relationName);

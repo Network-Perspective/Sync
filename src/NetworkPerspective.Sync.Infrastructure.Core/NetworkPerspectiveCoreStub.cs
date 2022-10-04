@@ -39,8 +39,8 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
 
                 foreach (var employee in employees.GetAllInternal())
                 {
-                    var manager = employees.Find(employee.ManagerEmail);
-                    entities.Add(EntitiesMapper.ToEntity(employee, manager, "test"));
+                    var entity = EntitiesMapper.ToEntity(employee, employees, "test");
+                    entities.Add(entity);
                 }
 
                 var command = new SyncHashedEntitesCommand

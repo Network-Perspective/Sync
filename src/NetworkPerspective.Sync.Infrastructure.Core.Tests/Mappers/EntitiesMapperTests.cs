@@ -47,8 +47,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
 
             var employee = Employee.CreateInternal(EmployeeId.Create("foo", "bar"), Array.Empty<Group>(), null, relations);
 
+            var allEmployees = new EmployeeCollection(null);
+            allEmployees.Add(employee);
+            allEmployees.Add(manager);
+
             // Act
-            var result = EntitiesMapper.ToEntity(employee, manager, dataSourceId);
+            var result = EntitiesMapper.ToEntity(employee, allEmployees, dataSourceId);
 
             // Assert
             var managerId = new Dictionary<string, string>

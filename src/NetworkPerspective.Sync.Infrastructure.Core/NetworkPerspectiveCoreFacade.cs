@@ -112,8 +112,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
                 foreach (var employee in employeesList)
                 {
-                    var manager = employees.Find(employee.ManagerEmail);
-                    entities.Add(EntitiesMapper.ToEntity(employee, manager, _npCoreConfig.DataSourceIdName));
+                    var entity = EntitiesMapper.ToEntity(employee, employees, _npCoreConfig.DataSourceIdName);
+                    entities.Add(entity);
                 }
 
                 var command = new SyncHashedEntitesCommand
