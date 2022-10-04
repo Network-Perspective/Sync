@@ -16,15 +16,14 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             _hashFunc = hashFunc;
         }
 
-        public void Add(Employee employee, ISet<string> aliases)
+        public void Add(Employee employee)
         {
             var employeeToInsert = _hashFunc == null ? employee : employee.Hash(_hashFunc);
-            var aliasesToUse = _hashFunc == null ? aliases : aliases.Select(x => _hashFunc(x));
 
             AddIfNotExists(employeeToInsert.Id.PrimaryId, employeeToInsert);
             AddIfNotExists(employeeToInsert.Id.DataSourceId, employeeToInsert);
 
-            foreach (var alias in aliasesToUse)
+            foreach (var alias in employee.Id.Aliases)
                 AddIfNotExists(alias, employeeToInsert);
 
             EvaluateHierarchy();

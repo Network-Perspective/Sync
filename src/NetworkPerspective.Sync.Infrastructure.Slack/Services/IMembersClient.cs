@@ -68,14 +68,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 var groups = usersChannels.Select(x => Group.Create(x.Id, x.Name, "Project"));
                 var employeeId = EmployeeId.Create(slackUser.Profile.Email, slackUser.Id);
                 var employee = Employee.CreateInternal(employeeId, groups);
-                employees.Add(employee, ImmutableHashSet<string>.Empty);
+                employees.Add(employee);
                 _logger.LogTrace("User: '{email}'", slackUser.Profile.Email);
             }
 
             foreach (var botId in botsIds)
             {
                 var bot = Employee.CreateBot(botId);
-                employees.Add(bot, ImmutableHashSet<string>.Empty);
+                employees.Add(bot);
             }
 
             return employees;

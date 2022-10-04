@@ -45,7 +45,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
                 var employeeId = EmployeeId.CreateWithAliases(user.PrimaryEmail, user.Id, employeeAliases);
                 var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations);
 
-                employees.Add(employee, employeeAliases);
+                employees.Add(employee);
             }
 
             return employees;

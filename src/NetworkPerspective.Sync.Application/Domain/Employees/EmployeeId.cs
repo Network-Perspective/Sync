@@ -31,7 +31,9 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         {
             var hashedPrimaryId = hashFunction(PrimaryId);
             var hashedDataSourceId = string.IsNullOrEmpty(DataSourceId) ? DataSourceId : hashFunction(DataSourceId);
-            return new EmployeeId(hashedPrimaryId, hashedDataSourceId, Aliases.Select(x => hashFunction(x)), true);
+            var hashedAliases = Aliases.Select(x => hashFunction(x));
+
+            return new EmployeeId(hashedPrimaryId, hashedDataSourceId, hashedAliases, true);
         }
 
         public override string ToString()
