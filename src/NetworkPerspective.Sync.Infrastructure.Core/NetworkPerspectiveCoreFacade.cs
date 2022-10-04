@@ -169,12 +169,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
                 var emailFilter = new EmailFilter(response.Whitelist, response.Blacklist);
                 _logger.LogDebug("Email filter: {emailFilter}", emailFilter.ToString());
 
+                var customAttributeRelationships = response.CustomAttributes?.Relationship == null
+                    ? Array.Empty<CustomAttributeRelationship>()
+                    : response.CustomAttributes?.Relationship.Select(x => new CustomAttributeRelationship(x.PropName, x.RelationshipName));
+
                 var customAttributes = new CustomAttributesConfig(
                     groupAttributes: response.CustomAttributes?.Group,
                     propAttributes: response.CustomAttributes?.Prop,
-                    relationships: Array.Empty<CustomAttributeRelationship>()
+                    relationships: customAttributeRelationships);
 
-                    );
                 _logger.LogDebug("Custom attributes: {customAttributes}", customAttributes.ToString());
 
 
