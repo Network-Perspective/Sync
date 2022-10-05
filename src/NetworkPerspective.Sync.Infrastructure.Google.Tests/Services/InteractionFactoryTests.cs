@@ -56,10 +56,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             // Assert
             var emailInteractions = interactions.Where(x => x.Type == InteractionType.Email);
             emailInteractions.Should().HaveCount(4);
-            emailInteractions.Where(x => x.Source.Email == $"{user1Email}_hashed" && x.Target.Email == "user2@networkperspective.io_hashed").Should().ContainSingle();
-            emailInteractions.Where(x => x.Source.Email == $"{user1Email}_hashed" && x.Target.Email == $"{user3Email}_hashed").Should().ContainSingle();
-            emailInteractions.Where(x => x.Source.Email == $"{user1Email}_hashed" && x.Target.Email == $"{user4Email}_hashed").Should().ContainSingle();
-            emailInteractions.Where(x => x.Source.Email == $"{user1Email}_hashed" && x.Target.Email == $"{user5Email}_hashed").Should().ContainSingle();
+            emailInteractions.Where(x => x.Source.Id.PrimaryId == $"{user1Email}_hashed" && x.Target.Id.PrimaryId == "user2@networkperspective.io_hashed").Should().ContainSingle();
+            emailInteractions.Where(x => x.Source.Id.PrimaryId == $"{user1Email}_hashed" && x.Target.Id.PrimaryId == $"{user3Email}_hashed").Should().ContainSingle();
+            emailInteractions.Where(x => x.Source.Id.PrimaryId == $"{user1Email}_hashed" && x.Target.Id.PrimaryId == $"{user4Email}_hashed").Should().ContainSingle();
+            emailInteractions.Where(x => x.Source.Id.PrimaryId == $"{user1Email}_hashed" && x.Target.Id.PrimaryId == $"{user5Email}_hashed").Should().ContainSingle();
         }
 
         [Fact]
@@ -99,12 +99,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             // Assert
             var emailInteractions = interactions.Where(x => x.Type == InteractionType.Meetings);
             emailInteractions.Should().HaveCount(6);
-            emailInteractions.Where(x => x.Duration == 90 && x.Source.Email == $"{user1Email}_hashed" && x.Target.Email == "user2@networkperspective.io_hashed").Should().ContainSingle();
-            emailInteractions.Where(x => x.Duration == 90 && x.Source.Email == "user2@networkperspective.io_hashed" && x.Target.Email == $"{user1Email}_hashed").Should().ContainSingle();
-            emailInteractions.Where(x => x.Duration == 90 && x.Source.Email == $"{user1Email}_hashed" && x.Target.Email == $"{user3Email}_hashed").Should().ContainSingle();
-            emailInteractions.Where(x => x.Duration == 90 && x.Source.Email == $"{user3Email}_hashed" && x.Target.Email == $"{user1Email}_hashed").Should().ContainSingle();
-            emailInteractions.Where(x => x.Duration == 90 && x.Source.Email == $"{user3Email}_hashed" && x.Target.Email == "user2@networkperspective.io_hashed").Should().ContainSingle();
-            emailInteractions.Where(x => x.Duration == 90 && x.Source.Email == "user2@networkperspective.io_hashed" && x.Target.Email == $"{user3Email}_hashed").Should().ContainSingle();
+            emailInteractions.Where(x => x.Duration == 90 && x.Source.Id.PrimaryId == $"{user1Email}_hashed" && x.Target.Id.PrimaryId == "user2@networkperspective.io_hashed").Should().ContainSingle();
+            emailInteractions.Where(x => x.Duration == 90 && x.Source.Id.PrimaryId == "user2@networkperspective.io_hashed" && x.Target.Id.PrimaryId == $"{user1Email}_hashed").Should().ContainSingle();
+            emailInteractions.Where(x => x.Duration == 90 && x.Source.Id.PrimaryId == $"{user1Email}_hashed" && x.Target.Id.PrimaryId == $"{user3Email}_hashed").Should().ContainSingle();
+            emailInteractions.Where(x => x.Duration == 90 && x.Source.Id.PrimaryId == $"{user3Email}_hashed" && x.Target.Id.PrimaryId == $"{user1Email}_hashed").Should().ContainSingle();
+            emailInteractions.Where(x => x.Duration == 90 && x.Source.Id.PrimaryId == $"{user3Email}_hashed" && x.Target.Id.PrimaryId == "user2@networkperspective.io_hashed").Should().ContainSingle();
+            emailInteractions.Where(x => x.Duration == 90 && x.Source.Id.PrimaryId == "user2@networkperspective.io_hashed" && x.Target.Id.PrimaryId == $"{user3Email}_hashed").Should().ContainSingle();
         }
 
     }

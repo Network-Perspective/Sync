@@ -10,7 +10,7 @@
 
     <ItemGroup>
       <OpenApiReference Include="OpenAPIs\v1.json" CodeGenerator="NSwagCSharp" Namespace="NetworkPerspective.Sync.Infrastructure.Core" ClassName="{controller}Client">
-        <SourceUri>https://test-np.azurewebsites.net/swagger/v1</SourceUri>
+        <SourceUri>https://app.networkperspective.io/swagger/v1/swagger.json</SourceUri>
           <Options>/UseBaseUrl:false /GenerateClientInterfaces:true /OperationGenerationMode:MultipleClientsFromOperationId</Options>
       </OpenApiReference>
     </ItemGroup>

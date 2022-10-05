@@ -26,7 +26,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
 
             var user = new UserEntity
             {
-                Email = employee.Email,
+                Email = employee.Id.PrimaryId,
                 Ids = IdsMapper.ToIds(employee, dataSourceIdName),
                 Props = props
             };

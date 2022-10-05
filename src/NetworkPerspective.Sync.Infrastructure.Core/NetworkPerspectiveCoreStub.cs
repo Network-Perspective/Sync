@@ -25,7 +25,8 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
         {
             var customAttributes = new CustomAttributesConfig(
                 groupAttributes: new[] { "NP-Test.Role" },
-                propAttributes: new[] { "NP-Test.Employment_Date" });
+                propAttributes: new[] { "NP-Test.Employment_Date" },
+                relationships: new[] { new CustomAttributeRelationship("NP-Test.FormalSupervisor", "Boss") });
 
             return Task.FromResult(new NetworkConfig(EmailFilter.Empty, customAttributes));
         }
@@ -38,8 +39,8 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
 
                 foreach (var employee in employees.GetAllInternal())
                 {
-                    var manager = employees.Find(employee.ManagerEmail);
-                    entities.Add(EntitiesMapper.ToEntity(employee, manager, "test"));
+                    var entity = EntitiesMapper.ToEntity(employee, employees, "test");
+                    entities.Add(entity);
                 }
 
                 var command = new SyncHashedEntitesCommand

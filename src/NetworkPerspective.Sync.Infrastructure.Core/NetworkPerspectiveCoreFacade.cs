@@ -112,8 +112,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
                 foreach (var employee in employeesList)
                 {
-                    var manager = employees.Find(employee.ManagerEmail);
-                    entities.Add(EntitiesMapper.ToEntity(employee, manager, _npCoreConfig.DataSourceIdName));
+                    var entity = EntitiesMapper.ToEntity(employee, employees, _npCoreConfig.DataSourceIdName);
+                    entities.Add(entity);
                 }
 
                 var command = new SyncHashedEntitesCommand
@@ -169,10 +169,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
                 var emailFilter = new EmailFilter(response.Whitelist, response.Blacklist);
                 _logger.LogDebug("Email filter: {emailFilter}", emailFilter.ToString());
 
+                var customAttributeRelationships = response.CustomAttributes?.Relationship == null
+                    ? Array.Empty<CustomAttributeRelationship>()
+                    : response.CustomAttributes?.Relationship.Select(x => new CustomAttributeRelationship(x.PropName, x.RelationshipName));
+
                 var customAttributes = new CustomAttributesConfig(
                     groupAttributes: response.CustomAttributes?.Group,
-                    propAttributes: response.CustomAttributes?.Prop
-                    );
+                    propAttributes: response.CustomAttributes?.Prop,
+                    relationships: customAttributeRelationships);
+
                 _logger.LogDebug("Custom attributes: {customAttributes}", customAttributes.ToString());
 
 

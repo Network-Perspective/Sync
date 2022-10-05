@@ -9,23 +9,24 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public bool IsHashed => _hashFunc != null;
 
         private readonly IDictionary<string, Employee> _emailLookupTable = new Dictionary<string, Employee>(StringComparer.InvariantCultureIgnoreCase);
-        private readonly Func<string, string> _hashFunc;
+        private readonly HashFunction _hashFunc;
 
-        public EmployeeCollection(Func<string, string> hashFunc)
+        public EmployeeCollection(HashFunction hashFunc)
         {
             _hashFunc = hashFunc;
         }
 
-        public void Add(Employee employee, ISet<string> aliases)
+        public void Add(Employee employee)
         {
             var employeeToInsert = _hashFunc == null ? employee : employee.Hash(_hashFunc);
-            var aliasesToUse = _hashFunc == null ? aliases : aliases.Select(_hashFunc);
 
-            AddIfNotExists(employeeToInsert.Email, employeeToInsert);
-            AddIfNotExists(employeeToInsert.SourceInternalId, employeeToInsert);
+            AddIfNotExists(employeeToInsert.Id.PrimaryId, employeeToInsert);
+            AddIfNotExists(employeeToInsert.Id.DataSourceId, employeeToInsert);
 
-            foreach (var alias in aliasesToUse)
+            foreach (var alias in employee.Id.Aliases)
                 AddIfNotExists(alias, employeeToInsert);
+
+            EvaluateHierarchy();
         }
 
         private void AddIfNotExists(string alias, Employee employee)
@@ -49,7 +50,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         private bool IsInternal(string alias)
             => _emailLookupTable.ContainsKey(alias);
 
-        public void EvaluateHierarchy()
+        private void EvaluateHierarchy()
         {
             var employees = GetAllInternal();
 
@@ -68,7 +69,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
                 if (subordinates.Any(x => x.GetHierarchy() == EmployeeHierarchy.Manager))
                     employee.SetHierarchy(EmployeeHierarchy.Director);
 
-                if (string.IsNullOrEmpty(employee.ManagerEmail))
+                if (!employee.HasManager)
                     employee.SetHierarchy(EmployeeHierarchy.Board);
             }
         }
@@ -78,7 +79,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
         private IEnumerable<Employee> GetSubordinates(Employee employee, IEnumerable<Employee> allEmployees)
             => allEmployees
-                .Where(x => x.ManagerEmail is not null)
-                .Where(x => Find(x.ManagerEmail).Email == employee.Email);
+                .Where(x => x.HasManager)
+                .Where(x => Find(x.ManagerEmail).Id.PrimaryId == employee.Id.PrimaryId);
     }
 }

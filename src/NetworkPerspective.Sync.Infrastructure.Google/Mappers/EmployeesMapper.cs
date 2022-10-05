@@ -33,15 +33,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
 
             foreach (var user in users)
             {
-                var managerEmail = user.GetManagerEmail();
-
                 var employeeGroups = GetEmployeeGroups(user, organizationGroups);
                 var employeeProps = GetEmployeeProps(user);
+                var employeeRelations = GetEmployeeRelations(user);
 
-                var employee = Employee.CreateInternal(user.PrimaryEmail, user.Id, managerEmail, employeeGroups, employeeProps);
                 var employeeAliases = user.Emails.Select(x => x.Address).ToHashSet();
+                var employeeId = EmployeeId.CreateWithAliases(user.PrimaryEmail, user.Id, employeeAliases);
+                var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations);
 
-                employees.Add(employee, employeeAliases);
+                employees.Add(employee);
             }
 
             return employees;
@@ -74,6 +74,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
             }
 
             return props;
+        }
+
+        private RelationsCollection GetEmployeeRelations(User user)
+        {
+            var customAttrs = user.GetCustomAttrs();
+
+            var relations = _customAttributesService.GetRelations(customAttrs);
+
+            var managerEmail = user.GetManagerEmail();
+
+            if (!string.IsNullOrEmpty(managerEmail))
+                relations.Add(Relation.Create(Employee.SupervisorRelationName, managerEmail));
+
+            return new RelationsCollection(relations);
         }
     }
 }
