@@ -83,7 +83,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 catch (GoogleApiException gaex) when (IsMailServiceNotEnabledException(gaex))
                 {
                     _logger.LogWarning("Skipping mailbox '{email}' gmail service not enabled", "***");
-                    _logger.LogTrace("Skipping mailbox '{email}' gmail service not enabled", userEmail);
+                    _logger.LogTrace("Skipping mailbox '{email}' gmail service not enabled", userEmail.Id.PrimaryId);
                 }
                 catch (Exception ex)
                 {
