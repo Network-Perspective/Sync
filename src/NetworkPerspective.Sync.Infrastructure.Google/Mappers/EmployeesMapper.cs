@@ -78,7 +78,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
 
         private RelationsCollection GetEmployeeRelations(User user)
         {
-            var relations = new List<Relation>();
+            var customAttrs = user.GetCustomAttrs();
+
+            var relations = _customAttributesService.GetRelations(customAttrs);
 
             var managerEmail = user.GetManagerEmail();
 
