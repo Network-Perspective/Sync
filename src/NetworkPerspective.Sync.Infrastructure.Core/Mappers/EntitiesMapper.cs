@@ -24,6 +24,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
 
                 if (props.ContainsKey(Employee.PropKeyDepartment))
                     props.Remove(Employee.PropKeyDepartment);
+
+                if (props.ContainsKey(Employee.PropKeyHierarchy))
+                    props.Remove(Employee.PropKeyHierarchy);
             }
 
             return new HashedEntity
