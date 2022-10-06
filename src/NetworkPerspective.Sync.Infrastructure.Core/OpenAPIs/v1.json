@@ -4,7 +4,7 @@
     "title": "Network Perspective",
     "version": "v1"
   },
-  "host": "test-networkperspective.azurewebsites.net",
+  "host": "app.networkperspective.io",
   "schemes": [
     "https"
   ],
@@ -6519,6 +6519,17 @@
         }
       }
     },
+    "ConnectorsCustomRelationshipSettings": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "prop": {
+          "type": "string"
+        }
+      }
+    },
     "ConnectorsSettings": {
       "type": "object",
       "properties": {
@@ -6536,6 +6547,12 @@
         },
         "customAttributes": {
           "$ref": "#/definitions/ConnectorsCustomAttributesSettings"
+        },
+        "customRelationships": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ConnectorsCustomRelationshipSettings"
+          }
         }
       }
     },
@@ -6829,6 +6846,23 @@
           "items": {
             "type": "string"
           }
+        },
+        "relationship": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HashedDataSourceCustomRelationshipSettingsResult"
+          }
+        }
+      }
+    },
+    "HashedDataSourceCustomRelationshipSettingsResult": {
+      "type": "object",
+      "properties": {
+        "propName": {
+          "type": "string"
+        },
+        "relationshipName": {
+          "type": "string"
         }
       }
     },

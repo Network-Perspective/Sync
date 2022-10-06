@@ -19,8 +19,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
             // Arrange
             var interactions = new[]
             {
-                Interaction.CreateEmail(DateTime.UtcNow, Employee.CreateBot("bot1"), Employee.CreateInternal("internal1", "internal1_id", string.Empty, Array.Empty<Group>()), "id1"),
-                Interaction.CreateEmail(DateTime.UtcNow, Employee.CreateInternal("internal2", "internal2_id", string.Empty, Array.Empty<Group>()), Employee.CreateBot("bot2"), "id2"),
+                Interaction.CreateEmail(DateTime.UtcNow, Employee.CreateBot("bot1"), Employee.CreateInternal(EmployeeId.Create("internal1", "internal1_id"), Array.Empty<Group>()), "id1"),
+                Interaction.CreateEmail(DateTime.UtcNow, Employee.CreateInternal(EmployeeId.Create("internal2", "internal2_id"), Array.Empty<Group>()), Employee.CreateBot("bot2"), "id2"),
                 Interaction.CreateEmail(DateTime.UtcNow, Employee.CreateBot("bot3"), Employee.CreateBot("internal4"), "id1")
             };
 
@@ -36,7 +36,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
         public void ShouldNotFilterOutUsersInteraction()
         {
             // Arrange
-            var source = Employee.CreateInternal("foo", "foo_id", string.Empty, Array.Empty<Group>());
+            var source = Employee.CreateInternal(EmployeeId.Create("foo", "foo_id"), Array.Empty<Group>());
             var target = Employee.CreateExternal("bar");
             var interactions = new[] { Interaction.CreateEmail(DateTime.UtcNow, source, target, "id1") };
 

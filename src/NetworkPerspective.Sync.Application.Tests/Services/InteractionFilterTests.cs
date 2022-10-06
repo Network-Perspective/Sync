@@ -21,18 +21,18 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             // Arrange
             var interactions = new[]
             {
-                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal("user1", "user1_id", string.Empty, Array.Empty<Group>()), Employee.CreateInternal("user2", "user2_id", string.Empty, Array.Empty<Group>()), "id1"),
-                Interaction.CreateEmail(new DateTime(2020, 01, 03), Employee.CreateInternal("user1", "user1_id", string.Empty, Array.Empty<Group>()), Employee.CreateInternal("user3", "user3_id", string.Empty, Array.Empty<Group>()), "id2"),
-                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal("user1", "user1_id", string.Empty, Array.Empty<Group>()), Employee.CreateInternal("user1", "user1_id", string.Empty, Array.Empty<Group>()), "id3"),
-                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal("user1", "user1_id", string.Empty, Array.Empty<Group>()), Employee.CreateBot("bot1"), "id4"),
-                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal("user1", "user1_id", string.Empty, Array.Empty<Group>()), Employee.CreateExternal("user5"), "id5"),
+                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal(EmployeeId.Create("user1", "user1_id"), Array.Empty<Group>()), Employee.CreateInternal(EmployeeId.Create("user2", "user2_id"), Array.Empty<Group>()), "id1"),
+                Interaction.CreateEmail(new DateTime(2020, 01, 03), Employee.CreateInternal(EmployeeId.Create("user1", "user1_id"), Array.Empty<Group>()), Employee.CreateInternal(EmployeeId.Create("user3", "user3_id"), Array.Empty<Group>()), "id2"),
+                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal(EmployeeId.Create("user1", "user1_id"), Array.Empty<Group>()), Employee.CreateInternal(EmployeeId.Create("user1", "user1_id"), Array.Empty<Group>()), "id3"),
+                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal(EmployeeId.Create("user1", "user1_id"), Array.Empty<Group>()), Employee.CreateBot("bot1"), "id4"),
+                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal(EmployeeId.Create("user1", "user1_id"), Array.Empty<Group>()), Employee.CreateExternal("user5"), "id5"),
                 Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateExternal("external1"), Employee.CreateExternal("external2"), "id6"),
             };
 
             var expectedInteractions = new[]
             {
-                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal("user1", "user1_id", string.Empty, Array.Empty<Group>()), Employee.CreateInternal("user2", "user2_id", string.Empty, Array.Empty<Group>()), "id1"),
-                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal("user1", "user1_id", string.Empty, Array.Empty<Group>()), Employee.CreateExternal("user5"), "id5"),
+                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal(EmployeeId.Create("user1", "user1_id"), Array.Empty<Group>()), Employee.CreateInternal(EmployeeId.Create("user2", "user2_id"), Array.Empty<Group>()), "id1"),
+                Interaction.CreateEmail(new DateTime(2020, 01, 01, 10, 10, 10 ), Employee.CreateInternal(EmployeeId.Create("user1", "user1_id"), Array.Empty<Group>()), Employee.CreateExternal("user5"), "id5"),
             };
 
             var timeRange = new TimeRange(

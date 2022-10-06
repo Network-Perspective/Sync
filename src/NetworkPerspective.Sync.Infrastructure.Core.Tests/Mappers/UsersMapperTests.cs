@@ -20,7 +20,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
             {
                 { Employee.PropKeyHierarchy, EmployeeHierarchy.IndividualContributor },
             };
-            var employee = Employee.CreateInternal("foo", "bar", "baz", Array.Empty<Group>(), props);
+            var employeeId = EmployeeId.Create("foo", "bar");
+            var employee = Employee.CreateInternal(employeeId, Array.Empty<Group>(), props);
 
             // Act
             var result = UsersMapper.ToUser(employee, "test");
@@ -37,7 +38,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
             {
                 { Employee.PropKeyCreationTime, DateTime.UtcNow },
             };
-            var employee = Employee.CreateInternal("foo", "bar", "baz", Array.Empty<Group>(), props);
+
+            var employeeId = EmployeeId.Create("foo", "bar");
+            var employee = Employee.CreateInternal(employeeId, Array.Empty<Group>(), props);
 
             // Act
             var result = UsersMapper.ToUser(employee, "test");

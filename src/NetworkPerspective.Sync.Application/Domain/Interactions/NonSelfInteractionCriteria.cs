@@ -19,7 +19,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
             _logger.LogDebug("Filtering out self interactions. Input has {count} interactions", input.Count());
 
             var result = input
-                .Where(x => !Consts.UserIdEqualityComparer.Equals(x.Source.Email, x.Target.Email));
+                .Where(x => !Consts.UserIdEqualityComparer.Equals(x.Source.Id.PrimaryId, x.Target.Id.PrimaryId));
 
             _logger.LogDebug("Filtering self interactions completed. Output has {count} interactions", result.Count());
 

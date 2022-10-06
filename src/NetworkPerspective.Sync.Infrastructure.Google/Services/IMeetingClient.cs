@@ -59,7 +59,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             {
                 try
                 {
-                    var interactions = await GetInteractionsInternalAsync(user.Email, timeRange, credentials, interactionFactory, stoppingToken);
+                    var interactions = await GetInteractionsInternalAsync(user.Id.PrimaryId, timeRange, credentials, interactionFactory, stoppingToken);
 
                     var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, (processedUsersCount++ / (double)usersCount) * 100);
                     await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);

@@ -12,6 +12,7 @@ namespace NetworkPerspective.Sync.Application.Services
         ISet<Group> GetGroupsForHashedEmployee(IEnumerable<CustomAttr> customAttributes);
         IDictionary<string, object> GetPropsForHashedEmployee(IEnumerable<CustomAttr> customAttributes);
         IDictionary<string, object> GetPropsForEmployee(IEnumerable<CustomAttr> customAttributes);
+        IList<Relation> GetRelations(IEnumerable<CustomAttr> customAttributes);
     }
 
     public class CustomAttributesService : ICustomAttributesService
@@ -67,6 +68,21 @@ namespace NetworkPerspective.Sync.Application.Services
                     result.Add(groupAttributeGonfig, GetFormattedCustomAttrValue(customAttrs.Single()));
                 else
                     result.Add(groupAttributeGonfig, customAttrs.Select(x => GetFormattedCustomAttrValue(x)));
+            }
+
+            return result;
+        }
+
+        public IList<Relation> GetRelations(IEnumerable<CustomAttr> customAttributes)
+        {
+            var result = new List<Relation>();
+
+            foreach (var relationshipAttributeGonfig in _customAttributesConfig.Relationships)
+            {
+                var customAttr = customAttributes.FirstOrDefault(x => x.Name == relationshipAttributeGonfig.PropName);
+
+                if (customAttr is not null)
+                    result.Add(Relation.Create(relationshipAttributeGonfig.RelationshipName, customAttr.Value.ToString()));
             }
 
             return result;

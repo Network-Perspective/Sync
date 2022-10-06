@@ -20,8 +20,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
         public void ShouldFilterOutSelfInteractions(string sourceId, string targetId)
         {
             // Arrange
-            var source = Employee.CreateInternal(sourceId, sourceId, string.Empty, Array.Empty<Group>());
-            var target = Employee.CreateInternal(targetId, targetId, string.Empty, Array.Empty<Group>());
+            var source = Employee.CreateInternal(EmployeeId.Create(sourceId, sourceId), Array.Empty<Group>());
+            var target = Employee.CreateInternal(EmployeeId.Create(targetId, targetId), Array.Empty<Group>());
             var interactions = new[] { Interaction.CreateEmail(DateTime.UtcNow, source, target, "id1") };
 
             // Act
@@ -37,8 +37,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
         public void ShouldNotFilterOutCrossInteractions(string sourceId, string targetId)
         {
             // Arrange
-            var source = Employee.CreateInternal(sourceId, sourceId, string.Empty, Array.Empty<Group>());
-            var target = Employee.CreateInternal(targetId, targetId, string.Empty, Array.Empty<Group>());
+            var source = Employee.CreateInternal(EmployeeId.Create(sourceId, sourceId), Array.Empty<Group>());
+            var target = Employee.CreateInternal(EmployeeId.Create(targetId, targetId), Array.Empty<Group>());
             var interactions = new[] { Interaction.CreateEmail(DateTime.UtcNow, source, target, "id1") };
 
             // Act
