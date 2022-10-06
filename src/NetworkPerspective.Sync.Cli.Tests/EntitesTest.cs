@@ -24,7 +24,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
             // Arrange
             var args = new EntitiesOpts()
             {
-                Csv = @"C:\entites.csv",
+                Csv = @"entites.csv",
                 BaseUrl = "http://localhost",
                 Token = "sample_token",
                 IdColumns = "EmployeeId",
@@ -37,7 +37,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
             await _entitiesClient.Main(args);
 
             // Assert
-            var expected = JsonConvert.DeserializeObject<SyncHashedEntitesCommand>(_fileSystem.File.ReadAllText(@"C:\entites-expected.json"));
+            var expected = JsonConvert.DeserializeObject<SyncHashedEntitesCommand>(_fileSystem.File.ReadAllText(@"entites-expected.json"));
             _interceptedCommand.Should().BeEquivalentTo(expected);
         }
     }

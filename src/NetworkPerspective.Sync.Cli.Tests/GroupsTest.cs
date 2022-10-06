@@ -24,7 +24,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
             // Arrange
             var args = new GroupsOpts()
             {
-                Csv = @"C:\groups.csv",
+                Csv = @"groups.csv",
                 BaseUrl = "http://localhost",
                 Token = "sample_token",
                 CsvDelimiter = "\t",
@@ -38,7 +38,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
             await _entitiesClient.Main(args);
 
             // Assert
-            var expected = JsonConvert.DeserializeObject<SyncHashedGroupStructureCommand>(_fileSystem.File.ReadAllText(@"C:\groups-expected.json"));
+            var expected = JsonConvert.DeserializeObject<SyncHashedGroupStructureCommand>(_fileSystem.File.ReadAllText(@"groups-expected.json"));
             _interceptedCommand.Should().BeEquivalentTo(expected);
         }
     }

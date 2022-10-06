@@ -24,7 +24,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
             // Arrange
             var args = new InteractionsOpts()
             {
-                Csv = @"C:\interactions.csv",
+                Csv = @"interactions.csv",
                 BaseUrl = "http://localhost",
                 Token = "sample_token",
                 CsvDelimiter = "\t",
@@ -42,7 +42,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
             await _interactionsClient.Main(args);
 
             // Assert
-            var expected = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"C:\interactions-expected.json"));
+            var expected = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"interactions-expected.json"));
             _interceptedCommand[0].Should().BeEquivalentTo(expected);
             _coreClient.Verify(c => c.SyncInteractionsAsync(It.IsAny<SyncHashedInteractionsCommand>()), Times.Once());
 
@@ -54,7 +54,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
             // Arrange
             var args = new InteractionsOpts()
             {
-                Csv = @"C:\interactions.csv",
+                Csv = @"interactions.csv",
                 BaseUrl = "http://localhost",
                 Token = "sample_token",
                 CsvDelimiter = "\t",
@@ -74,13 +74,13 @@ namespace NetworkPerspective.Sync.Cli.Tests
             // Assert
             _coreClient.Verify(c => c.SyncInteractionsAsync(It.IsAny<SyncHashedInteractionsCommand>()), Times.Exactly(3));
 
-            var batch1 = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"C:\interactions-expected-batch-0.json"));
+            var batch1 = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"interactions-expected-batch-0.json"));
             _interceptedCommand[0].Should().BeEquivalentTo(batch1);
 
-            var batch2 = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"C:\interactions-expected-batch-1.json"));
+            var batch2 = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"interactions-expected-batch-1.json"));
             _interceptedCommand[1].Should().BeEquivalentTo(batch2);
 
-            var batch3 = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"C:\interactions-expected-batch-2.json"));
+            var batch3 = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"interactions-expected-batch-2.json"));
             _interceptedCommand[2].Should().BeEquivalentTo(batch3);
         }
     }
