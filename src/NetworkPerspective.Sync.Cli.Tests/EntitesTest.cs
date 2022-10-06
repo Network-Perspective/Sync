@@ -36,7 +36,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
             // Act
             await _entitiesClient.Main(args);
 
-            // Assert
+            // Assert            
             var expected = JsonConvert.DeserializeObject<SyncHashedEntitesCommand>(_fileSystem.File.ReadAllText(@"entites-expected.json"));
             _interceptedCommand.Should().BeEquivalentTo(expected);
         }

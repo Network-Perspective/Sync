@@ -206,7 +206,7 @@ namespace NetworkPerspective.Sync.Cli
                         }
                         else if (_whenCols.ContainsKey(fieldName))
                         {
-                            interaction.When = DateTime.ParseExact(value, "s", CultureInfo.InvariantCulture);
+                            interaction.When = DateTime.ParseExact(value, "s", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
                         }
                         else if (_eventIdCols.ContainsKey(fieldName))
                         {

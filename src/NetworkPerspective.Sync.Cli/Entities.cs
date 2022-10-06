@@ -166,7 +166,7 @@ namespace NetworkPerspective.Sync.Cli
                         }
                         else if (_changeDateCols.ContainsKey(fieldName))
                         {
-                            entity.ChangeDate = DateTime.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                            entity.ChangeDate = DateTime.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
                         }
                         else if (field.IsJsonField())
                         {

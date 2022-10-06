@@ -2,7 +2,7 @@
   "serviceToken": "sample_token",
   "interactions": [
     {
-      "when": "2021-05-12T12:45:00+02:00",
+      "when": "2021-05-12T12:45:00+00:00",
       "sourceIds": {
         "EmployeeId": "internal"
       },
