@@ -28,6 +28,8 @@ namespace NetworkPerspective.Sync.Application
             services.AddTransient<ITokenService, TokenService>();
             services.AddTransient<ISyncHistoryService, SyncHistoryService>();
 
+            services.AddSingleton<ITasksStatusesCache, TasksStatusesCache>();
+
             return services;
         }
     }

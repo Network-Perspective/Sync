@@ -44,14 +44,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             var clock = new Clock();
 
-            var emailClient = new EmailClient(Mock.Of<IStatusLogger>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
+            var emailClient = new EmailClient(Mock.Of<IStatusLogger>(), Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
 
             var emailLookuptable = new EmployeeCollection(null)
                 .Add(existingEmail);
             var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", emailLookuptable, clock);
 
             // Act
-            var result = await emailClient.GetInteractionsAsync(Guid.NewGuid(), new[] { Employee.CreateInternal(existingEmail, existingEmail, string.Empty, Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
+            var result = await emailClient.GetInteractionsAsync(Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
 
             // Assert
             result.Should().NotBeNullOrEmpty();

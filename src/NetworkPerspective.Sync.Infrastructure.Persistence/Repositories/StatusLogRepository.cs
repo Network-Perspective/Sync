@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 
-using NetworkPerspective.Sync.Application.Domain.StatusLogs;
+using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Exceptions;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Repositories;
 using NetworkPerspective.Sync.Infrastructure.Persistence.Entities;

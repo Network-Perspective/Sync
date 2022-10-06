@@ -15,44 +15,74 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Aggregation;
+using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface IMeetingClient
     {
-        public Task<ISet<Interaction>> GetInteractionsAsync(string userEmail, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        public Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class MeetingClient : IMeetingClient
     {
+        private const string TaskCaption = "Synchronizing callendar interactions";
+        private const string TaskDescription = "Fetching callendar metadata from Google API";
+
         private readonly GoogleConfig _config;
+        private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ILogger<MeetingClient> _logger;
         private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
 
-        public MeetingClient(IOptions<GoogleConfig> config, ILogger<MeetingClient> logger)
+        public MeetingClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILogger<MeetingClient> logger)
         {
             _config = config.Value;
+            _tasksStatusesCache = tasksStatusesCache;
             _logger = logger;
         }
 
-        public async Task<ISet<Interaction>> GetInteractionsAsync(string userEmail, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
-            try
+            var usersCount = users.Count();
+            _logger.LogInformation("Evaluating interactions based on callendar for '{timerange}' for {count} users...", timeRange, usersCount);
+
+            var result = new HashSet<Interaction>(new InteractionEqualityComparer());
+            var processedUsersCount = 0;
+
+            await _tasksStatusesCache.SetStatusAsync(networkId, new SingleTaskStatus(TaskCaption, TaskDescription, 0), stoppingToken);
+
+            foreach (var user in users)
             {
-                return await GetInteractionsInternalAsync(userEmail, timeRange, credentials, interactionFactory, stoppingToken);
+                try
+                {
+                    var interactions = await GetInteractionsInternalAsync(user.Id.PrimaryId, timeRange, credentials, interactionFactory, stoppingToken);
+
+                    var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, (processedUsersCount++ / (double)usersCount) * 100);
+                    await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);
+
+                    result.UnionWith(interactions);
+                }
+                catch (GoogleApiException gaex) when (IndicatesIsNotACalendarUser(gaex))
+                {
+                    _logger.LogDebug("The user is not a calendar user. Skipping meetings interactions for given user");
+                    return ImmutableHashSet<Interaction>.Empty;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Unable to evaluate interactions based on callendar for given user. Please see inner exception\n");
+                    return ImmutableHashSet<Interaction>.Empty;
+                }
             }
-            catch (GoogleApiException gaex) when (IndicatesIsNotACalendarUser(gaex))
-            {
-                _logger.LogDebug("The user is not a calendar user. Skipping meetings interactions for given user");
-                return ImmutableHashSet<Interaction>.Empty;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Unable to evaluate interactions based on callendar for given user. Please see inner exception\n");
-                return ImmutableHashSet<Interaction>.Empty;
-            }
+
+            await _tasksStatusesCache.SetStatusAsync(networkId, new SingleTaskStatus(TaskCaption, TaskDescription, 100), stoppingToken);
+
+            _logger.LogInformation("Evaluation of interactions based on callendar for '{timerange}' completed", timeRange);
+
+            return result;
         }
 
         private async Task<ISet<Interaction>> GetInteractionsInternalAsync(string userEmail, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken)

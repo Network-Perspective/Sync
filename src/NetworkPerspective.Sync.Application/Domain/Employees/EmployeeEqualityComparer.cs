@@ -8,9 +8,9 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         private static readonly IEqualityComparer<string> StringEqualityComparer = StringComparer.InvariantCultureIgnoreCase;
 
         public bool Equals(Employee x, Employee y)
-            => StringEqualityComparer.Equals(x.Email, y.Email) && StringEqualityComparer.Equals(x.SourceInternalId, y.SourceInternalId);
+            => StringEqualityComparer.Equals(x.Id.PrimaryId, y.Id.PrimaryId) && StringEqualityComparer.Equals(x.Id.DataSourceId, y.Id.DataSourceId);
 
         public int GetHashCode(Employee obj)
-            => obj.Email.GetHashCode();
+            => obj.Id.PrimaryId.GetHashCode();
     }
 }

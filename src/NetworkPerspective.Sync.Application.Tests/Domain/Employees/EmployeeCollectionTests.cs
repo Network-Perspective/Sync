@@ -22,20 +22,21 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             const string alias_1 = "email_1_alias_1@networkperspective.io";
             const string alias_2 = "U12345ASD";
 
-            var lookupTable = new EmployeeCollection(null);
-            lookupTable.Add(Employee.CreateInternal(mainEmail, id, string.Empty, Array.Empty<Group>()), new[] { alias_1, alias_2 }.ToHashSet());
+            var employeesCollection = new EmployeeCollection(null);
+            var employeeId = EmployeeId.CreateWithAliases(mainEmail, id, new[] { alias_1, alias_2 });
+            employeesCollection.Add(Employee.CreateInternal(employeeId, Array.Empty<Group>()));
 
             // Act
-            var employee1 = lookupTable.Find(mainEmail);
-            var employee2 = lookupTable.Find(alias_1);
-            var employee3 = lookupTable.Find(alias_2);
-            var employee4 = lookupTable.Find(id);
+            var employee1 = employeesCollection.Find(mainEmail);
+            var employee2 = employeesCollection.Find(alias_1);
+            var employee3 = employeesCollection.Find(alias_2);
+            var employee4 = employeesCollection.Find(id);
 
             // Assert
-            employee1.Email.Should().Be(mainEmail);
-            employee2.Email.Should().Be(mainEmail);
-            employee3.Email.Should().Be(mainEmail);
-            employee4.Email.Should().Be(mainEmail);
+            employee1.Id.PrimaryId.Should().Be(mainEmail);
+            employee2.Id.PrimaryId.Should().Be(mainEmail);
+            employee3.Id.PrimaryId.Should().Be(mainEmail);
+            employee4.Id.PrimaryId.Should().Be(mainEmail);
             employee1.IsExternal.Should().BeFalse();
             employee2.IsExternal.Should().BeFalse();
             employee3.IsExternal.Should().BeFalse();
@@ -54,48 +55,47 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
 
             // Assert
             email.IsExternal.Should().BeTrue();
-            email.Email.Should().Be(unkwnownAlias);
+            email.Id.PrimaryId.Should().Be(unkwnownAlias);
         }
 
         [Fact]
         public void ShouldCorrectlyEvaluteHierarchy()
         {
             // Arrange
-            var ic1 = Employee.CreateInternal("ic1", string.Empty, "manager1", Array.Empty<Group>());
-            var ic2 = Employee.CreateInternal("ic2", string.Empty, "manager1_1", Array.Empty<Group>());
-            var ic3 = Employee.CreateInternal("ic3", string.Empty, "manager2", Array.Empty<Group>());
-            var ic4 = Employee.CreateInternal("ic4", string.Empty, "manager3", Array.Empty<Group>());
-            var ic5 = Employee.CreateInternal("ic5", string.Empty, "director1", Array.Empty<Group>());
+            var ic1 = Employee.CreateInternal(EmployeeId.Create("ic1", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "manager1") }));
+            var ic2 = Employee.CreateInternal(EmployeeId.Create("ic2", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "manager1_1") }));
+            var ic3 = Employee.CreateInternal(EmployeeId.Create("ic3", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "manager2") }));
+            var ic4 = Employee.CreateInternal(EmployeeId.Create("ic4", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "manager3") }));
+            var ic5 = Employee.CreateInternal(EmployeeId.Create("ic5", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "director1") }));
 
-            var manager1 = Employee.CreateInternal("manager1", string.Empty, "director1", Array.Empty<Group>());
-            var manager2 = Employee.CreateInternal("manager2", string.Empty, "director2", Array.Empty<Group>());
-            var manager3 = Employee.CreateInternal("manager3", string.Empty, "board2", Array.Empty<Group>());
+            var manager1 = Employee.CreateInternal(EmployeeId.CreateWithAliases("manager1", string.Empty, new[] { "manager1_1" }), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "director1") }));
+            var manager2 = Employee.CreateInternal(EmployeeId.Create("manager2", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "director2") }));
+            var manager3 = Employee.CreateInternal(EmployeeId.Create("manager3", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "board2") }));
 
-            var director1 = Employee.CreateInternal("director1", string.Empty, "board1", Array.Empty<Group>());
-            var director2 = Employee.CreateInternal("director2", string.Empty, "board1", Array.Empty<Group>());
+            var director1 = Employee.CreateInternal(EmployeeId.Create("director1", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "board1") }));
+            var director2 = Employee.CreateInternal(EmployeeId.Create("director2", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, "board1") }));
 
-            var board1 = Employee.CreateInternal("board1", string.Empty, null, Array.Empty<Group>());
-            var board2 = Employee.CreateInternal("board2", string.Empty, null, Array.Empty<Group>());
+            var board1 = Employee.CreateInternal(EmployeeId.Create("board1", string.Empty), Array.Empty<Group>(), null, RelationsCollection.Empty);
+            var board2 = Employee.CreateInternal(EmployeeId.Create("board2", string.Empty), Array.Empty<Group>(), null, RelationsCollection.Empty);
 
             var employeesCollection = new EmployeeCollection(null);
-            employeesCollection.Add(ic1, Array.Empty<string>().ToHashSet());
-            employeesCollection.Add(ic2, Array.Empty<string>().ToHashSet());
-            employeesCollection.Add(ic3, Array.Empty<string>().ToHashSet());
-            employeesCollection.Add(ic4, Array.Empty<string>().ToHashSet());
-            employeesCollection.Add(ic5, Array.Empty<string>().ToHashSet());
-
-            employeesCollection.Add(manager1, new[] { "manager1_1" }.ToHashSet());
-            employeesCollection.Add(manager2, Array.Empty<string>().ToHashSet());
-            employeesCollection.Add(manager3, Array.Empty<string>().ToHashSet());
-
-            employeesCollection.Add(director1, Array.Empty<string>().ToHashSet());
-            employeesCollection.Add(director2, Array.Empty<string>().ToHashSet());
-
-            employeesCollection.Add(board1, Array.Empty<string>().ToHashSet());
-            employeesCollection.Add(board2, Array.Empty<string>().ToHashSet());
 
             // Act
-            employeesCollection.EvaluateHierarchy();
+            employeesCollection.Add(ic1);
+            employeesCollection.Add(ic2);
+            employeesCollection.Add(ic3);
+            employeesCollection.Add(ic4);
+            employeesCollection.Add(ic5);
+
+            employeesCollection.Add(manager1);
+            employeesCollection.Add(manager2);
+            employeesCollection.Add(manager3);
+
+            employeesCollection.Add(director1);
+            employeesCollection.Add(director2);
+
+            employeesCollection.Add(board1);
+            employeesCollection.Add(board2);
 
             // Assert
             ic1.Props["Hierarchy"].Should().Be(EmployeeHierarchy.IndividualContributor);

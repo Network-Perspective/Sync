@@ -1,4 +1,4 @@
-﻿namespace NetworkPerspective.Sync.Application.Domain.StatusLogs
+﻿namespace NetworkPerspective.Sync.Application.Domain.Statuses
 {
     public enum StatusLogLevel
     {

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using Google.Apis.Admin.Directory.directory_v1.Data;
 
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
@@ -17,9 +17,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
     {
         private readonly ICompanyStructureService _companyStructureService;
         private readonly ICustomAttributesService _customAttributesService;
-        private readonly Func<string, string> _hashFunc;
+        private readonly HashFunction _hashFunc;
 
-        public HashedEmployeesMapper(ICompanyStructureService companyStructureService, ICustomAttributesService customAttributesService, Func<string, string> hashFunc)
+        public HashedEmployeesMapper(ICompanyStructureService companyStructureService, ICustomAttributesService customAttributesService, HashFunction hashFunc)
         {
             _companyStructureService = companyStructureService;
             _customAttributesService = customAttributesService;
@@ -35,17 +35,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
 
             foreach (var user in users)
             {
-                var managerEmail = user.GetManagerEmail();
-
                 var customAttr = user.GetCustomAttrs();
 
                 var employeeGroups = GetEmployeeGroups(user, organizationGroups);
                 var employeeProps = GetEmployeeProps(user);
+                var employeeRelations = GetEmployeeRelations(user);
 
-                var employee = Employee.CreateInternal(user.PrimaryEmail, user.Id, managerEmail, employeeGroups, employeeProps);
                 var employeeAliases = user.Emails.Select(x => x.Address).ToHashSet();
+                var employeeId = EmployeeId.CreateWithAliases(user.PrimaryEmail, user.Id, employeeAliases);
+                var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations);
 
-                employees.Add(employee, employeeAliases);
+                employees.Add(employee);
             }
 
             return employees;
@@ -72,6 +72,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
             var props = _customAttributesService.GetPropsForHashedEmployee(user.GetCustomAttrs());
 
             return props;
+        }
+
+        private RelationsCollection GetEmployeeRelations(User user)
+        {
+            var customAttrs = user.GetCustomAttrs();
+
+            var relations = _customAttributesService.GetRelations(customAttrs);
+
+            var managerEmail = user.GetManagerEmail();
+
+            if (!string.IsNullOrEmpty(managerEmail))
+                relations.Add(Relation.Create(Employee.SupervisorRelationName, managerEmail));
+
+            return new RelationsCollection(relations);
         }
     }
 }

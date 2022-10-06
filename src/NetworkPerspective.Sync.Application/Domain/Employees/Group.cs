@@ -32,7 +32,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public static Group CreateWithParentId(string id, string name, string category, string parentId)
             => new Group(id, name, category, parentId, false);
 
-        public Group Hash(Func<string, string> hashFunc)
+        public Group Hash(HashFunction hashFunc)
         {
             if (IsHashed)
                 throw new InvalidOperationException("Group is already hashed. Hashing twice is just silly... isn't it?");
