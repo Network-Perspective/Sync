@@ -1,0 +1,19 @@
+{
+  "serviceToken": "sample_token",
+  "interactions": [
+    {
+      "when": "2021-05-12T12:45:00+02:00",
+      "sourceIds": {
+        "EmployeeId": "internal"
+      },
+      "targetIds": {
+        "EmployeeId": "hash1"
+      },
+      "eventId": "event4",
+      "durationMinutes": 30,
+      "label": [
+        "Meeting"
+      ]
+    }
+  ]
+}

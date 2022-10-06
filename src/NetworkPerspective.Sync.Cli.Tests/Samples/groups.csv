@@ -1,0 +1,4 @@
+Code	Name	Category	ParentCode
+hash1	Pion CEO	Division	
+hash2	Biuro Analiz	Unit	hash1
+hash3	Biuro Zarządu	Unit	hash1

@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="output\**" />
+    <EmbeddedResource Remove="output\**" />
+    <None Remove="output\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Connector.cs" />
+    <Compile Remove="CryptoExtensions.cs" />
+    <Compile Remove="LegacyInteractions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Colors.Net" Version="1.1.0" />
+    <PackageReference Include="CsvHelper" Version="28.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="6.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="PowerArgs" Version="3.6.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="17.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Core\NetworkPerspective.Sync.Infrastructure.Core.csproj" />
+  </ItemGroup>
+
+</Project>

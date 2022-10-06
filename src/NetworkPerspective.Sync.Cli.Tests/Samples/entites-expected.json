@@ -1,0 +1,54 @@
+{
+  "serviceToken": "sample_token",
+  "entites": [
+    {
+      "changeDate": "2021-05-01T00:00:00",
+      "ids": {
+        "EmployeeId": "eid1"
+      },
+      "props": {
+        "Sex": "M",
+        "Kpi1": "8",
+        "EmploymentDate": "2006-04-30"
+      }
+    },
+    {
+      "changeDate": "2021-05-01T00:00:00",
+      "ids": {
+        "EmployeeId": "eid2"
+      },
+      "props": {
+        "Sex": "F",
+        "Kpi1": "2",
+        "EmploymentDate": "1998-12-14"
+      },
+      "relationships": [
+        {
+          "relationshipName": "Supervisor",
+          "targetIds": {
+            "EmployeeId": "eid1"
+          }
+        }
+      ]
+    },
+    {
+      "changeDate": "2021-05-01T00:00:00",
+      "ids": {
+        "EmployeeId": "eid3"
+      },
+      "props": {
+        "Sex": "M",
+        "Kpi1": "3",
+        "EmploymentDate": "1995-11-30"
+      },
+      "relationships": [
+        {
+          "relationshipName": "Supervisor",
+          "targetIds": {
+            "EmployeeId": "eid2"
+          }
+        }
+      ]
+    }
+  ]
+}
