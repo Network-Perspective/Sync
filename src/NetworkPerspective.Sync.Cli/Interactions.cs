@@ -42,6 +42,9 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("Text file delimiter (Default = tab delimited)"), DefaultValue("\t")]
         public string CsvDelimiter { get; set; }
 
+        [ArgDescription("New line delimiter (Default = Environment.NewLine)")]
+        public string CsvNewLine { get; set; }
+
         [ArgDescription("SourceId column (IdProperty)"), ArgRequired, DefaultValue("From (EmployeeId)")]
         public string FromCol { get; set; }
 
@@ -63,7 +66,7 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("Duration column name"), ArgRequired, DefaultValue("Duration")]
         public string DurationCol { get; set; }
 
-        [ArgDescription("One of (Chat, Email)"), ArgRequired]
+        [ArgDescription("One of (Chat, Email, Meeting)"), ArgRequired]
         public string DataSourceType { get; set; }
 
         [ArgDescription("Split requests into batches of specified number of interactions"), ArgRequired, DefaultValue(100000)]
@@ -162,7 +165,7 @@ namespace NetworkPerspective.Sync.Cli
                 reader = args.Csv != null ? _fileSystem.File.OpenText(args.Csv) : Console.In;
                 var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
                 {
-                    NewLine = Environment.NewLine,
+                    NewLine = args.CsvNewLine ?? Environment.NewLine,
                     HasHeaderRecord = true,
                     Delimiter = args.CsvDelimiter,
                 };

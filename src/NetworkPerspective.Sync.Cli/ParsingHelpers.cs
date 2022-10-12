@@ -77,19 +77,31 @@ namespace NetworkPerspective.Sync.Cli
 
         public static DateTime AsUtcDate(this string value, string? timeZoneId = null)
         {
-            DateTime parsed;
+            DateTime parsed = default(DateTime);
 
             // guess the format 
-            if (!DateTime.TryParseExact(value, "s", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out parsed))
+            DateTime.TryParseExact(value, "s", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out parsed);
+            if (parsed == default(DateTime))
             {
-                parsed = DateTime.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+                DateTime.TryParseExact(value, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out parsed);
             }
+            if (parsed == default(DateTime))
+            {
+                DateTime.TryParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out parsed);
+            }
+
+            if (parsed == default(DateTime))
+            {
+                throw new ArgumentException($"Cannot parse timestamp '{value}'");
+            }
+
+            // apply time zone shift
             if (timeZoneId == null)
             {
                 return parsed;
             }
             
-            TimeZoneInfo convFrom = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            TimeZoneInfo convFrom = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);            
             var offset = convFrom.GetUtcOffset(parsed);
             return parsed.Add(-offset);
         }
