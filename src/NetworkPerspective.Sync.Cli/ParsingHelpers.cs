@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,6 +73,25 @@ namespace NetworkPerspective.Sync.Cli
         public static bool IsJsonField(this ColumnDescriptor field)
         {
             return field.InSquareBrackets != null && field.InSquareBrackets.Contains("json", StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public static DateTime AsUtcDate(this string value, string? timeZoneId = null)
+        {
+            DateTime parsed;
+
+            // guess the format 
+            if (!DateTime.TryParseExact(value, "s", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out parsed))
+            {
+                parsed = DateTime.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+            }
+            if (timeZoneId == null)
+            {
+                return parsed;
+            }
+            
+            TimeZoneInfo convFrom = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            var offset = convFrom.GetUtcOffset(parsed);
+            return parsed.Add(-offset);
         }
     }
 }

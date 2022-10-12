@@ -51,6 +51,9 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("Timestamp column name"), ArgRequired, DefaultValue("When")]
         public string WhenCol { get; set; }
 
+        [ArgDescription("Timestamp timezone (see TimeZoneInfo.FindSystemTimeZoneById)"), ArgRequired, DefaultValue("Central European Standard Time")]
+        public string TimeZone { get; set; }
+
         [ArgDescription("EventId column name"), ArgRequired, DefaultValue("EventId")]
         public string EventIdCol { get; set; }
 
@@ -206,7 +209,7 @@ namespace NetworkPerspective.Sync.Cli
                         }
                         else if (_whenCols.ContainsKey(fieldName))
                         {
-                            interaction.When = DateTime.ParseExact(value, "s", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+                            interaction.When = value.AsUtcDate(args.TimeZone);
                         }
                         else if (_eventIdCols.ContainsKey(fieldName))
                         {

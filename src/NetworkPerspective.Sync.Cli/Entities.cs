@@ -42,6 +42,9 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("Change date columns (comma seperated)"), DefaultValue("RowDate,ChangeDate")]
         public string ChangeDateColumns { get; set; }
 
+        [ArgDescription("Timestamp timezone (see TimeZoneInfo.FindSystemTimeZoneById)"), ArgRequired, DefaultValue("Central European Standard Time")]
+        public string TimeZone { get; set; }
+
         [ArgDescription("Run in debug mode - save request to file DebugFn, but do not send it to remote service")]
         public string DebugFn { get; set; }
     }
@@ -80,7 +83,7 @@ namespace NetworkPerspective.Sync.Cli
             var timer = Stopwatch.StartNew();
 
             // read the CSV (tab separated by default)            
-            var entities = ReadCsvEntries(args.Csv, args.CsvDelimiter);
+            var entities = ReadCsvEntries(args);
 
             var request = new SyncHashedEntitesCommand()
             {
@@ -109,7 +112,7 @@ namespace NetworkPerspective.Sync.Cli
             }
         }
 
-        private List<HashedEntity> ReadCsvEntries(string? fileName, string delimiter)
+        private List<HashedEntity> ReadCsvEntries(EntitiesOpts args)
         {
             ColoredConsole.WriteLine($"Reading CSV...");
             var entities = new List<HashedEntity>();
@@ -117,12 +120,12 @@ namespace NetworkPerspective.Sync.Cli
             TextReader? reader = null;
             try
             {
-                reader = fileName != null ? _fileSystem.File.OpenText(fileName) : Console.In;
+                reader = args.Csv != null ? _fileSystem.File.OpenText(args.Csv) : Console.In;
                 var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
                 {
                     NewLine = Environment.NewLine,
                     HasHeaderRecord = true,
-                    Delimiter = delimiter,
+                    Delimiter = args.CsvDelimiter,
                 };
                 var csv = new CsvReader(reader, csvConfig);
 
@@ -166,7 +169,7 @@ namespace NetworkPerspective.Sync.Cli
                         }
                         else if (_changeDateCols.ContainsKey(fieldName))
                         {
-                            entity.ChangeDate = DateTime.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+                            entity.ChangeDate = value.AsUtcDate(args.TimeZone); 
                         }
                         else if (field.IsJsonField())
                         {
@@ -182,7 +185,7 @@ namespace NetworkPerspective.Sync.Cli
             }
             finally
             {
-                if (fileName != null) reader?.Dispose();
+                if (args.Csv != null) reader?.Dispose();
             }
             return entities;
         }
