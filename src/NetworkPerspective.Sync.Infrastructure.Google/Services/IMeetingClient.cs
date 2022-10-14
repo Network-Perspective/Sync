@@ -69,12 +69,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 catch (GoogleApiException gaex) when (IndicatesIsNotACalendarUser(gaex))
                 {
                     _logger.LogDebug("The user is not a calendar user. Skipping meetings interactions for given user");
-                    return ImmutableHashSet<Interaction>.Empty;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Unable to evaluate interactions based on callendar for given user. Please see inner exception\n");
-                    return ImmutableHashSet<Interaction>.Empty;
                 }
             }
 
