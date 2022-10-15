@@ -10,5 +10,6 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Persistence.Reposit
     {
         Task<SyncHistoryEntry> FindLastLogAsync(Guid networkId, CancellationToken cancellationToken = default);
         Task AddAsync(SyncHistoryEntry log, CancellationToken cancellationToken = default);
+        Task RemoveAllAsync(Guid networkId, CancellationToken cancellationToken = default);
     }
 }
