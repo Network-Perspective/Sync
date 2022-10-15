@@ -67,7 +67,7 @@ namespace NetworkPerspective.Sync.Application.Services
             var employees = await _dataSource.GetHashedEmployees(context, stoppingToken);
             await _statusLogger.LogInfoAsync(context.NetworkId, $"Received hashed employees profiles", stoppingToken);
 
-            await _networkPerspectiveCore.PushEntitiesAsync(context.AccessToken, employees, stoppingToken);
+            await _networkPerspectiveCore.PushEntitiesAsync(context.AccessToken, employees, context.Since, stoppingToken);
             await _statusLogger.LogInfoAsync(context.NetworkId, $"Uploaded hashed profiles", stoppingToken);
 
             _logger.LogInformation("Sync entities for network '{networkId}' completed", context.NetworkId);
