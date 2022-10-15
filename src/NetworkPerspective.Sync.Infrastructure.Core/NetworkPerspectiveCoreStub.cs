@@ -31,7 +31,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
             return Task.FromResult(new NetworkConfig(EmailFilter.Empty, customAttributes));
         }
 
-        public async Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, CancellationToken stoppingToken = default)
+        public async Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, DateTime changeDate, CancellationToken stoppingToken = default)
         {
             try
             {
@@ -39,7 +39,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
 
                 foreach (var employee in employees.GetAllInternal())
                 {
-                    var entity = EntitiesMapper.ToEntity(employee, employees, "test");
+                    var entity = EntitiesMapper.ToEntity(employee, employees, changeDate, "test");
                     entities.Add(entity);
                 }
 

@@ -100,7 +100,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             }
         }
 
-        public async Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, CancellationToken stoppingToken = default)
+        public async Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, DateTime changeDate, CancellationToken stoppingToken = default)
         {
             try
             {
@@ -112,7 +112,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
                 foreach (var employee in employeesList)
                 {
-                    var entity = EntitiesMapper.ToEntity(employee, employees, _npCoreConfig.DataSourceIdName);
+                    var entity = EntitiesMapper.ToEntity(employee, employees, changeDate, _npCoreConfig.DataSourceIdName);
                     entities.Add(entity);
                 }
 

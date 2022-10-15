@@ -25,7 +25,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
             var employee = Employee.CreateInternal(EmployeeId.Create("foo", "bar"), Array.Empty<Group>(), props);
 
             // Act
-            var result = EntitiesMapper.ToEntity(employee, null, "test");
+            var result = EntitiesMapper.ToEntity(employee, null, DateTime.UtcNow, "test");
 
             // Assert
             result.Props.Should().NotContainKey(Employee.PropKeyName);
@@ -52,7 +52,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
             allEmployees.Add(manager);
 
             // Act
-            var result = EntitiesMapper.ToEntity(employee, allEmployees, dataSourceId);
+            var result = EntitiesMapper.ToEntity(employee, allEmployees, DateTime.UtcNow, dataSourceId);
 
             // Assert
             var managerId = new Dictionary<string, string>
@@ -62,6 +62,24 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
             };
             var expectedRelations = new[] { new HashedEntityRelationship { RelationshipName = Employee.SupervisorRelationName, TargetIds = managerId } };
             result.Relationships.Should().BeEquivalentTo(expectedRelations);
+        }
+
+        [Fact]
+        public void ShouldSetProperChangeDate()
+        {
+            // Arrange
+            var changeDate = DateTime.UtcNow;
+
+            var employee = Employee.CreateInternal(EmployeeId.Create("foo", "bar"), Array.Empty<Group>(), null, RelationsCollection.Empty);
+
+            var allEmployees = new EmployeeCollection(null);
+            allEmployees.Add(employee);
+
+            // Act
+            var result = EntitiesMapper.ToEntity(employee, allEmployees, changeDate, "test");
+
+            // Assert
+            result.ChangeDate.Should().Be(changeDate);
         }
     }
 }
