@@ -54,5 +54,22 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
                 throw new DbException(ex);
             }
         }
+
+        public async Task RemoveAllAsync(Guid networkId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var entity = await _dbSet
+                     .Where(x => x.Network.Id == networkId)
+                     .ToListAsync(cancellationToken);
+
+                _dbSet
+                    .RemoveRange(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new DbException(ex);
+            }
+        }
     }
 }
