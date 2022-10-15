@@ -8,7 +8,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
 {
     internal static class EntitiesMapper
     {
-        public static HashedEntity ToEntity(Employee employee, EmployeeCollection employees, string dataSourceIdName)
+        public static HashedEntity ToEntity(Employee employee, EmployeeCollection employees, DateTime changeDate, string dataSourceIdName)
         {
             var props = employee.Props.Any()
                 ? employee.Props.ToDictionary(x => x.Key, y => y.Value)
@@ -35,7 +35,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
                 Props = props,
                 Groups = employee.Groups.Select(x => x.Id).ToList(),
                 Relationships = ToRelationships(employee, employees, dataSourceIdName),
-                ChangeDate = DateTimeOffset.UtcNow
+                ChangeDate = changeDate
             };
         }
 
