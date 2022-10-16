@@ -36,6 +36,12 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("Identifier columns (comma seperated)"), ArgRequired, DefaultValue("Email,EmployeeId,Username,Domain\\User")]
         public string IdColumns { get; set; }
 
+        [ArgDescription("Prop columns (comma seperated)")]
+        public string PropColumns { get; set; }
+
+        [ArgDescription("Group columns (comma seperated)")]
+        public string GroupColumns { get; set; }
+
         [ArgDescription("Relationship columns (comma seperated, target id prop in bracket)"), DefaultValue("Supervisor (EmployeeId)")]
         public string RealtionshipColumns { get; set; }
 
@@ -53,6 +59,8 @@ namespace NetworkPerspective.Sync.Cli
     public class EntitiesClient
     {
         private Dictionary<string, ColumnDescriptor> _idCols = new Dictionary<string, ColumnDescriptor>();
+        private Dictionary<string, ColumnDescriptor> _propCols = new Dictionary<string, ColumnDescriptor>();
+        private Dictionary<string, ColumnDescriptor> _groupsCols = new Dictionary<string, ColumnDescriptor>();
         private Dictionary<string, ColumnDescriptor> _relationshipCols = new Dictionary<string, ColumnDescriptor>();
         private Dictionary<string, ColumnDescriptor> _changeDateCols = new Dictionary<string, ColumnDescriptor>();
 
@@ -77,6 +85,8 @@ namespace NetworkPerspective.Sync.Cli
             }
 
             _idCols = args.IdColumns.AsColumnDescriptorDictionary();
+            _propCols = args.PropColumns.AsColumnDescriptorDictionary();
+            _groupsCols = args.GroupColumns.AsColumnDescriptorDictionary();
             _relationshipCols = args.RealtionshipColumns.AsColumnDescriptorDictionary();
             _changeDateCols = args.ChangeDateColumns.AsColumnDescriptorDictionary();
 
@@ -169,15 +179,34 @@ namespace NetworkPerspective.Sync.Cli
                         }
                         else if (_changeDateCols.ContainsKey(fieldName))
                         {
-                            entity.ChangeDate = value.AsUtcDate(args.TimeZone); 
+                            entity.ChangeDate = value.AsUtcDate(args.TimeZone);
                         }
-                        else if (field.IsJsonField())
+                        else if (_propCols.ContainsKey(fieldName))
                         {
-                            entity.Props[fieldName] = value == null ? null : JsonConvert.DeserializeObject(value);
-                        }
-                        else
+                            if (field.IsJsonField())
+                                entity.Props[fieldName] = value == null ? null : JsonConvert.DeserializeObject(value);
+                            else
+                                entity.Props[fieldName] = value;
+                        } 
+                        else if (_groupsCols.ContainsKey(fieldName))
                         {
-                            entity.Props[fieldName] = value;
+                            entity.Groups ??= new List<string>();
+                            if (field.IsJsonField())
+                            {
+                                var list = JsonConvert.DeserializeObject<List<string>>(value);
+                                if (list != null)
+                                {
+                                    foreach (var item in list)
+                                    {
+                                        entity.Groups.Add(item);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                entity.Groups.Add(value);
+                            }
+
                         }
                     }
                     entities.Add(entity);

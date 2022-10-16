@@ -30,7 +30,9 @@ namespace NetworkPerspective.Sync.Cli.Tests
                 IdColumns = "EmployeeId",
                 CsvDelimiter = "\t",
                 RealtionshipColumns = "Supervisor (EmployeeId)",
-                ChangeDateColumns = "RowDate"
+                ChangeDateColumns = "RowDate",
+                PropColumns = "Sex,Kpi1,EmploymentDate",
+                GroupColumns = ""
             };
 
             // Act
