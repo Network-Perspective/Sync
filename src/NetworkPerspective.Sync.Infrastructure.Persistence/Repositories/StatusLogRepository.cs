@@ -42,7 +42,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
 
             try
             {
-
                 var entities = await _dbSet
                     .Where(x => x.NetworkId == networkId)
                     .OrderByDescending(x => x.TimeStamp)

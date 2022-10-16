@@ -74,6 +74,36 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             result.Should().Be(now.AddDays(-configLookbackInDays));
         }
 
+        [Fact]
+        public async Task ShouldOverrideSyncStart()
+        {
+            // Arrange
+            var syncStart = DateTime.UtcNow;
+            var syncEnd = DateTime.UtcNow.AddDays(1);
+            var networkId = Guid.NewGuid();
+            var overridenSyncStart = new DateTime(2020, 01, 01);
+
+            var record = new SyncHistoryEntry(networkId, DateTime.UtcNow, new TimeRange(syncStart, syncEnd));
+
+            var unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+            using var unitOfWork = unitOfWorkFactory.Create();
+
+            var networkRepository = unitOfWork.GetNetworkRepository<TestableNetworkProperties>();
+            await networkRepository.AddAsync(Network<TestableNetworkProperties>.Create(networkId, new TestableNetworkProperties(), DateTime.UtcNow));
+            await unitOfWork.CommitAsync();
+
+            var service = new SyncHistoryService(unitOfWork, new Clock(), CreateOptions(1), NullLogger);
+            await service.SaveLogAsync(record);
+
+            await service.OverrideSyncStartAsync(networkId, overridenSyncStart);
+
+            // Act
+            var result = await service.EvaluateSyncStartAsync(networkId);
+
+            // Aseert
+            result.Should().Be(overridenSyncStart);
+        }
+
         private IOptions<SyncConfig> CreateOptions(int defaultSyncLookbackInDays)
             => Options.Create(new SyncConfig { DefaultSyncLookbackInDays = defaultSyncLookbackInDays });
     }
