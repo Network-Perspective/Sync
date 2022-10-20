@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -43,7 +42,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IClock _clock;
-        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
         public EmailClient(IStatusLogger statusService, ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILoggerFactory loggerFactory, IClock clock)
         {
@@ -57,48 +55,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
         public async Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
-            var usersCount = users.Count();
-            var processedUsersCount = 0;
             var maxMessagesCountPerUser = CalculateMaxMessagesCount(startDate);
 
-            async Task IncreaseProcessedUserCount()
+            async Task ReportProgressCallbackAsync(double progressRate)
             {
-                try
-                {
-                    await _semaphore.WaitAsync(stoppingToken);
-                    var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, (processedUsersCount++ / (double)usersCount) * 100);
-                    await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);
-                }
-                finally
-                {
-                    _semaphore.Release();
-
-                }
+                var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, progressRate);
+                await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);
             }
 
-            _logger.LogInformation("Evaluating interactions based on mailbox since {timestamp} for {count} users...", startDate, usersCount);
+            Task<ISet<Interaction>> SingleTaskAsync(string userEmail)
+                => GetSingleUserInteractionsAsync(networkId, userEmail, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
 
-            var result = new HashSet<Interaction>(new InteractionEqualityComparer());
+            _logger.LogInformation("Evaluating interactions based on mailbox since {timestamp} for {count} users...", startDate, users.Count());
 
-            await _tasksStatusesCache.SetStatusAsync(networkId, new SingleTaskStatus(TaskCaption, TaskDescription, 0), stoppingToken);
-
-            var interactionsBag = new ConcurrentBag<ISet<Interaction>>();
-
-            var parallelOptions = new ParallelOptions { CancellationToken = stoppingToken };
-
-            await Parallel.ForEachAsync(users, parallelOptions, async (user, stoppingToken) =>
-            {
-                var interactions = await GetSingleUserInteractionsAsync(networkId, user.Id.PrimaryId, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
-
-                await IncreaseProcessedUserCount();
-
-                interactionsBag.Add(interactions);
-            });
-            
-            while(interactionsBag.TryTake(out var set))
-                result.UnionWith(set);
-
-            await _tasksStatusesCache.SetStatusAsync(networkId, new SingleTaskStatus(TaskCaption, TaskDescription, 100), stoppingToken);
+            var userEmails = users.Select(x => x.Id.PrimaryId);
+            var result = await ParallelFetcher.FetchAsync(userEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
 
             _logger.LogInformation("Evaluation of interactions based on mailbox since '{timestamp}' completed", startDate);
 
