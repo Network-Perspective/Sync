@@ -49,7 +49,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var credentialsProvider = new CredentialsProvider(secretRepository);
             var mailboxClient = new MailboxClient(_statusLogger, _tasksStatusesCache, _googleConfig, _loggerFactory, _clock);
-            var meetingsClient = new MeetingClient(_tasksStatusesCache, _googleConfig, _loggerFactory.CreateLogger<MeetingClient>());
+            var meetingsClient = new CalendarClient(_tasksStatusesCache, _googleConfig, _loggerFactory.CreateLogger<CalendarClient>());
             var employeeCriterias = new[] { new NonServiceUserCriteria(_loggerFactory.CreateLogger<NonServiceUserCriteria>()) };
             var employeeProfileClient = new UsersClient(_tasksStatusesCache, _googleConfig, employeeCriterias, _loggerFactory.CreateLogger<UsersClient>());
 

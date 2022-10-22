@@ -27,7 +27,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         private readonly ISecretRepository _secretRepository;
         private readonly ICredentialsProvider _credentialsProvider;
         private readonly IMailboxClient _mailboxClient;
-        private readonly IMeetingClient _meetingClient;
+        private readonly ICalendarClient _calendarClient;
         private readonly IUsersClient _usersClient;
         private readonly IHashingServiceFactory _hashingServiceFactory;
         private readonly IClock _clock;
@@ -38,7 +38,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
                             ISecretRepository secretRepository,
                             ICredentialsProvider credentialsProvider,
                             IMailboxClient mailboxClient,
-                            IMeetingClient meetingClient,
+                            ICalendarClient calendarClient,
                             IUsersClient usersClient,
                             IHashingServiceFactory hashingServiceFactory,
                             IClock clock,
@@ -49,7 +49,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _secretRepository = secretRepository;
             _credentialsProvider = credentialsProvider;
             _mailboxClient = mailboxClient;
-            _meetingClient = meetingClient;
+            _calendarClient = calendarClient;
             _usersClient = usersClient;
             _hashingServiceFactory = hashingServiceFactory;
             _clock = clock;
@@ -84,7 +84,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var emailInteractions = context.Get<ISet<Interaction>>();
             result.UnionWith(emailInteractions.Where(x => context.CurrentRange.IsInRange(x.Timestamp)));
 
-            var meetingInteractions = await _meetingClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, interactionFactory, stoppingToken);
+            var meetingInteractions = await _calendarClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, interactionFactory, stoppingToken);
             result.UnionWith(meetingInteractions);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);

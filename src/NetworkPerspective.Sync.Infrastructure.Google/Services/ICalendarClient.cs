@@ -23,22 +23,22 @@ using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
-    internal interface IMeetingClient
+    internal interface ICalendarClient
     {
         public Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
-    internal sealed class MeetingClient : IMeetingClient
+    internal sealed class CalendarClient : ICalendarClient
     {
         private const string TaskCaption = "Synchronizing callendar interactions";
         private const string TaskDescription = "Fetching callendar metadata from Google API";
 
         private readonly GoogleConfig _config;
         private readonly ITasksStatusesCache _tasksStatusesCache;
-        private readonly ILogger<MeetingClient> _logger;
+        private readonly ILogger<CalendarClient> _logger;
         private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
 
-        public MeetingClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILogger<MeetingClient> logger)
+        public CalendarClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILogger<CalendarClient> logger)
         {
             _config = config.Value;
             _tasksStatusesCache = tasksStatusesCache;

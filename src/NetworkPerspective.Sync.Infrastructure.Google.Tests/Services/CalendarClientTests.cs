@@ -20,11 +20,11 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 {
-    public class MeetingClientTests : IClassFixture<GoogleClientFixture>
+    public class CalendarClientTests : IClassFixture<GoogleClientFixture>
     {
         private readonly GoogleClientFixture _googleClientFixture;
 
-        public MeetingClientTests(GoogleClientFixture googleClientFixture)
+        public CalendarClientTests(GoogleClientFixture googleClientFixture)
         {
             _googleClientFixture = googleClientFixture;
         }
@@ -41,7 +41,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
                 ApplicationName = "gmail_app",
             };
 
-            var client = new MeetingClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLogger<MeetingClient>.Instance);
+            var client = new CalendarClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLogger<CalendarClient>.Instance);
             var timeRange = new TimeRange(DateTime.MinValue, DateTime.MaxValue);
 
             var emailLookuptable = new EmployeeCollection(null)
