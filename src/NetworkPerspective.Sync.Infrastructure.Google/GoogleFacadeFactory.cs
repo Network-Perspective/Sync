@@ -48,12 +48,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId, stoppingToken);
 
             var credentialsProvider = new CredentialsProvider(secretRepository);
-            var emailClient = new EmailClient(_statusLogger, _tasksStatusesCache, _googleConfig, _loggerFactory, _clock);
-            var meetingsClient = new MeetingClient(_tasksStatusesCache, _googleConfig, _loggerFactory.CreateLogger<MeetingClient>());
+            var mailboxClient = new MailboxClient(_statusLogger, _tasksStatusesCache, _googleConfig, _loggerFactory, _clock);
+            var meetingsClient = new CalendarClient(_tasksStatusesCache, _googleConfig, _loggerFactory.CreateLogger<CalendarClient>());
             var employeeCriterias = new[] { new NonServiceUserCriteria(_loggerFactory.CreateLogger<NonServiceUserCriteria>()) };
             var employeeProfileClient = new UsersClient(_tasksStatusesCache, _googleConfig, employeeCriterias, _loggerFactory.CreateLogger<UsersClient>());
 
-            return new GoogleFacade(_networkService, secretRepository, credentialsProvider, emailClient, meetingsClient, employeeProfileClient, _hashingServiceFactory, _clock, _googleConfig, _loggerFactory.CreateLogger<GoogleFacade>());
+            return new GoogleFacade(_networkService, secretRepository, credentialsProvider, mailboxClient, meetingsClient, employeeProfileClient, _hashingServiceFactory, _clock, _googleConfig, _loggerFactory.CreateLogger<GoogleFacade>());
         }
     }
 }

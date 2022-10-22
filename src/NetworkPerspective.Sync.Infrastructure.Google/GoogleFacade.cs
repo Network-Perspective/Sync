@@ -26,8 +26,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         private readonly INetworkService _networkService;
         private readonly ISecretRepository _secretRepository;
         private readonly ICredentialsProvider _credentialsProvider;
-        private readonly IEmailClient _emailClient;
-        private readonly IMeetingClient _meetingClient;
+        private readonly IMailboxClient _mailboxClient;
+        private readonly ICalendarClient _calendarClient;
         private readonly IUsersClient _usersClient;
         private readonly IHashingServiceFactory _hashingServiceFactory;
         private readonly IClock _clock;
@@ -37,8 +37,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         public GoogleFacade(INetworkService networkService,
                             ISecretRepository secretRepository,
                             ICredentialsProvider credentialsProvider,
-                            IEmailClient emailClient,
-                            IMeetingClient meetingClient,
+                            IMailboxClient mailboxClient,
+                            ICalendarClient calendarClient,
                             IUsersClient usersClient,
                             IHashingServiceFactory hashingServiceFactory,
                             IClock clock,
@@ -48,8 +48,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _networkService = networkService;
             _secretRepository = secretRepository;
             _credentialsProvider = credentialsProvider;
-            _emailClient = emailClient;
-            _meetingClient = meetingClient;
+            _mailboxClient = mailboxClient;
+            _calendarClient = calendarClient;
             _usersClient = usersClient;
             _hashingServiceFactory = hashingServiceFactory;
             _clock = clock;
@@ -79,12 +79,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var periodStart = context.CurrentRange.Start.AddMinutes(-_config.SyncOverlapInMinutes);
             _logger.LogInformation("To not miss any email interactions period start is extended by {minutes}min. As result mailbox interactions are eveluated starting from {start}", _config.SyncOverlapInMinutes, periodStart);
 
-            await InitializeInContext(context, () => _emailClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, interactionFactory, stoppingToken));
+            await InitializeInContext(context, () => _mailboxClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, interactionFactory, stoppingToken));
 
             var emailInteractions = context.Get<ISet<Interaction>>();
             result.UnionWith(emailInteractions.Where(x => context.CurrentRange.IsInRange(x.Timestamp)));
 
-            var meetingInteractions = await _meetingClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, interactionFactory, stoppingToken);
+            var meetingInteractions = await _calendarClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, interactionFactory, stoppingToken);
             result.UnionWith(meetingInteractions);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
