@@ -47,80 +47,77 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
         public async Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
-            var usersCount = users.Count();
-            _logger.LogInformation("Evaluating interactions based on callendar for '{timerange}' for {count} users...", timeRange, usersCount);
-
-            var result = new HashSet<Interaction>(new InteractionEqualityComparer());
-            var processedUsersCount = 0;
-
-            await _tasksStatusesCache.SetStatusAsync(networkId, new SingleTaskStatus(TaskCaption, TaskDescription, 0), stoppingToken);
-
-            foreach (var user in users)
+            async Task ReportProgressCallbackAsync(double progressRate)
             {
-                try
-                {
-                    var interactions = await GetInteractionsInternalAsync(user.Id.PrimaryId, timeRange, credentials, interactionFactory, stoppingToken);
-
-                    var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, (processedUsersCount++ / (double)usersCount) * 100);
-                    await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);
-
-                    result.UnionWith(interactions);
-                }
-                catch (GoogleApiException gaex) when (IndicatesIsNotACalendarUser(gaex))
-                {
-                    _logger.LogDebug("The user is not a calendar user. Skipping meetings interactions for given user");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Unable to evaluate interactions based on callendar for given user. Please see inner exception\n");
-                }
+                var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, progressRate);
+                await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);
             }
 
-            await _tasksStatusesCache.SetStatusAsync(networkId, new SingleTaskStatus(TaskCaption, TaskDescription, 100), stoppingToken);
+            Task<ISet<Interaction>> SingleTaskAsync(string userEmail)
+                => GetSingleUserInteractionsAsync(userEmail, timeRange, credentials, interactionFactory, stoppingToken);
+
+            _logger.LogInformation("Evaluating interactions based on callendar for '{timerange}' for {count} users...", timeRange, users.Count());
+
+            var userEmails = users.Select(x => x.Id.PrimaryId);
+
+            var result = await ParallelFetcher.FetchAsync(userEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
 
             _logger.LogInformation("Evaluation of interactions based on callendar for '{timerange}' completed", timeRange);
 
             return result;
         }
 
-        private async Task<ISet<Interaction>> GetInteractionsInternalAsync(string userEmail, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken)
+        private async Task<ISet<Interaction>> GetSingleUserInteractionsAsync(string userEmail, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
-            _logger.LogDebug("Evaluating interactions based on callendar for period {timeRange} for user ***...", timeRange);
-
-            var userCredentials = credentials
-                .CreateWithUser(userEmail)
-                .UnderlyingCredential as ServiceAccountCredential;
-
-            var calendarService = new CalendarService(new BaseClientService.Initializer
+            try
             {
-                HttpClientInitializer = userCredentials,
-                ApplicationName = _config.ApplicationName
-            });
+                _logger.LogDebug("Evaluating interactions based on callendar for period {timeRange} for user ***...", timeRange);
 
-            var request = calendarService.Events.List(userEmail);
-            request.TimeMin = timeRange.Start;
-            request.TimeMax = timeRange.End;
-            request.SingleEvents = false;
+                var userCredentials = credentials
+                    .CreateWithUser(userEmail)
+                    .UnderlyingCredential as ServiceAccountCredential;
 
-            var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);
+                var calendarService = new CalendarService(new BaseClientService.Initializer
+                {
+                    HttpClientInitializer = userCredentials,
+                    ApplicationName = _config.ApplicationName
+                });
 
-            _logger.LogDebug("Found '{count}' events in callendar for user '{email}' for period {timeRange}", response.Items.Count, "***", timeRange);
-            _logger.LogTrace("Found '{count}' events in callendar for user '{email}' for period {timeRange}", response.Items.Count, userEmail, timeRange);
+                var request = calendarService.Events.List(userEmail);
+                request.TimeMin = timeRange.Start;
+                request.TimeMax = timeRange.End;
+                request.SingleEvents = false;
 
-            var result = new HashSet<Interaction>(new InteractionEqualityComparer());
+                var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);
 
-            var actionsAggregator = new ActionsAggregator(userEmail);
-            foreach (var meeting in response.Items)
-            {
-                actionsAggregator.Add(meeting.GetStart());
-                result.UnionWith(interactionFactory.CreateFromMeeting(meeting));
+                _logger.LogDebug("Found '{count}' events in callendar for user '{email}' for period {timeRange}", response.Items.Count, "***", timeRange);
+                _logger.LogTrace("Found '{count}' events in callendar for user '{email}' for period {timeRange}", response.Items.Count, userEmail, timeRange);
+
+                var result = new HashSet<Interaction>(new InteractionEqualityComparer());
+
+                var actionsAggregator = new ActionsAggregator(userEmail);
+                foreach (var meeting in response.Items)
+                {
+                    actionsAggregator.Add(meeting.GetStart());
+                    result.UnionWith(interactionFactory.CreateFromMeeting(meeting));
+                }
+
+                _logger.LogDebug("Evaluation of interactions based on callendar for user '{email}' completed. Found {count} interactions", "***", result.Count);
+                _logger.LogTrace("Evaluation of interactions based on callendar for user '{email}' completed. Found {count} interactions", userEmail, result.Count);
+                _logger.LogTrace(new DefaultActionsAggregatorPrinter().Print(actionsAggregator));
+
+                return result;
             }
-
-            _logger.LogDebug("Evaluation of interactions based on callendar for user '{email}' completed. Found {count} interactions", "***", result.Count);
-            _logger.LogTrace("Evaluation of interactions based on callendar for user '{email}' completed. Found {count} interactions", userEmail, result.Count);
-            _logger.LogTrace(new DefaultActionsAggregatorPrinter().Print(actionsAggregator));
-
-            return result;
+            catch (GoogleApiException gaex) when (IndicatesIsNotACalendarUser(gaex))
+            {
+                _logger.LogDebug("The user is not a calendar user. Skipping meetings interactions for given user");
+                return ImmutableHashSet<Interaction>.Empty;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Unable to evaluate interactions based on callendar for given user. Please see inner exception\n");
+                return ImmutableHashSet<Interaction>.Empty;
+            }
         }
 
         private static bool IndicatesIsNotACalendarUser(GoogleApiException ex)
