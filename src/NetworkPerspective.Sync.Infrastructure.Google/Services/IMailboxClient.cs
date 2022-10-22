@@ -24,29 +24,29 @@ using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
-    internal interface IEmailClient
+    internal interface IMailboxClient
     {
         Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
-    internal sealed class EmailClient : IEmailClient
+    internal sealed class MailboxClient : IMailboxClient
     {
         private static readonly int MinutesInDay = 24 * 60;
         private const string TaskCaption = "Synchronizing email interactions";
         private const string TaskDescription = "Fetching emails metadata from Google API";
 
         private readonly GoogleConfig _config;
-        private readonly ILogger<EmailClient> _logger;
+        private readonly ILogger<MailboxClient> _logger;
         private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
         private readonly IStatusLogger _statusLogger;
         private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IClock _clock;
 
-        public EmailClient(IStatusLogger statusService, ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILoggerFactory loggerFactory, IClock clock)
+        public MailboxClient(IStatusLogger statusService, ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILoggerFactory loggerFactory, IClock clock)
         {
             _config = config.Value;
-            _logger = loggerFactory.CreateLogger<EmailClient>();
+            _logger = loggerFactory.CreateLogger<MailboxClient>();
             _statusLogger = statusService;
             _tasksStatusesCache = tasksStatusesCache;
             _loggerFactory = loggerFactory;

@@ -26,7 +26,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         private readonly INetworkService _networkService;
         private readonly ISecretRepository _secretRepository;
         private readonly ICredentialsProvider _credentialsProvider;
-        private readonly IEmailClient _emailClient;
+        private readonly IMailboxClient _mailboxClient;
         private readonly IMeetingClient _meetingClient;
         private readonly IUsersClient _usersClient;
         private readonly IHashingServiceFactory _hashingServiceFactory;
@@ -37,7 +37,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         public GoogleFacade(INetworkService networkService,
                             ISecretRepository secretRepository,
                             ICredentialsProvider credentialsProvider,
-                            IEmailClient emailClient,
+                            IMailboxClient mailboxClient,
                             IMeetingClient meetingClient,
                             IUsersClient usersClient,
                             IHashingServiceFactory hashingServiceFactory,
@@ -48,7 +48,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _networkService = networkService;
             _secretRepository = secretRepository;
             _credentialsProvider = credentialsProvider;
-            _emailClient = emailClient;
+            _mailboxClient = mailboxClient;
             _meetingClient = meetingClient;
             _usersClient = usersClient;
             _hashingServiceFactory = hashingServiceFactory;
@@ -79,7 +79,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var periodStart = context.CurrentRange.Start.AddMinutes(-_config.SyncOverlapInMinutes);
             _logger.LogInformation("To not miss any email interactions period start is extended by {minutes}min. As result mailbox interactions are eveluated starting from {start}", _config.SyncOverlapInMinutes, periodStart);
 
-            await InitializeInContext(context, () => _emailClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, interactionFactory, stoppingToken));
+            await InitializeInContext(context, () => _mailboxClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, interactionFactory, stoppingToken));
 
             var emailInteractions = context.Get<ISet<Interaction>>();
             result.UnionWith(emailInteractions.Where(x => context.CurrentRange.IsInRange(x.Timestamp)));

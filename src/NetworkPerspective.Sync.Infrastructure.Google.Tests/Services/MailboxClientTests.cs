@@ -19,11 +19,11 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 {
-    public class EmailClientTests : IClassFixture<GoogleClientFixture>
+    public class MailboxClientTests : IClassFixture<GoogleClientFixture>
     {
         private readonly GoogleClientFixture _googleClientFixture;
 
-        public EmailClientTests(GoogleClientFixture googleClientFixture)
+        public MailboxClientTests(GoogleClientFixture googleClientFixture)
         {
             _googleClientFixture = googleClientFixture;
         }
@@ -44,14 +44,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             var clock = new Clock();
 
-            var emailClient = new EmailClient(Mock.Of<IStatusLogger>(), Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
+            var mailboxClient = new MailboxClient(Mock.Of<IStatusLogger>(), Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
 
             var emailLookuptable = new EmployeeCollection(null)
                 .Add(existingEmail);
             var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", emailLookuptable, clock);
 
             // Act
-            var result = await emailClient.GetInteractionsAsync(Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
+            var result = await mailboxClient.GetInteractionsAsync(Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
 
             // Assert
             result.Should().NotBeNullOrEmpty();
