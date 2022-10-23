@@ -72,6 +72,7 @@ namespace NetworkPerspective.Sync.Framework.Controllers
             await _networkService.ValidateExists(tokenValidationResponse.NetworkId, stoppingToken);
 
             await _scheduler.UnscheduleAsync(tokenValidationResponse.NetworkId, stoppingToken);
+            await _scheduler.InterruptNowAsync(tokenValidationResponse.NetworkId, stoppingToken);
 
             await _statusLogger.LogInfoAsync(tokenValidationResponse.NetworkId, "Schedule stopped", stoppingToken);
 

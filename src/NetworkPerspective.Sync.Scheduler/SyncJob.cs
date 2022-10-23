@@ -87,6 +87,11 @@ namespace NetworkPerspective.Sync.Application.Scheduler
                 await _statusLogger.LogInfoAsync(networkId, "Sync completed", context.CancellationToken);
                 _logger.LogInformation("Syncronization Job Completed for Network '{network}'", networkId);
             }
+            catch (Exception ex) when (ex.IndicatesTaskCanceled())
+            {
+                _logger.LogInformation("Synchronization Job cancelled for Network '{network}'", networkId);
+                await _statusLogger.LogInfoAsync(networkId, "Sync cancelled");
+            }
             catch (Exception ex)
             {
                 _logger.LogError($"Cannot complete synchronization job for Network {context.JobDetail.Key.Name}.\n{ex.Message}");

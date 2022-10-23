@@ -11,6 +11,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
 {
     public class TestableJob : IJob
     {
+        public const int JobExcecutionTimeInMs = 1000;
         private static readonly IList<Guid> InternalExecutedJobs = new List<Guid>();
 
         private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
@@ -55,7 +56,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             {
                 Semaphore.Release();
             }
-            await Task.Delay(1000);
+            await Task.Delay(JobExcecutionTimeInMs, context.CancellationToken);
         }
     }
 }
