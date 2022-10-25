@@ -11,8 +11,10 @@ using Colors.Net.StringColorExtensions;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.Core;
+using NetworkPerspective.Sync.Infrastructure.Core.Services;
 
 using Polly;
 
@@ -81,6 +83,7 @@ namespace NetworkPerspective.Sync.Cli
                     services.AddTransient<InteractionsClient>();
 
                     services.AddTransient<IFileSystem, FileSystem>();
+                    services.AddTransient<IInteractionsBatchSplitter, InteractionsBatchSplitter>();
 
                     var httpClientBuilder = services
                         .AddHttpClient<ISyncHashedClient, SyncHashedClient>();
@@ -88,10 +91,26 @@ namespace NetworkPerspective.Sync.Cli
                     if (args.BaseUrl != null)
                         httpClientBuilder.ConfigureHttpClient(client => client.BaseAddress = new Uri(args.BaseUrl));
 
-                    //httpClientBuilder
-                    //    .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(config.Resiliency.Retries));                    
+                    httpClientBuilder
+                        .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(new []
+                        {
+                            TimeSpan.FromMinutes(1),
+                            TimeSpan.FromMinutes(5),
+                            TimeSpan.FromMinutes(10),
+                            TimeSpan.FromMinutes(10),
+                            TimeSpan.FromMinutes(10),
+                            TimeSpan.FromMinutes(30),
+                            TimeSpan.FromMinutes(30),
+                            TimeSpan.FromMinutes(30),
+                            TimeSpan.FromMinutes(30),
+                        }));
                 });
-
+            hostBuilder.ConfigureLogging((log) =>
+            {
+                log
+                    .AddConsole()
+                    .AddFilter("System.Net.Http.HttpClient", LogLevel.Warning);                    
+            });
             var host = hostBuilder.Build();
             return host.Services.GetService<T>();
         }

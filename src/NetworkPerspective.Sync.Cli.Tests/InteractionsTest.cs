@@ -1,3 +1,5 @@
+using NetworkPerspective.Sync.Infrastructure.Core.Services;
+
 namespace NetworkPerspective.Sync.Cli.Tests
 {
     public class InteractionsTest : IClassFixture<EmbeddedSamplesFixture>
@@ -14,8 +16,8 @@ namespace NetworkPerspective.Sync.Cli.Tests
                 .Returns(Task.FromResult("sample_corellation_id"))
                 .Callback<SyncHashedInteractionsCommand>(req => _interceptedCommand.Add(req));
 
-            _fileSystem = samples.FileSystem;
-            _interactionsClient = new InteractionsClient(_coreClient.Object, _fileSystem);
+            _fileSystem = samples.FileSystem;            
+            _interactionsClient = new InteractionsClient(_coreClient.Object, _fileSystem, new InteractionsBatchSplitter());
         }
 
         [Fact]
@@ -24,7 +26,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
             // Arrange
             var args = new InteractionsOpts()
             {
-                Csv = @"interactions.csv",
+                Csv = new[] { @"interactions.csv" },
                 BaseUrl = "http://localhost",
                 Token = "sample_token",
                 CsvDelimiter = "\t",
@@ -54,7 +56,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
             // Arrange
             var args = new InteractionsOpts()
             {
-                Csv = @"interactions.csv",
+                Csv = new[] { @"interactions.csv" },
                 BaseUrl = "http://localhost",
                 Token = "sample_token",
                 CsvDelimiter = "\t",
@@ -82,6 +84,40 @@ namespace NetworkPerspective.Sync.Cli.Tests
 
             var batch3 = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"interactions-expected-batch-2.json"));
             _interceptedCommand[2].Should().BeEquivalentTo(batch3);
+        }
+
+
+        [Fact]
+        public async Task ItShouldNotSplitEventsToDifferentBatches()
+        {
+            // Arrange
+            var args = new InteractionsOpts()
+            {
+                Csv = new[] { @"interactions-split2.csv" },
+                BaseUrl = "http://localhost",
+                Token = "sample_token",
+                CsvDelimiter = "\t",
+                FromCol = "From(EmployeeId)",
+                ToCol = "To(EmployeeId)",
+                WhenCol = "When",
+                EventIdCol = "EventId",
+                DurationCol = "Duration",
+                RecurrentceCol = "RecurrenceType",
+                DataSourceType = "Meeting",
+                BatchSize = 2,
+            };
+
+            // Act
+            await _interactionsClient.Main(args);
+
+            // Assert
+            _coreClient.Verify(c => c.SyncInteractionsAsync(It.IsAny<SyncHashedInteractionsCommand>()), Times.Exactly(2));
+
+            var batch1 = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"interactions-split2-expected-batch-0.json"));
+            _interceptedCommand[0].Should().BeEquivalentTo(batch1);
+
+            var batch2 = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"interactions-split2-expected-batch-1.json"));
+            _interceptedCommand[1].Should().BeEquivalentTo(batch2);
         }
     }
 }

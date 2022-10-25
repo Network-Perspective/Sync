@@ -16,9 +16,12 @@ using CsvHelper;
 using CsvHelper.Configuration;
 
 using NetworkPerspective.Sync.Infrastructure.Core;
+using NetworkPerspective.Sync.Infrastructure.Core.Services;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
+using NLog;
 
 using PowerArgs;
 using PowerArgs.Cli;
@@ -36,8 +39,8 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("Api base url")]
         public string BaseUrl { get; set; }
 
-        [ArgDescription("Text file with user data (Default = StdIn)")]
-        public string? Csv { get; set; }
+        [ArgDescription("Text file with user data"), ArgRequired]
+        public string[] Csv { get; set; }
 
         [ArgDescription("Text file delimiter (Default = tab delimited)"), DefaultValue("\t")]
         public string CsvDelimiter { get; set; }
@@ -88,11 +91,15 @@ namespace NetworkPerspective.Sync.Cli
 
         private readonly ISyncHashedClient _client;
         private readonly IFileSystem _fileSystem;
+        private readonly IInteractionsBatchSplitter _batchSplitter;
+        private long estimatedNoOfBatches = 0;
+        private ProgressBar _sendingProgress;
 
-        public InteractionsClient(ISyncHashedClient client, IFileSystem fileSystem)
+        public InteractionsClient(ISyncHashedClient client, IFileSystem fileSystem, IInteractionsBatchSplitter batchSplitter)
         {
             _client = client;
             _fileSystem = fileSystem;
+            _batchSplitter = batchSplitter;
         }
 
         public async Task Main(InteractionsOpts args)
@@ -106,6 +113,9 @@ namespace NetworkPerspective.Sync.Cli
             {
                 throw new ArgException("Either BaseUrl or DebugFn must be specified");
             }
+            
+            // w don't want extra logging to appear on console
+            LogManager.DisableLogging();
 
             _fromCols = args.FromCol.AsColumnDescriptorDictionary();
             _toCols = args.ToCol.AsColumnDescriptorDictionary();
@@ -115,23 +125,37 @@ namespace NetworkPerspective.Sync.Cli
             _durationCols = args.DurationCol.AsColumnDescriptorDictionary();
 
             var timer = Stopwatch.StartNew();
+            _batchSplitter.BatchSize = args.BatchSize;
+            _batchSplitter.BufferSize = null;
+            _batchSplitter.BatchIsReadyAsync += async (object sender, BatchIsReadyEventArgs e) =>
+            {
+                await SendBatch(e.BatchNo, e.Interactions, args);
+            };
 
-            //// read the CSV (tab separated by default)            
-            await ReadCsvInteractions(args, (batch, data) => SendBatch(batch, data, args));
+            // read the CSV             
+            foreach (var fn in args.Csv)
+            {
+                await ReadCsvInteractions(fn, args);
+            }
 
-            ColoredConsole.WriteLine("Success!".Green() + " Time elapsed " + timer.Elapsed);
+            ColoredConsole.WriteLine($"Uploading data");
+            _sendingProgress = new ProgressBar();
+            await _batchSplitter.FlushAsync();
+            _sendingProgress.Dispose();
+
+            ColoredConsole.WriteLine("Success!".Green());
+            ColoredConsole.WriteLine("Time elapsed " + timer.Elapsed);
         }
-
-        private async Task SendBatch(int batchNo, List<HashedInteraction> interactions, InteractionsOpts args)
+        
+        private async Task SendBatch(int batchNo, ICollection<HashedInteraction> interactions, InteractionsOpts args)
         {
             var request = new SyncHashedInteractionsCommand()
             {
                 Interactions = interactions,
                 ServiceToken = args.Token
             };
-
-            ColoredConsole.WriteLine("Uploading interactions:");
-            ColoredConsole.WriteLine(" - uploading " + interactions.Count.ToString().Cyan() + " records...");
+            
+            _sendingProgress.Report((double)batchNo / estimatedNoOfBatches);
 
             // dump to file or send to api
             if (!string.IsNullOrWhiteSpace(args.DebugFn))
@@ -154,35 +178,43 @@ namespace NetworkPerspective.Sync.Cli
             await Task.CompletedTask;
         }
 
-        private async Task ReadCsvInteractions(InteractionsOpts args, Func<int, List<HashedInteraction>, Task> processBatch)
+        private async Task ReadCsvInteractions(string fileName, InteractionsOpts args)
         {
-            ColoredConsole.WriteLine($"Reading CSV...");
-            var result = new List<HashedInteraction>();
+            ColoredConsole.WriteLine($"Reading CSV {fileName}...");            
             var header = new List<ColumnDescriptor>();
-            TextReader? reader = null;
-            try
+            
+            if (!_fileSystem.File.Exists(fileName))
             {
-                reader = args.Csv != null ? _fileSystem.File.OpenText(args.Csv) : Console.In;
-                var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
-                {
-                    NewLine = args.CsvNewLine ?? Environment.NewLine,
-                    HasHeaderRecord = true,
-                    Delimiter = args.CsvDelimiter,
-                };
-                var csv = new CsvReader(reader, csvConfig);
+                ColoredConsole.WriteLine($"File {fileName} does not exist".Red());
+                return;
+            }
 
+            var fileSize = _fileSystem.FileInfo.FromFileName(fileName).Length;
+            var bufferSize = 1024 * 1024 * 10; // 10MB
+            var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                NewLine = args.CsvNewLine ?? Environment.NewLine,
+                HasHeaderRecord = true,
+                Delimiter = args.CsvDelimiter,
+                BufferSize = bufferSize,
+            };
+
+            using (var progress = new ProgressBar())
+            using (var stream = _fileSystem.FileStream.Create(fileName, FileMode.Open, FileAccess.Read))
+            using (var reader = new StreamReader(stream, Encoding.UTF8, true, bufferSize))
+            using (var csv = new CsvReader(reader, csvConfig))
+            {
                 csv.Read();
 
                 string value;
                 for (int i = 0; csv.TryGetField<string>(i, out value); i++)
                 {
                     header.Add(value.AsColumnDescriptor());
-                }
-                ColoredConsole.WriteLine("Found fields: " + String.Join(", ", header.Select(h => h.Header.Cyan())));
+                }                
 
-                var batchNo = 0;
+                long lineCounter = 0;
                 while (csv.Read())
-                {
+                {                    
                     var interaction = new HashedInteraction()
                     {
                         Label = new List<HashedInteractionLabel>()
@@ -235,24 +267,17 @@ namespace NetworkPerspective.Sync.Cli
                             }
                         }
                     }
-                    result.Add(interaction);
 
-                    if (result.Count >= args.BatchSize)
-                    {
-                        await processBatch(batchNo, result);
-                        batchNo++;
-                        result = new List<HashedInteraction>();
-                    }
-                }
+                    await _batchSplitter.PushInteractionAsync(interaction);
 
-                if (result.Count > 0)
-                {
-                    await processBatch(batchNo, result);
+                    lineCounter++;
+                    
+                    // report progress                    
+                    var position = reader.BaseStream.Position;
+                    progress.Report((double)position / (double)fileSize);                    
                 }
-            }
-            finally
-            {
-                if (args.Csv != null) reader?.Dispose();
+                
+                estimatedNoOfBatches += lineCounter / _batchSplitter.BatchSize;
             }
         }
     }

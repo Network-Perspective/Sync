@@ -17,6 +17,9 @@
     <None Remove="Samples\interactions-expected-batch-1.json" />
     <None Remove="Samples\interactions-expected-batch-2.json" />
     <None Remove="Samples\interactions-expected.json" />
+    <None Remove="Samples\interactions-split2-expected-batch-0.json" />
+    <None Remove="Samples\interactions-split2-expected-batch-1.json" />
+    <None Remove="Samples\interactions-split2.csv" />
     <None Remove="Samples\interactions.csv" />
   </ItemGroup>
 
@@ -25,6 +28,9 @@
     <EmbeddedResource Include="Samples\entites.csv" />
     <EmbeddedResource Include="Samples\groups-expected.json" />
     <EmbeddedResource Include="Samples\groups.csv" />
+    <EmbeddedResource Include="Samples\interactions-split2-expected-batch-0.json" />
+    <EmbeddedResource Include="Samples\interactions-split2-expected-batch-1.json" />
+    <EmbeddedResource Include="Samples\interactions-split2.csv" />
     <EmbeddedResource Include="Samples\interactions-expected-batch-0.json" />
     <EmbeddedResource Include="Samples\interactions-expected-batch-1.json" />
     <EmbeddedResource Include="Samples\interactions-expected-batch-2.json" />

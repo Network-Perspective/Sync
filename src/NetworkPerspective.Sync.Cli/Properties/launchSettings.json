@@ -20,7 +20,12 @@
     },
     "InteractionBatched": {
       "commandName": "Project",
-      "commandLineArgs": "Interactions -Token sample_token -Csv ..\\NetworkPerspective.Sync.Cli.Tests\\Samples\\interactions.csv -DebugFn .\\output\\interactions-expected.json -DataSourceType meeting -BatchSize 2",
+      "commandLineArgs": "Interactions -Token sample_token -Csv ..\\NetworkPerspective.Sync.Cli.Tests\\Samples\\interactions.csv -DebugFn .\\output\\interactions-expected.json -DataSourceType meeting -BatchSize 2 -TimeZone UTC",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "InteractionsSplitTest": {
+      "commandName": "Project",
+      "commandLineArgs": "Interactions -Token sample_token -Csv ..\\NetworkPerspective.Sync.Cli.Tests\\Samples\\interactions-split2.csv -DebugFn .\\output\\interactions-split2-expected.json -DataSourceType meeting -BatchSize 2 -TimeZone UTC",
       "workingDirectory": "$(ProjectDir)"
     }
   }

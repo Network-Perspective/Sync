@@ -5,12 +5,16 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>np-sync</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="output\**" />
+    <Compile Remove="publish\**" />
     <EmbeddedResource Remove="output\**" />
+    <EmbeddedResource Remove="publish\**" />
     <None Remove="output\**" />
+    <None Remove="publish\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +33,7 @@
     <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="6.0.9" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NLog" Version="4.7.15" />
     <PackageReference Include="PowerArgs" Version="3.6.0" />
     <PackageReference Include="System.IO.Abstractions" Version="17.2.3" />
   </ItemGroup>

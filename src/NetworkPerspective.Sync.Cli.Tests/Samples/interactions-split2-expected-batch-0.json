@@ -1,0 +1,78 @@
+{
+  "serviceToken": "sample_token",
+  "interactions": [
+    {
+      "when": "2021-05-04T10:05:00+02:00",
+      "sourceIds": {
+        "EmployeeId": "hash1"
+      },
+      "targetIds": {
+        "EmployeeId": "hash2"
+      },
+      "eventId": "event1",
+      "durationMinutes": 20,
+      "label": [
+        "Meeting",
+        "RecurringDaily"
+      ]
+    },
+    {
+      "when": "2021-05-04T10:05:00+02:00",
+      "sourceIds": {
+        "EmployeeId": "hash2"
+      },
+      "targetIds": {
+        "EmployeeId": "hash3"
+      },
+      "eventId": "event1",
+      "durationMinutes": 20,
+      "label": [
+        "Meeting",
+        "RecurringWeekly"
+      ]
+    },
+    {
+      "when": "2021-05-04T10:05:00+02:00",
+      "sourceIds": {
+        "EmployeeId": "hash1"
+      },
+      "targetIds": {
+        "EmployeeId": "hash3"
+      },
+      "eventId": "event1",
+      "durationMinutes": 25,
+      "label": [
+        "Meeting",
+        "RecurringMonthly"
+      ]
+    },
+    {
+      "when": "2021-05-04T10:05:00+02:00",
+      "sourceIds": {
+        "EmployeeId": "external"
+      },
+      "targetIds": {
+        "EmployeeId": "hash1"
+      },
+      "eventId": "event1",
+      "durationMinutes": 60,
+      "label": [
+        "Meeting"
+      ]
+    },
+    {
+      "when": "2021-05-04T10:05:00+02:00",
+      "sourceIds": {
+        "EmployeeId": "internal"
+      },
+      "targetIds": {
+        "EmployeeId": "hash1"
+      },
+      "eventId": "event1",
+      "durationMinutes": 30,
+      "label": [
+        "Meeting"
+      ]
+    }
+  ]
+}
