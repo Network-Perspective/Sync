@@ -113,7 +113,7 @@ namespace NetworkPerspective.Sync.Cli
             {
                 throw new ArgException("Either BaseUrl or DebugFn must be specified");
             }
-            
+
             // w don't want extra logging to appear on console
             LogManager.DisableLogging();
 
@@ -146,7 +146,7 @@ namespace NetworkPerspective.Sync.Cli
             ColoredConsole.WriteLine("Success!".Green());
             ColoredConsole.WriteLine("Time elapsed " + timer.Elapsed);
         }
-        
+
         private async Task SendBatch(int batchNo, ICollection<HashedInteraction> interactions, InteractionsOpts args)
         {
             var request = new SyncHashedInteractionsCommand()
@@ -154,7 +154,7 @@ namespace NetworkPerspective.Sync.Cli
                 Interactions = interactions,
                 ServiceToken = args.Token
             };
-            
+
             _sendingProgress.Report((double)batchNo / estimatedNoOfBatches);
 
             // dump to file or send to api
@@ -180,9 +180,9 @@ namespace NetworkPerspective.Sync.Cli
 
         private async Task ReadCsvInteractions(string fileName, InteractionsOpts args)
         {
-            ColoredConsole.WriteLine($"Reading CSV {fileName}...");            
+            ColoredConsole.WriteLine($"Reading CSV {fileName}...");
             var header = new List<ColumnDescriptor>();
-            
+
             if (!_fileSystem.File.Exists(fileName))
             {
                 ColoredConsole.WriteLine($"File {fileName} does not exist".Red());
@@ -210,11 +210,11 @@ namespace NetworkPerspective.Sync.Cli
                 for (int i = 0; csv.TryGetField<string>(i, out value); i++)
                 {
                     header.Add(value.AsColumnDescriptor());
-                }                
+                }
 
                 long lineCounter = 0;
                 while (csv.Read())
-                {                    
+                {
                     var interaction = new HashedInteraction()
                     {
                         Label = new List<HashedInteractionLabel>()
@@ -271,12 +271,12 @@ namespace NetworkPerspective.Sync.Cli
                     await _batchSplitter.PushInteractionAsync(interaction);
 
                     lineCounter++;
-                    
+
                     // report progress                    
                     var position = reader.BaseStream.Position;
-                    progress.Report((double)position / (double)fileSize);                    
+                    progress.Report((double)position / (double)fileSize);
                 }
-                
+
                 estimatedNoOfBatches += lineCounter / _batchSplitter.BatchSize;
             }
         }

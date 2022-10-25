@@ -92,7 +92,7 @@ namespace NetworkPerspective.Sync.Cli
                         httpClientBuilder.ConfigureHttpClient(client => client.BaseAddress = new Uri(args.BaseUrl));
 
                     httpClientBuilder
-                        .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(new []
+                        .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(new[]
                         {
                             TimeSpan.FromMinutes(1),
                             TimeSpan.FromMinutes(5),
@@ -109,7 +109,7 @@ namespace NetworkPerspective.Sync.Cli
             {
                 log
                     .AddConsole()
-                    .AddFilter("System.Net.Http.HttpClient", LogLevel.Warning);                    
+                    .AddFilter("System.Net.Http.HttpClient", LogLevel.Warning);
             });
             var host = hostBuilder.Build();
             return host.Services.GetService<T>();

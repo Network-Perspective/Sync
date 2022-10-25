@@ -16,7 +16,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
                 .Returns(Task.FromResult("sample_corellation_id"))
                 .Callback<SyncHashedInteractionsCommand>(req => _interceptedCommand.Add(req));
 
-            _fileSystem = samples.FileSystem;            
+            _fileSystem = samples.FileSystem;
             _interactionsClient = new InteractionsClient(_coreClient.Object, _fileSystem, new InteractionsBatchSplitter());
         }
 

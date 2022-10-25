@@ -100,8 +100,8 @@ namespace NetworkPerspective.Sync.Cli
             {
                 return parsed;
             }
-            
-            TimeZoneInfo convFrom = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);            
+
+            TimeZoneInfo convFrom = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
             var offset = convFrom.GetUtcOffset(parsed);
             return parsed.Add(-offset);
         }

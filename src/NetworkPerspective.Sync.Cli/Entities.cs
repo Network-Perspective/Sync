@@ -187,7 +187,7 @@ namespace NetworkPerspective.Sync.Cli
                                 entity.Props[fieldName] = value == null ? null : JsonConvert.DeserializeObject(value);
                             else
                                 entity.Props[fieldName] = value;
-                        } 
+                        }
                         else if (_groupsCols.ContainsKey(fieldName))
                         {
                             entity.Groups ??= new List<string>();
