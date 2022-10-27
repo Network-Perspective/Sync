@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
     [Collection("Sequential")]
     public class SyncSchedulerTest
     {
-        private const int TIMEOUT = 2000; //ms
+        private const int TimeoutInMs = TestableJob.JobExcecutionTimeInMs * 2;
         private readonly ISchedulerFactory _schedulerFactory = new StdSchedulerFactory();
         private readonly IScheduler _scheduler;
 
@@ -108,7 +108,50 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
                 await syncScheduler.TriggerNowAsync(networkId);
 
                 // Assert
-                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == networkId), TIMEOUT).Should().BeTrue();
+                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == networkId), TimeoutInMs).Should().BeTrue();
+            }
+        }
+
+        public class InterruptNow : SyncSchedulerTest
+        {
+            [Fact]
+            public async Task ShouldInterruptCurrentJob()
+            {
+                // Arrange
+                var networkId = Guid.NewGuid();
+
+                var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
+                await syncScheduler.AddOrReplaceAsync(networkId);
+                await _scheduler.Start();
+                await syncScheduler.TriggerNowAsync(networkId);
+                SpinWait.SpinUntil(() => syncScheduler.IsRunningAsync(networkId).Result, TimeoutInMs);
+
+                // Act
+                await syncScheduler.InterruptNowAsync(networkId);
+
+                // Assert
+                var interruptionTimeout = TestableJob.JobExcecutionTimeInMs / 5;
+                SpinWait.SpinUntil(() => !syncScheduler.IsRunningAsync(networkId).Result, interruptionTimeout).Should().BeTrue();
+            }
+
+            [Fact]
+            public async Task ShouldNotInterfereWithOtherNetworksSync()
+            {
+                // Arrange
+                var networkId_1 = Guid.NewGuid();
+                var networkId_2 = Guid.NewGuid();
+
+                var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
+                await syncScheduler.AddOrReplaceAsync(networkId_1);
+                await syncScheduler.AddOrReplaceAsync(networkId_2);
+                await _scheduler.Start();
+                await syncScheduler.TriggerNowAsync(networkId_2);
+
+                // Act
+                await syncScheduler.InterruptNowAsync(networkId_1);
+
+                // Assert
+                SpinWait.SpinUntil(() => TestableJob.CompletedJobs.Contains(networkId_2), TimeoutInMs).Should().BeTrue();
             }
         }
 
@@ -128,14 +171,14 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
                 await _scheduler.Start();
 
                 // Assert
-                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == networkId), TIMEOUT).Should().BeTrue();
+                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == networkId), TimeoutInMs).Should().BeTrue();
             }
         }
 
         public class Unschedule : SyncSchedulerTest
         {
             [Fact]
-            public async Task ShouldTriggerWithCorrectNetworkId()
+            public async Task ShouldUnscheduleAllPendingJobs()
             {
                 // Arrange
                 var networkId = Guid.NewGuid();
@@ -143,13 +186,36 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
                 await syncScheduler.AddOrReplaceAsync(networkId);
                 await syncScheduler.ScheduleAsync(networkId);
+                await syncScheduler.TriggerNowAsync(networkId);
 
                 // Act
                 await syncScheduler.UnscheduleAsync(networkId);
                 await _scheduler.Start();
 
                 // Assert
-                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == networkId), TIMEOUT).Should().BeFalse();
+                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == networkId), TimeoutInMs).Should().BeFalse();
+            }
+
+            [Fact]
+            public async Task ShouldNotInterfereWithOtherNetworksSync()
+            {
+                // Arrange
+                var networkId_1 = Guid.NewGuid();
+                var networkId_2 = Guid.NewGuid();
+
+                var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
+                await syncScheduler.AddOrReplaceAsync(networkId_1);
+                await syncScheduler.AddOrReplaceAsync(networkId_2);
+                await syncScheduler.ScheduleAsync(networkId_1);
+                await syncScheduler.ScheduleAsync(networkId_2);
+                await syncScheduler.TriggerNowAsync(networkId_1);
+                await syncScheduler.UnscheduleAsync(networkId_1);
+
+                // Act
+                await _scheduler.Start();
+
+                // Assert
+                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == networkId_2), TimeoutInMs).Should().BeTrue();
             }
         }
 
@@ -167,7 +233,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
                 await syncScheduler.TriggerNowAsync(networkId);
 
                 // Act Assert
-                SpinWait.SpinUntil(() => syncScheduler.IsRunningAsync(networkId).Result, TIMEOUT).Should().BeTrue();
+                SpinWait.SpinUntil(() => syncScheduler.IsRunningAsync(networkId).Result, TimeoutInMs).Should().BeTrue();
             }
 
             [Fact]

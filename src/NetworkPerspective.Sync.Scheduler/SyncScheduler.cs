@@ -77,9 +77,20 @@ namespace NetworkPerspective.Sync.Scheduler
 
             var scheduler = await _schedulerFactory.GetScheduler(stoppingToken);
 
-            await scheduler.TriggerJob(CreateJobKey(networkId));
+            await scheduler.TriggerJob(CreateJobKey(networkId), stoppingToken);
 
             _logger.LogDebug("Network '{networkId}' triggered manually", networkId);
+        }
+
+        public async Task InterruptNowAsync(Guid networkId, CancellationToken stoppingToken = default)
+        {
+            _logger.LogDebug("Interrupting current job for Network '{networkId}'", networkId);
+
+            var scheduler = await _schedulerFactory.GetScheduler(stoppingToken);
+
+            await scheduler.Interrupt(CreateJobKey(networkId), stoppingToken);
+
+            _logger.LogDebug("Network '{networkId}' interrupted", networkId);
         }
 
         public async Task ScheduleAsync(Guid networkId, CancellationToken stoppingToken = default)
@@ -88,7 +99,7 @@ namespace NetworkPerspective.Sync.Scheduler
 
             var triggerKey = CreateTriggerKey(networkId);
 
-            await scheduler.ResumeTrigger(triggerKey);
+            await scheduler.ResumeTrigger(triggerKey, stoppingToken);
 
             var nextExecutionTime = (await scheduler.GetTrigger(triggerKey)).GetNextFireTimeUtc();
             _logger.LogInformation("Network '{networkId}' scheduled. Next execution at '{executionTime}'", networkId, nextExecutionTime);
@@ -98,9 +109,10 @@ namespace NetworkPerspective.Sync.Scheduler
         {
             var scheduler = await _schedulerFactory.GetScheduler(stoppingToken);
 
-            var triggerKey = CreateTriggerKey(networkId);
+            var triggers = await scheduler.GetTriggersOfJob(CreateJobKey(networkId));
 
-            await scheduler.PauseTrigger(triggerKey);
+            foreach (var trigger in triggers)
+                await scheduler.PauseTrigger(trigger.Key);
 
             _logger.LogInformation("Network '{networkId}' unscheduled", networkId);
         }

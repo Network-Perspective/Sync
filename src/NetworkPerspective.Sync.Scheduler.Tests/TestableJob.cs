@@ -11,7 +11,9 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
 {
     public class TestableJob : IJob
     {
+        public const int JobExcecutionTimeInMs = 1000;
         private static readonly IList<Guid> InternalExecutedJobs = new List<Guid>();
+        private static readonly IList<Guid> InternalCompletedJobs = new List<Guid>();
 
         private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
 
@@ -31,12 +33,29 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             }
         }
 
+        public static IReadOnlyCollection<Guid> CompletedJobs
+        {
+            get
+            {
+                try
+                {
+                    Semaphore.Wait();
+                    return new ReadOnlyCollection<Guid>(InternalCompletedJobs.ToList());
+                }
+                finally
+                {
+                    Semaphore.Release();
+                }
+            }
+        }
+
         public static void Reset()
         {
             try
             {
                 Semaphore.Wait();
                 InternalExecutedJobs.Clear();
+                InternalCompletedJobs.Clear();
             }
             finally
             {
@@ -55,7 +74,18 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             {
                 Semaphore.Release();
             }
-            await Task.Delay(1000);
+
+            await Task.Delay(JobExcecutionTimeInMs, context.CancellationToken);
+
+            try
+            {
+                await Semaphore.WaitAsync();
+                InternalCompletedJobs.Add(Guid.Parse(context.JobDetail.Key.Name));
+            }
+            finally
+            {
+                Semaphore.Release();
+            }
         }
     }
 }
