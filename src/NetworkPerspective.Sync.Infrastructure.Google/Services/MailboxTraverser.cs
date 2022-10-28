@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,7 +70,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
             var messagesListResponse = await _retryHandler.ExecuteAsync(messagesListRequest.ExecuteAsync, _logger, stoppingToken);
 
-            _currentPageMessageIds.AddRange(messagesListResponse.Messages.Select(x => x.Id));
+            _currentPageMessageIds.AddRange(messagesListResponse.Messages?.Select(x => x.Id) ?? Array.Empty<string>());
             _nextPageToken = messagesListResponse.NextPageToken;
 
             _logger.LogTrace("Loaded new message page for user ***...");

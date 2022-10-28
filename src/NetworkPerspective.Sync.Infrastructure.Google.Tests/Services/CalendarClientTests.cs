@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
@@ -19,39 +20,36 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 {
-    public class EmailClientTests : IClassFixture<GoogleClientFixture>
+    public class CalendarClientTests : IClassFixture<GoogleClientFixture>
     {
         private readonly GoogleClientFixture _googleClientFixture;
 
-        public EmailClientTests(GoogleClientFixture googleClientFixture)
+        public CalendarClientTests(GoogleClientFixture googleClientFixture)
         {
             _googleClientFixture = googleClientFixture;
         }
 
-        [Fact]
+        [Theory]
+        [InlineData("nptestuser12@worksmartona.com")]
+        [InlineData("john@worksmartona.com")]
         [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
-        public async Task ShouldReturnNonEmptyEmailCollection()
+        public async Task ShouldGetNonEmptyUserCollection(string email)
         {
             // Arrange
-            const string existingEmail = "nptestuser12@worksmartona.com";
-
             var googleConfig = new GoogleConfig
             {
                 ApplicationName = "gmail_app",
-                MaxMessagesPerUserDaily = 1000,
-                SyncOverlapInMinutes = 0
             };
 
-            var clock = new Clock();
-
-            var emailClient = new EmailClient(Mock.Of<IStatusLogger>(), Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
+            var client = new CalendarClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLogger<CalendarClient>.Instance);
+            var timeRange = new TimeRange(DateTime.MinValue, DateTime.MaxValue);
 
             var emailLookuptable = new EmployeeCollection(null)
-                .Add(existingEmail);
-            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", emailLookuptable, clock);
+                .Add(email);
+            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", emailLookuptable, new Clock());
 
             // Act
-            var result = await emailClient.GetInteractionsAsync(Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
+            var result = await client.GetInteractionsAsync(Guid.NewGuid(), emailLookuptable.GetAllInternal(), timeRange, _googleClientFixture.Credential, interactionFactory);
 
             // Assert
             result.Should().NotBeNullOrEmpty();
