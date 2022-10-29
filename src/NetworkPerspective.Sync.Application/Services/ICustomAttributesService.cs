@@ -64,10 +64,13 @@ namespace NetworkPerspective.Sync.Application.Services
             {
                 var customAttrs = customAttributes.Where(x => x.Name == groupAttributeGonfig);
 
-                if (customAttrs.Count() < 2)
-                    result.Add(groupAttributeGonfig, GetFormattedCustomAttrValue(customAttrs.Single()));
-                else
-                    result.Add(groupAttributeGonfig, customAttrs.Select(x => GetFormattedCustomAttrValue(x)));
+                if (customAttrs.Any())
+                {
+                    if (customAttrs.First().IsMultiValue)
+                        result.Add(groupAttributeGonfig, customAttrs.Select(x => GetFormattedCustomAttrValue(x)));
+                    else
+                        result.Add(groupAttributeGonfig, GetFormattedCustomAttrValue(customAttrs.Single()));
+                }
             }
 
             return result;
