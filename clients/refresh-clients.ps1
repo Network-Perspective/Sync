@@ -4,11 +4,11 @@
 
 # refresh open-api.jsons 
 
-Copy-Item ..\NetworkPerspective.Sync.GSuite\bin\Debug\net6.0\NetworkPerspective.Sync.GSuite.xml ..\NetworkPerspective.Sync.GSuite\bin\Debug\net6.0\dotnet-swagger.xml
-dotnet swagger tofile --output gsuite.json ..\NetworkPerspective.Sync.GSuite\bin\Debug\net6.0\NetworkPerspective.Sync.GSuite.dll v1
+Copy-Item ..\src\NetworkPerspective.Sync.GSuite\bin\Debug\net6.0\NetworkPerspective.Sync.GSuite.xml ..\src\NetworkPerspective.Sync.GSuite\bin\Debug\net6.0\dotnet-swagger.xml
+dotnet swagger tofile --output gsuite.json ..\src\NetworkPerspective.Sync.GSuite\bin\Debug\net6.0\NetworkPerspective.Sync.GSuite.dll v1
 
-Copy-Item ..\NetworkPerspective.Sync.Slack\bin\Debug\net6.0\NetworkPerspective.Sync.Slack.xml ..\NetworkPerspective.Sync.Slack\bin\Debug\net6.0\dotnet-swagger.xml
-dotnet swagger tofile --output slack.json ..\NetworkPerspective.Sync.Slack\bin\Debug\net6.0\NetworkPerspective.Sync.Slack.dll v1
+Copy-Item ..\src\NetworkPerspective.Sync.Slack\bin\Debug\net6.0\NetworkPerspective.Sync.Slack.xml ..\src\NetworkPerspective.Sync.Slack\bin\Debug\net6.0\dotnet-swagger.xml
+dotnet swagger tofile --output slack.json ..\src\NetworkPerspective.Sync.Slack\bin\Debug\net6.0\NetworkPerspective.Sync.Slack.dll v1
 
 # generate clients
 

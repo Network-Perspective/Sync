@@ -91,10 +91,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Extensions
                 // Arrange
                 var expectedCustomAttr = new[]
                 {
-                    new CustomAttr { Name = "Test.Role", Value = "HR partner"},
-                    new CustomAttr { Name = "Test.Role", Value = "Team lead"},
-                    new CustomAttr { Name = "Test.Formal_Group", Value = "GAME2/ENCOUNTERS DESIGN/GAMEPLAY DESIGN"},
-                    new CustomAttr { Name = "Test.Employment_Date", Value = new DateTime(2022, 08, 17)}
+                    CustomAttr.CreateMultiValue("Test.Role", "HR partner"),
+                    CustomAttr.CreateMultiValue("Test.Role", "Team lead"),
+                    CustomAttr.Create("Test.Formal_Group", "GAME2/ENCOUNTERS DESIGN/GAMEPLAY DESIGN"),
+                    CustomAttr.Create("Test.Employment_Date", new DateTime(2022, 08, 17))
                 };
 
                 var user = new User
