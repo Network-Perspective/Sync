@@ -82,11 +82,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
                 if (entry.Value.GetType() == typeof(JArray))
                 {
                     var values = ((JArray)entry.Value).ToObject<List<MultiValueCustomField>>();
-                    result.AddRange(values.Select(x => new CustomAttr { Name = entry.Key, Value = x.Value }));
+                    result.AddRange(values.Select(x => CustomAttr.CreateMultiValue(entry.Key, x.Value)));
                 }
                 else
                 {
-                    result.Add(new CustomAttr { Name = entry.Key, Value = entry.Value });
+                    result.Add(CustomAttr.Create(entry.Key, entry.Value));
                 }
             }
 
