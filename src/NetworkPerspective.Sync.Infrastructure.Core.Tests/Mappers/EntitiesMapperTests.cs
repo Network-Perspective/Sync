@@ -47,9 +47,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
 
             var employee = Employee.CreateInternal(EmployeeId.Create("foo", "bar"), Array.Empty<Group>(), null, relations);
 
-            var allEmployees = new EmployeeCollection(null);
-            allEmployees.Add(employee);
-            allEmployees.Add(manager);
+            var allEmployees = new EmployeeCollection(new[] { employee, manager }, null);
 
             // Act
             var result = EntitiesMapper.ToEntity(employee, allEmployees, DateTime.UtcNow, dataSourceId);
@@ -72,8 +70,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
 
             var employee = Employee.CreateInternal(EmployeeId.Create("foo", "bar"), Array.Empty<Group>(), null, RelationsCollection.Empty);
 
-            var allEmployees = new EmployeeCollection(null);
-            allEmployees.Add(employee);
+            var allEmployees = new EmployeeCollection(new[] { employee }, null);
 
             // Act
             var result = EntitiesMapper.ToEntity(employee, allEmployees, changeDate, "test");

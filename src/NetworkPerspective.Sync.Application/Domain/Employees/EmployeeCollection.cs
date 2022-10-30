@@ -11,12 +11,17 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         private readonly IDictionary<string, Employee> _emailLookupTable = new Dictionary<string, Employee>(StringComparer.InvariantCultureIgnoreCase);
         private readonly HashFunction _hashFunc;
 
-        public EmployeeCollection(HashFunction hashFunc)
+        public EmployeeCollection(IEnumerable<Employee> employees, HashFunction hashFunc)
         {
             _hashFunc = hashFunc;
+
+            foreach (var employee in employees)
+                Add(employee);
+
+            EvaluateHierarchy();
         }
 
-        public void Add(Employee employee)
+        private void Add(Employee employee)
         {
             var employeeToInsert = _hashFunc == null ? employee : employee.Hash(_hashFunc);
 
@@ -25,8 +30,6 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
             foreach (var alias in employee.Id.Aliases)
                 AddIfNotExists(alias, employeeToInsert);
-
-            EvaluateHierarchy();
         }
 
         private void AddIfNotExists(string alias, Employee employee)
