@@ -22,9 +22,9 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             const string alias_1 = "email_1_alias_1@networkperspective.io";
             const string alias_2 = "U12345ASD";
 
-            var employeesCollection = new EmployeeCollection(null);
             var employeeId = EmployeeId.CreateWithAliases(mainEmail, id, new[] { alias_1, alias_2 });
-            employeesCollection.Add(Employee.CreateInternal(employeeId, Array.Empty<Group>()));
+            var employee = Employee.CreateInternal(employeeId, Array.Empty<Group>());
+            var employeesCollection = new EmployeeCollection(new[] { employee }, null);
 
             // Act
             var employee1 = employeesCollection.Find(mainEmail);
@@ -48,10 +48,10 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
         {
             // Arrange
             const string unkwnownAlias = "foo";
-            var lookupTable = new EmployeeCollection(null);
+            var employeesCollection = new EmployeeCollection(Enumerable.Empty<Employee>(), null);
 
             // Act
-            var email = lookupTable.Find(unkwnownAlias);
+            var email = employeesCollection.Find(unkwnownAlias);
 
             // Assert
             email.IsExternal.Should().BeTrue();
@@ -78,24 +78,11 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             var board1 = Employee.CreateInternal(EmployeeId.Create("board1", string.Empty), Array.Empty<Group>(), null, RelationsCollection.Empty);
             var board2 = Employee.CreateInternal(EmployeeId.Create("board2", string.Empty), Array.Empty<Group>(), null, RelationsCollection.Empty);
 
-            var employeesCollection = new EmployeeCollection(null);
-
             // Act
-            employeesCollection.Add(ic1);
-            employeesCollection.Add(ic2);
-            employeesCollection.Add(ic3);
-            employeesCollection.Add(ic4);
-            employeesCollection.Add(ic5);
+            var employees = new[] { ic1, ic2, ic3, ic4, ic5, manager1, manager2, manager3, director1, director2, board1, board2 };
 
-            employeesCollection.Add(manager1);
-            employeesCollection.Add(manager2);
-            employeesCollection.Add(manager3);
+            var employeesCollection = new EmployeeCollection(employees, null);
 
-            employeesCollection.Add(director1);
-            employeesCollection.Add(director2);
-
-            employeesCollection.Add(board1);
-            employeesCollection.Add(board2);
 
             // Assert
             ic1.Props["Hierarchy"].Should().Be(EmployeeHierarchy.IndividualContributor);

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -41,9 +43,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
 
             var slackClientFacade = new SlackClientFacade(_httpClientFactory, paginationHandler);
 
-            var emailLookuptable = new EmployeeCollection(null)
+            var employees = new List<Employee>()
                 .Add(existingEmail);
-            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", emailLookuptable);
+
+            var employeesCollection = new EmployeeCollection(employees, null);
+
+            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", employeesCollection);
 
             try
             {

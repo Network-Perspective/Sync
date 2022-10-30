@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -60,7 +61,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             else
                 _logger.LogDebug("Fetching organization members completed (employees: '{employeesCount}', bots: '{botsCount}')", slackUsers.Count(), botsIds.Count);
 
-            var employees = new EmployeeCollection(hashFunc);
+            var employees = new List<Employee>();
 
             foreach (var slackUser in slackUsers)
             {
@@ -78,7 +79,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 employees.Add(bot);
             }
 
-            return employees;
+            return new EmployeeCollection(employees, hashFunc);
         }
     }
 }

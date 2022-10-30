@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -132,6 +133,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         }
 
         public Task<EmployeeCollection> GetEmployees(SyncContext context, CancellationToken stoppingToken = default)
-            => Task.FromResult(new EmployeeCollection(null));
+            => Task.FromResult(new EmployeeCollection(Enumerable.Empty<Employee>(), null));
     }
 }
