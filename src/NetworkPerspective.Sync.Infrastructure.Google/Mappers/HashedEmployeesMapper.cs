@@ -28,7 +28,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
 
         public EmployeeCollection ToEmployees(IEnumerable<User> users)
         {
-            var employees = new EmployeeCollection(_hashFunc);
+            var employees = new List<Employee>();
 
             var organizationGroups = _companyStructureService
                 .CreateGroups(users.Select(x => x.OrgUnitPath));
@@ -48,7 +48,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
                 employees.Add(employee);
             }
 
-            return employees;
+            return new EmployeeCollection(employees, _hashFunc);
         }
 
         private IEnumerable<Group> GetEmployeeGroups(User user, ISet<Group> organizationGroups)
