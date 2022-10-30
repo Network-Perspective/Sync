@@ -28,11 +28,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             const string channelMember3 = "ChannelMember3";
             const string channelMember4 = "ChannelMember4";
 
-            var emailLookuptable = new EmployeeCollection(null)
+            var employees = new List<Employee>()
                 .Add(channelMember1)
                 .Add(channelMember2)
                 .Add(channelMember3)
                 .Add(channelMember4);
+
+            var employeesCollection = new EmployeeCollection(employees, null);
 
             var channelMembers = new HashSet<string>() { channelMember1, channelMember2, channelMember3, channelMember4 };
             var channelId = Guid.NewGuid().ToString();
@@ -49,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             };
 
             // Act
-            var reactions = new InteractionFactory(x => $"{x}_hashed", emailLookuptable).CreateFromThreadMessage(threadMessage, channelId, channelMembers);
+            var reactions = new InteractionFactory(x => $"{x}_hashed", employeesCollection).CreateFromThreadMessage(threadMessage, channelId, channelMembers);
 
             var threadInteractions = reactions.Where(x => x.UserAction.SetEquals(new HashSet<UserActionType> { UserActionType.Thread }));
             var rectionsInteractions = reactions.Where(x => x.UserAction.SetEquals(new HashSet<UserActionType> { UserActionType.Reaction }));
@@ -75,11 +77,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             const string channelMember3 = "ChannelMember3";
             const string channelMember4 = "ChannelMember4";
 
-            var emailLookuptable = new EmployeeCollection(null)
+            var employees = new List<Employee>()
                 .Add(channelMember1)
                 .Add(channelMember2)
                 .Add(channelMember3)
                 .Add(channelMember4);
+
+            var employeesCollection = new EmployeeCollection(employees, null);
 
             var channelMembers = new HashSet<string>() { channelMember1, channelMember2, channelMember3, channelMember4 };
             var channelId = Guid.NewGuid().ToString();
@@ -107,7 +111,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             };
 
             // Act
-            var reactions = new InteractionFactory(x => $"{x}_hashed", emailLookuptable).CreateFromThreadReplies(new[] { threadReply1, threadReply2 }, channelId, threadId, channelMember4, new TimeRange(DateTime.UtcNow.Date, DateTime.UtcNow.Date.AddDays(1)));
+            var reactions = new InteractionFactory(x => $"{x}_hashed", employeesCollection).CreateFromThreadReplies(new[] { threadReply1, threadReply2 }, channelId, threadId, channelMember4, new TimeRange(DateTime.UtcNow.Date, DateTime.UtcNow.Date.AddDays(1)));
 
             var threadInteractions = reactions.Where(x => x.UserAction.SetEquals(new HashSet<UserActionType> { UserActionType.Thread }));
             var replyInteractions = reactions.Where(x => x.UserAction.SetEquals(new HashSet<UserActionType> { UserActionType.Reply }));
