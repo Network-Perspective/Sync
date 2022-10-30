@@ -19,6 +19,7 @@ using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Controllers;
+using NetworkPerspective.Sync.Framework.Dtos;
 
 using Xunit;
 
@@ -29,12 +30,14 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
         private readonly Mock<INetworkPerspectiveCore> _networkPerspectiveCoreMock = new Mock<INetworkPerspectiveCore>();
         private readonly Mock<ISyncScheduler> _schduleFacadeMock = new Mock<ISyncScheduler>();
         private readonly Mock<INetworkService> _networkServiceMock = new Mock<INetworkService>();
+        private readonly Mock<ISyncHistoryService> _syncHistoryServiceMock = new Mock<ISyncHistoryService>();
 
         public SchedulesControllerTests()
         {
             _networkPerspectiveCoreMock.Reset();
             _schduleFacadeMock.Reset();
             _networkServiceMock.Reset();
+            _syncHistoryServiceMock.Reset();
         }
 
         public class Start : SchedulesControllerTests
@@ -54,10 +57,11 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 var controller = Create(accessToken);
 
                 // Act
-                await controller.StartAsync();
+                await controller.StartAsync(new SchedulerStartDto());
 
                 // Assert
                 _schduleFacadeMock.Verify(x => x.ScheduleAsync(networkId, It.IsAny<CancellationToken>()), Times.Once);
+                _syncHistoryServiceMock.Verify(x => x.OverrideSyncStartAsync(networkId, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Never);
             }
 
             [Fact]
@@ -75,7 +79,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 var controller = Create(accessToken);
 
                 // Act
-                await controller.StartAsync();
+                await controller.StartAsync(new SchedulerStartDto());
 
                 // Assert
                 _schduleFacadeMock.Verify(x => x.TriggerNowAsync(networkId, It.IsAny<CancellationToken>()), Times.Once);
@@ -92,7 +96,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                     .ThrowsAsync(new InvalidTokenException("https://networkperspective.io"));
 
                 var controller = Create(accessToken);
-                Func<Task> func = () => controller.StartAsync();
+                Func<Task> func = () => controller.StartAsync(new SchedulerStartDto());
 
                 // Act Assert
                 await func.Should().ThrowExactlyAsync<InvalidTokenException>();
@@ -116,11 +120,33 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                     .ThrowsAsync(new NetworkNotFoundException(networkId));
 
                 var controller = Create(accessToken);
-                Func<Task> func = () => controller.StartAsync();
+                Func<Task> func = () => controller.StartAsync(new SchedulerStartDto());
 
                 // Act Assert
                 await func.Should().ThrowExactlyAsync<NetworkNotFoundException>();
                 _schduleFacadeMock.Verify(x => x.ScheduleAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+            }
+
+            [Fact]
+            public async Task ShouldOverrideSyncPeriodStart()
+            {
+                // Arrange
+                var networkId = Guid.NewGuid();
+                var connectorId = Guid.NewGuid();
+                var accessToken = "access-token";
+                var syncPeriodStart = DateTime.Now;
+
+                _networkPerspectiveCoreMock
+                    .Setup(x => x.ValidateTokenAsync(It.Is<SecureString>(x => x.ToSystemString() == accessToken), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(new TokenValidationResponse(networkId, connectorId));
+
+                var controller = Create(accessToken);
+
+                // Act
+                await controller.StartAsync(new SchedulerStartDto { OverrideSyncPeriodStart = syncPeriodStart });
+
+                // Assert
+                _syncHistoryServiceMock.Verify(x => x.OverrideSyncStartAsync(networkId, syncPeriodStart.ToUniversalTime(), It.IsAny<CancellationToken>()), Times.Once);
             }
         }
 
@@ -174,7 +200,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             var features = new FeatureCollection();
             features.Set<IHttpRequestFeature>(requestFeature);
 
-            var controller = new SchedulesController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _schduleFacadeMock.Object, Mock.Of<IStatusLogger>());
+            var controller = new SchedulesController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _schduleFacadeMock.Object, _syncHistoryServiceMock.Object, Mock.Of<IStatusLogger>());
             controller.ControllerContext.HttpContext = new DefaultHttpContext(features);
 
             return controller;

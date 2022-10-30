@@ -1,5 +1,4 @@
-﻿using System.Net.Mime;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
@@ -8,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Framework.Dtos;
 
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -18,18 +18,21 @@ namespace NetworkPerspective.Sync.Framework.Controllers
     {
         private readonly INetworkService _networkService;
         private readonly ISyncScheduler _scheduler;
+        private readonly ISyncHistoryService _syncHistoryService;
         private readonly IStatusLogger _statusLogger;
 
-        public SchedulesController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ISyncScheduler scheduler, IStatusLogger statusLogger) : base(networkPerspectiveCore)
+        public SchedulesController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ISyncScheduler scheduler, ISyncHistoryService syncHistoryService, IStatusLogger statusLogger) : base(networkPerspectiveCore)
         {
             _networkService = networkService;
             _scheduler = scheduler;
+            _syncHistoryService = syncHistoryService;
             _statusLogger = statusLogger;
         }
 
         /// <summary>
         /// Schedules synchronization job for given network to run at midnight, and also triggers the synchronization to run now
         /// </summary>
+        /// <param name="request">Scheduler properties</param>
         /// <param name="stoppingToken">Stopping token</param>
         /// <returns>Result</returns>
         [HttpPost]
@@ -37,10 +40,13 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Network doesn't exist")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
-        public async Task<IActionResult> StartAsync(CancellationToken stoppingToken = default)
+        public async Task<IActionResult> StartAsync([FromBody] SchedulerStartDto request, CancellationToken stoppingToken = default)
         {
             var tokenValidationResponse = await ValidateTokenAsync(stoppingToken);
             await _networkService.ValidateExists(tokenValidationResponse.NetworkId, stoppingToken);
+
+            if (request.OverrideSyncPeriodStart is not null)
+                await _syncHistoryService.OverrideSyncStartAsync(tokenValidationResponse.NetworkId, request.OverrideSyncPeriodStart.Value.ToUniversalTime(), stoppingToken);
 
             await _scheduler.ScheduleAsync(tokenValidationResponse.NetworkId, stoppingToken);
             await _scheduler.TriggerNowAsync(tokenValidationResponse.NetworkId, stoppingToken);
@@ -66,6 +72,7 @@ namespace NetworkPerspective.Sync.Framework.Controllers
             await _networkService.ValidateExists(tokenValidationResponse.NetworkId, stoppingToken);
 
             await _scheduler.UnscheduleAsync(tokenValidationResponse.NetworkId, stoppingToken);
+            await _scheduler.InterruptNowAsync(tokenValidationResponse.NetworkId, stoppingToken);
 
             await _statusLogger.LogInfoAsync(tokenValidationResponse.NetworkId, "Schedule stopped", stoppingToken);
 

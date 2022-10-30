@@ -18,8 +18,10 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
 
         const string groupAttributeName1 = "group_attribute_name_1";
         const string groupAttributeName2 = "group_attribute_name_2";
+        const string groupAttributeName3 = "group_attribute_name_3";
+        const string groupAttributeName4 = "group_attribute_name_4";
 
-        static readonly IEnumerable<string> groupAttributes = new[] { groupAttributeName1, groupAttributeName2 };
+        static readonly IEnumerable<string> groupAttributes = new[] { groupAttributeName1, groupAttributeName2, groupAttributeName3, groupAttributeName4 };
         static readonly IEnumerable<string> propAttributes = new[] { propAttributeName1, propAttributeName2 };
 
         readonly CustomAttributesConfig config = new CustomAttributesConfig(
@@ -35,9 +37,9 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 // Arrange
                 var customAttributesValues = new[]
                 {
-                    new CustomAttr { Name = groupAttributeName1, Value = "value1_1" },
-                    new CustomAttr { Name = groupAttributeName1, Value = "value1_2" },
-                    new CustomAttr { Name = groupAttributeName2, Value = "value2" }
+                    CustomAttr.CreateMultiValue(groupAttributeName1, "value1_1"),
+                    CustomAttr.CreateMultiValue(groupAttributeName1, "value1_2"),
+                    CustomAttr.Create(groupAttributeName2, "value2")
                 };
 
                 var expectedGroups = new[]
@@ -66,10 +68,10 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 // Arrange
                 var customAttributesValues = new[]
                 {
-                    new CustomAttr { Name = propAttributeName1, Value = "value1" },
-                    new CustomAttr { Name = propAttributeName2, Value = "value2" },
-                    new CustomAttr { Name = groupAttributeName1, Value = "value3" },
-                    new CustomAttr { Name = groupAttributeName1, Value = "value4" },
+                    CustomAttr.Create(propAttributeName1, "value1"),
+                    CustomAttr.Create(propAttributeName2, "value2"),
+                    CustomAttr.CreateMultiValue(groupAttributeName1, "value3"),
+                    CustomAttr.CreateMultiValue(groupAttributeName1, "value4"),
                 };
 
                 var expectedProps = new Dictionary<string, object>
@@ -96,16 +98,18 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 // Arrange
                 var customAttributesValues = new[]
                 {
-                    new CustomAttr { Name = propAttributeName1, Value = "value1" },
-                    new CustomAttr { Name = groupAttributeName1, Value = "value2" },
-                    new CustomAttr { Name = groupAttributeName1, Value = "value3" },
-                    new CustomAttr { Name = groupAttributeName2, Value = "value4" }
+                    CustomAttr.Create(propAttributeName1, "value1"),
+                    CustomAttr.CreateMultiValue(groupAttributeName1, "value2"),
+                    CustomAttr.CreateMultiValue(groupAttributeName1, "value3"),
+                    CustomAttr.Create(groupAttributeName2, "value4"),
+                    CustomAttr.CreateMultiValue(groupAttributeName3, "value5")
                 };
 
                 var expectedProps = new Dictionary<string, object>
                 {
                     { groupAttributeName1, new[] {"value2", "value3" } },
-                    { groupAttributeName2, "value4"}
+                    { groupAttributeName2, "value4"},
+                    { groupAttributeName3, new[] {"value5"} }
                 };
 
                 var service = new CustomAttributesService(config);

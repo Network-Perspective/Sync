@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 
@@ -14,6 +15,7 @@ namespace NetworkPerspective.Sync.Application.Services
     {
         Task<DateTime> EvaluateSyncStartAsync(Guid networkId, CancellationToken stoppingToken = default);
         Task SaveLogAsync(SyncHistoryEntry syncHistoryEntry, CancellationToken stoppingToken = default);
+        Task OverrideSyncStartAsync(Guid networkId, DateTime syncStart, CancellationToken stoppingToken = default);
     }
 
     internal class SyncHistoryService : ISyncHistoryService
@@ -54,6 +56,22 @@ namespace NetworkPerspective.Sync.Application.Services
             await _unitOfWork.CommitAsync(stoppingToken);
 
             _logger.LogDebug("Added {type} to persistence", typeof(SyncHistoryEntry));
+        }
+
+        public async Task OverrideSyncStartAsync(Guid networkId, DateTime syncStart, CancellationToken stoppingToken = default)
+        {
+            _logger.LogDebug("Overriding sync start to '{start}' for network '{networkId}'", syncStart, networkId);
+
+            var repository = _unitOfWork.GetSyncHistoryRepository();
+
+            await repository.RemoveAllAsync(networkId, stoppingToken);
+
+            var initLogEntry = new SyncHistoryEntry(networkId, DateTime.MinValue, new TimeRange(syncStart, syncStart));
+            await repository.AddAsync(initLogEntry, stoppingToken);
+
+            await _unitOfWork.CommitAsync(stoppingToken);
+
+            _logger.LogDebug("Overriden sync start to '{start}' for network '{networkId}'", syncStart, networkId);
         }
     }
 }
