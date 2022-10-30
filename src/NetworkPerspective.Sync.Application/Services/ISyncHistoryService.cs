@@ -64,9 +64,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             var repository = _unitOfWork.GetSyncHistoryRepository();
 
-            await repository.RemoveAllAsync(networkId, stoppingToken);
-
-            var initLogEntry = new SyncHistoryEntry(networkId, DateTime.MinValue, new TimeRange(syncStart, syncStart));
+            var initLogEntry = new SyncHistoryEntry(networkId, _clock.UtcNow(), new TimeRange(syncStart, syncStart));
             await repository.AddAsync(initLogEntry, stoppingToken);
 
             await _unitOfWork.CommitAsync(stoppingToken);
