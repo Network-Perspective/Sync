@@ -69,9 +69,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var network = context.Get<Network<GoogleNetworkProperties>>();
             var hashingService = context.Get<IHashingService>();
 
-            await InitializeInContext(context, () => _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken));
+            var mapper = new EmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes));
+            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
 
-            var employeeCollection = context.Get<EmployeeCollection>();
+            var employeeCollection = mapper.ToEmployees(users);
 
             var interactionFactory = new InteractionFactory(hashingService.Hash, employeeCollection, _clock);
             var result = new HashSet<Interaction>(new InteractionEqualityComparer());
@@ -103,12 +104,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var network = context.Get<Network<GoogleNetworkProperties>>();
 
             var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
-
             var mapper = new EmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes));
 
-            await InitializeInContext(context, () => Task.FromResult(mapper.ToEmployees(users)));
-
-            return context.Get<EmployeeCollection>();
+            return mapper.ToEmployees(users);
         }
 
         public async Task<EmployeeCollection> GetHashedEmployees(SyncContext context, CancellationToken stoppingToken = default)
@@ -122,8 +120,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var credentials = context.Get<GoogleCredential>();
             var network = context.Get<Network<GoogleNetworkProperties>>();
             var hashingService = context.Get<IHashingService>();
-            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
 
+            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
             var mapper = new HashedEmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes), hashingService.Hash);
 
             return mapper.ToEmployees(users);
