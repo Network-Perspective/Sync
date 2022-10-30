@@ -9,6 +9,8 @@ using Colors.Net.StringColorExtensions;
 using CsvHelper;
 using CsvHelper.Configuration;
 
+using Microsoft.Extensions.Options;
+
 using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Core.Services;
 
@@ -83,15 +85,13 @@ namespace NetworkPerspective.Sync.Cli
 
         private readonly ISyncHashedClient _client;
         private readonly IFileSystem _fileSystem;
-        private readonly IInteractionsBatchSplitter _batchSplitter;
         private long estimatedNoOfBatches = 0;
         private ProgressBar _sendingProgress;
 
-        public InteractionsClient(ISyncHashedClient client, IFileSystem fileSystem, IInteractionsBatchSplitter batchSplitter)
+        public InteractionsClient(ISyncHashedClient client, IFileSystem fileSystem)
         {
             _client = client;
             _fileSystem = fileSystem;
-            _batchSplitter = batchSplitter;
         }
 
         public async Task Main(InteractionsOpts args)
@@ -109,6 +109,13 @@ namespace NetworkPerspective.Sync.Cli
             // w don't want extra logging to appear on console
             LogManager.DisableLogging();
 
+            var batchSplitterConfig = new InteractionsBatchSplitterConfig
+            {
+                BatchSize = args.BatchSize,
+                BufferSize = long.MaxValue
+            };
+            var batchSplitter = new InteractionsBatchSplitter(Options.Create(batchSplitterConfig));
+
             _fromCols = args.FromCol.AsColumnDescriptorDictionary();
             _toCols = args.ToCol.AsColumnDescriptorDictionary();
             _whenCols = args.WhenCol.AsColumnDescriptorDictionary();
@@ -117,21 +124,16 @@ namespace NetworkPerspective.Sync.Cli
             _durationCols = args.DurationCol.AsColumnDescriptorDictionary();
 
             var timer = Stopwatch.StartNew();
-            _batchSplitter.BatchSize = args.BatchSize;
-            _batchSplitter.BufferSize = null;
-            _batchSplitter.OnBatchIsReady(async e => await SendBatchAsync(e.BatchNo, e.Interactions, args));
 
-
+            batchSplitter.OnBatchIsReady(async e => await SendBatchAsync(e.BatchNo, e.Interactions, args));
 
             // read the CSV             
-            foreach (var fn in args.Csv)
-            {
-                await ReadCsvInteractions(fn, args);
-            }
+            foreach (var fileName in args.Csv)
+                await ReadCsvInteractions(fileName, args, batchSplitter);
 
             ColoredConsole.WriteLine($"Uploading data");
             _sendingProgress = new ProgressBar();
-            await _batchSplitter.FlushAsync();
+            await batchSplitter.FlushAsync();
             _sendingProgress.Dispose();
 
             ColoredConsole.WriteLine("Success!".Green());
@@ -165,11 +167,9 @@ namespace NetworkPerspective.Sync.Cli
                 var corellationId = await _client.SyncInteractionsAsync(request);
                 ColoredConsole.WriteLine("CorellationId: " + corellationId.ToString().Cyan());
             }
-
-            await Task.CompletedTask;
         }
 
-        private async Task ReadCsvInteractions(string fileName, InteractionsOpts args)
+        private async Task ReadCsvInteractions(string fileName, InteractionsOpts args, IInteractionsBatchSplitter batchSplitter)
         {
             ColoredConsole.WriteLine($"Reading CSV {fileName}...");
             var header = new List<ColumnDescriptor>();
@@ -259,7 +259,7 @@ namespace NetworkPerspective.Sync.Cli
                         }
                     }
 
-                    await _batchSplitter.PushInteractionAsync(interaction);
+                    await batchSplitter.PushInteractionAsync(interaction);
 
                     lineCounter++;
 
@@ -268,7 +268,7 @@ namespace NetworkPerspective.Sync.Cli
                     progress.Report((double)position / (double)fileSize);
                 }
 
-                estimatedNoOfBatches += lineCounter / _batchSplitter.BatchSize;
+                estimatedNoOfBatches += lineCounter / args.BatchSize;
             }
         }
     }

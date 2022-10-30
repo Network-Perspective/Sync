@@ -17,7 +17,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
                 .Callback<SyncHashedInteractionsCommand>(req => _interceptedCommand.Add(req));
 
             _fileSystem = samples.FileSystem;
-            _interactionsClient = new InteractionsClient(_coreClient.Object, _fileSystem, new InteractionsBatchSplitter());
+            _interactionsClient = new InteractionsClient(_coreClient.Object, _fileSystem);
         }
 
         [Fact]
