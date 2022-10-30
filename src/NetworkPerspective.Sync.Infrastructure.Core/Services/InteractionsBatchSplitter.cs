@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using NetworkPerspective.Sync.Application.Extensions;
+
 namespace NetworkPerspective.Sync.Infrastructure.Core.Services
 {
     public interface IInteractionsBatchSplitter
@@ -75,15 +77,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
                 _batchNo++;
             }
         }
-
-        private readonly long _ticksIn10Minutes = TimeSpan.FromMinutes(10).Ticks;
             
         private Tuple<DateTime, string> GetKey(HashedInteraction interaction)
         {
             if (interaction == null) return null;
 
-            var dt = interaction.When.Value.UtcDateTime;
-            var roundDate = new DateTime((dt.Ticks + _ticksIn10Minutes - 1) / _ticksIn10Minutes * _ticksIn10Minutes, DateTimeKind.Utc);
+            var roundDate = interaction.When.Value.UtcDateTime.Bucket(TimeSpan.FromMinutes(10));
 
             return new Tuple<DateTime, string>(roundDate, interaction.EventId);
         }
