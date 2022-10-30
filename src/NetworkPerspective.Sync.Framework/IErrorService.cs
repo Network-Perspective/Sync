@@ -92,7 +92,7 @@ namespace NetworkPerspective.Sync.Framework
                             details: $"Network '{nnfex.NetworkId}' doesn't exist. Please add network",
                             statusCode: StatusCodes.Status404NotFound);
                     }
-                case TaskCanceledException:
+                case Exception ex when ex.IndicatesTaskCanceled():
                     {
                         return new Error(
                             type: Error.Types.Client,

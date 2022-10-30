@@ -34,6 +34,7 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         [HttpGet]
         [SwaggerResponse(StatusCodes.Status200OK, "Status", typeof(StatusDto))]
         [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Request cancelled")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Network doesn't exist")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
         public async Task<StatusDto> GetStatus(CancellationToken stoppingToken = default)
