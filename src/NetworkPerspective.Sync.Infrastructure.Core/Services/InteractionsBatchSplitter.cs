@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Application.Extensions;
@@ -13,7 +12,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
         int BatchSize { get; set; }
         long? BufferSize { get; set; }
 
-        event InteractionsBatchSplitter.BatchIsReadyAsyncEventHandler BatchIsReadyAsync;
+        void OnBatchIsReady(InteractionsBatchSplitter.BatchIsReadyCallback callback);
         Task FlushAsync();
         Task PushInteractionAsync(HashedInteraction interaction);
     }
@@ -25,9 +24,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
     /// </summary>
     public class InteractionsBatchSplitter : IInteractionsBatchSplitter
     {
-        public delegate Task BatchIsReadyAsyncEventHandler(object sender, BatchIsReadyEventArgs e);
+        public delegate Task BatchIsReadyCallback(BatchIsReadyArgs args);
 
-        public event BatchIsReadyAsyncEventHandler BatchIsReadyAsync;
+        private BatchIsReadyCallback _batchIsReadyCallback = _ => Task.CompletedTask;
         
         public int BatchSize { get; set; } = 10000;
         public long? BufferSize { get; set; } = 100000;
@@ -73,7 +72,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
 
             if (batch.Any())
             {
-                await BatchIsReadyAsync?.Invoke(this, new BatchIsReadyEventArgs(_batchNo, batch));
+                await _batchIsReadyCallback?.Invoke(new BatchIsReadyArgs(_batchNo, batch));
                 _batchNo++;
             }
         }
@@ -94,11 +93,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
                 await EmitNewBatchAsync();
             }
         }
+
+        public void OnBatchIsReady(BatchIsReadyCallback callback)
+            => _batchIsReadyCallback = callback;
     }
 
-    public class BatchIsReadyEventArgs
+    public class BatchIsReadyArgs
     {
-        public BatchIsReadyEventArgs(int batchNo, ICollection<HashedInteraction> interactions)
+        public BatchIsReadyArgs(int batchNo, ICollection<HashedInteraction> interactions)
         {
             BatchNo = batchNo;
             Interactions = interactions;

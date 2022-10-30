@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.IO.Abstractions;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Colors.Net;
 using Colors.Net.StringColorExtensions;
@@ -19,12 +13,10 @@ using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Core.Services;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 using NLog;
 
 using PowerArgs;
-using PowerArgs.Cli;
 
 namespace NetworkPerspective.Sync.Cli
 {
@@ -127,10 +119,9 @@ namespace NetworkPerspective.Sync.Cli
             var timer = Stopwatch.StartNew();
             _batchSplitter.BatchSize = args.BatchSize;
             _batchSplitter.BufferSize = null;
-            _batchSplitter.BatchIsReadyAsync += async (object sender, BatchIsReadyEventArgs e) =>
-            {
-                await SendBatch(e.BatchNo, e.Interactions, args);
-            };
+            _batchSplitter.OnBatchIsReady(async e => await SendBatchAsync(e.BatchNo, e.Interactions, args));
+
+
 
             // read the CSV             
             foreach (var fn in args.Csv)
@@ -147,7 +138,7 @@ namespace NetworkPerspective.Sync.Cli
             ColoredConsole.WriteLine("Time elapsed " + timer.Elapsed);
         }
 
-        private async Task SendBatch(int batchNo, ICollection<HashedInteraction> interactions, InteractionsOpts args)
+        private async Task SendBatchAsync(int batchNo, ICollection<HashedInteraction> interactions, InteractionsOpts args)
         {
             var request = new SyncHashedInteractionsCommand()
             {
