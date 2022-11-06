@@ -17,6 +17,7 @@ using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Aggregation;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Domain.Meetings;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
@@ -86,7 +87,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 var request = calendarService.Events.List(userEmail);
                 request.TimeMin = timeRange.Start;
                 request.TimeMax = timeRange.End;
-                request.SingleEvents = false;
+                request.SingleEvents = true;
 
                 var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);
 
@@ -98,8 +99,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 var actionsAggregator = new ActionsAggregator(userEmail);
                 foreach (var meeting in response.Items)
                 {
+                    var recurrence = await GetRecurrenceAsync(calendarService, userEmail, meeting.RecurringEventId, stoppingToken);
                     actionsAggregator.Add(meeting.GetStart());
-                    result.UnionWith(interactionFactory.CreateFromMeeting(meeting));
+                    result.UnionWith(interactionFactory.CreateFromMeeting(meeting, recurrence));
                 }
 
                 _logger.LogDebug("Evaluation of interactions based on callendar for user '{email}' completed. Found {count} interactions", "***", result.Count);
@@ -118,6 +120,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 _logger.LogWarning(ex, "Unable to evaluate interactions based on callendar for given user. Please see inner exception\n");
                 return ImmutableHashSet<Interaction>.Empty;
             }
+        }
+
+        private async Task<RecurrenceType?> GetRecurrenceAsync(CalendarService calendarService, string userEmail, string recurrenceEventId, CancellationToken stoppingToken)
+        {
+            if (string.IsNullOrEmpty(recurrenceEventId))
+                return null;
+
+            var request = calendarService.Events.Get(userEmail, recurrenceEventId);
+            var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);
+
+            return response.GetRecurrence();
         }
 
         private static bool IndicatesIsNotACalendarUser(GoogleApiException ex)
