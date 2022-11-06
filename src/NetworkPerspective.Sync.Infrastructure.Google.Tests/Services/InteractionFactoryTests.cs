@@ -99,7 +99,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             // Act
             var interactions = new InteractionFactory(x => $"{x}_hashed", employeesCollection, new Clock())
-                .CreateFromMeeting(meeting);
+                .CreateFromMeeting(meeting, null);
 
             // Assert
             var emailInteractions = interactions.Where(x => x.Type == InteractionType.Meetings);
