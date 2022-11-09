@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
@@ -29,6 +30,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         private readonly IHashingServiceFactory _hashingServiceFactory;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly CursorPaginationHandler _cursorPaginationHandler;
+        private readonly IClock _clock;
         private readonly ILogger<SlackFacade> _logger;
 
         public SlackFacade(INetworkService networkService,
@@ -38,6 +40,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                            IHashingServiceFactory hashingServiceFactory,
                            IHttpClientFactory httpClientFactory,
                            CursorPaginationHandler cursorPaginationHandler,
+                           IClock clock,
                            ILogger<SlackFacade> logger)
         {
             _networkService = networkService;
@@ -47,6 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             _hashingServiceFactory = hashingServiceFactory;
             _httpClientFactory = httpClientFactory;
             _cursorPaginationHandler = cursorPaginationHandler;
+            _clock = clock;
             _logger = logger;
         }
 
@@ -70,11 +74,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             var hashingService = context.Get<IHashingService>();
             var network = context.Get<Network<SlackNetworkProperties>>();
 
-            var employees = await _employeeProfileClient.GetEmployees(slackClientFacace, context.NetworkConfig.EmailFilter, stoppingToken);
+            await InitializeInContext(context, () => _employeeProfileClient.GetEmployees(slackClientFacace, context.NetworkConfig.EmailFilter, stoppingToken));
+
+            var employees = context.Get<EmployeeCollection>();
 
             var interactionFactory = new InteractionFactory(hashingService.Hash, employees);
 
-            return await _chatClient.GetInteractions(slackClientFacace, network, interactionFactory, context.CurrentRange, stoppingToken); ;
+            var timeRange = new TimeRange(context.Since.AddDays(-30), _clock.UtcNow());
+            await InitializeInContext(context, () => _chatClient.GetInteractions(slackClientFacace, network, interactionFactory, timeRange, stoppingToken));
+
+            var chatInteractions = context
+                .Get<ISet<Interaction>>()
+                .Where(x => context.CurrentRange.IsInRange(x.Timestamp));
+
+            return chatInteractions.ToHashSet(new InteractionEqualityComparer());
         }
 
         public async Task<EmployeeCollection> GetHashedEmployees(SyncContext context, CancellationToken stoppingToken = default)

@@ -10,6 +10,7 @@ using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
@@ -98,7 +99,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
                 var networkHash = new NetworkCredential(string.Empty, accessToken).Password;
 
                 if (interactions.Any())
-                    await new FileDataWriter("Data").WriteAsync(command.Interactions, $"{accessToken.GetHashCode()}_{interactions.First().Timestamp:yyyyMMdd_HHmmss}_interactions.json", stoppingToken);
+                    await new FileDataWriter("Data").WriteAsync(command.Interactions, $"{accessToken.ToSystemString().GetHashCode()}_{interactions.First().Timestamp:yyyyMMdd_HHmmss}_interactions.json", stoppingToken);
             }
             catch (Exception ex)
             {
