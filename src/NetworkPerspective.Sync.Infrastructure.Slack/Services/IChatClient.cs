@@ -92,7 +92,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                                 foreach (var slackThreadReply in slackThreadReplies)
                                     actionsAggregator.Add(TimeStampMapper.SlackTimeStampToDateTime(slackThreadReply.TimeStamp));
 
-                                var repliesInteractions = interactionFactory.CreateFromThreadReplies(slackThreadReplies, slackChannel.Id, slackThreadMessage.TimeStamp, slackThreadMessage.User, timeRange);
+                                var repliesInteractions = interactionFactory.CreateFromThreadReplies(slackThreadReplies, slackChannel.Id, slackChannel.Id + slackThreadMessage.TimeStamp, slackThreadMessage.User, timeRange);
 
                                 if (slackThreadReplies.Any())
                                 {
