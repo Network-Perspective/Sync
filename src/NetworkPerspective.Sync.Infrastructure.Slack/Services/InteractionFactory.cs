@@ -5,6 +5,7 @@ using System.Linq;
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
 
@@ -24,7 +25,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         public ISet<Interaction> CreateFromThreadMessage(ConversationHistoryResponse.SingleMessage threadMessage, string channelId, ISet<string> channelMembers)
         {
             var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
-            var threadId = threadMessage.MessageId;
+            var threadId = channelId + threadMessage.TimeStamp;
             var timeStamp = TimeStampMapper.SlackTimeStampToDateTime(threadMessage.TimeStamp);
 
             foreach (var channelMember in channelMembers)
@@ -42,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             var reactingUsers = threadMessage.Reactions.SelectMany(x => x.Users);
             foreach (var reactingUser in reactingUsers)
             {
-                var reactionHash = HashCode.Combine(timeStamp, reactingUser, channelId);
+                var reactionHash = $"{timeStamp.Ticks}{reactingUser.GetStableHashCode()}{channelId.GetStableHashCode()}";
 
                 var interaction = Interaction.CreateChatReaction(
                     timestamp: timeStamp,
@@ -65,7 +66,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
             foreach (var reply in replies)
             {
-                var replyId = reply.MessageId;
+                var replyId = threadId + reply.TimeStamp;
                 var timeStamp = TimeStampMapper.SlackTimeStampToDateTime(reply.TimeStamp);
 
                 foreach (var user in activeUsers)
@@ -88,7 +89,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 {
                     foreach (var reactingUser in reply.Reactions.SelectMany(x => x.Users))
                     {
-                        var reactionHash = HashCode.Combine(timeStamp, reactingUser, channelId, replyId);
+                        var reactionHash = $"{timeStamp.Ticks}{reactingUser.GetStableHashCode()}{channelId.GetStableHashCode()}{replyId.GetStableHashCode()}";
 
                         var interaction = Interaction.CreateChatReaction(
                             timestamp: timeStamp,
