@@ -25,7 +25,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         public ISet<Interaction> CreateFromThreadMessage(ConversationHistoryResponse.SingleMessage threadMessage, string channelId, ISet<string> channelMembers)
         {
             var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
-            var threadId = threadMessage.TimeStamp + channelId;
+            var threadId = channelId + threadMessage.TimeStamp;
             var timeStamp = TimeStampMapper.SlackTimeStampToDateTime(threadMessage.TimeStamp);
 
             foreach (var channelMember in channelMembers)
