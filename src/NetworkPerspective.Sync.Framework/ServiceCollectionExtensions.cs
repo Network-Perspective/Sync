@@ -20,7 +20,6 @@ namespace NetworkPerspective.Sync.Framework
 
             // add telemetry
             services.AddApplicationInsightsTelemetry();            
-            services.AddServiceProfiler();
 
             return services;
         }
