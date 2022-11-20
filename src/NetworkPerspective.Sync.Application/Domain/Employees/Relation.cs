@@ -2,9 +2,12 @@
 {
     public class Relation
     {
-        public string Name { get; }
-        public string TargetEmployeeEmail { get; }
-        public bool IsHashed { get; }
+        public string Name { get; init; }
+        public string TargetEmployeeEmail { get; init; }
+        public bool IsHashed { get; init; }
+
+        public Relation()
+        { }
 
         private Relation(string name, string targetEmployeeEmail, bool isHashed)
         {

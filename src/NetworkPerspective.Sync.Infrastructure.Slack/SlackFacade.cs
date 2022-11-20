@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -18,6 +19,8 @@ using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
+
+using Newtonsoft.Json;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack
 {
@@ -58,6 +61,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         {
             _logger.LogInformation("Fetching employees data...");
 
+            var storagePath = Path.Combine("tmp", context.NetworkId.ToString());
+
             await InitializeInContext(context, () => _networkService.GetAsync<SlackNetworkProperties>(context.NetworkId, stoppingToken));
             await InitializeInContext(context, async () =>
             {
@@ -81,11 +86,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             var interactionFactory = new InteractionFactory(hashingService.Hash, employees);
 
             var timeRange = new TimeRange(context.Since.AddDays(-30), _clock.UtcNow());
-            await InitializeInContext(context, () => _chatClient.GetInteractions(slackClientFacace, network, interactionFactory, timeRange, stoppingToken));
+            await InitializeInContext(context, async () =>
+            {
+                var storage = new InteractionsFileStorage(storagePath) as IInteractionsStorage;
+                await _chatClient.GetInteractions(storage, slackClientFacace, network, interactionFactory, timeRange, stoppingToken);
+                return storage;
 
-            var chatInteractions = context
-                .Get<ISet<Interaction>>()
-                .Where(x => context.CurrentRange.IsInRange(x.Timestamp));
+            });
+
+            var storage = context.Get<IInteractionsStorage>();
+
+            var chatInteractions = await storage.PullInteractionsAsync(context.CurrentRange.Start.Date, stoppingToken);
 
             return chatInteractions.ToHashSet(new InteractionEqualityComparer());
         }

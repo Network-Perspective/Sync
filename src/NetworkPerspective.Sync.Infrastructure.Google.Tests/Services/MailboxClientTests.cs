@@ -51,9 +51,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
                 .Add(existingEmail);
             var employeesCollection = new EmployeeCollection(employees, null);
             var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", employeesCollection, clock);
+            var date = new DateTime(2021, 11, 01);
 
             // Act
-            var result = await mailboxClient.GetInteractionsAsync(Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
+            var storage = new InteractionsFileStorage("tmp");
+            await mailboxClient.GetInteractionsAsync(storage, Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
+
+            var result = await storage.PullInteractionsAsync(date.Date);
 
             // Assert
             result.Should().NotBeNullOrEmpty();
