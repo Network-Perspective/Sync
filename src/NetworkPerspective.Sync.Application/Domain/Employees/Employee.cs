@@ -10,6 +10,8 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 {
     public class Employee
     {
+        public static readonly IEqualityComparer<Employee> EqualityComparer = new EmployeeEqualityComparer(EmployeeId.EqualityComparer);
+
         public const string PropKeyTeam = "Team";
         public const string PropKeyDepartment = "Department";
         public const string PropKeyHierarchy = "Hierarchy";
@@ -17,8 +19,6 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public const string PropKeyName = "Name";
 
         public const string SupervisorRelationName = "Supervisor";
-
-        public static readonly IEqualityComparer<Employee> EqualityComparer = new EmployeeEqualityComparer();
 
         private readonly IList<Group> _groups;
         private readonly IDictionary<string, object> _props;

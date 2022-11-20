@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
-
 namespace NetworkPerspective.Sync.Application.Domain.Interactions
 {
     public class InteractionEqualityComparer : IEqualityComparer<Interaction>
     {
-        private static readonly IEqualityComparer<Employee> VertexEqualityComparer = Employee.EqualityComparer;
+        private readonly IEqualityComparer<InteractionVertex> _interactionVertexEqualityComparer;
+
+        public InteractionEqualityComparer(IEqualityComparer<InteractionVertex> interactionVertexEqualityComparer)
+        {
+            _interactionVertexEqualityComparer = interactionVertexEqualityComparer;
+        }
 
         public bool Equals(Interaction x, Interaction y)
         {
@@ -17,10 +20,10 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
             if (x.Timestamp != y.Timestamp)
                 return false;
 
-            if (!VertexEqualityComparer.Equals(x.Source, y.Source))
+            if (!_interactionVertexEqualityComparer.Equals(x.Source, y.Source))
                 return false;
 
-            if (!VertexEqualityComparer.Equals(x.Target, y.Target))
+            if (!_interactionVertexEqualityComparer.Equals(x.Target, y.Target))
                 return false;
 
             if (!string.Equals(x.ChannelId, y.ChannelId))
@@ -51,7 +54,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
             foreach (var item in obj.UserAction)
                 userActionHash.Add(item);
 
-            return HashCode.Combine(obj.Timestamp, VertexEqualityComparer.GetHashCode(obj.Source), VertexEqualityComparer.GetHashCode(obj.Target), obj.Type, userActionHash.ToHashCode(), obj.ChannelId);
+            return HashCode.Combine(obj.Timestamp, _interactionVertexEqualityComparer.GetHashCode(obj.Source), _interactionVertexEqualityComparer.GetHashCode(obj.Target), obj.Type, userActionHash.ToHashCode(), obj.ChannelId);
         }
     }
 }

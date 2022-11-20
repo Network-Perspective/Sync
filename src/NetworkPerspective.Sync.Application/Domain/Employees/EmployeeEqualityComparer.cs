@@ -1,14 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace NetworkPerspective.Sync.Application.Domain.Employees
 {
     public class EmployeeEqualityComparer : IEqualityComparer<Employee>
     {
-        private static readonly IEqualityComparer<string> StringEqualityComparer = StringComparer.InvariantCultureIgnoreCase;
+        private readonly IEqualityComparer<EmployeeId> _employeeIdEqualityComparer;
+
+        public EmployeeEqualityComparer(IEqualityComparer<EmployeeId> employeeIdEqualityComparer)
+        {
+            _employeeIdEqualityComparer = employeeIdEqualityComparer;
+        }
 
         public bool Equals(Employee x, Employee y)
-            => StringEqualityComparer.Equals(x.Id.PrimaryId, y.Id.PrimaryId) && StringEqualityComparer.Equals(x.Id.DataSourceId, y.Id.DataSourceId);
+            => _employeeIdEqualityComparer.Equals(x.Id, y.Id);
 
         public int GetHashCode(Employee obj)
             => obj.Id.PrimaryId.GetHashCode();

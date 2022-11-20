@@ -38,7 +38,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
         public async Task<ISet<Interaction>> FetchAsync()
         {
-            var result = new HashSet<Interaction>(new InteractionEqualityComparer());
+            var result = new HashSet<Interaction>(Interaction.EqualityComparer);
 
             var interactionsBag = new ConcurrentBag<ISet<Interaction>>();
 

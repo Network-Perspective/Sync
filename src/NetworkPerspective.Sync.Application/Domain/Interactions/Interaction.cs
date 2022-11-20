@@ -11,10 +11,12 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
 {
     public class Interaction
     {
+        public static readonly IEqualityComparer<Interaction> EqualityComparer = new InteractionEqualityComparer(InteractionVertex.EqualityComparer);
+
         public bool IsHashed { get; }
         public DateTime Timestamp { get; }
-        public Employee Source { get; }
-        public Employee Target { get; }
+        public InteractionVertex Source { get; }
+        public InteractionVertex Target { get; }
         public InteractionType Type { get; }
         public string ChannelId { get; }
         public string ParentEventId { get; }
@@ -23,7 +25,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         public ISet<UserActionType> UserAction { get; }
         public int? Duration { get; }
 
-        private Interaction(DateTime timestamp, Employee source, Employee target, InteractionType type, string channelId, string eventId, string parentEventId, RecurrenceType? recurring, ISet<UserActionType> userActions, int? duration, bool isHashed)
+        private Interaction(DateTime timestamp, InteractionVertex source, InteractionVertex target, InteractionType type, string channelId, string eventId, string parentEventId, RecurrenceType? recurring, ISet<UserActionType> userActions, int? duration, bool isHashed)
         {
             Timestamp = timestamp;
             Source = source;
@@ -38,7 +40,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
             IsHashed = isHashed;
         }
 
-        public static Interaction CreateEmail(DateTime timestamp, Employee source, Employee target, string eventId)
+        public static Interaction CreateEmail(DateTime timestamp, InteractionVertex source, InteractionVertex target, string eventId)
         {
             return new Interaction(
                 timestamp: timestamp.Bucket(TimeSpan.FromMinutes(10)),
@@ -54,7 +56,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
                 isHashed: false);
         }
 
-        public static Interaction CreateMeeting(DateTime timestamp, Employee source, Employee target, string eventId, RecurrenceType? recurring, int duration)
+        public static Interaction CreateMeeting(DateTime timestamp, InteractionVertex source, InteractionVertex target, string eventId, RecurrenceType? recurring, int duration)
         {
             return new Interaction(
                 timestamp: timestamp.Bucket(TimeSpan.FromHours(1)),
@@ -70,16 +72,16 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
                 isHashed: false);
         }
 
-        public static Interaction CreateChatThread(DateTime timestamp, Employee source, Employee target, string eventId, string channelId)
+        public static Interaction CreateChatThread(DateTime timestamp, InteractionVertex source, InteractionVertex target, string eventId, string channelId)
             => CreateChatInteraction(timestamp, source, target, eventId, null, channelId, new HashSet<UserActionType> { UserActionType.Thread });
 
-        public static Interaction CreateChatReply(DateTime timestamp, Employee source, Employee target, string eventId, string parentEventId, string channelId)
+        public static Interaction CreateChatReply(DateTime timestamp, InteractionVertex source, InteractionVertex target, string eventId, string parentEventId, string channelId)
             => CreateChatInteraction(timestamp, source, target, eventId, parentEventId, channelId, new HashSet<UserActionType> { UserActionType.Reply });
 
-        public static Interaction CreateChatReaction(DateTime timestamp, Employee source, Employee target, string eventId, string parentEventId, string channelId)
+        public static Interaction CreateChatReaction(DateTime timestamp, InteractionVertex source, InteractionVertex target, string eventId, string parentEventId, string channelId)
             => CreateChatInteraction(timestamp, source, target, eventId, parentEventId, channelId, new HashSet<UserActionType> { UserActionType.Reaction });
 
-        private static Interaction CreateChatInteraction(DateTime timestamp, Employee source, Employee target, string eventId, string parentEventId, string channelId, ISet<UserActionType> userActionType)
+        private static Interaction CreateChatInteraction(DateTime timestamp, InteractionVertex source, InteractionVertex target, string eventId, string parentEventId, string channelId, ISet<UserActionType> userActionType)
         {
             return new Interaction(
                 timestamp: timestamp.Bucket(TimeSpan.FromMinutes(10)),

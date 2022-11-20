@@ -41,7 +41,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public IEnumerable<Employee> GetAllInternal()
             => _emailLookupTable.Values
             .Where(x => x.IsBot == false)
-            .ToHashSet(new EmployeeEqualityComparer());
+            .ToHashSet(Employee.EqualityComparer);
 
         public Employee Find(string alias)
         {

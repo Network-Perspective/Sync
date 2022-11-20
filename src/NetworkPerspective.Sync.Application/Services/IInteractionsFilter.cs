@@ -32,7 +32,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             _logger.LogDebug("After filtering there are {count} interactions", interactions.Count());
 
-            return interactions.ToHashSet(new InteractionEqualityComparer());
+            return interactions.ToHashSet(Interaction.EqualityComparer);
         }
     }
 }
