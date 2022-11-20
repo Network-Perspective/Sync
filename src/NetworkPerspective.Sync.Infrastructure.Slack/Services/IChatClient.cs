@@ -10,6 +10,7 @@ using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Aggregation;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
@@ -19,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
     internal interface IChatClient
     {
-        Task<ISet<Interaction>> GetInteractions(ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
+        Task GetInteractions(IInteractionsStorage interactionsStorage, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
     }
 
     internal class ChatClient : IChatClient
@@ -31,10 +32,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _logger = logger;
         }
 
-        public async Task<ISet<Interaction>> GetInteractions(ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
+        public async Task GetInteractions(IInteractionsStorage interactionsStorage, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
         {
             _logger.LogDebug("Fetching chats...");
-            var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
 
             var slackChannels = await GetChannels(slackClientFacade, network, stoppingToken);
             _logger.LogDebug("There are '{count}' of channels to get interactions from", slackChannels.Count());
@@ -53,6 +53,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             {
                 try
                 {
+                    var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
+
                     _logger.LogDebug("Getting interactions from channel...");
                     var actionsAggregator = new ActionsAggregator(slackChannel.Name);
 
@@ -120,6 +122,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                         }
                     }
 
+                    await interactionsStorage.PushInteractionsAsync(interactions, stoppingToken);
+
                     _logger.LogTrace(new DefaultActionsAggregatorPrinter().Print(actionsAggregator));
 
                     _logger.LogDebug("Getting interactions from channel completed");
@@ -129,8 +133,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                     _logger.LogWarning(ex, "Couldn't get interactions from channel. Please see inner exception");
                 }
             }
-
-            return interactions;
         }
 
         private async Task<IEnumerable<Channel>> GetChannels(ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, CancellationToken stoppingToken = default)

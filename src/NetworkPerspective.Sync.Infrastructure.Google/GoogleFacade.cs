@@ -89,8 +89,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
                 return storage;
             });
 
-            var emailInteractions = context.Get<IInteractionsStorage>();
-            result.UnionWith(await emailInteractions.PullInteractionsAsync(context.CurrentRange.Start.Date, stoppingToken));
+            var storage = context.Get<IInteractionsStorage>();
+            result.UnionWith(await storage.PullInteractionsAsync(context.CurrentRange.Start.Date, stoppingToken));
 
             var meetingInteractions = await _calendarClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, interactionFactory, stoppingToken);
             result.UnionWith(meetingInteractions);
