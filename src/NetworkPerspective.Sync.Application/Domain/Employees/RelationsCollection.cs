@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace NetworkPerspective.Sync.Application.Domain.Employees
 {
-    public class RelationsCollection
+    public class RelationsCollection : IEnumerable<Relation>
     {
         public static readonly RelationsCollection Empty = new RelationsCollection(Array.Empty<Relation>());
 
         private readonly IEnumerable<Relation> _relations;
 
-        public bool IsHashed { get; }
+        public bool IsHashed { get; init; }
 
 
         public RelationsCollection(IEnumerable<Relation> relations) : this(relations, false)
@@ -36,5 +37,15 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
         public string GetTargetEmployeeEmail(string relationName)
             => _relations.Single(x => x.Name == relationName).TargetEmployeeEmail;
+
+        public IEnumerator<Relation> GetEnumerator()
+        {
+            return _relations.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _relations.GetEnumerator();
+        }
     }
 }

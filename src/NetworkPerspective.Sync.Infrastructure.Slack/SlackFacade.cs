@@ -19,6 +19,8 @@ using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
 
+using Newtonsoft.Json;
+
 namespace NetworkPerspective.Sync.Infrastructure.Slack
 {
     internal class SlackFacade : IDataSource
@@ -87,7 +89,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 .Get<ISet<Interaction>>()
                 .Where(x => context.CurrentRange.IsInRange(x.Timestamp));
 
-            return chatInteractions.ToHashSet(new InteractionEqualityComparer());
+            var result = chatInteractions.ToHashSet(new InteractionEqualityComparer());
+
+            var tmp = JsonConvert.SerializeObject(result);
+            var newResult = JsonConvert.DeserializeObject<IEnumerable<Interaction>>(tmp);
+
+            return newResult.ToHashSet();
         }
 
         public async Task<EmployeeCollection> GetHashedEmployees(SyncContext context, CancellationToken stoppingToken = default)

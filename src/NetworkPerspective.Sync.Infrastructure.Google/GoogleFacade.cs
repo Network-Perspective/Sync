@@ -19,6 +19,8 @@ using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Mappers;
 using NetworkPerspective.Sync.Infrastructure.Google.Services;
 
+using Newtonsoft.Json;
+
 namespace NetworkPerspective.Sync.Infrastructure.Google
 {
     internal sealed class GoogleFacade : IDataSource
@@ -87,9 +89,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var meetingInteractions = await _calendarClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, interactionFactory, stoppingToken);
             result.UnionWith(meetingInteractions);
 
+            var tmp = JsonConvert.SerializeObject(result);
+            var newResult = JsonConvert.DeserializeObject<IEnumerable<Interaction>>(tmp);
+
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
 
-            return result;
+            return newResult.ToHashSet();
         }
 
         public async Task<EmployeeCollection> GetEmployees(SyncContext context, CancellationToken stoppingToken = default)
