@@ -26,8 +26,10 @@ namespace NetworkPerspective.Sync.Application.Services
         {
             _basePath = basePath;
 
-            if (!Directory.Exists(_basePath))
-                Directory.CreateDirectory(_basePath);
+            if (Directory.Exists(_basePath))
+                Directory.Delete(_basePath, true);
+
+            Directory.CreateDirectory(_basePath);
         }
 
         public void Dispose()

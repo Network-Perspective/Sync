@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 using NetworkPerspective.Sync.Application.Exceptions;
+
+using Newtonsoft.Json;
 
 namespace NetworkPerspective.Sync.Application.Domain.Employees
 {
@@ -19,21 +22,22 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
         public static readonly IEqualityComparer<Employee> EqualityComparer = new EmployeeEqualityComparer();
 
+        private readonly IList<Group> _groups;
+        private readonly IDictionary<string, object> _props;
+
         public EmployeeId Id { get; init; }
         public bool IsExternal { get; init; }
         public bool IsBot { get; init; }
         public bool IsHashed { get; init; }
-        public bool HasManager => Relations.Contains(SupervisorRelationName);
-        public string ManagerEmail => HasManager ? Relations.GetTargetEmployeeEmail(SupervisorRelationName) : string.Empty;
+        [JsonIgnore] public bool HasManager => Relations.Contains(SupervisorRelationName);
+        [JsonIgnore] public string ManagerEmail => HasManager ? Relations.GetTargetEmployeeEmail(SupervisorRelationName) : string.Empty;
 
-        public IDictionary<string, object> Props { get; init; }
-        public IReadOnlyCollection<Group> Groups { get; init; }
-        public RelationsCollection Relations { get; init; }
+        [JsonIgnore] public IReadOnlyDictionary<string, object> Props => _props.ToImmutableDictionary();
+        [JsonIgnore] public IReadOnlyCollection<Group> Groups => new ReadOnlyCollection<Group>(_groups);
+        [JsonIgnore] public RelationsCollection Relations { get; }
 
         public Employee()
-        {
-
-        }
+        { }
 
         private Employee(EmployeeId id, IEnumerable<Group> groups, bool isExternal, bool isBot, bool isHashed, IDictionary<string, object> props, RelationsCollection relations)
         {
@@ -41,16 +45,15 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             IsExternal = isExternal;
             IsBot = isBot;
             IsHashed = isHashed;
+            _props = props;
             Relations = relations;
-            Groups = groups.ToList();
+            _groups = groups.ToList();
 
             if (groups.Any())
             {
-                props[PropKeyTeam] = GetTeam();
-                props[PropKeyDepartment] = GetDepartments();
+                _props[PropKeyTeam] = GetTeam();
+                _props[PropKeyDepartment] = GetDepartments();
             }
-
-            Props = props;
         }
 
         public static Employee CreateInternal(EmployeeId id, IEnumerable<Group> groups, IDictionary<string, object> props = null, RelationsCollection relations = null)
@@ -75,10 +78,10 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         }
 
         public void SetHierarchy(EmployeeHierarchy hierarchy)
-            => Props[PropKeyHierarchy] = hierarchy;
+            => _props[PropKeyHierarchy] = hierarchy;
 
         public EmployeeHierarchy GetHierarchy()
-            => Props.ContainsKey(PropKeyHierarchy) ? (EmployeeHierarchy)Props[PropKeyHierarchy] : EmployeeHierarchy.Unknown;
+            => _props.ContainsKey(PropKeyHierarchy) ? (EmployeeHierarchy)_props[PropKeyHierarchy] : EmployeeHierarchy.Unknown;
 
         private string GetTeam()
             => GetTeamGroup()?.Id ?? string.Empty;

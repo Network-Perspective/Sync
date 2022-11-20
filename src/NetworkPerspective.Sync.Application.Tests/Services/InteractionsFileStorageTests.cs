@@ -58,8 +58,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var storedInteractions1 = await storage.PullInteractionsAsync(timestamp1.Date);
             var storedInteractions2 = await storage.PullInteractionsAsync(timestamp3.Date);
 
-            storedInteractions1.Should().BeEquivalentTo(new[] { interaction1_1, interaction1_2 });
-            storedInteractions2.Should().BeEquivalentTo(new[] { interaction2_1, interaction2_2 });
+            storedInteractions1.Should().HaveCount(2);
+            storedInteractions2.Should().HaveCount(2);
             Directory.GetFiles(_tempDirPath).Should().BeEmpty();
         }
 
