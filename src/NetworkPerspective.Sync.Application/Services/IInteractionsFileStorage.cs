@@ -25,6 +25,9 @@ namespace NetworkPerspective.Sync.Application.Services
         public InteractionsFileStorage(string basePath)
         {
             _basePath = basePath;
+
+            if (!Directory.Exists(_basePath))
+                Directory.CreateDirectory(_basePath);
         }
 
         public void Dispose()
@@ -42,7 +45,17 @@ namespace NetworkPerspective.Sync.Application.Services
                 foreach (var group in interactionsGroups)
                 {
                     var filePath = Path.Combine(_basePath, GetInteractionsFileName(group.Key));
-                    var content = JsonConvert.SerializeObject(group, Formatting.Indented);
+
+                    var result = new HashSet<Interaction>(group, new InteractionEqualityComparer());
+
+                    if (File.Exists(filePath))
+                    {
+                        var currentContent = await File.ReadAllTextAsync(filePath, stoppingToken);
+                        var currentInteractions = JsonConvert.DeserializeObject<IEnumerable<Interaction>>(currentContent);
+                        result.UnionWith(currentInteractions);
+                    }
+
+                    var content = JsonConvert.SerializeObject(result);
                     await File.WriteAllTextAsync(filePath, content, stoppingToken);
                 }
             }

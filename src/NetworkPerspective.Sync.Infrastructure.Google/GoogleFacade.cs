@@ -20,8 +20,6 @@ using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Mappers;
 using NetworkPerspective.Sync.Infrastructure.Google.Services;
 
-using Newtonsoft.Json;
-
 namespace NetworkPerspective.Sync.Infrastructure.Google
 {
     internal sealed class GoogleFacade : IDataSource
@@ -66,7 +64,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var storagePath = Path.Combine("tmp", context.NetworkId.ToString());
 
-            await InitializeInContext(context, () => Task.FromResult(new InteractionsFileStorage(storagePath) as IInteractionsStorage));
             await InitializeInContext(context, () => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
             await InitializeInContext(context, () => _credentialsProvider.GetCredentialsAsync(stoppingToken));
             await InitializeInContext(context, () => _hashingServiceFactory.CreateAsync(_secretRepository, stoppingToken));
@@ -85,11 +82,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var periodStart = context.CurrentRange.Start.AddMinutes(-_config.SyncOverlapInMinutes);
             _logger.LogInformation("To not miss any email interactions period start is extended by {minutes}min. As result mailbox interactions are eveluated starting from {start}", _config.SyncOverlapInMinutes, periodStart);
 
-            await InitializeInContext(context, () =>
+            await InitializeInContext(context, async () =>
             {
                 var storage = new InteractionsFileStorage(storagePath) as IInteractionsStorage;
-                _mailboxClient.GetInteractionsAsync(storage, context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, interactionFactory, stoppingToken);
-                return Task.FromResult(storage);
+                await _mailboxClient.GetInteractionsAsync(storage, context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, interactionFactory, stoppingToken);
+                return storage;
             });
 
             var emailInteractions = context.Get<IInteractionsStorage>();

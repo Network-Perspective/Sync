@@ -38,24 +38,28 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var timestamp1 = new DateTime(2022, 01, 01, 12, 00, 00);
             var timestamp2 = new DateTime(2022, 01, 01, 13, 00, 00);
             var timestamp3 = new DateTime(2022, 01, 02, 12, 00, 00);
+            var timestamp4 = new DateTime(2022, 01, 02, 13, 00, 00);
 
             var interaction1_1 = Interaction.CreateEmail(timestamp1, employee1, employee2, Guid.NewGuid().ToString());
             var interaction1_2 = Interaction.CreateEmail(timestamp2, employee1, employee2, Guid.NewGuid().ToString());
             var interaction2_1 = Interaction.CreateEmail(timestamp3, employee1, employee2, Guid.NewGuid().ToString());
+            var interaction2_2 = Interaction.CreateEmail(timestamp4, employee1, employee2, Guid.NewGuid().ToString());
 
-            var interactions = new HashSet<Interaction> { interaction1_1, interaction1_2, interaction2_1 };
+            var interactions1 = new HashSet<Interaction> { interaction1_1, interaction1_2, interaction2_1 };
+            var interactions2 = new HashSet<Interaction> { interaction2_2 };
 
             var storage = new InteractionsFileStorage(_tempDirPath);
 
             // Act
-            await storage.PushInteractionsAsync(interactions);
+            await storage.PushInteractionsAsync(interactions1);
+            await storage.PushInteractionsAsync(interactions2);
 
             // Assert
             var storedInteractions1 = await storage.PullInteractionsAsync(timestamp1.Date);
             var storedInteractions2 = await storage.PullInteractionsAsync(timestamp3.Date);
 
             storedInteractions1.Should().BeEquivalentTo(new[] { interaction1_1, interaction1_2 });
-            storedInteractions2.Should().BeEquivalentTo(new[] { interaction2_1 });
+            storedInteractions2.Should().BeEquivalentTo(new[] { interaction2_1, interaction2_2 });
             Directory.GetFiles(_tempDirPath).Should().BeEmpty();
         }
 
