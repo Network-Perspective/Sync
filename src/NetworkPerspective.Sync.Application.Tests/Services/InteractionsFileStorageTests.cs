@@ -29,7 +29,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
         }
 
         [Fact]
-        public async Task Should()
+        public async Task ShouldStoreAndAllowToFetch()
         {
             // Arrange
             var employee1 = Employee.CreateBot("bot1");
@@ -57,6 +57,19 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             storedInteractions1.Should().BeEquivalentTo(new[] { interaction1_1, interaction1_2 });
             storedInteractions2.Should().BeEquivalentTo(new[] { interaction2_1 });
             Directory.GetFiles(_tempDirPath).Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task ShouldReturnEmptySetOnNoInteractions()
+        {
+            // Arrange
+            var storage = new InteractionsFileStorage(_tempDirPath);
+
+            // Act
+            var result = await storage.PullInteractionsAsync(DateTime.UtcNow.Date);
+
+            // Assert
+            result.Should().BeEmpty();
         }
     }
 }

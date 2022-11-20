@@ -11,13 +11,13 @@ using Newtonsoft.Json;
 
 namespace NetworkPerspective.Sync.Application.Services
 {
-    public interface IInteractionsFileStorage : IDisposable
+    public interface IInteractionsStorage : IDisposable
     {
         Task PushInteractionsAsync(ISet<Interaction> interactions, CancellationToken stoppingToken = default);
         Task<ISet<Interaction>> PullInteractionsAsync(DateTime day, CancellationToken stoppingToken = default);
     }
 
-    internal class InteractionsFileStorage : IInteractionsFileStorage
+    public class InteractionsFileStorage : IInteractionsStorage
     {
         private readonly string _basePath;
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
@@ -58,6 +58,11 @@ namespace NetworkPerspective.Sync.Application.Services
             try
             {
                 var filePath = Path.Combine(_basePath, GetInteractionsFileName(day));
+
+
+                if (!File.Exists(filePath))
+                    return new HashSet<Interaction>();
+
                 var content = await File.ReadAllTextAsync(filePath, stoppingToken);
                 var interactions = JsonConvert.DeserializeObject<IEnumerable<Interaction>>(content);
                 File.Delete(filePath);
