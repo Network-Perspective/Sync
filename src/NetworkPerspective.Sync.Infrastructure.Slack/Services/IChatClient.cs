@@ -53,7 +53,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             {
                 try
                 {
-                    var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
 
                     _logger.LogDebug("Getting interactions from channel...");
                     var actionsAggregator = new ActionsAggregator(slackChannel.Name);
@@ -77,6 +76,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
                     foreach (var slackThreadMessage in slackThreadsMessages)
                     {
+                        var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
+
                         if (GetLastUpdateOfThread(slackThreadMessage) > timeRange.Start)
                         {
                             _logger.LogDebug("Synchonizing thread...");
@@ -120,9 +121,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
                             _logger.LogDebug("Thread synchronization completed");
                         }
-                    }
 
-                    await interactionsStorage.PushInteractionsAsync(interactions, stoppingToken);
+                        await interactionsStorage.PushInteractionsAsync(interactions, stoppingToken);
+                    }
 
                     _logger.LogTrace(new DefaultActionsAggregatorPrinter().Print(actionsAggregator));
 
