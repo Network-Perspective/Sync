@@ -19,7 +19,7 @@ namespace NetworkPerspective.Sync.Framework
             services.AddTransient<IErrorService, ErrorService>();
 
             // add telemetry
-            services.AddApplicationInsightsTelemetry();            
+            services.AddApplicationInsightsTelemetry();
 
             return services;
         }
