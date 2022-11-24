@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -40,37 +39,27 @@ namespace NetworkPerspective.Sync.Application.Services
         {
             var result = new HashSet<Interaction>(new InteractionEqualityComparer());
 
-            var interactionsBag = new ConcurrentBag<ISet<Interaction>>();
-
             await _updateStatus(0.0);
 
             await Parallel.ForEachAsync(_userIds, _parallelOptions, async (user, stoppingToken) =>
             {
                 var interactions = await _singleTask(user);
-                await UpdateStatus();
-                interactionsBag.Add(interactions);
+
+                await _semaphore.WaitAsync(_stoppingToken);
+                try
+                {
+                    result.UnionWith(interactions);
+                    _taskProcessed++;
+                    var completionRate = 100.0 * _taskProcessed / _tasksCount;
+                    await _updateStatus(completionRate);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
             });
 
-            while (interactionsBag.TryTake(out var set))
-                result.UnionWith(set);
-
             return result;
-        }
-
-        private async Task UpdateStatus()
-        {
-            try
-            {
-                await _semaphore.WaitAsync(_stoppingToken);
-                _taskProcessed++;
-                var completionRate = 100.0 * _taskProcessed / _tasksCount;
-                await _updateStatus(completionRate);
-            }
-            finally
-            {
-                _semaphore.Release();
-
-            }
         }
     }
 }
