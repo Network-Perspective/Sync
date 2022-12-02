@@ -46,7 +46,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         public static Interaction CreateEmail(DateTime timestamp, Employee source, Employee target, string eventId)
         {
             return new Interaction(
-                timestamp: timestamp.Bucket(TimeSpan.FromMinutes(10)),
+                timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
                 type: InteractionType.Email,
@@ -62,7 +62,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         public static Interaction CreateMeeting(DateTime timestamp, Employee source, Employee target, string eventId, RecurrenceType? recurring, int duration)
         {
             return new Interaction(
-                timestamp: timestamp.Bucket(TimeSpan.FromHours(1)),
+                timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
                 type: InteractionType.Meetings,
@@ -87,7 +87,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         private static Interaction CreateChatInteraction(DateTime timestamp, Employee source, Employee target, string eventId, string parentEventId, string channelId, ISet<UserActionType> userActionType)
         {
             return new Interaction(
-                timestamp: timestamp.Bucket(TimeSpan.FromMinutes(10)),
+                timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
                 type: InteractionType.Chat,
