@@ -42,7 +42,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
             const string user_2_department_2 = "department_2_2";
             var user_2_custom_attr_location = "Berlin";
 
-            var expectedEmployees = new EmployeeCollection(null);
             var expectedGroups1 = new[]
             {
                 Group.Create($"Department:{user_1_department_1}", user_1_department_1, Group.DepartmentCatergory),
@@ -60,7 +59,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
             var exectedRelations1 = new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, manager_email) });
             var expectedEmployeeId1 = EmployeeId.CreateWithAliases(user_1_email, user_1_id, new[] { user_1_email });
             var expectedEmployee1 = Employee.CreateInternal(expectedEmployeeId1, expectedGroups1, expectedProps1, exectedRelations1);
-            expectedEmployees.Add(expectedEmployee1);
 
             var expectedGroups2 = new[]
 {
@@ -78,7 +76,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
             var expectedRelations2 = new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, manager_email) });
             var expectedEmployeeId2 = EmployeeId.CreateWithAliases(user_2_email, user_2_id, new[] { user_2_email });
             var expectedEmployee2 = Employee.CreateInternal(expectedEmployeeId2, expectedGroups2, expectedProps2, expectedRelations2);
-            expectedEmployees.Add(expectedEmployee2);
+
+            var expectedEmployees = new EmployeeCollection(new[] { expectedEmployee1, expectedEmployee2 }, null);
 
             var users = new[]
             {

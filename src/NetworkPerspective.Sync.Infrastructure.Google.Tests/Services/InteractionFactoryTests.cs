@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using FluentAssertions;
@@ -42,15 +43,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
                 }
             };
 
-            var emailLookuptable = new EmployeeCollection(null)
+            var employees = new List<Employee>()
                 .Add(user1Email)
                 .Add("user2@networkperspective.io")
                 .Add(user3Email)
                 .Add(user4Email)
                 .Add(user5Email);
 
+            var employeesCollection = new EmployeeCollection(employees, null);
+
             // Act
-            var interactions = new InteractionFactory(x => $"{x}_hashed", emailLookuptable, new Clock())
+            var interactions = new InteractionFactory(x => $"{x}_hashed", employeesCollection, new Clock())
                 .CreateFromEmail(email);
 
             // Assert
@@ -85,16 +88,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
                 End = new EventDateTime { DateTime = new DateTime(2020, 01, 01, 11, 30, 0) }
             };
 
-            var emailLookuptable = new EmployeeCollection(null)
+            var employees = new List<Employee>()
                 .Add(user1Email)
                 .Add("user2@networkperspective.io")
                 .Add(user3Email)
                 .Add(user4Email)
                 .Add(user5Email);
 
+            var employeesCollection = new EmployeeCollection(employees, null);
+
             // Act
-            var interactions = new InteractionFactory(x => $"{x}_hashed", emailLookuptable, new Clock())
-                .CreateFromMeeting(meeting);
+            var interactions = new InteractionFactory(x => $"{x}_hashed", employeesCollection, new Clock())
+                .CreateFromMeeting(meeting, null);
 
             // Assert
             var emailInteractions = interactions.Where(x => x.Type == InteractionType.Meetings);

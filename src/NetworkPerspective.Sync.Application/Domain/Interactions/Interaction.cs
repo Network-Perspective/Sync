@@ -11,17 +11,22 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
 {
     public class Interaction
     {
-        public bool IsHashed { get; }
-        public DateTime Timestamp { get; }
-        public Employee Source { get; }
-        public Employee Target { get; }
-        public InteractionType Type { get; }
-        public string ChannelId { get; }
-        public string ParentEventId { get; }
-        public string EventId { get; }
-        public RecurrenceType? Recurring { get; }
-        public ISet<UserActionType> UserAction { get; }
-        public int? Duration { get; }
+        public bool IsHashed { get; init; }
+        public DateTime Timestamp { get; init; }
+        public Employee Source { get; init; }
+        public Employee Target { get; init; }
+        public InteractionType Type { get; init; }
+        public string ChannelId { get; init; }
+        public string ParentEventId { get; init; }
+        public string EventId { get; init; }
+        public RecurrenceType? Recurring { get; init; }
+        public ISet<UserActionType> UserAction { get; init; }
+        public int? Duration { get; init; }
+
+        public Interaction()
+        {
+
+        }
 
         private Interaction(DateTime timestamp, Employee source, Employee target, InteractionType type, string channelId, string eventId, string parentEventId, RecurrenceType? recurring, ISet<UserActionType> userActions, int? duration, bool isHashed)
         {
@@ -41,7 +46,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         public static Interaction CreateEmail(DateTime timestamp, Employee source, Employee target, string eventId)
         {
             return new Interaction(
-                timestamp: timestamp.Bucket(TimeSpan.FromMinutes(10)),
+                timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
                 type: InteractionType.Email,
@@ -57,7 +62,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         public static Interaction CreateMeeting(DateTime timestamp, Employee source, Employee target, string eventId, RecurrenceType? recurring, int duration)
         {
             return new Interaction(
-                timestamp: timestamp.Bucket(TimeSpan.FromHours(1)),
+                timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
                 type: InteractionType.Meetings,
@@ -82,7 +87,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         private static Interaction CreateChatInteraction(DateTime timestamp, Employee source, Employee target, string eventId, string parentEventId, string channelId, ISet<UserActionType> userActionType)
         {
             return new Interaction(
-                timestamp: timestamp.Bucket(TimeSpan.FromMinutes(10)),
+                timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
                 type: InteractionType.Chat,

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -46,12 +47,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             var mailboxClient = new MailboxClient(Mock.Of<IStatusLogger>(), Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
 
-            var emailLookuptable = new EmployeeCollection(null)
+            var employees = new List<Employee>()
                 .Add(existingEmail);
-            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", emailLookuptable, clock);
+            var employeesCollection = new EmployeeCollection(employees, null);
+            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", employeesCollection, clock);
+            var date = new DateTime(2021, 11, 01);
 
             // Act
-            var result = await mailboxClient.GetInteractionsAsync(Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
+            var storage = new InteractionsFileStorage("tmp");
+            await mailboxClient.GetInteractionsAsync(storage, Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
+
+            var result = await storage.PullInteractionsAsync(date.Date);
 
             // Assert
             result.Should().NotBeNullOrEmpty();

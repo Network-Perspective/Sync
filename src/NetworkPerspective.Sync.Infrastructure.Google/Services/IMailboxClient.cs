@@ -26,7 +26,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface IMailboxClient
     {
-        Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        Task GetInteractionsAsync(IInteractionsStorage interactionsStorage, Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class MailboxClient : IMailboxClient
@@ -53,7 +53,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _clock = clock;
         }
 
-        public async Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task GetInteractionsAsync(IInteractionsStorage interactionsStorage, Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             var maxMessagesCountPerUser = CalculateMaxMessagesCount(startDate);
 
@@ -69,11 +69,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _logger.LogInformation("Evaluating interactions based on mailbox since {timestamp} for {count} users...", startDate, users.Count());
 
             var userEmails = users.Select(x => x.Id.PrimaryId);
-            var result = await ParallelFetcher.FetchAsync(userEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+            await ParallelFetcherWithStorage.FetchAsync(interactionsStorage, userEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
 
             _logger.LogInformation("Evaluation of interactions based on mailbox since '{timestamp}' completed", startDate);
-
-            return result;
         }
 
         private async Task<ISet<Interaction>> GetSingleUserInteractionsAsync(Guid networkId, string userEmail, int maxMessagesCount, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -42,14 +43,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             };
 
             var client = new CalendarClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLogger<CalendarClient>.Instance);
-            var timeRange = new TimeRange(DateTime.MinValue, DateTime.MaxValue);
+            var timeRange = new TimeRange(DateTime.UtcNow.AddDays(-7), DateTime.UtcNow);
 
-            var emailLookuptable = new EmployeeCollection(null)
+            var employees = new List<Employee>()
                 .Add(email);
-            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", emailLookuptable, new Clock());
+
+            var employeesCollection = new EmployeeCollection(employees, null);
+
+            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", employeesCollection, new Clock());
 
             // Act
-            var result = await client.GetInteractionsAsync(Guid.NewGuid(), emailLookuptable.GetAllInternal(), timeRange, _googleClientFixture.Credential, interactionFactory);
+            var result = await client.GetInteractionsAsync(Guid.NewGuid(), employeesCollection.GetAllInternal(), timeRange, _googleClientFixture.Credential, interactionFactory);
 
             // Assert
             result.Should().NotBeNullOrEmpty();

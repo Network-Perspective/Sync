@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -9,6 +11,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
@@ -41,16 +44,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
 
             var slackClientFacade = new SlackClientFacade(_httpClientFactory, paginationHandler);
 
-            var emailLookuptable = new EmployeeCollection(null)
+            var employees = new List<Employee>()
                 .Add(existingEmail);
-            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", emailLookuptable);
+
+            var employeesCollection = new EmployeeCollection(employees, null);
+
+            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", employeesCollection);
 
             try
             {
                 // Act
-                var result = await chatclient.GetInteractions(slackClientFacade, network, interactionFactory, timeRange);
+                var storage = new InteractionsFileStorage("tmp");
+                await chatclient.GetInteractions(storage, slackClientFacade, network, interactionFactory, timeRange);
 
                 // Assert
+                var result = await storage.PullInteractionsAsync(new DateTime(2022, 07, 30));
                 result.Should().NotBeEmpty();
             }
             catch (Slack.Client.Exceptions.ApiException exception)
