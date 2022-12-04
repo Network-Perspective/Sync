@@ -14,13 +14,15 @@ using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.GSuite.Client;
+using NetworkPerspective.Sync.GSuite.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Google;
 
 using Xunit;
 
 namespace NetworkPerspective.Sync.GSuite.Tests
 {
-    public class BaseTest : IClassFixture<InMemoryHostedServiceFixture<Startup>>
+    [Collection(GSuiteTestsCollection.Name)]
+    public class BaseTest
     {
         private readonly InMemoryHostedServiceFixture<Startup> _service;
 

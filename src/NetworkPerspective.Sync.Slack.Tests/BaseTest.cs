@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 using Moq;
 
@@ -16,12 +15,14 @@ using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Slack;
 using NetworkPerspective.Sync.Slack.Client;
+using NetworkPerspective.Sync.Slack.Tests.Fixtures;
 
 using Xunit;
 
 namespace NetworkPerspective.Sync.Slack.Tests
 {
-    public class BaseTest : IClassFixture<InMemoryHostedServiceFixture<Startup>>
+    [Collection(SlackTestsCollection.Name)]
+    public class BaseTest
     {
         private readonly InMemoryHostedServiceFixture<Startup> _service;
 
