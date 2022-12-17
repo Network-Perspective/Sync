@@ -217,7 +217,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
                 {
                     ServiceToken = accessToken.ToSystemString(),
                     SyncPeriodStart = timeRange.Start,
-                    SyncPeriodEnd= timeRange.End,
+                    SyncPeriodEnd = timeRange.End,
                 };
 
                 await _client.ReportStartAsync(command, stoppingToken);
@@ -230,34 +230,53 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             }
         }
 
-        public Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default)
-            => ReportSyncEndAsync(accessToken, timeRange, true, string.Empty, stoppingToken);
-
-        public Task ReportSyncFailedAsync(SecureString accessToken, TimeRange timeRange, string message, CancellationToken stoppingToken = default)
-            => ReportSyncEndAsync(accessToken, timeRange, false, message, stoppingToken);
-
-        private async Task ReportSyncEndAsync(SecureString accessToken, TimeRange timeRange, bool isSuccess, string message, CancellationToken stoppingToken)
+        public async Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default)
         {
             try
             {
-                _logger.LogInformation("Notifying NetworkPerspective Core App sync completed (success = '{isSuccess}'...", isSuccess);
+                _logger.LogInformation("Notifying NetworkPerspective Core App sync successed...");
 
                 var command = new ReportSyncCompletedCommand
                 {
                     ServiceToken = accessToken.ToSystemString(),
                     SyncPeriodStart = timeRange.Start,
                     SyncPeriodEnd = timeRange.End,
-                    Success = isSuccess,
+                    Success = true,
+                    Message = string.Empty
+                };
+
+                await _client.ReportCompletedAsync(command, stoppingToken);
+
+                _logger.LogInformation("NetworkPerspective Core App has been notified sync successed");
+            }
+            catch (Exception ex)
+            {
+                throw new NetworkPerspectiveCoreException(_npCoreConfig.BaseUrl, ex);
+            }
+        }
+
+        public async Task TryReportSyncFailedAsync(SecureString accessToken, TimeRange timeRange, string message, CancellationToken stoppingToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Notifying NetworkPerspective Core App sync failed...");
+
+                var command = new ReportSyncCompletedCommand
+                {
+                    ServiceToken = accessToken.ToSystemString(),
+                    SyncPeriodStart = timeRange.Start,
+                    SyncPeriodEnd = timeRange.End,
+                    Success = false,
                     Message = message
                 };
 
                 await _client.ReportCompletedAsync(command, stoppingToken);
 
-                _logger.LogInformation("NetworkPerspective Core App has been notified sync completed (success = '{isSuccess}'...", isSuccess);
+                _logger.LogInformation("NetworkPerspective Core App has been notified sync failed");
             }
             catch (Exception ex)
             {
-                throw new NetworkPerspectiveCoreException(_npCoreConfig.BaseUrl, ex);
+                _logger.LogError(ex, "NetworkPerspective Core App has been NOT notified sync failed");
             }
         }
     }

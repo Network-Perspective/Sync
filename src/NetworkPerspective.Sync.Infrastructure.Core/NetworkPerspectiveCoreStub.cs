@@ -125,7 +125,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
             }
         }
 
-        public Task ReportSyncFailedAsync(SecureString accessToken, TimeRange timeRange, string message, CancellationToken stoppingToken = default)
+        public Task TryReportSyncFailedAsync(SecureString accessToken, TimeRange timeRange, string message, CancellationToken stoppingToken = default)
             => Task.CompletedTask;
 
         public Task ReportSyncStartAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default)

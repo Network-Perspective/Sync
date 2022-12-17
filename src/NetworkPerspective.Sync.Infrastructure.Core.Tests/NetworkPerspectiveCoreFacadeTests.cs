@@ -239,7 +239,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
             }
 
             [Fact]
-            public async Task ShouldThrowSpecificException()
+            public async Task ShouldNotThrowException()
             {
                 // Arrange
                 var start = new DateTime(2022, 01, 01);
@@ -274,7 +274,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
 
                 // Act
-                await facade.ReportSyncFailedAsync("foo".ToSecureString(), timeRange, message);
+                await facade.TryReportSyncFailedAsync("foo".ToSecureString(), timeRange, message);
 
                 // Assert
                 _clientMock.Verify(x => x.ReportCompletedAsync(
@@ -284,7 +284,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
             }
 
             [Fact]
-            public async Task ShouldThrowSpecificException()
+            public async Task ShouldNotThrowException()
             {
                 // Arrange
                 var start = new DateTime(2022, 01, 01);
@@ -298,10 +298,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                     .ThrowsAsync(new Exception());
 
                 // Act
-                Func<Task> func = async () => await facade.ReportSyncFailedAsync("foo".ToSecureString(), timeRange, "bar");
+                Func<Task> func = async () => await facade.TryReportSyncFailedAsync("foo".ToSecureString(), timeRange, "bar");
 
                 // Assert
-                await func.Should().ThrowAsync<NetworkPerspectiveCoreException>();
+                await func.Should().NotThrowAsync<Exception>();
             }
         }
 

@@ -78,7 +78,10 @@ namespace NetworkPerspective.Sync.Application.Scheduler
                 {
                     await _statusLogger.LogInfoAsync(networkId, $"Synchronizing interactions {syncContext.CurrentRange}", context.CancellationToken);
 
+                    await _networkPerspectiveCore.ReportSyncStartAsync(syncContext.AccessToken, syncContext.CurrentRange, context.CancellationToken);
                     await syncService.SyncInteractionsAsync(syncContext, context.CancellationToken);
+                    await _networkPerspectiveCore.ReportSyncSuccessfulAsync(syncContext.AccessToken, syncContext.CurrentRange, context.CancellationToken);
+
                     lastSyncedTimeStamp = syncContext.CurrentRange.End;
                     now = _clock.UtcNow();
                     syncContext.MoveToNextSyncRange(now);

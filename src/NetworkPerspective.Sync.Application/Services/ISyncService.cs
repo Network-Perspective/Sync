@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -93,22 +94,34 @@ namespace NetworkPerspective.Sync.Application.Services
 
         public async Task SyncInteractionsAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
-            _logger.LogInformation("Syncing interactions for network '{networkId}' for period {period}", context.NetworkId, context.CurrentRange);
-            var interactions = await _dataSource.GetInteractions(context, stoppingToken);
+            try
+            {
+                _logger.LogInformation("Syncing interactions for network '{networkId}' for period {period}", context.NetworkId, context.CurrentRange);
 
-            var filteredInteractions = _interactionFilterFactory
-                .CreateInteractionsFilter(context.CurrentRange)
-                .Filter(interactions);
+                await _networkPerspectiveCore.ReportSyncStartAsync(context.AccessToken, context.CurrentRange, stoppingToken);
 
-            await _statusLogger.LogInfoAsync(context.NetworkId, $"Received {filteredInteractions.Count} Interactions", stoppingToken);
+                var interactions = await _dataSource.GetInteractions(context, stoppingToken);
 
-            await _networkPerspectiveCore.PushInteractionsAsync(context.AccessToken, filteredInteractions, stoppingToken);
+                var filteredInteractions = _interactionFilterFactory
+                    .CreateInteractionsFilter(context.CurrentRange)
+                    .Filter(interactions);
 
-            var syncHistoryEntry = new SyncHistoryEntry(context.NetworkId, _clock.UtcNow(), context.CurrentRange);
-            await _syncHistoryService.SaveLogAsync(syncHistoryEntry, stoppingToken);
-            await _statusLogger.LogInfoAsync(context.NetworkId, "Uploaded all interactions", stoppingToken);
+                await _statusLogger.LogInfoAsync(context.NetworkId, $"Received {filteredInteractions.Count} Interactions", stoppingToken);
 
-            _logger.LogInformation("Sync interactions for network '{networkId}' for {period} completed", context.NetworkId, context.CurrentRange);
+                await _networkPerspectiveCore.PushInteractionsAsync(context.AccessToken, filteredInteractions, stoppingToken);
+
+                var syncHistoryEntry = new SyncHistoryEntry(context.NetworkId, _clock.UtcNow(), context.CurrentRange);
+                await _networkPerspectiveCore.ReportSyncSuccessfulAsync(context.AccessToken, context.CurrentRange, stoppingToken);
+                await _syncHistoryService.SaveLogAsync(syncHistoryEntry, stoppingToken);
+                await _statusLogger.LogInfoAsync(context.NetworkId, "Uploaded all interactions", stoppingToken);
+
+                _logger.LogInformation("Sync interactions for network '{networkId}' for {period} completed", context.NetworkId, context.CurrentRange);
+            }
+            catch (Exception ex)
+            {
+                await _networkPerspectiveCore.TryReportSyncFailedAsync(context.AccessToken, context.CurrentRange, ex.Message, stoppingToken);
+                throw;
+            }
         }
 
     }
