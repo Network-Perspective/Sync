@@ -14,6 +14,7 @@ using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
+using NetworkPerspective.Sync.Application.Infrastructure.InteractionsCache;
 using NetworkPerspective.Sync.Application.Scheduler;
 using NetworkPerspective.Sync.Application.Services;
 
@@ -48,7 +49,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
 
             var jobContextMock = CreateContext(networkId);
 
-            var syncJob = new SyncJob(syncServiceFactoryMock, Mock.Of<INetworkPerspectiveCore>(), Mock.Of<ITokenService>(), syncHistoryServiceMock, networkServiceMock, clockMock.Object, Mock.Of<IStatusLogger>(), NullLogger<SyncJob>.Instance);
+            var syncJob = new SyncJob(syncServiceFactoryMock, Mock.Of<INetworkPerspectiveCore>(), Mock.Of<ITokenService>(), syncHistoryServiceMock, networkServiceMock, clockMock.Object, Mock.Of<IInteractionsCacheFactory>(), Mock.Of<IStatusLogger>(), NullLogger<SyncJob>.Instance);
 
             // Act
             await syncJob.Execute(jobContextMock);
@@ -87,7 +88,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
 
             var jobContextMock = CreateContext(networkId);
 
-            var syncJob = new SyncJob(syncServiceFactoryMock, Mock.Of<INetworkPerspectiveCore>(), Mock.Of<ITokenService>(), syncHistoryServiceMock, networkServiceMock, clockMock.Object, Mock.Of<IStatusLogger>(), NullLogger<SyncJob>.Instance);
+            var syncJob = new SyncJob(syncServiceFactoryMock, Mock.Of<INetworkPerspectiveCore>(), Mock.Of<ITokenService>(), syncHistoryServiceMock, networkServiceMock, clockMock.Object, Mock.Of<IInteractionsCacheFactory>(), Mock.Of<IStatusLogger>(), NullLogger<SyncJob>.Instance);
 
             // Act
             await syncJob.Execute(jobContextMock);
@@ -117,7 +118,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
 
             var jobContextMock = CreateContext(networkId);
 
-            var syncJob = new SyncJob(syncServiceFactoryMock, Mock.Of<INetworkPerspectiveCore>(), Mock.Of<ITokenService>(), syncHistoryServiceMock, networkServiceMock, new Clock(), statusLoggerMock.Object, NullLogger<SyncJob>.Instance);
+            var syncJob = new SyncJob(syncServiceFactoryMock, Mock.Of<INetworkPerspectiveCore>(), Mock.Of<ITokenService>(), syncHistoryServiceMock, networkServiceMock, new Clock(), Mock.Of<IInteractionsCacheFactory>(), statusLoggerMock.Object, NullLogger<SyncJob>.Instance);
 
             // Act
             Func<Task> func = async () => await syncJob.Execute(jobContextMock);
@@ -148,7 +149,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
 
             networkServiceMock
                 .Setup(x => x.GetAsync<NetworkProperties>(networkId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Network<NetworkProperties>.Create(networkId, new NetworkProperties(syncGroups, null), DateTime.UtcNow));
+                .ReturnsAsync(Network<NetworkProperties>.Create(networkId, new NetworkProperties(syncGroups, null, false), DateTime.UtcNow));
 
             return networkServiceMock.Object;
         }

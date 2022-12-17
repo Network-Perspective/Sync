@@ -47,13 +47,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         {
             var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId, stoppingToken);
 
-            var credentialsProvider = new CredentialsProvider(secretRepository);
-            var mailboxClient = new MailboxClient(_statusLogger, _tasksStatusesCache, _googleConfig, _loggerFactory, _clock);
-            var meetingsClient = new CalendarClient(_tasksStatusesCache, _googleConfig, _loggerFactory.CreateLogger<CalendarClient>());
-            var employeeCriterias = new[] { new NonServiceUserCriteria(_loggerFactory.CreateLogger<NonServiceUserCriteria>()) };
-            var employeeProfileClient = new UsersClient(_tasksStatusesCache, _googleConfig, employeeCriterias, _loggerFactory.CreateLogger<UsersClient>());
+            var network = await _networkService.GetAsync<GoogleNetworkProperties>(networkId, stoppingToken);
 
-            return new GoogleFacade(_networkService, secretRepository, credentialsProvider, mailboxClient, meetingsClient, employeeProfileClient, _hashingServiceFactory, _clock, _googleConfig, _loggerFactory.CreateLogger<GoogleFacade>());
+            var credentialsProvider = new CredentialsProvider(secretRepository);
+            var googleCredentials = await credentialsProvider.GetCredentialsAsync(stoppingToken);
+
+            var hashingService = await _hashingServiceFactory.CreateAsync(secretRepository, stoppingToken);
+
+            var nonServiceUserCriteria = new NonServiceUserCriteria(_loggerFactory.CreateLogger<NonServiceUserCriteria>());
+            var employeeCriterias = new[] { nonServiceUserCriteria };
+
+            var mailboxClient = new MailboxClient(networkId, googleCredentials, _statusLogger, _tasksStatusesCache, _googleConfig, _loggerFactory, _clock);
+            var meetingsClient = new CalendarClient(networkId, googleCredentials, _tasksStatusesCache, _googleConfig, _loggerFactory.CreateLogger<CalendarClient>());
+            var employeeProfileClient = new UsersClient(network, googleCredentials, _tasksStatusesCache, _googleConfig, employeeCriterias, _loggerFactory.CreateLogger<UsersClient>());
+
+            return new GoogleFacade(network, mailboxClient, meetingsClient, employeeProfileClient, hashingService, _clock, _googleConfig, _loggerFactory.CreateLogger<GoogleFacade>());
         }
     }
 }

@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
-using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Application.Infrastructure.InteractionsCache;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
@@ -54,7 +54,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             try
             {
                 // Act
-                var storage = new InteractionsFileStorage("tmp");
+                var storage = new InteractionsFileCache("tmp", new EphemeralDataProtectionProvider().CreateProtector("foo"), NullLogger<InteractionsFileCache>.Instance);
                 await chatclient.GetInteractions(storage, slackClientFacade, network, interactionFactory, timeRange);
 
                 // Assert

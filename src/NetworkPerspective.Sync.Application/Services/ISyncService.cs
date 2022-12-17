@@ -14,6 +14,7 @@ namespace NetworkPerspective.Sync.Application.Services
 {
     public interface ISyncService
     {
+        Task InitializeCacheAsync(SyncContext context, CancellationToken stoppingToken = default);
         Task SyncInteractionsAsync(SyncContext context, CancellationToken stoppingToken = default);
         Task SyncUsersAsync(SyncContext context, CancellationToken stoppingToken = default);
         Task SyncEntitiesAsync(SyncContext context, CancellationToken stoppingToken = default);
@@ -45,6 +46,15 @@ namespace NetworkPerspective.Sync.Application.Services
             _interactionFilterFactory = interactionFilterFactory;
             _statusLogger = statusLogger;
             _clock = clock;
+        }
+
+        public async Task InitializeCacheAsync(SyncContext context, CancellationToken stoppingToken = default)
+        {
+            _logger.LogInformation("Initializing cache for network '{networkId}'", context.NetworkId);
+
+            await _dataSource.InitializeAsync(context, stoppingToken);
+
+            _logger.LogInformation("Initialization cache for '{networkId}' completed", context.NetworkId);
         }
 
         public async Task SyncUsersAsync(SyncContext context, CancellationToken stoppingToken = default)

@@ -1,23 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
-using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Application.Infrastructure.InteractionsCache;
+
+using Newtonsoft.Json;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Application.Tests.Services
+namespace NetworkPerspective.Sync.Application.Tests.Infrastructure.InteractionsCache
 {
-    public class InteractionsFileStorageTests : IDisposable
+    public class InteractionsFileCacheTests : IDisposable
     {
         private readonly string _tempDirPath;
+        private readonly ILogger<InteractionsFileCache> _logger = NullLogger<InteractionsFileCache>.Instance;
+        private readonly IDataProtector _dataProtector = new EphemeralDataProtectionProvider().CreateProtector("foo");
 
-        public InteractionsFileStorageTests()
+        public InteractionsFileCacheTests()
         {
             _tempDirPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(_tempDirPath);
@@ -48,7 +57,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var interactions1 = new HashSet<Interaction> { interaction1_1, interaction1_2, interaction2_1 };
             var interactions2 = new HashSet<Interaction> { interaction2_2 };
 
-            var storage = new InteractionsFileStorage(_tempDirPath);
+            var storage = new InteractionsFileCache(_tempDirPath, _dataProtector, _logger);
 
             // Act
             await storage.PushInteractionsAsync(interactions1);
@@ -67,13 +76,38 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
         public async Task ShouldReturnEmptySetOnNoInteractions()
         {
             // Arrange
-            var storage = new InteractionsFileStorage(_tempDirPath);
+            var storage = new InteractionsFileCache(_tempDirPath, _dataProtector, _logger);
 
             // Act
             var result = await storage.PullInteractionsAsync(DateTime.UtcNow.Date);
 
             // Assert
             result.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task ShouldEncryptData()
+        {
+            // Arrange
+            var employee1 = Employee.CreateBot("bot1");
+            var employee2 = Employee.CreateBot("bot2");
+
+            var timestamp1 = new DateTime(2022, 01, 01, 12, 00, 00);
+
+            var interaction = Interaction.CreateEmail(timestamp1, employee1, employee2, Guid.NewGuid().ToString());
+
+            var interactions = new HashSet<Interaction> { interaction };
+
+            var storage = new InteractionsFileCache(_tempDirPath, _dataProtector, _logger);
+
+            // Act
+            await storage.PushInteractionsAsync(interactions);
+
+            // Assert
+            var storedBytes = await File.ReadAllBytesAsync(Path.Combine(_tempDirPath, "2022-01-01"));
+            var storedContent = Encoding.Unicode.GetString(storedBytes);
+            Func<IEnumerable<Interaction>> func = () => JsonConvert.DeserializeObject<IEnumerable<Interaction>>(storedContent);
+            func.Should().Throw<JsonReaderException>();
         }
     }
 }

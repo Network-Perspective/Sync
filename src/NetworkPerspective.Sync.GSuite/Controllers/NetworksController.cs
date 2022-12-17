@@ -32,7 +32,7 @@ namespace NetworkPerspective.Sync.GSuite.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
         public async Task<IActionResult> Add(string adminEmail, Uri externalKeyVaultUri = null, CancellationToken stoppingToken = default)
         {
-            var properties = new GoogleNetworkProperties(adminEmail, externalKeyVaultUri);
+            var properties = new GoogleNetworkProperties(adminEmail, externalKeyVaultUri, false);
 
             var networkId = await InitializeAsync(properties, stoppingToken);
 

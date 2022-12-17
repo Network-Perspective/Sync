@@ -10,10 +10,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
     {
         public bool AutoJoinChannels { get; private set; } = true;
 
-        public SlackNetworkProperties() : base(DefaultSyncGroups, null)
+        public SlackNetworkProperties() : base(DefaultSyncGroups, null, DefaultUseDurableIntractionsCache)
         { }
 
-        public SlackNetworkProperties(bool autoJoinChannels, bool syncChannelsNames, Uri externalKeyVaultUri) : base(syncChannelsNames, externalKeyVaultUri)
+        public SlackNetworkProperties(bool autoJoinChannels, bool syncChannelsNames, Uri externalKeyVaultUri, bool useDurableInteractionsCache) : base(syncChannelsNames, externalKeyVaultUri, useDurableInteractionsCache)
         {
             AutoJoinChannels = autoJoinChannels;
         }

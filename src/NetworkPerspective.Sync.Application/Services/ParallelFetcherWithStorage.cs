@@ -5,13 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Infrastructure.InteractionsCache;
 
 namespace NetworkPerspective.Sync.Application.Services
 {
     public class ParallelFetcherWithStorage
     {
         private readonly int _tasksCount;
-        private readonly IInteractionsStorage _interactionStorage;
+        private readonly IInteractionsCache _interactionStorage;
         private readonly IEnumerable<string> _userIds;
         private readonly Func<double, Task> _updateStatus;
         private readonly Func<string, Task<ISet<Interaction>>> _singleTask;
@@ -20,7 +21,7 @@ namespace NetworkPerspective.Sync.Application.Services
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         private readonly ParallelOptions _parallelOptions;
 
-        private ParallelFetcherWithStorage(IInteractionsStorage interactionStorage, IEnumerable<string> userIds, Func<double, Task> updateStatus, Func<string, Task<ISet<Interaction>>> singleTask, CancellationToken stoppingToken = default)
+        private ParallelFetcherWithStorage(IInteractionsCache interactionStorage, IEnumerable<string> userIds, Func<double, Task> updateStatus, Func<string, Task<ISet<Interaction>>> singleTask, CancellationToken stoppingToken = default)
         {
             _tasksCount = userIds.Count();
             _interactionStorage = interactionStorage;
@@ -31,7 +32,7 @@ namespace NetworkPerspective.Sync.Application.Services
             _parallelOptions = new ParallelOptions { CancellationToken = stoppingToken };
         }
 
-        public async static Task FetchAsync(IInteractionsStorage interactionsStorage, IEnumerable<string> userIds, Func<double, Task> updateStatus, Func<string, Task<ISet<Interaction>>> singleTask, CancellationToken stoppingToken = default)
+        public async static Task FetchAsync(IInteractionsCache interactionsStorage, IEnumerable<string> userIds, Func<double, Task> updateStatus, Func<string, Task<ISet<Interaction>>> singleTask, CancellationToken stoppingToken = default)
         {
             var fetcher = new ParallelFetcherWithStorage(interactionsStorage, userIds, updateStatus, singleTask, stoppingToken);
             await fetcher.FetchAsync();

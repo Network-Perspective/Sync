@@ -33,7 +33,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
         public async Task ShouldGetNonEmptyUserCollection()
         {
             // Arrange
-            var network = Network<GoogleNetworkProperties>.Create(Guid.NewGuid(), new GoogleNetworkProperties("nptestuser12@worksmartona.com", null), DateTime.UtcNow);
+            var network = Network<GoogleNetworkProperties>.Create(Guid.NewGuid(), new GoogleNetworkProperties("nptestuser12@worksmartona.com", null, false), DateTime.UtcNow);
             var googleConfig = new GoogleConfig
             {
                 ApplicationName = "gmail_app",

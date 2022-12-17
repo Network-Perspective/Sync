@@ -7,6 +7,7 @@ using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
+using NetworkPerspective.Sync.Application.Infrastructure.InteractionsCache;
 using NetworkPerspective.Sync.Application.Services;
 
 using Quartz;
@@ -22,6 +23,7 @@ namespace NetworkPerspective.Sync.Application.Scheduler
         private readonly ISyncHistoryService _syncHistoryService;
         private readonly INetworkService _networkService;
         private readonly IClock _clock;
+        private readonly IInteractionsCacheFactory _interactionsCacheFactory;
         private readonly IStatusLogger _statusLogger;
         private readonly ILogger<SyncJob> _logger;
 
@@ -32,6 +34,7 @@ namespace NetworkPerspective.Sync.Application.Scheduler
             ISyncHistoryService syncHistoryService,
             INetworkService networkService,
             IClock clock,
+            IInteractionsCacheFactory interactionsCacheFactory,
             IStatusLogger statusLogger,
             ILogger<SyncJob> logger)
         {
@@ -41,6 +44,7 @@ namespace NetworkPerspective.Sync.Application.Scheduler
             _syncHistoryService = syncHistoryService;
             _networkService = networkService;
             _clock = clock;
+            _interactionsCacheFactory = interactionsCacheFactory;
             _statusLogger = statusLogger;
             _logger = logger;
         }
@@ -59,6 +63,7 @@ namespace NetworkPerspective.Sync.Application.Scheduler
                 var lastSyncedTimeStamp = await _syncHistoryService.EvaluateSyncStartAsync(networkId, context.CancellationToken);
                 var now = _clock.UtcNow();
 
+                var interactionsCache = await _interactionsCacheFactory.CreateAsync(networkId, context.CancellationToken);
                 using var syncContext = new SyncContext(networkId, networkConfig, token, lastSyncedTimeStamp, now);
 
                 _logger.LogInformation("Executing Syncronization Job for Network '{network}' starting from {timestamp}", networkId, lastSyncedTimeStamp.ToShortDateString());

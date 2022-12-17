@@ -18,6 +18,7 @@ using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Extensions;
+using NetworkPerspective.Sync.Application.Infrastructure.InteractionsCache;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
@@ -26,7 +27,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface IMailboxClient
     {
-        Task GetInteractionsAsync(IInteractionsStorage interactionsStorage, Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        Task GetInteractionsAsync(IInteractionsCache interactionsStorage, IEnumerable<Employee> userEmails, DateTime startDate, InteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class MailboxClient : IMailboxClient
@@ -35,6 +36,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         private const string TaskCaption = "Synchronizing email interactions";
         private const string TaskDescription = "Fetching emails metadata from Google API";
 
+        private readonly Guid _networkId;
+        private readonly GoogleCredential _googleCredential;
         private readonly GoogleConfig _config;
         private readonly ILogger<MailboxClient> _logger;
         private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
@@ -43,28 +46,30 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         private readonly ILoggerFactory _loggerFactory;
         private readonly IClock _clock;
 
-        public MailboxClient(IStatusLogger statusService, ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILoggerFactory loggerFactory, IClock clock)
+        public MailboxClient(Guid networkId, GoogleCredential googleCredential, IStatusLogger statusService, ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILoggerFactory loggerFactory, IClock clock)
         {
             _config = config.Value;
             _logger = loggerFactory.CreateLogger<MailboxClient>();
+            _networkId = networkId;
+            _googleCredential = googleCredential;
             _statusLogger = statusService;
             _tasksStatusesCache = tasksStatusesCache;
             _loggerFactory = loggerFactory;
             _clock = clock;
         }
 
-        public async Task GetInteractionsAsync(IInteractionsStorage interactionsStorage, Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task GetInteractionsAsync(IInteractionsCache interactionsStorage, IEnumerable<Employee> users, DateTime startDate, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             var maxMessagesCountPerUser = CalculateMaxMessagesCount(startDate);
 
             async Task ReportProgressCallbackAsync(double progressRate)
             {
                 var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, progressRate);
-                await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);
+                await _tasksStatusesCache.SetStatusAsync(_networkId, taskStatus, stoppingToken);
             }
 
             Task<ISet<Interaction>> SingleTaskAsync(string userEmail)
-                => GetSingleUserInteractionsAsync(networkId, userEmail, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
+                => GetSingleUserInteractionsAsync(userEmail, maxMessagesCountPerUser, startDate, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on mailbox since {timestamp} for {count} users...", startDate, users.Count());
 
@@ -74,7 +79,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _logger.LogInformation("Evaluation of interactions based on mailbox since '{timestamp}' completed", startDate);
         }
 
-        private async Task<ISet<Interaction>> GetSingleUserInteractionsAsync(Guid networkId, string userEmail, int maxMessagesCount, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken)
+        private async Task<ISet<Interaction>> GetSingleUserInteractionsAsync(string userEmail, int maxMessagesCount, DateTime startDate, InteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
             try
             {
@@ -82,7 +87,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
                 var result = new HashSet<Interaction>(new InteractionEqualityComparer());
 
-                using var gmailService = InitializeGmailService(userEmail, credentials);
+                using var gmailService = InitializeGmailService(userEmail);
                 var actionsAggregator = new ActionsAggregator(userEmail);
                 var mailboxTraverser = new MailboxTraverser(userEmail, maxMessagesCount, gmailService, _retryHandler, _loggerFactory.CreateLogger<MailboxTraverser>());
                 var message = await mailboxTraverser.GetNextMessageAsync(stoppingToken);
@@ -104,7 +109,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             }
             catch (TooManyMailsPerUserException tmmpuex)
             {
-                await _statusLogger.LogWarningAsync(networkId, $"Skipping mailbox '{tmmpuex.Email}' too many messages", stoppingToken);
+                await _statusLogger.LogWarningAsync(_networkId, $"Skipping mailbox '{tmmpuex.Email}' too many messages", stoppingToken);
                 _logger.LogWarning("Skipping mailbox '{email}' too many messages", tmmpuex.Email);
                 return ImmutableHashSet<Interaction>.Empty;
             }
@@ -135,9 +140,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             return result;
         }
 
-        private GmailService InitializeGmailService(string userEmail, GoogleCredential credentials)
+        private GmailService InitializeGmailService(string userEmail)
         {
-            var userCredentials = credentials
+            var userCredentials = _googleCredential
                 .CreateWithUser(userEmail)
                 .UnderlyingCredential as ServiceAccountCredential;
 

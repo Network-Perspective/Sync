@@ -5,6 +5,7 @@ using Moq;
 
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
+using NetworkPerspective.Sync.Application.Infrastructure.InteractionsCache;
 
 using Xunit;
 
@@ -17,6 +18,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
         {
             // Arrange
             var mock = new Mock<IDisposable>();
+            
             var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new SecureString(), DateTime.UtcNow, DateTime.Now);
             context.Set(mock.Object);
 

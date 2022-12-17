@@ -10,7 +10,7 @@ using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Aggregation;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
-using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Application.Infrastructure.InteractionsCache;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
     internal interface IChatClient
     {
-        Task GetInteractions(IInteractionsStorage interactionsStorage, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
+        Task GetInteractions(IInteractionsCache interactionsStorage, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
     }
 
     internal class ChatClient : IChatClient
@@ -32,7 +32,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _logger = logger;
         }
 
-        public async Task GetInteractions(IInteractionsStorage interactionsStorage, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
+        public async Task GetInteractions(IInteractionsCache interactionsStorage, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
         {
             _logger.LogDebug("Fetching chats...");
 

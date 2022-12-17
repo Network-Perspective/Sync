@@ -16,7 +16,6 @@ namespace NetworkPerspective.Sync.Application.Domain.Networks
 
     public class Network<T> : Network where T : NetworkProperties
     {
-
         public T Properties { get; }
 
         private Network(Guid networkId, T properties, DateTime createdAt) : base(networkId, createdAt)

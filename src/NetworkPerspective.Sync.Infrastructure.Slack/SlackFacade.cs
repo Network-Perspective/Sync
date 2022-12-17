@@ -20,8 +20,6 @@ using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
 
-using Newtonsoft.Json;
-
 namespace NetworkPerspective.Sync.Infrastructure.Slack
 {
     internal class SlackFacade : IDataSource
@@ -86,17 +84,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             var interactionFactory = new InteractionFactory(hashingService.Hash, employees);
 
             var timeRange = new TimeRange(context.Since.AddDays(-30), _clock.UtcNow());
-            await InitializeInContext(context, async () =>
-            {
-                var storage = new InteractionsFileStorage(storagePath) as IInteractionsStorage;
-                await _chatClient.GetInteractions(storage, slackClientFacace, network, interactionFactory, timeRange, stoppingToken);
-                return storage;
 
-            });
+            await _chatClient.GetInteractions(context.InteractionsCache, slackClientFacace, network, interactionFactory, timeRange, stoppingToken);
 
-            var storage = context.Get<IInteractionsStorage>();
-
-            var chatInteractions = await storage.PullInteractionsAsync(context.CurrentRange.Start.Date, stoppingToken);
+            var chatInteractions = await context.InteractionsCache.PullInteractionsAsync(context.CurrentRange.Start.Date, stoppingToken);
 
             return chatInteractions.ToHashSet(new InteractionEqualityComparer());
         }
@@ -158,5 +149,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
         public Task<EmployeeCollection> GetEmployees(SyncContext context, CancellationToken stoppingToken = default)
             => Task.FromResult(new EmployeeCollection(Enumerable.Empty<Employee>(), null));
+
+        public Task InitializeAsync(SyncContext context, CancellationToken stoppingToken = default)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

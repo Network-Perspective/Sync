@@ -1,7 +1,5 @@
 ﻿using System;
 
-using NetworkPerspective.Sync.Application.Services;
-
 namespace NetworkPerspective.Sync.Application.Domain.Sync
 {
     public class SyncHistoryEntry

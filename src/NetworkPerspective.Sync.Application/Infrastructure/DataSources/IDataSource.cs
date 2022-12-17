@@ -11,6 +11,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.DataSources
 {
     public interface IDataSource
     {
+        Task InitializeAsync(SyncContext context, CancellationToken stoppingToken = default);
         Task<ISet<Interaction>> GetInteractions(SyncContext context, CancellationToken stoppingToken = default);
         Task<EmployeeCollection> GetEmployees(SyncContext context, CancellationToken stoppingToken = default);
         Task<EmployeeCollection> GetHashedEmployees(SyncContext context, CancellationToken stoppingToken = default);

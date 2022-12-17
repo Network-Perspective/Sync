@@ -4,12 +4,14 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 using Moq;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Application.Infrastructure.InteractionsCache;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
@@ -54,7 +56,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var date = new DateTime(2021, 11, 01);
 
             // Act
-            var storage = new InteractionsFileStorage("tmp");
+            var storage = new InteractionsFileCache("tmp", new EphemeralDataProtectionProvider().CreateProtector("foo"), NullLogger<InteractionsFileCache>.Instance);
             await mailboxClient.GetInteractionsAsync(storage, Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
 
             var result = await storage.PullInteractionsAsync(date.Date);
