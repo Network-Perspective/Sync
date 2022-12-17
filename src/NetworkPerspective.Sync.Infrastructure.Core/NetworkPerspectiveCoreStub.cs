@@ -125,6 +125,16 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
             }
         }
 
+        public Task ReportSyncFailedAsync(SecureString accessToken, TimeRange timeRange, string message, CancellationToken stoppingToken = default)
+            => Task.CompletedTask;
+
+        public Task ReportSyncStartAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default)
+            => Task.CompletedTask;
+
+
+        public Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default)
+            => Task.CompletedTask;
+
         public Task<TokenValidationResponse> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default)
         {
             return Task.FromResult(new TokenValidationResponse(NetworkId, ConnectorId));

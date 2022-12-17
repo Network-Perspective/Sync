@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -168,6 +169,139 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 // Assert
                 var expectedResult = new NetworkConfig(EmailFilter.Empty, CustomAttributesConfig.Empty);
 
+            }
+        }
+
+        public class ReportSyncStartAsync : NetworkPerspectiveCoreFacadeTests
+        {
+            [Fact]
+            public async Task ShouldCallEndpoint()
+            {
+                // Arrange
+                var start = new DateTime(2022, 01, 01);
+                var end = new DateTime(2022, 01, 02);
+                var timeRange = new TimeRange(start, end);
+                var options = CreateNpCoreOptions();
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+
+                // Act
+                await facade.ReportSyncStartAsync("foo".ToSecureString(), timeRange);
+
+                // Assert
+                _clientMock.Verify(x => x.ReportStartAsync(
+                        It.Is<ReportSyncStartedCommand>(x => x.SyncPeriodStart == start && x.SyncPeriodEnd == end),
+                        It.IsAny<CancellationToken>()),
+                    Times.Once);
+            }
+
+            [Fact]
+            public async Task ShouldThrowSpecificException()
+            {
+                // Arrange
+                var start = new DateTime(2022, 01, 01);
+                var end = new DateTime(2022, 01, 02);
+                var timeRange = new TimeRange(start, end);
+                var options = CreateNpCoreOptions();
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+
+                _clientMock
+                    .Setup(x => x.ReportStartAsync(It.IsAny<ReportSyncStartedCommand>(), It.IsAny<CancellationToken>()))
+                    .ThrowsAsync(new Exception());
+
+                // Act
+                Func<Task> func = async () => await facade.ReportSyncStartAsync("foo".ToSecureString(), timeRange);
+
+                // Assert
+                await func.Should().ThrowAsync<NetworkPerspectiveCoreException>();
+            }
+        }
+
+        public class ReportSyncSuccessfulAsync : NetworkPerspectiveCoreFacadeTests
+        {
+            [Fact]
+            public async Task ShouldCallEndpoint()
+            {
+                // Arrange
+                var start = new DateTime(2022, 01, 01);
+                var end = new DateTime(2022, 01, 02);
+                var timeRange = new TimeRange(start, end);
+                var options = CreateNpCoreOptions();
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+
+                // Act
+                await facade.ReportSyncSuccessfulAsync("foo".ToSecureString(), timeRange);
+
+                // Assert
+                _clientMock.Verify(x => x.ReportCompletedAsync(
+                        It.Is<ReportSyncCompletedCommand>(x => x.SyncPeriodStart == start && x.SyncPeriodEnd == end && x.Success == true),
+                        It.IsAny<CancellationToken>()),
+                    Times.Once);
+            }
+
+            [Fact]
+            public async Task ShouldThrowSpecificException()
+            {
+                // Arrange
+                var start = new DateTime(2022, 01, 01);
+                var end = new DateTime(2022, 01, 02);
+                var timeRange = new TimeRange(start, end);
+                var options = CreateNpCoreOptions();
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+
+                _clientMock
+                    .Setup(x => x.ReportCompletedAsync(It.IsAny<ReportSyncCompletedCommand>(), It.IsAny<CancellationToken>()))
+                    .ThrowsAsync(new Exception());
+
+                // Act
+                Func<Task> func = async () => await facade.ReportSyncSuccessfulAsync("foo".ToSecureString(), timeRange);
+
+                // Assert
+                await func.Should().ThrowAsync<NetworkPerspectiveCoreException>();
+            }
+        }
+
+        public class ReportSyncFailedAsync : NetworkPerspectiveCoreFacadeTests
+        {
+            [Fact]
+            public async Task ShouldCallEndpoint()
+            {
+                // Arrange
+                var start = new DateTime(2022, 01, 01);
+                var end = new DateTime(2022, 01, 02);
+                var message = "message";
+                var timeRange = new TimeRange(start, end);
+                var options = CreateNpCoreOptions();
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+
+                // Act
+                await facade.ReportSyncFailedAsync("foo".ToSecureString(), timeRange, message);
+
+                // Assert
+                _clientMock.Verify(x => x.ReportCompletedAsync(
+                        It.Is<ReportSyncCompletedCommand>(x => x.SyncPeriodStart == start && x.SyncPeriodEnd == end && x.Success == false && x.Message == message),
+                        It.IsAny<CancellationToken>()),
+                    Times.Once);
+            }
+
+            [Fact]
+            public async Task ShouldThrowSpecificException()
+            {
+                // Arrange
+                var start = new DateTime(2022, 01, 01);
+                var end = new DateTime(2022, 01, 02);
+                var timeRange = new TimeRange(start, end);
+                var options = CreateNpCoreOptions();
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+
+                _clientMock
+                    .Setup(x => x.ReportCompletedAsync(It.IsAny<ReportSyncCompletedCommand>(), It.IsAny<CancellationToken>()))
+                    .ThrowsAsync(new Exception());
+
+                // Act
+                Func<Task> func = async () => await facade.ReportSyncFailedAsync("foo".ToSecureString(), timeRange, "bar");
+
+                // Assert
+                await func.Should().ThrowAsync<NetworkPerspectiveCoreException>();
             }
         }
 
