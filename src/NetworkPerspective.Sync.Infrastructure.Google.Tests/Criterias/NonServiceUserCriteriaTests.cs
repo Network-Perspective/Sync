@@ -29,7 +29,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Criterias
                 {
                     Name = new UserName
                     {
-                        FamilyName =familyName,
+                        FamilyName = familyName,
                         GivenName = givenName
                     }
                 }

@@ -101,7 +101,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 {
                     var recurrence = await GetRecurrenceAsync(calendarService, userEmail, meeting.RecurringEventId, stoppingToken);
                     actionsAggregator.Add(meeting.GetStart());
-                    result.UnionWith(interactionFactory.Create(meeting, recurrence));
+                    result.UnionWith(interactionFactory.CreateForUser(meeting, userEmail, recurrence));
                 }
 
                 _logger.LogDebug("Evaluation of interactions based on callendar for user '{email}' completed. Found {count} interactions", "***", result.Count);
