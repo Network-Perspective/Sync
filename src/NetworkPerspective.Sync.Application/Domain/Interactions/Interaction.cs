@@ -11,6 +11,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
 {
     public class Interaction
     {
+        public string Id { get; init; }
         public bool IsHashed { get; init; }
         public DateTime Timestamp { get; init; }
         public Employee Source { get; init; }
@@ -28,8 +29,9 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
 
         }
 
-        private Interaction(DateTime timestamp, Employee source, Employee target, InteractionType type, string channelId, string eventId, string parentEventId, RecurrenceType? recurring, ISet<UserActionType> userActions, int? duration, bool isHashed)
+        private Interaction(string id, DateTime timestamp, Employee source, Employee target, InteractionType type, string channelId, string eventId, string parentEventId, RecurrenceType? recurring, ISet<UserActionType> userActions, int? duration, bool isHashed)
         {
+            Id = id;
             Timestamp = timestamp;
             Source = source;
             Target = target;
@@ -46,6 +48,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         public static Interaction CreateEmail(DateTime timestamp, Employee source, Employee target, string eventId)
         {
             return new Interaction(
+                id: (timestamp.Ticks.ToString() + source.Id.PrimaryId + target.Id.PrimaryId + eventId).GetMd5HashCode(),
                 timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
@@ -62,6 +65,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         public static Interaction CreateMeeting(DateTime timestamp, Employee source, Employee target, string eventId, RecurrenceType? recurring, int duration)
         {
             return new Interaction(
+                id: (timestamp.Ticks.ToString() + source.Id.PrimaryId + target.Id.PrimaryId + eventId).GetStableHashCode().ToString(),
                 timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
@@ -87,6 +91,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         private static Interaction CreateChatInteraction(DateTime timestamp, Employee source, Employee target, string eventId, string parentEventId, string channelId, ISet<UserActionType> userActionType)
         {
             return new Interaction(
+                id: (timestamp.Ticks.ToString() + source.Id.PrimaryId + target.Id.PrimaryId + eventId).GetStableHashCode().ToString(),
                 timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
@@ -106,6 +111,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
                 throw new DoubleHashingException(nameof(Interaction));
 
             return new Interaction(
+                id: Id,
                 timestamp: Timestamp,
                 source: Source.Hash(hashFunc),
                 target: Target.Hash(hashFunc),
