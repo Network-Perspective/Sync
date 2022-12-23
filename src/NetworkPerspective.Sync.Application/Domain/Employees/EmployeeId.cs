@@ -6,6 +6,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 {
     public class EmployeeId
     {
+        public static readonly IEqualityComparer<EmployeeId> EqualityComparer = new EmployeeIdEqualityComparer();
         public static readonly EmployeeId Empty = new EmployeeId(string.Empty, string.Empty, Array.Empty<string>(), false);
 
         public string PrimaryId { get; init; }
@@ -41,5 +42,8 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
         public override string ToString()
             => $"{PrimaryId} ({string.Join(", ", Aliases)})";
+
+        public override int GetHashCode()
+            => PrimaryId.GetHashCode();
     }
 }

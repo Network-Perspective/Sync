@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -76,7 +75,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var employeeCollection = context.Get<EmployeeCollection>();
 
-            var interactionFactory = new InteractionFactory(hashingService.Hash, employeeCollection, _clock);
+            var emailInteractionFactory = new EmailInteractionFactory(hashingService.Hash, employeeCollection, _clock);
+            var meetingInteractionFactory = new MeetingInteractionFactory(hashingService.Hash, employeeCollection);
             var result = new HashSet<Interaction>(new InteractionEqualityComparer());
 
             var periodStart = context.CurrentRange.Start.AddMinutes(-_config.SyncOverlapInMinutes);
@@ -85,14 +85,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             await InitializeInContext(context, async () =>
             {
                 var storage = new InteractionsFileStorage(storagePath) as IInteractionsStorage;
-                await _mailboxClient.GetInteractionsAsync(storage, context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, interactionFactory, stoppingToken);
+                await _mailboxClient.GetInteractionsAsync(storage, context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, emailInteractionFactory, stoppingToken);
                 return storage;
             });
 
             var storage = context.Get<IInteractionsStorage>();
             result.UnionWith(await storage.PullInteractionsAsync(context.CurrentRange.Start.Date, stoppingToken));
 
-            var meetingInteractions = await _calendarClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, interactionFactory, stoppingToken);
+            var meetingInteractions = await _calendarClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, meetingInteractionFactory, stoppingToken);
             result.UnionWith(meetingInteractions);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);

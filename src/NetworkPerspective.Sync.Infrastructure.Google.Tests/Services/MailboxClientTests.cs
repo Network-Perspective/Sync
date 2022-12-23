@@ -50,8 +50,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var employees = new List<Employee>()
                 .Add(existingEmail);
             var employeesCollection = new EmployeeCollection(employees, null);
-            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", employeesCollection, clock);
-            var date = new DateTime(2021, 11, 01);
+            var interactionFactory = new EmailInteractionFactory((x) => $"{x}_hashed", employeesCollection, clock);
+            var date = new DateTime(2021, 11, 09);
 
             // Act
             var storage = new InteractionsFileStorage("tmp");

@@ -50,7 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             var employeesCollection = new EmployeeCollection(employees, null);
 
-            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", employeesCollection, new Clock());
+            var interactionFactory = new MeetingInteractionFactory((x) => $"{x}_hashed", employeesCollection);
 
             // Act
             var result = await client.GetInteractionsAsync(Guid.NewGuid(), employeesCollection.GetAllInternal(), timeRange, _googleClientFixture.Credential, interactionFactory);
