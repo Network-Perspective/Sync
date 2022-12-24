@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -34,7 +35,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
         public async Task ShouldReturnNonEmptyEmailCollection()
         {
             // Arrange
-            const string existingEmail = "nptestuser12@worksmartona.com";
+            const string userEmail = "nptestuser12@worksmartona.com";
 
             var googleConfig = new GoogleConfig
             {
@@ -48,19 +49,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var mailboxClient = new MailboxClient(Mock.Of<IStatusLogger>(), Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
 
             var employees = new List<Employee>()
-                .Add(existingEmail);
+                .Add(userEmail);
             var employeesCollection = new EmployeeCollection(employees, null);
             var interactionFactory = new EmailInteractionFactory((x) => $"{x}_hashed", employeesCollection, clock);
-            var date = new DateTime(2021, 11, 09);
 
             // Act
             var storage = new InteractionsFileStorage("tmp");
-            await mailboxClient.GetInteractionsAsync(storage, Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
-
-            var result = await storage.PullInteractionsAsync(date.Date);
+            await mailboxClient.GetInteractionsAsync(storage, Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(userEmail, userEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
 
             // Assert
-            result.Should().NotBeNullOrEmpty();
+            var result1 = await storage.PullInteractionsAsync(new DateTime(2022, 11, 20));
+            result1.Single(x => x.Source.Id.PrimaryId == "maciej@networkperspective.io_hashed" && x.Target.Id.PrimaryId == $"{userEmail}_hashed");
+
+            var result2 = await storage.PullInteractionsAsync(new DateTime(2022, 12, 24));
+            result2.Single(x => x.Source.Id.PrimaryId == $"{userEmail}_hashed" && x.Target.Id.PrimaryId == "john@worksmartona.com_hashed");
+
         }
     }
 }

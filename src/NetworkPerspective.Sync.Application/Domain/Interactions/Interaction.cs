@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Meetings;
@@ -9,6 +10,7 @@ using NetworkPerspective.Sync.Application.Extensions;
 
 namespace NetworkPerspective.Sync.Application.Domain.Interactions
 {
+    [DebuggerDisplay("{Source.Id.PrimaryId} -> {Target.Id.PrimaryId}")]
     public class Interaction
     {
         public string Id { get; init; }
