@@ -26,7 +26,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface ICalendarClient
     {
-        public Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        public Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class CalendarClient : ICalendarClient
@@ -46,7 +46,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _logger = logger;
         }
 
-        public async Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task<ISet<Interaction>> GetInteractionsAsync(Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             async Task ReportProgressCallbackAsync(double progressRate)
             {
@@ -68,7 +68,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             return result;
         }
 
-        private async Task<ISet<Interaction>> GetSingleUserInteractionsAsync(string userEmail, TimeRange timeRange, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken)
+        private async Task<ISet<Interaction>> GetSingleUserInteractionsAsync(string userEmail, TimeRange timeRange, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
             try
             {
@@ -101,7 +101,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 {
                     var recurrence = await GetRecurrenceAsync(calendarService, userEmail, meeting.RecurringEventId, stoppingToken);
                     actionsAggregator.Add(meeting.GetStart());
-                    result.UnionWith(interactionFactory.CreateFromMeeting(meeting, recurrence));
+                    result.UnionWith(interactionFactory.CreateForUser(meeting, userEmail, recurrence));
                 }
 
                 _logger.LogDebug("Evaluation of interactions based on callendar for user '{email}' completed. Found {count} interactions", "***", result.Count);

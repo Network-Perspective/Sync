@@ -26,7 +26,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface IMailboxClient
     {
-        Task GetInteractionsAsync(IInteractionsStorage interactionsStorage, Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        Task GetInteractionsAsync(IInteractionsStorage interactionsStorage, Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class MailboxClient : IMailboxClient
@@ -53,7 +53,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _clock = clock;
         }
 
-        public async Task GetInteractionsAsync(IInteractionsStorage interactionsStorage, Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task GetInteractionsAsync(IInteractionsStorage interactionsStorage, Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             var maxMessagesCountPerUser = CalculateMaxMessagesCount(startDate);
 
@@ -74,7 +74,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _logger.LogInformation("Evaluation of interactions based on mailbox since '{timestamp}' completed", startDate);
         }
 
-        private async Task<ISet<Interaction>> GetSingleUserInteractionsAsync(Guid networkId, string userEmail, int maxMessagesCount, DateTime startDate, GoogleCredential credentials, InteractionFactory interactionFactory, CancellationToken stoppingToken)
+        private async Task<ISet<Interaction>> GetSingleUserInteractionsAsync(Guid networkId, string userEmail, int maxMessagesCount, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
             try
             {
@@ -90,7 +90,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 while (!stoppingToken.IsCancellationRequested && message != null && message?.GetDateTime(_clock) > startDate)
                 {
                     actionsAggregator.Add(message.GetDateTime(_clock));
-                    var interactions = interactionFactory.CreateFromEmail(message);
+                    var interactions = interactionFactory.CreateForUser(message, userEmail);
                     result.UnionWith(interactions);
                     message = await mailboxTraverser.GetNextMessageAsync(stoppingToken);
                 }

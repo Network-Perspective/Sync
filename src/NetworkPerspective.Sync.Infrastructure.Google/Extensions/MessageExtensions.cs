@@ -21,7 +21,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
                 return "empty";
         }
 
-        public static ISet<string> GetReceivers(this Message message)
+        public static ISet<string> GetRecipients(this Message message)
         {
             var receivers = message.GetHeaderValue("to").GetUserEmails();
             var copyReceivers = message.GetHeaderValue("cc").GetUserEmails();

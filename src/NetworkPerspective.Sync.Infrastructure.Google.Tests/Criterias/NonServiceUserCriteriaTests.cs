@@ -16,15 +16,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Criterias
         private static readonly ILogger<NonServiceUserCriteria> Logger = NullLogger<NonServiceUserCriteria>.Instance;
 
         [Theory]
-        [InlineData(null, "bar", "baz")]
-        [InlineData("foo", null, "baz")]
-        //[InlineData("foo", "bar", null)] To be uncommented once we know rule to filter out service accounts
-        [InlineData(null, null, "baz")]
-        [InlineData(null, "bar", null)]
-        [InlineData("foo", null, null)]
-        [InlineData(null, null, null)]
-        [InlineData("", "bar", "baz")]
-        public void ShouldFilterOutUsersWithoutRequiredProperties(string familyName, string givenName, string title)
+        [InlineData(null, "bar")]
+        [InlineData("foo", null)]
+        [InlineData(null, null)]
+        [InlineData("", "bar")]
+        public void ShouldFilterOutUsersWithoutRequiredProperties(string familyName, string givenName)
         {
             // Arrange
             var users = new[]
@@ -33,15 +29,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Criterias
                 {
                     Name = new UserName
                     {
-                        FamilyName =familyName,
+                        FamilyName = familyName,
                         GivenName = givenName
-                    },
-                    Organizations = new[]
-                    {
-                        new UserOrganization
-                        {
-                            Title = title,
-                        }
                     }
                 }
             };
@@ -65,13 +54,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Criterias
                     {
                         FamilyName = "foo",
                         GivenName = "bar"
-                    },
-                    Organizations = new[]
-                    {
-                        new UserOrganization
-                        {
-                            Title = "baz",
-                        }
                     }
                 }
             };
@@ -82,30 +64,5 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Criterias
             // Assert
             filteredUsers.Should().BeEquivalentTo(users);
         }
-
-        [Fact(Skip = "We need to adjust the rule to reality, once we know how to filter out service accounts")]
-        public void ShouldFilterOutUsersWithoutAnyOrganization()
-        {
-            // Arrange
-            var users = new[]
-            {
-                new User
-                {
-                    Name = new UserName
-                    {
-                        FamilyName = "foo",
-                        GivenName = "bar"
-                    },
-                    Organizations = null
-                }
-            };
-
-            // Act
-            var filteredUsers = new NonServiceUserCriteria(Logger).MeetCriteria(users);
-
-            // Assert
-            filteredUsers.Should().BeEmpty();
-        }
-
     }
 }
