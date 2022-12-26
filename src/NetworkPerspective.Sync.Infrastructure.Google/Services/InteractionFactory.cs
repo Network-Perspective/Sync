@@ -6,6 +6,7 @@ using Google.Apis.Gmail.v1.Data;
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Domain.Meetings;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
 
@@ -46,9 +47,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             return result;
         }
 
-        public ISet<Interaction> CreateFromMeeting(Event meeting)
+        public ISet<Interaction> CreateFromMeeting(Event meeting, RecurrenceType? recurrence)
         {
-            var recurrence = meeting.GetRecurrence();
             var meetingDuration = meeting.GetDurationInMinutes();
             var meetingStart = meeting.GetStart();
             var participants = meeting.GetParticipants();

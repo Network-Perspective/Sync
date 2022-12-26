@@ -43,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             };
 
             var client = new CalendarClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLogger<CalendarClient>.Instance);
-            var timeRange = new TimeRange(DateTime.MinValue, DateTime.MaxValue);
+            var timeRange = new TimeRange(DateTime.UtcNow.AddDays(-7), DateTime.UtcNow);
 
             var employees = new List<Employee>()
                 .Add(email);

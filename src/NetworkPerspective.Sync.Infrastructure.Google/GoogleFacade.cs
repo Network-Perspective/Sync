@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,6 +62,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         {
             _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.CurrentRange);
 
+            var storagePath = Path.Combine("tmp", context.NetworkId.ToString());
+
             await InitializeInContext(context, () => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
             await InitializeInContext(context, () => _credentialsProvider.GetCredentialsAsync(stoppingToken));
             await InitializeInContext(context, () => _hashingServiceFactory.CreateAsync(_secretRepository, stoppingToken));
@@ -79,10 +82,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var periodStart = context.CurrentRange.Start.AddMinutes(-_config.SyncOverlapInMinutes);
             _logger.LogInformation("To not miss any email interactions period start is extended by {minutes}min. As result mailbox interactions are eveluated starting from {start}", _config.SyncOverlapInMinutes, periodStart);
 
-            await InitializeInContext(context, () => _mailboxClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, interactionFactory, stoppingToken));
+            await InitializeInContext(context, async () =>
+            {
+                var storage = new InteractionsFileStorage(storagePath) as IInteractionsStorage;
+                await _mailboxClient.GetInteractionsAsync(storage, context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, interactionFactory, stoppingToken);
+                return storage;
+            });
 
-            var emailInteractions = context.Get<ISet<Interaction>>();
-            result.UnionWith(emailInteractions.Where(x => context.CurrentRange.IsInRange(x.Timestamp)));
+            var storage = context.Get<IInteractionsStorage>();
+            result.UnionWith(await storage.PullInteractionsAsync(context.CurrentRange.Start.Date, stoppingToken));
 
             var meetingInteractions = await _calendarClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, interactionFactory, stoppingToken);
             result.UnionWith(meetingInteractions);

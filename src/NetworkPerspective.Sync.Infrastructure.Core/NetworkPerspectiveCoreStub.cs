@@ -10,6 +10,7 @@ using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
@@ -49,8 +50,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
                     Entites = entities
                 };
 
-                var networkHash = new NetworkCredential(string.Empty, accessToken).Password;
-                await new FileDataWriter("Data").WriteAsync(command.Entites, $"{networkHash}_entities.json", stoppingToken);
+                await new FileDataWriter("Data").WriteAsync(command.Entites, $"{accessToken.ToSystemString().GetStableHashCode()}_entities.json", stoppingToken);
             }
             catch (Exception ex)
             {
@@ -72,8 +72,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
                     Groups = hashedGroups
                 };
 
-                var networkHash = new NetworkCredential(string.Empty, accessToken).Password;
-                await new FileDataWriter("Data").WriteAsync(command.Groups, $"{networkHash}_groups.json", stoppingToken);
+                await new FileDataWriter("Data").WriteAsync(command.Groups, $"{accessToken.ToSystemString().GetStableHashCode()}_groups.json", stoppingToken);
             }
             catch (Exception ex)
             {
@@ -95,10 +94,8 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
                     Interactions = interactionsToPush
                 };
 
-                var networkHash = new NetworkCredential(string.Empty, accessToken).Password;
-
                 if (interactions.Any())
-                    await new FileDataWriter("Data").WriteAsync(command.Interactions, $"{accessToken.GetHashCode()}_{interactions.First().Timestamp:yyyyMMdd_HHmmss}_interactions.json", stoppingToken);
+                    await new FileDataWriter("Data").WriteAsync(command.Interactions, $"{accessToken.ToSystemString().GetStableHashCode()}_{interactions.First().Timestamp:yyyyMMdd_HHmmss}_interactions.json", stoppingToken);
             }
             catch (Exception ex)
             {
@@ -120,8 +117,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
                     Users = employeesList.ToList()
                 };
 
-                var networkHash = new NetworkCredential(string.Empty, accessToken).Password;
-                await new FileDataWriter("Data").WriteAsync(command.Users, $"{networkHash}_users.json", stoppingToken);
+                await new FileDataWriter("Data").WriteAsync(command.Users, $"{accessToken.ToSystemString().GetStableHashCode()}_users.json", stoppingToken);
             }
             catch (Exception ex)
             {

@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
@@ -53,9 +54,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             try
             {
                 // Act
-                var result = await chatclient.GetInteractions(slackClientFacade, network, interactionFactory, timeRange);
+                var storage = new InteractionsFileStorage("tmp");
+                await chatclient.GetInteractions(storage, slackClientFacade, network, interactionFactory, timeRange);
 
                 // Assert
+                var result = await storage.PullInteractionsAsync(new DateTime(2022, 07, 30));
                 result.Should().NotBeEmpty();
             }
             catch (Slack.Client.Exceptions.ApiException exception)

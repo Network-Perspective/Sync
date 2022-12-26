@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
@@ -17,6 +19,8 @@ using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
+
+using Newtonsoft.Json;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack
 {
@@ -29,6 +33,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         private readonly IHashingServiceFactory _hashingServiceFactory;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly CursorPaginationHandler _cursorPaginationHandler;
+        private readonly IClock _clock;
         private readonly ILogger<SlackFacade> _logger;
 
         public SlackFacade(INetworkService networkService,
@@ -38,6 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                            IHashingServiceFactory hashingServiceFactory,
                            IHttpClientFactory httpClientFactory,
                            CursorPaginationHandler cursorPaginationHandler,
+                           IClock clock,
                            ILogger<SlackFacade> logger)
         {
             _networkService = networkService;
@@ -47,12 +53,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             _hashingServiceFactory = hashingServiceFactory;
             _httpClientFactory = httpClientFactory;
             _cursorPaginationHandler = cursorPaginationHandler;
+            _clock = clock;
             _logger = logger;
         }
 
         public async Task<ISet<Interaction>> GetInteractions(SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Fetching employees data...");
+
+            var storagePath = Path.Combine("tmp", context.NetworkId.ToString());
 
             await InitializeInContext(context, () => _networkService.GetAsync<SlackNetworkProperties>(context.NetworkId, stoppingToken));
             await InitializeInContext(context, async () =>
@@ -70,11 +79,26 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             var hashingService = context.Get<IHashingService>();
             var network = context.Get<Network<SlackNetworkProperties>>();
 
-            var employees = await _employeeProfileClient.GetEmployees(slackClientFacace, context.NetworkConfig.EmailFilter, stoppingToken);
+            await InitializeInContext(context, () => _employeeProfileClient.GetEmployees(slackClientFacace, context.NetworkConfig.EmailFilter, stoppingToken));
+
+            var employees = context.Get<EmployeeCollection>();
 
             var interactionFactory = new InteractionFactory(hashingService.Hash, employees);
 
-            return await _chatClient.GetInteractions(slackClientFacace, network, interactionFactory, context.CurrentRange, stoppingToken); ;
+            var timeRange = new TimeRange(context.Since.AddDays(-30), _clock.UtcNow());
+            await InitializeInContext(context, async () =>
+            {
+                var storage = new InteractionsFileStorage(storagePath) as IInteractionsStorage;
+                await _chatClient.GetInteractions(storage, slackClientFacace, network, interactionFactory, timeRange, stoppingToken);
+                return storage;
+
+            });
+
+            var storage = context.Get<IInteractionsStorage>();
+
+            var chatInteractions = await storage.PullInteractionsAsync(context.CurrentRange.Start.Date, stoppingToken);
+
+            return chatInteractions.ToHashSet(new InteractionEqualityComparer());
         }
 
         public async Task<EmployeeCollection> GetHashedEmployees(SyncContext context, CancellationToken stoppingToken = default)

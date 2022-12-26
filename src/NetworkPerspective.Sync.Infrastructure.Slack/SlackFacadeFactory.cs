@@ -19,18 +19,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IHashingServiceFactory _hashingServiceFactory;
+        private readonly IClock _clock;
         private readonly ILoggerFactory _loggerFactory;
 
         public SlackFacadeFactory(INetworkService networkService,
                                   ISecretRepositoryFactory secretRepositoryFactory,
                                   IHttpClientFactory httpClientFactory,
                                   IHashingServiceFactory hashingServiceFactory,
+                                  IClock clock,
                                   ILoggerFactory loggerFactory)
         {
             _networkService = networkService;
             _secretRepositoryFactory = secretRepositoryFactory;
             _httpClientFactory = httpClientFactory;
             _hashingServiceFactory = hashingServiceFactory;
+            _clock = clock;
             _loggerFactory = loggerFactory;
         }
 
@@ -44,7 +47,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             var employeeProfileClient = new MembersClient(_loggerFactory.CreateLogger<MembersClient>());
             var chatClient = new ChatClient(_loggerFactory.CreateLogger<ChatClient>());
 
-            return new SlackFacade(_networkService, secretRepository, employeeProfileClient, chatClient, _hashingServiceFactory, _httpClientFactory, paginationHandler, logger);
+            return new SlackFacade(_networkService, secretRepository, employeeProfileClient, chatClient, _hashingServiceFactory, _httpClientFactory, paginationHandler, _clock, logger);
         }
     }
 }
