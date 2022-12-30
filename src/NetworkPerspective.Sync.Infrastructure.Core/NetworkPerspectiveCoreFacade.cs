@@ -17,6 +17,7 @@ using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
+using NetworkPerspective.Sync.Infrastructure.Core.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core
 {
@@ -24,14 +25,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
     {
         private readonly NetworkPerspectiveCoreConfig _npCoreConfig;
         private readonly ISyncHashedClient _client;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<NetworkPerspectiveCoreFacade> _logger;
 
-        public NetworkPerspectiveCoreFacade(ISyncHashedClient client, IOptions<NetworkPerspectiveCoreConfig> npCoreConfig, ILogger<NetworkPerspectiveCoreFacade> logger)
+        public NetworkPerspectiveCoreFacade(ISyncHashedClient client, IOptions<NetworkPerspectiveCoreConfig> npCoreConfig, ILoggerFactory loggerFactory)
         {
             _npCoreConfig = npCoreConfig.Value;
             _client = client;
-            _logger = logger;
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<NetworkPerspectiveCoreFacade>();
         }
+
+        public IInteractionsStream OpenInteractionsStream(SecureString accessToken, CancellationToken stoppingToken = default)
+            => new InteractionsStream(accessToken.Copy(), _client, _npCoreConfig, _loggerFactory.CreateLogger<InteractionsStream>(), stoppingToken);
 
         public async Task PushInteractionsAsync(SecureString accessToken, ISet<Interaction> interactions, CancellationToken stoppingToken = default)
         {
