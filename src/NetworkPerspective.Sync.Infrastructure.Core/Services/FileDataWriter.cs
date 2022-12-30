@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace NetworkPerspective.Sync.Infrastructure.Core
+namespace NetworkPerspective.Sync.Infrastructure.Core.Services
 {
     internal class FileDataWriter
     {

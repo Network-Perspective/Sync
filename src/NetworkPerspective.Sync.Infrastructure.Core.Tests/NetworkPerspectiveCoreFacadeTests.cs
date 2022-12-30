@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
-using HandlebarsDotNet;
-
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -22,8 +20,8 @@ using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
+using NetworkPerspective.Sync.Common.Tests.Factories;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
-using NetworkPerspective.Sync.Infrastructure.Core.Tests.Toolkit;
 
 using Xunit;
 
@@ -32,7 +30,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
     public class NetworkPerspectiveCoreFacadeTests
     {
         private readonly Mock<ISyncHashedClient> _clientMock = new Mock<ISyncHashedClient>();
-        private readonly ILogger<NetworkPerspectiveCoreFacade> _logger = NullLogger<NetworkPerspectiveCoreFacade>.Instance;
+        private readonly ILoggerFactory _loggerFactory = NullLoggerFactory.Instance;
 
         public NetworkPerspectiveCoreFacadeTests()
         {
@@ -51,7 +49,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                     .Setup(x => x.QueryAsync(token, CancellationToken.None))
                     .ThrowsAsync(new ApiException("message", StatusCodes.Status403Forbidden, "response", null, null));
 
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, CreateNpCoreOptions(), _logger);
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, CreateNpCoreOptions(), _loggerFactory);
 
                 // Act
                 Func<Task<TokenValidationResponse>> func = async () => await facade.ValidateTokenAsync(new NetworkCredential(string.Empty, token).SecurePassword);
@@ -68,7 +66,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
             public async Task ShouldSendAllData(int count)
             {
                 // Arrange
-                var interactions = InteractionsFactory.Create(count);
+                var interactions = InteractionFactory.CreateSet(count);
 
                 var sentInteractions = new List<HashedInteraction>();
 
@@ -78,7 +76,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
 
                 var dataSourceIdName = "SlackId";
                 var options = CreateNpCoreOptions(dataSourceIdName: dataSourceIdName);
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
 
                 // Act
                 await facade.PushInteractionsAsync("foo".ToSecureString(), interactions);
@@ -96,11 +94,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
             public async Task ShouldPartitionData(int count)
             {
                 // Arrange
-                var interactions = InteractionsFactory.Create(count);
+                var interactions = InteractionFactory.CreateSet(count);
                 var maxInteractionsPerRequestCount = 10;
 
                 var options = CreateNpCoreOptions(maxInteractionsPerRequestCount: maxInteractionsPerRequestCount);
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
 
                 // Act
                 await facade.PushInteractionsAsync(new NetworkCredential(string.Empty, "foo").SecurePassword, interactions);
@@ -133,7 +131,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                     .Callback<SyncHashedGroupStructureCommand, CancellationToken>((x, y) => sentGroups.AddRange(x.Groups));
 
                 var options = CreateNpCoreOptions();
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
 
                 // Act
                 await facade.PushGroupsAsync("foo".ToSecureString(), groups);
@@ -161,7 +159,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                     .ReturnsAsync(responseFromApiDto);
 
                 var options = CreateNpCoreOptions();
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
 
                 // Act
                 var result = await facade.GetNetworkConfigAsync("foo".ToSecureString());
@@ -182,7 +180,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var end = new DateTime(2022, 01, 02);
                 var timeRange = new TimeRange(start, end);
                 var options = CreateNpCoreOptions();
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
 
                 // Act
                 await facade.ReportSyncStartAsync("foo".ToSecureString(), timeRange);
@@ -202,7 +200,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var end = new DateTime(2022, 01, 02);
                 var timeRange = new TimeRange(start, end);
                 var options = CreateNpCoreOptions();
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
 
                 _clientMock
                     .Setup(x => x.ReportStartAsync(It.IsAny<ReportSyncStartedCommand>(), It.IsAny<CancellationToken>()))
@@ -226,7 +224,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var end = new DateTime(2022, 01, 02);
                 var timeRange = new TimeRange(start, end);
                 var options = CreateNpCoreOptions();
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
 
                 // Act
                 await facade.ReportSyncSuccessfulAsync("foo".ToSecureString(), timeRange);
@@ -246,7 +244,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var end = new DateTime(2022, 01, 02);
                 var timeRange = new TimeRange(start, end);
                 var options = CreateNpCoreOptions();
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
 
                 _clientMock
                     .Setup(x => x.ReportCompletedAsync(It.IsAny<ReportSyncCompletedCommand>(), It.IsAny<CancellationToken>()))
@@ -271,7 +269,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var message = "message";
                 var timeRange = new TimeRange(start, end);
                 var options = CreateNpCoreOptions();
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
 
                 // Act
                 await facade.TryReportSyncFailedAsync("foo".ToSecureString(), timeRange, message);
@@ -291,7 +289,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var end = new DateTime(2022, 01, 02);
                 var timeRange = new TimeRange(start, end);
                 var options = CreateNpCoreOptions();
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _logger);
+                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
 
                 _clientMock
                     .Setup(x => x.ReportCompletedAsync(It.IsAny<ReportSyncCompletedCommand>(), It.IsAny<CancellationToken>()))
