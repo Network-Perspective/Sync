@@ -127,7 +127,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Services
                 {
                     invocationCount++;
 
-                    if(invocationCount > 3)
+                    if (invocationCount > 3)
                         cancellationTokenSource.Cancel();
                 })
                 .ReturnsAsync("bar");

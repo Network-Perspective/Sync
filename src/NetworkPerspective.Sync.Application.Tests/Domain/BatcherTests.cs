@@ -90,7 +90,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain
 
             // Act
             await buffer.FlushAsync();
-            
+
             // Assert
             result.Should().BeEquivalentTo(Enumerable.Range(0, 5));
         }

@@ -40,7 +40,7 @@ namespace NetworkPerspective.Sync.Application.Domain
 
         public async Task FlushAsync()
         {
-            if(_objects.Any())
+            if (_objects.Any())
             {
                 await _callback(new BatchReadyEventArgs<T>(_objects));
                 _objects = Enumerable.Empty<T>().ToList();
