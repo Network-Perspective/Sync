@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace NetworkPerspective.Sync.Infrastructure.Core.Services
+namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
 {
-    internal class FileDataWriter
+    public class FileDataWriter
     {
         private readonly string _directory;
 

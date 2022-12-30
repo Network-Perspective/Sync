@@ -13,6 +13,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
 {
     public interface INetworkPerspectiveCore
     {
+        IInteractionsStream OpenInteractionsStream(SecureString accessToken, CancellationToken stoppingToken = default);
         Task PushInteractionsAsync(SecureString accessToken, ISet<Interaction> interactions, CancellationToken stoppingToken = default);
         Task PushUsersAsync(SecureString accessToken, EmployeeCollection employees, CancellationToken stoppingToken = default);
         Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, DateTime changeDate, CancellationToken stoppingToken = default);

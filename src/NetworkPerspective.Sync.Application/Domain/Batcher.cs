@@ -12,7 +12,6 @@ namespace NetworkPerspective.Sync.Application.Domain
         private readonly int _batchSize;
         private BatchReadyCallback<T> _callback = _ => Task.CompletedTask;
 
-
         public Batcher(int batchSize)
         {
             if (batchSize < 1)

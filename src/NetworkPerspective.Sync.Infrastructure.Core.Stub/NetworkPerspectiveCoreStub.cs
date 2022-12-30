@@ -6,22 +6,32 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Options;
+
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Extensions;
+using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
-using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
-using NetworkPerspective.Sync.Infrastructure.Core.Services;
 
-namespace NetworkPerspective.Sync.Application.Infrastructure.Core
+namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
 {
-    public class NetworkPerspectiveCoreStub : INetworkPerspectiveCore
+    internal class NetworkPerspectiveCoreStub : INetworkPerspectiveCore
     {
         private static readonly Guid NetworkId = new Guid("bd1bc916-db78-4e1e-b93b-c6feb8cf729e");
         private static readonly Guid ConnectorId = new Guid("04C753D8-FF9A-479C-B857-5D28C1EAF6C1");
+
+        private readonly FileDataWriter _fileWriter;
+        private readonly NetworkPerspectiveCoreConfig _config;
+
+        public NetworkPerspectiveCoreStub(FileDataWriter fileWriter, IOptions<NetworkPerspectiveCoreConfig> config)
+        {
+            _fileWriter = fileWriter;
+            _config = config.Value;
+        }
 
         public Task<NetworkConfig> GetNetworkConfigAsync(SecureString accessToken, CancellationToken stoppingToken = default)
         {
@@ -47,11 +57,11 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
 
                 var command = new SyncHashedEntitesCommand
                 {
-                    ServiceToken = new NetworkCredential(string.Empty, accessToken).Password,
+                    ServiceToken = accessToken.ToSystemString(),
                     Entites = entities
                 };
 
-                await new FileDataWriter("Data").WriteAsync(command.Entites, $"{accessToken.ToSystemString().GetStableHashCode()}_entities.json", stoppingToken);
+                await _fileWriter.WriteAsync(command.Entites, $"{accessToken.ToSystemString().GetStableHashCode()}_entities.json", stoppingToken);
             }
             catch (Exception ex)
             {
@@ -69,11 +79,11 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
 
                 var command = new SyncHashedGroupStructureCommand
                 {
-                    ServiceToken = new NetworkCredential(string.Empty, accessToken).Password,
+                    ServiceToken = accessToken.ToSystemString(),
                     Groups = hashedGroups
                 };
 
-                await new FileDataWriter("Data").WriteAsync(command.Groups, $"{accessToken.ToSystemString().GetStableHashCode()}_groups.json", stoppingToken);
+                await _fileWriter.WriteAsync(command.Groups, $"{accessToken.ToSystemString().GetStableHashCode()}_groups.json", stoppingToken);
             }
             catch (Exception ex)
             {
@@ -96,7 +106,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
                 };
 
                 if (interactions.Any())
-                    await new FileDataWriter("Data").WriteAsync(command.Interactions, $"{accessToken.ToSystemString().GetStableHashCode()}_{interactions.First().Timestamp:yyyyMMdd_HHmmss}_interactions.json", stoppingToken);
+                    await _fileWriter.WriteAsync(command.Interactions, $"{accessToken.ToSystemString().GetStableHashCode()}_{interactions.First().Timestamp:yyyyMMdd_HHmmss}_interactions.json", stoppingToken);
             }
             catch (Exception ex)
             {
@@ -114,11 +124,11 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
 
                 var command = new SyncUsersCommand
                 {
-                    ServiceToken = new NetworkCredential(string.Empty, accessToken).Password,
+                    ServiceToken = accessToken.ToSystemString(),
                     Users = employeesList.ToList()
                 };
 
-                await new FileDataWriter("Data").WriteAsync(command.Users, $"{accessToken.ToSystemString().GetStableHashCode()}_users.json", stoppingToken);
+                await _fileWriter.WriteAsync(command.Users, $"{accessToken.ToSystemString().GetStableHashCode()}_users.json", stoppingToken);
             }
             catch (Exception ex)
             {
@@ -140,5 +150,8 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
         {
             return Task.FromResult(new TokenValidationResponse(NetworkId, ConnectorId));
         }
+
+        public IInteractionsStream OpenInteractionsStream(SecureString accessToken, CancellationToken stoppingToken = default)
+            => new InteractionStreamStub(accessToken, _fileWriter, _config);
     }
 }
