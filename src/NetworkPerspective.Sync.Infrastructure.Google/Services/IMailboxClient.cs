@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain.Aggregation;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Services;
@@ -26,7 +24,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface IMailboxClient
     {
-        Task GetInteractionsAsync(IInteractionsStorage interactionsStorage, Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        Task SyncInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class MailboxClient : IMailboxClient
@@ -53,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _clock = clock;
         }
 
-        public async Task GetInteractionsAsync(IInteractionsStorage interactionsStorage, Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task SyncInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             var maxMessagesCountPerUser = CalculateMaxMessagesCount(startDate);
 
@@ -63,24 +61,22 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 await _tasksStatusesCache.SetStatusAsync(networkId, taskStatus, stoppingToken);
             }
 
-            Task<ISet<Interaction>> SingleTaskAsync(string userEmail)
-                => GetSingleUserInteractionsAsync(networkId, userEmail, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
+            Task SingleTaskAsync(string userEmail)
+                => GetSingleUserInteractionsAsync(stream, filter, networkId, userEmail, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on mailbox since {timestamp} for {count} users...", startDate, users.Count());
 
             var userEmails = users.Select(x => x.Id.PrimaryId);
-            await ParallelFetcherWithStorage.FetchAsync(interactionsStorage, userEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+            await ParallelTask.RunAsync(userEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
 
             _logger.LogInformation("Evaluation of interactions based on mailbox since '{timestamp}' completed", startDate);
         }
 
-        private async Task<ISet<Interaction>> GetSingleUserInteractionsAsync(Guid networkId, string userEmail, int maxMessagesCount, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken)
+        private async Task GetSingleUserInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, Guid networkId, string userEmail, int maxMessagesCount, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
             try
             {
                 _logger.LogDebug("Evaluating interactions based on mailbox for user ***...");
-
-                var result = new HashSet<Interaction>(new InteractionEqualityComparer());
 
                 using var gmailService = InitializeGmailService(userEmail, credentials);
                 var actionsAggregator = new ActionsAggregator(userEmail);
@@ -91,33 +87,30 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 {
                     actionsAggregator.Add(message.GetDateTime(_clock));
                     var interactions = interactionFactory.CreateForUser(message, userEmail);
-                    result.UnionWith(interactions);
+                    var filteredInteractions = filter.Filter(interactions);
+                    await stream.SendAsync(filteredInteractions);
                     message = await mailboxTraverser.GetNextMessageAsync(stoppingToken);
                 }
 
-                _logger.LogDebug("Evaluation interactions based on mailbox for user '{user}' completed. Found {count} interactions out of {mailsCount} email/s", "***", result.Count, mailboxTraverser.FetchedMessagesCount);
-                _logger.LogTrace("Evaluation interactions based on mailbox for user '{user}' completed. Found {count} interactions out of {mailsCount} email/s", userEmail, result.Count, mailboxTraverser.FetchedMessagesCount);
+                _logger.LogDebug("Evaluation interactions based on mailbox for user '{user}' completed. Processed {mailsCount} email/s", "***", mailboxTraverser.FetchedMessagesCount);
+                _logger.LogTrace("Evaluation interactions based on mailbox for user '{user}' completed. Processed {mailsCount} email/s", userEmail, mailboxTraverser.FetchedMessagesCount);
 
                 _logger.LogTrace(new DefaultActionsAggregatorPrinter().Print(actionsAggregator));
 
-                return result;
             }
             catch (TooManyMailsPerUserException tmmpuex)
             {
                 await _statusLogger.LogWarningAsync(networkId, $"Skipping mailbox '{tmmpuex.Email}' too many messages", stoppingToken);
                 _logger.LogWarning("Skipping mailbox '{email}' too many messages", tmmpuex.Email);
-                return ImmutableHashSet<Interaction>.Empty;
             }
             catch (GoogleApiException gaex) when (IsMailServiceNotEnabledException(gaex))
             {
                 _logger.LogWarning("Skipping mailbox '{email}' gmail service not enabled", "***");
                 _logger.LogTrace("Skipping mailbox '{email}' gmail service not enabled", userEmail);
-                return ImmutableHashSet<Interaction>.Empty;
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Unable to evaluate interactions based on mailbox for given user. Please see inner exception\n");
-                return ImmutableHashSet<Interaction>.Empty;
             }
         }
 

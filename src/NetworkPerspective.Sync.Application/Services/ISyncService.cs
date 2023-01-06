@@ -52,7 +52,7 @@ namespace NetworkPerspective.Sync.Application.Services
         {
             _logger.LogInformation("Syncing users for network '{networkId}'", context.NetworkId);
 
-            var employees = await _dataSource.GetEmployees(context, stoppingToken);
+            var employees = await _dataSource.GetEmployeesAsync(context, stoppingToken);
             await _statusLogger.LogInfoAsync(context.NetworkId, $"Received employees profiles", stoppingToken);
 
             await _networkPerspectiveCore.PushUsersAsync(context.AccessToken, employees, stoppingToken);
@@ -65,7 +65,7 @@ namespace NetworkPerspective.Sync.Application.Services
         {
             _logger.LogInformation("Syncing entities for network '{networkId}'", context.NetworkId);
 
-            var employees = await _dataSource.GetHashedEmployees(context, stoppingToken);
+            var employees = await _dataSource.GetHashedEmployeesAsync(context, stoppingToken);
             await _statusLogger.LogInfoAsync(context.NetworkId, $"Received hashed employees profiles", stoppingToken);
 
             await _networkPerspectiveCore.PushEntitiesAsync(context.AccessToken, employees, context.Since, stoppingToken);
@@ -78,7 +78,7 @@ namespace NetworkPerspective.Sync.Application.Services
         {
             _logger.LogInformation("Syncing groups for network '{networkId}'", context.NetworkId);
 
-            var employees = await _dataSource.GetHashedEmployees(context, stoppingToken);
+            var employees = await _dataSource.GetHashedEmployeesAsync(context, stoppingToken);
 
             var groups = employees
                 .GetAllInternal()
@@ -99,21 +99,23 @@ namespace NetworkPerspective.Sync.Application.Services
                 _logger.LogInformation("Syncing interactions for network '{networkId}' for period {period}", context.NetworkId, context.CurrentRange);
 
                 await _networkPerspectiveCore.ReportSyncStartAsync(context.AccessToken, context.CurrentRange, stoppingToken);
+                await using var stream = _networkPerspectiveCore.OpenInteractionsStream(context.AccessToken, stoppingToken);
 
-                var interactions = await _dataSource.GetInteractions(context, stoppingToken);
+                var filter = _interactionFilterFactory
+                    .CreateInteractionsFilter(context.CurrentRange);
 
-                var filteredInteractions = _interactionFilterFactory
-                    .CreateInteractionsFilter(context.CurrentRange)
-                    .Filter(interactions);
+                await _dataSource.SyncInteractionsAsync(stream, filter, context, stoppingToken);
 
-                await _statusLogger.LogInfoAsync(context.NetworkId, $"Received {filteredInteractions.Count} Interactions", stoppingToken);
 
-                await _networkPerspectiveCore.PushInteractionsAsync(context.AccessToken, filteredInteractions, stoppingToken);
+
+                //await _statusLogger.LogInfoAsync(context.NetworkId, $"Received {filteredInteractions.Count} Interactions", stoppingToken);
+
+                await _networkPerspectiveCore.ReportSyncSuccessfulAsync(context.AccessToken, context.CurrentRange, stoppingToken);
 
                 var syncHistoryEntry = new SyncHistoryEntry(context.NetworkId, _clock.UtcNow(), context.CurrentRange);
-                await _networkPerspectiveCore.ReportSyncSuccessfulAsync(context.AccessToken, context.CurrentRange, stoppingToken);
                 await _syncHistoryService.SaveLogAsync(syncHistoryEntry, stoppingToken);
-                await _statusLogger.LogInfoAsync(context.NetworkId, "Uploaded all interactions", stoppingToken);
+
+                await _statusLogger.LogInfoAsync(context.NetworkId, "Synced interactions", stoppingToken);
 
                 _logger.LogInformation("Sync interactions for network '{networkId}' for {period} completed", context.NetworkId, context.CurrentRange);
             }

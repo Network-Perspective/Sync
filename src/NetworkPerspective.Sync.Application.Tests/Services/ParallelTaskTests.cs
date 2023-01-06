@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using FluentAssertions;
 using FluentAssertions.Extensions;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Services;
 
 using Xunit;
 
 namespace NetworkPerspective.Sync.Application.Tests.Services
 {
-    public class ParallelFetcherTests
+    public class ParallelTaskTests
     {
         [Fact]
         public async Task ShouldUpdateStatus()
@@ -31,7 +30,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             }
 
             // Act
-            await ParallelFetcher.FetchAsync(userIds, StatusReportCallback, EmptySingleFetchTask);
+            await ParallelTask.RunAsync(userIds, StatusReportCallback, EmptySingleFetchTask);
 
             // Assert
             completionRateReports.Should().BeEquivalentTo(new[] { 0.0, 20.0, 40.0, 60.0, 80.0, 100.0 });
@@ -41,16 +40,17 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
         public void ShouldRunInParallel()
         {
             // Arrange
-            var userIds = new[] { "id1", "id2", "id3", "id4" };
+            var userIds = Enumerable
+                .Range(0, 4)
+                .Select(x => x.ToString());
 
-            static async Task<ISet<Interaction>> SingleFetchTask(string id)
+            static async Task SingleFetchTask(string id)
             {
                 await Task.Delay(50);
-                return ImmutableHashSet<Interaction>.Empty;
             }
 
             // Act
-            Func<Task<ISet<Interaction>>> func = () => ParallelFetcher.FetchAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
+            Func<Task> func = () => ParallelTask.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
 
             // Assert
             func.ExecutionTime().Should().BeLessThan(150.Milliseconds());
@@ -60,26 +60,29 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
         public async void ShouldCollectAllInteractions()
         {
             // Arrange
-            var userIds = new[] { "id1", "id2", "id3", "id4" };
+            var userIds = Enumerable
+                .Range(0, 4)
+                .Select(x => x.ToString());
 
-            static Task<ISet<Interaction>> SingleFetchTask(string id)
+            var invocationCount = 0;
+
+            Task SingleFetchTask(string id)
             {
-                var interaction = Interaction.CreateEmail(DateTime.UtcNow, Employee.CreateBot(id), Employee.CreateBot(id), string.Empty);
-                var interactions = new HashSet<Interaction> { interaction } as ISet<Interaction>;
-                return Task.FromResult(interactions);
+                Interlocked.Increment(ref invocationCount);
+                return Task.CompletedTask;
             }
 
             // Act
-            var result = await ParallelFetcher.FetchAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
+            await ParallelTask.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
 
             // Assert
-            result.Should().HaveCount(userIds.Length);
+            invocationCount.Should().Be(userIds.Count());
         }
 
         private static Task EmptyStatusReportCallback(double completionRate)
             => Task.CompletedTask;
 
-        private static Task<ISet<Interaction>> EmptySingleFetchTask(string id)
-                => Task.FromResult(ImmutableHashSet<Interaction>.Empty as ISet<Interaction>);
+        private static Task EmptySingleFetchTask(string id)
+                => Task.CompletedTask;
     }
 }

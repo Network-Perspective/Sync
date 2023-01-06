@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
     internal interface IChatClient
     {
-        Task GetInteractions(IInteractionsStorage interactionsStorage, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
+        Task SyncInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
     }
 
     internal class ChatClient : IChatClient
@@ -32,7 +32,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _logger = logger;
         }
 
-        public async Task GetInteractions(IInteractionsStorage interactionsStorage, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
+        public async Task SyncInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
         {
             _logger.LogDebug("Fetching chats...");
 
@@ -121,8 +121,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
                             _logger.LogDebug("Thread synchronization completed");
                         }
-
-                        await interactionsStorage.PushInteractionsAsync(interactions, stoppingToken);
+                        var filteredInteractions = filter.Filter(interactions);
+                        await stream.SendAsync(filteredInteractions);
                     }
 
                     _logger.LogTrace(new DefaultActionsAggregatorPrinter().Print(actionsAggregator));

@@ -10,7 +10,6 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
@@ -84,29 +83,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
                 };
 
                 await _fileWriter.WriteAsync(command.Groups, $"{accessToken.ToSystemString().GetStableHashCode()}_groups.json", stoppingToken);
-            }
-            catch (Exception ex)
-            {
-                throw new NetworkPerspectiveCoreException("test", ex);
-            }
-        }
-
-        public async Task PushInteractionsAsync(SecureString accessToken, ISet<Interaction> interactions, CancellationToken stoppingToken = default)
-        {
-            try
-            {
-                var interactionsToPush = interactions
-                        .Select(x => InteractionMapper.DomainIntractionToDto(x, "test"))
-                        .ToList();
-
-                var command = new SyncHashedInteractionsCommand
-                {
-                    ServiceToken = new NetworkCredential(string.Empty, accessToken).Password,
-                    Interactions = interactionsToPush
-                };
-
-                if (interactions.Any())
-                    await _fileWriter.WriteAsync(command.Interactions, $"{accessToken.ToSystemString().GetStableHashCode()}_{interactions.First().Timestamp:yyyyMMdd_HHmmss}_interactions.json", stoppingToken);
             }
             catch (Exception ex)
             {

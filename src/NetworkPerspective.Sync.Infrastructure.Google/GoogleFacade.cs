@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
@@ -57,7 +55,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _logger = logger;
         }
 
-        public async Task<ISet<Interaction>> GetInteractions(SyncContext context, CancellationToken stoppingToken = default)
+        public async Task SyncInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.CurrentRange);
 
@@ -77,30 +75,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var emailInteractionFactory = new EmailInteractionFactory(hashingService.Hash, employeeCollection, _clock);
             var meetingInteractionFactory = new MeetingInteractionFactory(hashingService.Hash, employeeCollection);
-            var result = new HashSet<Interaction>(new InteractionEqualityComparer());
 
             var periodStart = context.CurrentRange.Start.AddMinutes(-_config.SyncOverlapInMinutes);
             _logger.LogInformation("To not miss any email interactions period start is extended by {minutes}min. As result mailbox interactions are eveluated starting from {start}", _config.SyncOverlapInMinutes, periodStart);
 
-            await InitializeInContext(context, async () =>
-            {
-                var storage = new InteractionsFileStorage(storagePath) as IInteractionsStorage;
-                await _mailboxClient.GetInteractionsAsync(storage, context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, emailInteractionFactory, stoppingToken);
-                return storage;
-            });
-
-            var storage = context.Get<IInteractionsStorage>();
-            result.UnionWith(await storage.PullInteractionsAsync(context.CurrentRange.Start.Date, stoppingToken));
-
-            var meetingInteractions = await _calendarClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, meetingInteractionFactory, stoppingToken);
-            result.UnionWith(meetingInteractions);
+            await _mailboxClient.SyncInteractionsAsync(stream, filter, context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, emailInteractionFactory, stoppingToken);
+            await _calendarClient.SyncInteractionsAsync(stream, filter, context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, meetingInteractionFactory, stoppingToken);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
-
-            return result;
         }
 
-        public async Task<EmployeeCollection> GetEmployees(SyncContext context, CancellationToken stoppingToken = default)
+        public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Getting employees for network '{networkId}'", context.NetworkId);
 
@@ -119,7 +104,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             return context.Get<EmployeeCollection>();
         }
 
-        public async Task<EmployeeCollection> GetHashedEmployees(SyncContext context, CancellationToken stoppingToken = default)
+        public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Getting hashed employees for network '{networkId}'", context.NetworkId);
 
@@ -137,7 +122,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             return mapper.ToEmployees(users);
         }
 
-        public async Task<bool> IsAuthorized(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)
         {
             try
             {

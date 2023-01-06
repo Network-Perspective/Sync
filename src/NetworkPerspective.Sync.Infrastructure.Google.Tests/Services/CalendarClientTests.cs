@@ -55,13 +55,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             var interactionFactory = new MeetingInteractionFactory((x) => $"{x}_hashed", employeesCollection);
 
+            var stream = new TestableInteractionStream();
+            var filter = new NoopFilter();
+
             // Act
-            var result = await client.GetInteractionsAsync(Guid.NewGuid(), employeesCollection.GetAllInternal(), timeRange, _googleClientFixture.Credential, interactionFactory);
+            await client.SyncInteractionsAsync(stream, filter, Guid.NewGuid(), employeesCollection.GetAllInternal(), timeRange, _googleClientFixture.Credential, interactionFactory);
 
             // Assert
-            result.Should().HaveCount(8);
+            stream.SentInteractions.Should().HaveCount(8);
 
-            var interactions_1 = result.Where(x => x.Timestamp == new DateTime(2022, 12, 21, 08, 30, 00));
+            var interactions_1 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2022, 12, 21, 08, 30, 00));
             interactions_1.Should().HaveCount(6);
 
             var interaction_1_1 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{email1}_hashed" && x.Target.Id.PrimaryId == $"{email2}_hashed");
@@ -71,7 +74,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var interaction_1_5 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{externalEmail}_hashed" && x.Target.Id.PrimaryId == $"{email1}_hashed");
             var interaction_1_6 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{externalEmail}_hashed" && x.Target.Id.PrimaryId == $"{email2}_hashed");
 
-            var interactions_2 = result.Where(x => x.Timestamp == new DateTime(2022, 12, 21, 14, 30, 00));
+            var interactions_2 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2022, 12, 21, 14, 30, 00));
             interactions_2.Should().HaveCount(2);
             var interaction_2_1 = interactions_2.Single(x => x.Source.Id.PrimaryId == $"{email1}_hashed" && x.Target.Id.PrimaryId == $"{externalEmail}_hashed");
             var interaction_2_2 = interactions_2.Single(x => x.Source.Id.PrimaryId == $"{externalEmail}_hashed" && x.Target.Id.PrimaryId == $"{email1}_hashed");

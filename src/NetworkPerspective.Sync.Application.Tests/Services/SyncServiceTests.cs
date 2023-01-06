@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,11 +25,13 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
 {
     public class SyncServiceTests
     {
-        private ILogger<SyncService> _logger = NullLogger<SyncService>.Instance;
+        private readonly ILogger<SyncService> _logger = NullLogger<SyncService>.Instance;
         private readonly Mock<INetworkPerspectiveCore> _networkPerspectiveCoreMock = new Mock<INetworkPerspectiveCore>();
+        private readonly Mock<IInteractionsStream> _interactionsStreamMock = new Mock<IInteractionsStream>();
         private readonly Mock<IInteractionsFilterFactory> _interactionsFilterFactoryMock = new Mock<IInteractionsFilterFactory>();
         private readonly Mock<IInteractionsFilter> _interactionsFilterMock = new Mock<IInteractionsFilter>();
         private readonly Mock<IDataSource> _dataSourceMock = new Mock<IDataSource>();
+
 
         public SyncServiceTests()
         {
@@ -39,14 +39,11 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             _interactionsFilterFactoryMock.Reset();
             _interactionsFilterMock.Reset();
             _dataSourceMock.Reset();
+            _interactionsStreamMock.Reset();
 
             _interactionsFilterFactoryMock
                 .Setup(x => x.CreateInteractionsFilter(It.IsAny<TimeRange>()))
                 .Returns(_interactionsFilterMock.Object);
-
-            _dataSourceMock
-                .Setup(x => x.GetInteractions(It.IsAny<SyncContext>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new HashSet<Interaction>());
 
             _interactionsFilterMock
                 .Setup(x => x.Filter(It.IsAny<IEnumerable<Interaction>>()))

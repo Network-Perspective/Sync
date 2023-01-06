@@ -8,8 +8,11 @@ using FluentAssertions;
 
 using Microsoft.Extensions.Logging.Abstractions;
 
+using Moq;
+
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
@@ -43,6 +46,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             var chatclient = new ChatClient(NullLogger<ChatClient>.Instance);
 
             var slackClientFacade = new SlackClientFacade(_httpClientFactory, paginationHandler);
+            var stream = new TestableInteractionStream();
+            var filterMock = new Mock<IInteractionsFilter>();
+            filterMock
+                .Setup(x => x.Filter(It.IsAny<IEnumerable<Interaction>>()))
+                .Returns<IEnumerable<Interaction>>(x => x.ToHashSet<Interaction>());
 
             var employees = new List<Employee>()
                 .Add(existingEmail);
@@ -54,12 +62,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             try
             {
                 // Act
-                var storage = new InteractionsFileStorage("tmp");
-                await chatclient.GetInteractions(storage, slackClientFacade, network, interactionFactory, timeRange);
+                await chatclient.SyncInteractionsAsync(stream, filterMock.Object, slackClientFacade, network, interactionFactory, timeRange);
 
                 // Assert
-                var result = await storage.PullInteractionsAsync(new DateTime(2022, 07, 30));
-                result.Should().NotBeEmpty();
+                stream.SentInteractions.Count.Should().BePositive();
             }
             catch (Slack.Client.Exceptions.ApiException exception)
             {

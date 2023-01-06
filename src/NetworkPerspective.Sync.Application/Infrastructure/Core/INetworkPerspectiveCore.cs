@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 
 namespace NetworkPerspective.Sync.Application.Infrastructure.Core
@@ -14,7 +13,6 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Core
     public interface INetworkPerspectiveCore
     {
         IInteractionsStream OpenInteractionsStream(SecureString accessToken, CancellationToken stoppingToken = default);
-        Task PushInteractionsAsync(SecureString accessToken, ISet<Interaction> interactions, CancellationToken stoppingToken = default);
         Task PushUsersAsync(SecureString accessToken, EmployeeCollection employees, CancellationToken stoppingToken = default);
         Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, DateTime changeDate, CancellationToken stoppingToken = default);
         Task PushGroupsAsync(SecureString accessToken, IEnumerable<Group> groups, CancellationToken stoppingToken = default);
