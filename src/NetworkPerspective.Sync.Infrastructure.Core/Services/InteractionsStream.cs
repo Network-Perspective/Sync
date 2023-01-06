@@ -22,6 +22,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
         private readonly ILogger<IInteractionsStream> _logger;
         private readonly CancellationToken _stoppingToken;
         private readonly Batcher<HashedInteraction> _batcher;
+        private bool _disposed = false;
 
         public InteractionsStream(SecureString accessToken, ISyncHashedClient client, NetworkPerspectiveCoreConfig npCoreConfig, ILogger<InteractionsStream> logger, CancellationToken stoppingToken)
         {
@@ -36,8 +37,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
 
         public async ValueTask DisposeAsync()
         {
+            if (_disposed)
+                return;
+
             await TryFlushAsync();
             _accessToken?.Dispose();
+
+            _disposed = true;
         }
 
         public async Task SendAsync(IEnumerable<Interaction> interactions)

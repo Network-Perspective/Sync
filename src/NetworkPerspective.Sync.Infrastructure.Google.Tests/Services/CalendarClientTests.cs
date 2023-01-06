@@ -56,10 +56,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var interactionFactory = new MeetingInteractionFactory((x) => $"{x}_hashed", employeesCollection);
 
             var stream = new TestableInteractionStream();
-            var filter = new NoopFilter();
 
             // Act
-            await client.SyncInteractionsAsync(stream, filter, Guid.NewGuid(), employeesCollection.GetAllInternal(), timeRange, _googleClientFixture.Credential, interactionFactory);
+            await client.SyncInteractionsAsync(stream, Guid.NewGuid(), employeesCollection.GetAllInternal(), timeRange, _googleClientFixture.Credential, interactionFactory);
 
             // Assert
             stream.SentInteractions.Should().HaveCount(8);

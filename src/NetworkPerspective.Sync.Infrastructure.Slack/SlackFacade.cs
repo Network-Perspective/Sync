@@ -53,7 +53,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             _logger = logger;
         }
 
-        public async Task SyncInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, SyncContext context, CancellationToken stoppingToken = default)
+        public async Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Fetching employees data...");
 
@@ -83,7 +83,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
             var timeRange = new TimeRange(context.Since.AddDays(-30), _clock.UtcNow());
 
-            await _chatClient.SyncInteractionsAsync(stream, filter, slackClientFacace, network, interactionFactory, timeRange, stoppingToken);
+            await _chatClient.SyncInteractionsAsync(stream, slackClientFacace, network, interactionFactory, timeRange, stoppingToken);
         }
 
         public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)

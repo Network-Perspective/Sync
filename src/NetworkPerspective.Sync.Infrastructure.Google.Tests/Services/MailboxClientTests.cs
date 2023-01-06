@@ -55,7 +55,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var stream = new TestableInteractionStream();
 
             // Act
-            await mailboxClient.SyncInteractionsAsync(stream, new NoopFilter(), Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(userEmail, userEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
+            await mailboxClient.SyncInteractionsAsync(stream, Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(userEmail, userEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
 
             // Assert
 

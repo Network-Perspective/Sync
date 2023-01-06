@@ -55,7 +55,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _logger = logger;
         }
 
-        public async Task SyncInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, SyncContext context, CancellationToken stoppingToken = default)
+        public async Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.CurrentRange);
 
@@ -79,8 +79,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var periodStart = context.CurrentRange.Start.AddMinutes(-_config.SyncOverlapInMinutes);
             _logger.LogInformation("To not miss any email interactions period start is extended by {minutes}min. As result mailbox interactions are eveluated starting from {start}", _config.SyncOverlapInMinutes, periodStart);
 
-            await _mailboxClient.SyncInteractionsAsync(stream, filter, context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, emailInteractionFactory, stoppingToken);
-            await _calendarClient.SyncInteractionsAsync(stream, filter, context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, meetingInteractionFactory, stoppingToken);
+            await _mailboxClient.SyncInteractionsAsync(stream, context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, emailInteractionFactory, stoppingToken);
+            await _calendarClient.SyncInteractionsAsync(stream, context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, meetingInteractionFactory, stoppingToken);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
         }

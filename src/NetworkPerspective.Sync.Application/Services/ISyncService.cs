@@ -99,14 +99,14 @@ namespace NetworkPerspective.Sync.Application.Services
                 _logger.LogInformation("Syncing interactions for network '{networkId}' for period {period}", context.NetworkId, context.CurrentRange);
 
                 await _networkPerspectiveCore.ReportSyncStartAsync(context.AccessToken, context.CurrentRange, stoppingToken);
-                await using var stream = _networkPerspectiveCore.OpenInteractionsStream(context.AccessToken, stoppingToken);
 
                 var filter = _interactionFilterFactory
                     .CreateInteractionsFilter(context.CurrentRange);
 
-                await _dataSource.SyncInteractionsAsync(stream, filter, context, stoppingToken);
+                var stream = _networkPerspectiveCore.OpenInteractionsStream(context.AccessToken, stoppingToken);
+                await using var filteredStream = new FilteredInteractionStreamDecorator(stream, filter);
 
-
+                await _dataSource.SyncInteractionsAsync(stream, context, stoppingToken);
 
                 //await _statusLogger.LogInfoAsync(context.NetworkId, $"Received {filteredInteractions.Count} Interactions", stoppingToken);
 

@@ -24,7 +24,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface ICalendarClient
     {
-        public Task SyncInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        public Task SyncInteractionsAsync(IInteractionsStream stream, Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class CalendarClient : ICalendarClient
@@ -44,7 +44,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _logger = logger;
         }
 
-        public async Task SyncInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task SyncInteractionsAsync(IInteractionsStream stream, Guid networkId, IEnumerable<Employee> users, TimeRange timeRange, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             async Task ReportProgressCallbackAsync(double progressRate)
             {
@@ -53,7 +53,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             }
 
             Task SingleTaskAsync(string userEmail)
-                => GetSingleUserInteractionsAsync(stream, filter, userEmail, timeRange, credentials, interactionFactory, stoppingToken);
+                => GetSingleUserInteractionsAsync(stream, userEmail, timeRange, credentials, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on callendar for '{timerange}' for {count} users...", timeRange, users.Count());
 
@@ -64,7 +64,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _logger.LogInformation("Evaluation of interactions based on callendar for '{timerange}' completed", timeRange);
         }
 
-        private async Task GetSingleUserInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, string userEmail, TimeRange timeRange, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken)
+        private async Task GetSingleUserInteractionsAsync(IInteractionsStream stream, string userEmail, TimeRange timeRange, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
             try
             {
@@ -97,8 +97,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                     var recurrence = await GetRecurrenceAsync(calendarService, userEmail, meeting.RecurringEventId, stoppingToken);
                     actionsAggregator.Add(meeting.GetStart());
                     var interactions = interactionFactory.CreateForUser(meeting, userEmail, recurrence);
-                    var filteredInteractions = filter.Filter(interactions);
-                    await stream.SendAsync(filteredInteractions);
+                    await stream.SendAsync(interactions);
                 }
 
                 _logger.LogDebug("Evaluation of interactions based on callendar for user '{email}' completed", "***");

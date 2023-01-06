@@ -24,7 +24,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface IMailboxClient
     {
-        Task SyncInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        Task SyncInteractionsAsync(IInteractionsStream stream, Guid networkId, IEnumerable<Employee> userEmails, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class MailboxClient : IMailboxClient
@@ -51,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _clock = clock;
         }
 
-        public async Task SyncInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task SyncInteractionsAsync(IInteractionsStream stream, Guid networkId, IEnumerable<Employee> users, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             var maxMessagesCountPerUser = CalculateMaxMessagesCount(startDate);
 
@@ -62,7 +62,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             }
 
             Task SingleTaskAsync(string userEmail)
-                => GetSingleUserInteractionsAsync(stream, filter, networkId, userEmail, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
+                => GetSingleUserInteractionsAsync(stream, networkId, userEmail, maxMessagesCountPerUser, startDate, credentials, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on mailbox since {timestamp} for {count} users...", startDate, users.Count());
 
@@ -72,7 +72,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _logger.LogInformation("Evaluation of interactions based on mailbox since '{timestamp}' completed", startDate);
         }
 
-        private async Task GetSingleUserInteractionsAsync(IInteractionsStream stream, IInteractionsFilter filter, Guid networkId, string userEmail, int maxMessagesCount, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken)
+        private async Task GetSingleUserInteractionsAsync(IInteractionsStream stream, Guid networkId, string userEmail, int maxMessagesCount, DateTime startDate, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
             try
             {
@@ -87,8 +87,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 {
                     actionsAggregator.Add(message.GetDateTime(_clock));
                     var interactions = interactionFactory.CreateForUser(message, userEmail);
-                    var filteredInteractions = filter.Filter(interactions);
-                    await stream.SendAsync(filteredInteractions);
+                    await stream.SendAsync(interactions);
                     message = await mailboxTraverser.GetNextMessageAsync(stoppingToken);
                 }
 

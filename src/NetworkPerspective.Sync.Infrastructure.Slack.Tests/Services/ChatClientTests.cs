@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -8,13 +7,9 @@ using FluentAssertions;
 
 using Microsoft.Extensions.Logging.Abstractions;
 
-using Moq;
-
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
@@ -47,10 +42,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
 
             var slackClientFacade = new SlackClientFacade(_httpClientFactory, paginationHandler);
             var stream = new TestableInteractionStream();
-            var filterMock = new Mock<IInteractionsFilter>();
-            filterMock
-                .Setup(x => x.Filter(It.IsAny<IEnumerable<Interaction>>()))
-                .Returns<IEnumerable<Interaction>>(x => x.ToHashSet<Interaction>());
 
             var employees = new List<Employee>()
                 .Add(existingEmail);
@@ -62,7 +53,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             try
             {
                 // Act
-                await chatclient.SyncInteractionsAsync(stream, filterMock.Object, slackClientFacade, network, interactionFactory, timeRange);
+                await chatclient.SyncInteractionsAsync(stream, slackClientFacade, network, interactionFactory, timeRange);
 
                 // Assert
                 stream.SentInteractions.Count.Should().BePositive();
