@@ -82,29 +82,20 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 var start = new DateTime(2022, 01, 01);
                 var end = new DateTime(2022, 01, 02);
                 var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), start, end);
-                
+
                 _dataSourceMock
                     .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
                     .ThrowsAsync(new Exception());
-                
+
                 var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, Mock.Of<IStatusLogger>(), new Clock());
 
                 // Act
-
                 Func<Task> func = async () => await syncService.SyncInteractionsAsync(context);
 
                 // Assert
                 await func.Should().ThrowAsync<Exception>();
                 _networkPerspectiveCoreMock.Verify(x => x.ReportSyncStartAsync(It.IsAny<SecureString>(), context.CurrentRange, It.IsAny<CancellationToken>()), Times.Once);
                 _networkPerspectiveCoreMock.Verify(x => x.TryReportSyncFailedAsync(It.IsAny<SecureString>(), context.CurrentRange, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
-
-
-
-                // Act
-
-                // Assert
-
-
             }
 
             [Fact]

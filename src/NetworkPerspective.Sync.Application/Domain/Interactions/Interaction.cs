@@ -13,23 +13,18 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
     [DebuggerDisplay("{Source.Id.PrimaryId} -> {Target.Id.PrimaryId}")]
     public class Interaction
     {
-        public string Id { get; init; }
-        public bool IsHashed { get; init; }
-        public DateTime Timestamp { get; init; }
-        public Employee Source { get; init; }
-        public Employee Target { get; init; }
-        public InteractionType Type { get; init; }
-        public string ChannelId { get; init; }
-        public string ParentEventId { get; init; }
-        public string EventId { get; init; }
-        public RecurrenceType? Recurring { get; init; }
-        public ISet<UserActionType> UserAction { get; init; }
-        public int? Duration { get; init; }
-
-        public Interaction()
-        {
-
-        }
+        public string Id { get; }
+        public bool IsHashed { get; }
+        public DateTime Timestamp { get; }
+        public Employee Source { get; }
+        public Employee Target { get; }
+        public InteractionType Type { get; }
+        public string ChannelId { get; }
+        public string ParentEventId { get; }
+        public string EventId { get; }
+        public RecurrenceType? Recurring { get; }
+        public ISet<UserActionType> UserAction { get; }
+        public int? Duration { get; }
 
         private Interaction(string id, DateTime timestamp, Employee source, Employee target, InteractionType type, string channelId, string eventId, string parentEventId, RecurrenceType? recurring, ISet<UserActionType> userActions, int? duration, bool isHashed)
         {
