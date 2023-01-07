@@ -106,7 +106,7 @@ namespace NetworkPerspective.Sync.Application.Services
                 var stream = _networkPerspectiveCore.OpenInteractionsStream(context.AccessToken, stoppingToken);
                 await using var filteredStream = new FilteredInteractionStreamDecorator(stream, filter);
 
-                await _dataSource.SyncInteractionsAsync(stream, context, stoppingToken);
+                await _dataSource.SyncInteractionsAsync(filteredStream, context, stoppingToken);
 
                 //await _statusLogger.LogInfoAsync(context.NetworkId, $"Received {filteredInteractions.Count} Interactions", stoppingToken);
 
