@@ -56,9 +56,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             // Assert
             var expectedTimeRanges = new[]
             {
-                new TimeRange(startTimeStamp, new DateTime(2021, 1, 2)),
-                new TimeRange(new DateTime(2021, 1, 2), new DateTime(2021, 1, 3)),
-                new TimeRange(new DateTime(2021, 1, 3), endTimeStamp.AddMinutes(2))
+                new TimeRange(startTimeStamp, endTimeStamp),
             };
 
             syncHistory.Should().BeEquivalentTo(expectedTimeRanges);
@@ -124,7 +122,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
 
             // Assert
             await func.Should().NotThrowAsync();
-            statusLoggerMock.Verify(x => x.AddLogAsync(It.Is<StatusLog>(l => l.Level == StatusLogLevel.Error), It.IsAny<CancellationToken>()), Times.Once);
+            statusLoggerMock.Verify(x => x.AddLogAsync(It.IsAny<string>(), It.Is<StatusLogLevel>(l => l == StatusLogLevel.Error), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         private static IJobExecutionContext CreateContext(Guid networkId)
@@ -168,7 +166,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             var syncServiceMock = new Mock<ISyncService>();
             syncServiceMock
                 .Setup(x => x.SyncInteractionsAsync(It.IsAny<SyncContext>(), It.IsAny<CancellationToken>()))
-                .Callback<SyncContext, CancellationToken>((x, _) => syncCallback(x.CurrentRange));
+                .Callback<SyncContext, CancellationToken>((x, _) => syncCallback(x.TimeRange));
 
             var factoryMock = new Mock<ISyncServiceFactory>();
             factoryMock

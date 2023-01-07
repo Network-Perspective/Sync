@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -12,6 +13,8 @@ using Moq;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
@@ -46,6 +49,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             var client = new CalendarClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLogger<CalendarClient>.Instance);
             var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
+            var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new SecureString(), timeRange, Mock.Of<IStatusLogger>());
 
             var employees = new List<Employee>()
                 .Add(email1)
@@ -58,7 +62,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var stream = new TestableInteractionStream();
 
             // Act
-            await client.SyncInteractionsAsync(stream, Guid.NewGuid(), employeesCollection.GetAllInternal(), timeRange, _googleClientFixture.Credential, interactionFactory);
+            await client.SyncInteractionsAsync(syncContext, stream, employeesCollection.GetAllInternal(), _googleClientFixture.Credential, interactionFactory);
 
             // Assert
             stream.SentInteractions.Should().HaveCount(8);

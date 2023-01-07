@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -57,9 +56,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
         public async Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
-            _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.CurrentRange);
-
-            var storagePath = Path.Combine("tmp", context.NetworkId.ToString());
+            _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);
 
             await InitializeInContext(context, () => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
             await InitializeInContext(context, () => _credentialsProvider.GetCredentialsAsync(stoppingToken));
@@ -76,11 +73,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var emailInteractionFactory = new EmailInteractionFactory(hashingService.Hash, employeeCollection, _clock);
             var meetingInteractionFactory = new MeetingInteractionFactory(hashingService.Hash, employeeCollection);
 
-            var periodStart = context.CurrentRange.Start.AddMinutes(-_config.SyncOverlapInMinutes);
-            _logger.LogInformation("To not miss any email interactions period start is extended by {minutes}min. As result mailbox interactions are eveluated starting from {start}", _config.SyncOverlapInMinutes, periodStart);
 
-            await _mailboxClient.SyncInteractionsAsync(stream, context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, emailInteractionFactory, stoppingToken);
-            await _calendarClient.SyncInteractionsAsync(stream, context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, meetingInteractionFactory, stoppingToken);
+            await _mailboxClient.SyncInteractionsAsync(context, stream, employeeCollection.GetAllInternal(), credentials, emailInteractionFactory, stoppingToken);
+            await _calendarClient.SyncInteractionsAsync(context, stream, employeeCollection.GetAllInternal(), credentials, meetingInteractionFactory, stoppingToken);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
         }

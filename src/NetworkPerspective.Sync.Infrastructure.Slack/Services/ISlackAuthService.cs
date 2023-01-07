@@ -33,17 +33,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
         private readonly ISlackClientFacade _slackClientFacade;
         private readonly IMemoryCache _cache;
-        private readonly IStatusLogger _statusLogger;
+        private readonly IStatusLoggerFactory _statusLoggerFactory;
         private readonly ILogger<SlackAuthService> _logger;
 
-        public SlackAuthService(IStateKeyFactory stateFactory, IOptions<AuthConfig> slackAuthConfig, ISecretRepositoryFactory secretRepositoryFactory, ISlackClientFacade slackClientFacade, IMemoryCache cache, IStatusLogger statusLogger, ILogger<SlackAuthService> logger)
+        public SlackAuthService(IStateKeyFactory stateFactory, IOptions<AuthConfig> slackAuthConfig, ISecretRepositoryFactory secretRepositoryFactory, ISlackClientFacade slackClientFacade, IMemoryCache cache, IStatusLoggerFactory statusLoggerFactory, ILogger<SlackAuthService> logger)
         {
             _slackAuthConfig = slackAuthConfig.Value;
             _stateKeyFactory = stateFactory;
             _secretRepositoryFactory = secretRepositoryFactory;
             _slackClientFacade = slackClientFacade;
             _cache = cache;
-            _statusLogger = statusLogger;
+            _statusLoggerFactory = statusLoggerFactory;
             _logger = logger;
         }
 
@@ -55,7 +55,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         public async Task<AuthStartProcessResult> StartAuthProcessAsync(AuthProcess authProcess, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Starting slack autentication process...");
-            await _statusLogger.LogInfoAsync(authProcess.NetworkId, "Authorization process started", stoppingToken);
+            await _statusLoggerFactory
+                .CreateForNetwork(authProcess.NetworkId)
+                .LogInfoAsync("Authorization process started", stoppingToken);
 
             var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.NetworkId, stoppingToken);
             var clientId = await secretRepository.GetSecretAsync(SlackKeys.SlackClientIdKey, stoppingToken);
@@ -97,7 +99,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             var tokenKey = string.Format(SlackKeys.TokenKeyPattern, authProcess.NetworkId);
             await secretRepository.SetSecretAsync(tokenKey, response.AccessToken.ToSecureString());
 
-            await _statusLogger.LogInfoAsync(authProcess.NetworkId, "Connector authorized successfully", stoppingToken);
+            await _statusLoggerFactory
+                .CreateForNetwork(authProcess.NetworkId)
+                .LogInfoAsync("Connector authorized successfully", stoppingToken);
             _logger.LogInformation("Authentication callback processed successfully. Network '{networkId}' is configured for synchronization", authProcess.NetworkId);
         }
 

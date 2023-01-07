@@ -81,7 +81,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
             var interactionFactory = new InteractionFactory(hashingService.Hash, employees);
 
-            var timeRange = new TimeRange(context.Since.AddDays(-30), _clock.UtcNow());
+            var timeRange = new TimeRange(context.TimeRange.Start.AddDays(-30), _clock.UtcNow());
 
             await _chatClient.SyncInteractionsAsync(stream, slackClientFacace, network, interactionFactory, timeRange, stoppingToken);
         }

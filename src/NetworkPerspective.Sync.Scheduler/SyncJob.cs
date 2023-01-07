@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Extensions;
@@ -52,52 +54,54 @@ namespace NetworkPerspective.Sync.Application.Scheduler
             try
             {
                 networkId = Guid.Parse(context.JobDetail.Key.Name);
-                await _statusLogger.LogInfoAsync(networkId, "Sync started", context.CancellationToken);
+                await _statusLogger.LogInfoAsync("Sync started", context.CancellationToken);
 
-                var token = await _tokenService.GetAsync(networkId, context.CancellationToken);
-                var networkConfig = await _networkPerspectiveCore.GetNetworkConfigAsync(token, context.CancellationToken);
-                var lastSyncedTimeStamp = await _syncHistoryService.EvaluateSyncStartAsync(networkId, context.CancellationToken);
-                var now = _clock.UtcNow();
+                using var syncContext = await InitializeContext(networkId, context.CancellationToken);
 
-                using var syncContext = new SyncContext(networkId, networkConfig, token, lastSyncedTimeStamp, now);
+                _logger.LogInformation("Executing Syncronization Job for Network '{network}' for timerange '{timeRange}'", networkId, syncContext.TimeRange);
 
-                _logger.LogInformation("Executing Syncronization Job for Network '{network}' starting from {timestamp}", networkId, lastSyncedTimeStamp.ToShortDateString());
+                var syncService = await _syncServiceFactory.CreateAsync(networkId, context.CancellationToken);
 
                 var network = await _networkService.GetAsync<NetworkProperties>(networkId, context.CancellationToken);
-                var syncService = await _syncServiceFactory.CreateAsync(networkId, context.CancellationToken);
 
                 if (network.Properties.SyncGroups)
                     await syncService.SyncGroupsAsync(syncContext, context.CancellationToken);
                 else
-                    await _statusLogger.LogInfoAsync(networkId, "Skipping sync groups");
+                    await _statusLogger.LogInfoAsync("Skipping sync groups");
 
                 await syncService.SyncUsersAsync(syncContext, context.CancellationToken);
                 await syncService.SyncEntitiesAsync(syncContext, context.CancellationToken);
 
-                do
-                {
-                    await _statusLogger.LogInfoAsync(networkId, $"Synchronizing interactions {syncContext.CurrentRange}", context.CancellationToken);
+                await _statusLogger.LogInfoAsync($"Synchronizing interactions {syncContext.TimeRange}", context.CancellationToken);
 
-                    await syncService.SyncInteractionsAsync(syncContext, context.CancellationToken);
-                    lastSyncedTimeStamp = syncContext.CurrentRange.End;
-                    now = _clock.UtcNow();
-                    syncContext.MoveToNextSyncRange(now);
-                } while (!context.CancellationToken.IsCancellationRequested && lastSyncedTimeStamp.AddDays(1) <= now.Date.AddDays(1));
+                await syncService.SyncInteractionsAsync(syncContext, context.CancellationToken);
 
-                await _statusLogger.LogInfoAsync(networkId, "Sync completed", context.CancellationToken);
+                await _statusLogger.LogInfoAsync("Sync completed", context.CancellationToken);
                 _logger.LogInformation("Syncronization Job Completed for Network '{network}'", networkId);
             }
             catch (Exception ex) when (ex.IndicatesTaskCanceled())
             {
                 _logger.LogInformation("Synchronization Job cancelled for Network '{network}'", networkId);
-                await _statusLogger.LogInfoAsync(networkId, "Sync cancelled");
+                await _statusLogger.LogInfoAsync("Sync cancelled");
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Cannot complete synchronization job for Network {context.JobDetail.Key.Name}.\n{ex.Message}");
                 _logger.LogDebug(ex, string.Empty);
-                await _statusLogger.LogErrorAsync(networkId, "Sync failed");
+                await _statusLogger.LogErrorAsync("Sync failed");
             }
+        }
+
+        private async Task<SyncContext> InitializeContext(Guid networkId, CancellationToken stoppingToken)
+        {
+            var token = await _tokenService.GetAsync(networkId, stoppingToken);
+            var networkConfig = await _networkPerspectiveCore.GetNetworkConfigAsync(token, stoppingToken);
+            var lastSyncedTimeStamp = await _syncHistoryService.EvaluateSyncStartAsync(networkId, stoppingToken);
+            var now = _clock.UtcNow();
+
+            var timeRange = new TimeRange(lastSyncedTimeStamp, now);
+
+            return new SyncContext(networkId, networkConfig, token, timeRange, _statusLogger);
         }
     }
 }

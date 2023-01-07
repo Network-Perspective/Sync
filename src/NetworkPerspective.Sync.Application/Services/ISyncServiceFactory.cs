@@ -21,7 +21,6 @@ namespace NetworkPerspective.Sync.Application.Services
         private readonly ISyncHistoryService _syncHistoryService;
         private readonly IInteractionsFilterFactory _interactionFilterFactory;
         private readonly IClock _clock;
-        private readonly IStatusLogger _statusLogger;
         private readonly IDataSourceFactory _dataSourceFactory;
 
         public SyncServiceFactory(ILoggerFactory loggerFactory,
@@ -29,7 +28,6 @@ namespace NetworkPerspective.Sync.Application.Services
                                   ISyncHistoryService syncHistoryService,
                                   IInteractionsFilterFactory interactionFilterFactory,
                                   IClock clock,
-                                  IStatusLogger statusLogger,
                                   IDataSourceFactory dataSourceFactory)
         {
             _loggerFactory = loggerFactory;
@@ -37,7 +35,6 @@ namespace NetworkPerspective.Sync.Application.Services
             _syncHistoryService = syncHistoryService;
             _interactionFilterFactory = interactionFilterFactory;
             _clock = clock;
-            _statusLogger = statusLogger;
             _dataSourceFactory = dataSourceFactory;
         }
 
@@ -51,7 +48,6 @@ namespace NetworkPerspective.Sync.Application.Services
                                    _syncHistoryService,
                                    _networkPerspectiveCoreFacade,
                                    _interactionFilterFactory,
-                                   _statusLogger,
                                    _clock);
         }
     }

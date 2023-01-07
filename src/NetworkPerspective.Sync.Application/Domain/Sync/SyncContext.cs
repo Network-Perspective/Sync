@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security;
 
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Services;
 
 namespace NetworkPerspective.Sync.Application.Domain.Sync
 {
@@ -13,23 +14,16 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
         public Guid NetworkId { get; }
         public NetworkConfig NetworkConfig { get; }
         public SecureString AccessToken { get; }
-        public DateTime Since { get; }
-        public TimeRange CurrentRange { get; private set; }
+        public TimeRange TimeRange { get; }
+        public IStatusLogger StatusLogger { get; }
 
-        public SyncContext(Guid networkId, NetworkConfig networkConfig, SecureString accessToken, DateTime since, DateTime currentTime)
+        public SyncContext(Guid networkId, NetworkConfig networkConfig, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger)
         {
             NetworkId = networkId;
             NetworkConfig = networkConfig;
             AccessToken = accessToken;
-            Since = since;
-            CurrentRange = new TimeRange(since, since.Date.AddDays(1) > currentTime ? currentTime : since.Date.AddDays(1));
-        }
-
-        public void MoveToNextSyncRange(DateTime currentTime)
-        {
-            var start = CurrentRange.End.Date;
-            var end = CurrentRange.End.Date.AddDays(1) > currentTime ? currentTime : CurrentRange.End.Date.AddDays(1);
-            CurrentRange = new TimeRange(start, end);
+            TimeRange = timeRange;
+            StatusLogger = statusLogger;
         }
 
         public bool Contains<T>()

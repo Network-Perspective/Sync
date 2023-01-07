@@ -51,7 +51,7 @@ namespace NetworkPerspective.Sync.Framework.Controllers
             await _scheduler.ScheduleAsync(tokenValidationResponse.NetworkId, stoppingToken);
             await _scheduler.TriggerNowAsync(tokenValidationResponse.NetworkId, stoppingToken);
 
-            await _statusLogger.LogInfoAsync(tokenValidationResponse.NetworkId, "Schedule started", stoppingToken);
+            await _statusLogger.LogInfoAsync("Schedule started", stoppingToken);
 
             return Ok($"Scheduled sync {tokenValidationResponse.NetworkId}");
         }
@@ -74,7 +74,7 @@ namespace NetworkPerspective.Sync.Framework.Controllers
             await _scheduler.UnscheduleAsync(tokenValidationResponse.NetworkId, stoppingToken);
             await _scheduler.InterruptNowAsync(tokenValidationResponse.NetworkId, stoppingToken);
 
-            await _statusLogger.LogInfoAsync(tokenValidationResponse.NetworkId, "Schedule stopped", stoppingToken);
+            await _statusLogger.LogInfoAsync("Schedule stopped", stoppingToken);
 
             return Ok($"Unscheduled sync {tokenValidationResponse.NetworkId}");
         }
