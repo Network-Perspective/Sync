@@ -49,7 +49,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             var client = new CalendarClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLogger<CalendarClient>.Instance);
             var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
-            var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new SecureString(), timeRange, Mock.Of<IStatusLogger>());
+            var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
             var employees = new List<Employee>()
                 .Add(email1)

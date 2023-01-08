@@ -65,7 +65,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 var start = new DateTime(2022, 01, 01);
                 var end = new DateTime(2022, 01, 02);
                 var timeRange = new TimeRange(start, end);
-                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>());
+                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
                 var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
 
                 // Act
@@ -83,7 +83,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 var start = new DateTime(2022, 01, 01);
                 var end = new DateTime(2022, 01, 02);
                 var timeRange = new TimeRange(start, end);
-                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>());
+                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
                 _dataSourceMock
                     .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
@@ -107,7 +107,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 var start = new DateTime(2022, 01, 01);
                 var end = new DateTime(2022, 01, 02);
                 var timeRange = new TimeRange(start, end);
-                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>());
+                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
                 var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
 
@@ -126,7 +126,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 var start = new DateTime(2022, 01, 01);
                 var end = new DateTime(2022, 01, 02);
                 var timeRange = new TimeRange(start, end);
-                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>());
+                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
                 var interactionsStreamMock = new Mock<IInteractionsStream>();
                 _networkPerspectiveCoreMock

@@ -26,7 +26,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         private readonly ISecretRepository _secretRepository;
         private readonly IMembersClient _employeeProfileClient;
         private readonly IChatClient _chatClient;
-        private readonly IHashingServiceFactory _hashingServiceFactory;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly CursorPaginationHandler _cursorPaginationHandler;
         private readonly IClock _clock;
@@ -36,7 +35,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                            ISecretRepository secretRepository,
                            IMembersClient employeeProfileClient,
                            IChatClient chatClient,
-                           IHashingServiceFactory hashingServiceFactory,
                            IHttpClientFactory httpClientFactory,
                            CursorPaginationHandler cursorPaginationHandler,
                            IClock clock,
@@ -46,7 +44,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             _secretRepository = secretRepository;
             _employeeProfileClient = employeeProfileClient;
             _chatClient = chatClient;
-            _hashingServiceFactory = hashingServiceFactory;
             _httpClientFactory = httpClientFactory;
             _cursorPaginationHandler = cursorPaginationHandler;
             _clock = clock;
@@ -69,17 +66,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 return slackClientFacade as ISlackClientFacade;
             });
 
-            await InitializeInContext(context, () => _hashingServiceFactory.CreateAsync(_secretRepository, stoppingToken));
 
             var slackClientFacace = context.Get<ISlackClientFacade>();
-            var hashingService = context.Get<IHashingService>();
             var network = context.Get<Network<SlackNetworkProperties>>();
 
             await InitializeInContext(context, () => _employeeProfileClient.GetEmployees(slackClientFacace, context.NetworkConfig.EmailFilter, stoppingToken));
 
             var employees = context.Get<EmployeeCollection>();
 
-            var interactionFactory = new InteractionFactory(hashingService.Hash, employees);
+            var interactionFactory = new InteractionFactory(context.HashFunction, employees);
 
             var timeRange = new TimeRange(context.TimeRange.Start.AddDays(-30), _clock.UtcNow());
 
@@ -99,13 +94,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 return slackClientFacade as ISlackClientFacade;
             });
 
-            await InitializeInContext(context, () => _hashingServiceFactory.CreateAsync(_secretRepository, stoppingToken));
 
             var slackClientFacade = context.Get<ISlackClientFacade>();
-            var hashingService = context.Get<IHashingService>();
             var network = context.Get<Network<SlackNetworkProperties>>();
 
-            return await _employeeProfileClient.GetHashedEmployees(slackClientFacade, context.NetworkConfig.EmailFilter, hashingService.Hash, stoppingToken);
+            return await _employeeProfileClient.GetHashedEmployees(slackClientFacade, context.NetworkConfig.EmailFilter, context.HashFunction, stoppingToken);
         }
 
         public async Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)

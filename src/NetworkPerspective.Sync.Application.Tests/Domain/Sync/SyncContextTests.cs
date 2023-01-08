@@ -19,7 +19,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
         {
             // Arrange
             var mock = new Mock<IDisposable>();
-            var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new SecureString(), new TimeRange(DateTime.UtcNow, DateTime.Now), Mock.Of<IStatusLogger>());
+            var hashingServiceMock = new Mock<IHashingService>();
+            var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new SecureString(), new TimeRange(DateTime.UtcNow, DateTime.Now), Mock.Of<IStatusLogger>(), hashingServiceMock.Object);
             context.Set(mock.Object);
 
             // Act
@@ -27,6 +28,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
 
             // Assert
             mock.Verify(x => x.Dispose(), Times.Once);
+            hashingServiceMock.Verify(x => x.Dispose(), Times.Once);
         }
     }
 }

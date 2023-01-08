@@ -18,7 +18,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         private readonly ILoggerFactory _loggerFactory;
         private readonly INetworkService _networkService;
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
-        private readonly IHashingServiceFactory _hashingServiceFactory;
         private readonly IClock _clock;
         private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly IOptions<GoogleConfig> _googleConfig;
@@ -26,7 +25,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         public GoogleFacadeFactory(ILoggerFactory loggerFactory,
                                    INetworkService networkService,
                                    ISecretRepositoryFactory secretRepositoryFactory,
-                                   IHashingServiceFactory hashingserviceFactory,
                                    IClock clock,
                                    ITasksStatusesCache tasksStatusesCache,
                                    IOptions<GoogleConfig> googleConfig)
@@ -34,7 +32,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _loggerFactory = loggerFactory;
             _networkService = networkService;
             _secretRepositoryFactory = secretRepositoryFactory;
-            _hashingServiceFactory = hashingserviceFactory;
             _clock = clock;
             _tasksStatusesCache = tasksStatusesCache;
             _googleConfig = googleConfig;
@@ -50,7 +47,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var employeeCriterias = new[] { new NonServiceUserCriteria(_loggerFactory.CreateLogger<NonServiceUserCriteria>()) };
             var employeeProfileClient = new UsersClient(_tasksStatusesCache, _googleConfig, employeeCriterias, _loggerFactory.CreateLogger<UsersClient>());
 
-            return new GoogleFacade(_networkService, secretRepository, credentialsProvider, mailboxClient, meetingsClient, employeeProfileClient, _hashingServiceFactory, _clock, _googleConfig, _loggerFactory.CreateLogger<GoogleFacade>());
+            return new GoogleFacade(_networkService, secretRepository, credentialsProvider, mailboxClient, meetingsClient, employeeProfileClient, _clock, _googleConfig, _loggerFactory.CreateLogger<GoogleFacade>());
         }
     }
 }

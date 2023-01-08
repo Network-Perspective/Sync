@@ -26,7 +26,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         private readonly IMailboxClient _mailboxClient;
         private readonly ICalendarClient _calendarClient;
         private readonly IUsersClient _usersClient;
-        private readonly IHashingServiceFactory _hashingServiceFactory;
         private readonly IClock _clock;
         private readonly GoogleConfig _config;
         private readonly ILogger<GoogleFacade> _logger;
@@ -37,7 +36,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
                             IMailboxClient mailboxClient,
                             ICalendarClient calendarClient,
                             IUsersClient usersClient,
-                            IHashingServiceFactory hashingServiceFactory,
                             IClock clock,
                             IOptions<GoogleConfig> config,
                             ILogger<GoogleFacade> logger)
@@ -48,7 +46,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _mailboxClient = mailboxClient;
             _calendarClient = calendarClient;
             _usersClient = usersClient;
-            _hashingServiceFactory = hashingServiceFactory;
             _clock = clock;
             _config = config.Value;
             _logger = logger;
@@ -60,18 +57,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             await InitializeInContext(context, () => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
             await InitializeInContext(context, () => _credentialsProvider.GetCredentialsAsync(stoppingToken));
-            await InitializeInContext(context, () => _hashingServiceFactory.CreateAsync(_secretRepository, stoppingToken));
 
             var credentials = context.Get<GoogleCredential>();
             var network = context.Get<Network<GoogleNetworkProperties>>();
-            var hashingService = context.Get<IHashingService>();
 
             await InitializeInContext(context, () => _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken));
 
             var employeeCollection = context.Get<EmployeeCollection>();
 
-            var emailInteractionFactory = new EmailInteractionFactory(hashingService.Hash, employeeCollection, _clock);
-            var meetingInteractionFactory = new MeetingInteractionFactory(hashingService.Hash, employeeCollection);
+            var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employeeCollection, _clock);
+            var meetingInteractionFactory = new MeetingInteractionFactory(context.HashFunction, employeeCollection);
 
 
             await _mailboxClient.SyncInteractionsAsync(context, stream, employeeCollection.GetAllInternal(), credentials, emailInteractionFactory, stoppingToken);
@@ -105,14 +100,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             await InitializeInContext(context, () => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
             await InitializeInContext(context, () => _credentialsProvider.GetCredentialsAsync(stoppingToken));
-            await InitializeInContext(context, () => _hashingServiceFactory.CreateAsync(_secretRepository, stoppingToken));
 
             var credentials = context.Get<GoogleCredential>();
             var network = context.Get<Network<GoogleNetworkProperties>>();
-            var hashingService = context.Get<IHashingService>();
             var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
 
-            var mapper = new HashedEmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes), hashingService.Hash);
+            var mapper = new HashedEmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes), context.HashFunction);
 
             return mapper.ToEmployees(users);
         }

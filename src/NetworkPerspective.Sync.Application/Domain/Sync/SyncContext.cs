@@ -10,20 +10,24 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
     public class SyncContext : IDisposable
     {
         private readonly IDictionary<Type, object> _container = new Dictionary<Type, object>();
+        private readonly IHashingService _hashingService;
 
         public Guid NetworkId { get; }
         public NetworkConfig NetworkConfig { get; }
         public SecureString AccessToken { get; }
         public TimeRange TimeRange { get; }
         public IStatusLogger StatusLogger { get; }
+        public HashFunction HashFunction { get; }
 
-        public SyncContext(Guid networkId, NetworkConfig networkConfig, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger)
+        public SyncContext(Guid networkId, NetworkConfig networkConfig, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger, IHashingService hashingService)
         {
             NetworkId = networkId;
             NetworkConfig = networkConfig;
             AccessToken = accessToken;
             TimeRange = timeRange;
             StatusLogger = statusLogger;
+            _hashingService = hashingService;
+            HashFunction = hashingService.Hash;
         }
 
         public bool Contains<T>()
@@ -43,6 +47,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
         public void Dispose()
         {
             AccessToken?.Dispose();
+            _hashingService?.Dispose();
 
             foreach (var type in _container.Keys)
             {
