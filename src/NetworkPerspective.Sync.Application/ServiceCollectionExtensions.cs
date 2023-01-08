@@ -27,6 +27,7 @@ namespace NetworkPerspective.Sync.Application
             services.AddTransient<IStatusService, StatusService>();
             services.AddTransient<ITokenService, TokenService>();
             services.AddTransient<ISyncHistoryService, SyncHistoryService>();
+            services.AddTransient<ISyncContextFactory, SyncContextFactory>();
 
             services.AddSingleton<ITasksStatusesCache, TasksStatusesCache>();
 
