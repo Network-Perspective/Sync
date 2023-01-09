@@ -57,7 +57,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.GSu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.GSuite.Tests", "NetworkPerspective.Sync.GSuite.Tests\NetworkPerspective.Sync.GSuite.Tests.csproj", "{1637F593-4B6E-48F3-A646-C9349640C4D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Infrastructure.Core.Stub", "NetworkPerspective.Sync.Infrastructure.Core.Stub\NetworkPerspective.Sync.Infrastructure.Core.Stub.csproj", "{51619BB3-6F56-4584-96DD-6232EEC858D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.Core.Stub", "NetworkPerspective.Sync.Infrastructure.Core.Stub\NetworkPerspective.Sync.Infrastructure.Core.Stub.csproj", "{51619BB3-6F56-4584-96DD-6232EEC858D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.RegressionTests", "NetworkPerspective.Sync.RegressionTests\NetworkPerspective.Sync.RegressionTests.csproj", "{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -161,6 +163,10 @@ Global
 		{51619BB3-6F56-4584-96DD-6232EEC858D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51619BB3-6F56-4584-96DD-6232EEC858D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51619BB3-6F56-4584-96DD-6232EEC858D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -192,6 +198,7 @@ Global
 		{4ACF8049-21D7-4071-B4F4-AE69E3B9B132} = {9AC2B900-B353-4879-A540-108F67D429C1}
 		{1637F593-4B6E-48F3-A646-C9349640C4D0} = {6EFA829B-C784-47D9-9825-3264F052057B}
 		{51619BB3-6F56-4584-96DD-6232EEC858D6} = {527F899C-F2B0-4EB7-B9ED-B90CDAAF18E0}
+		{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A} = {6EFA829B-C784-47D9-9825-3264F052057B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}
