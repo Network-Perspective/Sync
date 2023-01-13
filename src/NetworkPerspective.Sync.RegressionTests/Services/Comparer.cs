@@ -14,16 +14,13 @@ namespace NetworkPerspective.Sync.RegressionTests.Services
             _equalityComparer = equalityComparer;
         }
 
-        public ComparisonResult<T> Compare(IEnumerable<T> left, IEnumerable<T> right)
+        public ComparisonResult<T> Compare(IEnumerable<T> old, IEnumerable<T> @new)
         {
-            var leftList = left.ToList();
-            var rightList = right.ToList();
+            var onlyInOld = old.Except(@new, _equalityComparer);
+            var onlyInNew = @new.Except(old, _equalityComparer);
+            var inBoth = old.Intersect(@new, _equalityComparer);
 
-            var onlyInLeft = leftList.Except(rightList, _equalityComparer);
-            var onlyInRight = rightList.Except(leftList, _equalityComparer);
-            var inBoth = left.Intersect(right, _equalityComparer);
-
-            return new ComparisonResult<T>(onlyInLeft, onlyInRight, inBoth);
+            return new ComparisonResult<T>(onlyInOld, onlyInNew, inBoth);
         }
     }
 }

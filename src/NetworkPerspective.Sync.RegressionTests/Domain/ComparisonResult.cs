@@ -5,14 +5,14 @@ namespace NetworkPerspective.Sync.RegressionTests.Domain
 {
     internal class ComparisonResult<T>
     {
-        public IList<T> OnlyInLeft { get; }
-        public IList<T> OnlyInRight { get; }
+        public IList<T> OnlyInOld { get; }
+        public IList<T> OnlyInNew { get; }
         public IList<T> InBoth { get; }
 
-        public ComparisonResult(IEnumerable<T> onlyInLeft, IEnumerable<T> onlyInRight, IEnumerable<T> inBoth)
+        public ComparisonResult(IEnumerable<T> onlyInOld, IEnumerable<T> onlyInNew, IEnumerable<T> inBoth)
         {
-            OnlyInLeft = onlyInLeft.ToList();
-            OnlyInRight = onlyInRight.ToList();
+            OnlyInOld = onlyInOld.ToList();
+            OnlyInNew = onlyInNew.ToList();
             InBoth = inBoth.ToList();
         }
     }

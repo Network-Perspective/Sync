@@ -17,8 +17,8 @@ namespace NetworkPerspective.Sync.RegressionTests.Services
 
         public InteractionsFromFileProvider(string dirPath)
         {
-            if (!Directory.Exists(_dirPath))
-                throw new DirectoryNotFoundException($"Directory {_dirPath} not found");
+            if (!Directory.Exists(dirPath))
+                throw new DirectoryNotFoundException($"Directory {dirPath} not found");
 
             _dirPath = dirPath;
         }

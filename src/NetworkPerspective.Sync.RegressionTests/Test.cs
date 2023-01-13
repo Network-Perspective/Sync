@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using System.Linq;
 
 using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.RegressionTests.Interactions;
@@ -14,14 +15,19 @@ namespace NetworkPerspective.Sync.RegressionTests
         public async Task Should()
         {
             // Arrange
-            const string oldInteractionsDirPath = "C:\\Users\\MaciejKlimczuk\\Desktop\\temp\\dane\\old";
-            const string newInteractionsDirPath = "C:\\Users\\MaciejKlimczuk\\Desktop\\temp\\dane\\new";
+            const string oldInteractionsDirPath = "D:\\dane\\old\\interactions";
+            const string newInteractionsDirPath = "D:\\dane\\new\\interactions";
 
             var oldInteractions = await new InteractionsFromFileProvider(oldInteractionsDirPath).GetInteractionsAsync();
             var newInteractions = await new InteractionsFromFileProvider(newInteractionsDirPath).GetInteractionsAsync();
 
-            var equalityComparer = new InteractionEqualityComparer();
+
+            var equalityComparer = new HashedInteractionEqualityComparer();
             var comparer = new Comparer<HashedInteraction>(equalityComparer);
+
+            var newDist = newInteractions.Distinct(equalityComparer).ToList();
+
+            var overlaping = newInteractions.Except(newDist).ToList();
 
             // Act
             var result = comparer.Compare(oldInteractions, newInteractions);

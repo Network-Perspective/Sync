@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.RegressionTests.Interactions
 
             foreach (var key in x.Keys)
             {
-                if (x[key] == y[key])
+                if (x[key] != y[key])
                     return false;
             }
 
@@ -31,7 +31,7 @@ namespace NetworkPerspective.Sync.RegressionTests.Interactions
         {
             var hashCode = new HashCode();
 
-            foreach (var key in obj.Keys)
+            foreach (var key in obj.Keys.OrderBy(x => x))
             {
                 hashCode.Add(key);
                 hashCode.Add(obj[key]);
