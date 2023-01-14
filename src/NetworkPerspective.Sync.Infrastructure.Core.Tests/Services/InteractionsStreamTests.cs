@@ -111,6 +111,25 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Services
         }
 
         [Fact]
+        public async Task ShouldBeOkWithDisposeTwice()
+        {
+            // Arrange
+            var accessToken = "foo".ToSecureString();
+            var config = CreateConfig(10);
+            var interactions = InteractionFactory.CreateSet(5);
+
+            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, _logger, CancellationToken.None);
+            await stream.SendAsync(interactions);
+
+            // Act
+            Func<Task> func = async () => await stream.DisposeAsync().AsTask();
+
+            // Act Assert
+            await func.Should().NotThrowAsync();
+            await func.Should().NotThrowAsync();
+        }
+
+        [Fact]
         public async Task ShouldStopOnCancelled()
         {
             // Arrange

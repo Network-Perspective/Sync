@@ -7,6 +7,8 @@ namespace NetworkPerspective.Sync.Application.Domain
     {
         public DateTime Start { get; }
         public DateTime End { get; }
+        public TimeSpan Duration => End - Start;
+
 
         public TimeRange(DateTime? start, DateTime? end)
         {

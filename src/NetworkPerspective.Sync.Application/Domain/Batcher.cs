@@ -11,7 +11,7 @@ namespace NetworkPerspective.Sync.Application.Domain
         private List<T> _objects = new List<T>();
         private readonly int _batchSize;
         private BatchReadyCallback<T> _callback = _ => Task.CompletedTask;
-
+        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
 
         public Batcher(int batchSize)
         {
@@ -26,24 +26,40 @@ namespace NetworkPerspective.Sync.Application.Domain
 
         public async Task AddRangeAsync(IEnumerable<T> objects, CancellationToken stoppingToken = default)
         {
-            _objects.AddRange(objects);
-
-            while (_objects.Count >= _batchSize)
+            await _semaphoreSlim.WaitAsync(stoppingToken);
+            try
             {
-                if (stoppingToken.IsCancellationRequested)
-                    return;
+                _objects.AddRange(objects);
 
-                await _callback(new BatchReadyEventArgs<T>(_objects.Take(_batchSize)));
-                _objects = _objects.Skip(_batchSize).ToList();
+                while (_objects.Count >= _batchSize)
+                {
+                    if (stoppingToken.IsCancellationRequested)
+                        return;
+
+                    await _callback(new BatchReadyEventArgs<T>(_objects.Take(_batchSize)));
+                    _objects = _objects.Skip(_batchSize).ToList();
+                }
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
             }
         }
 
         public async Task FlushAsync()
         {
-            if (_objects.Any())
+            await _semaphoreSlim.WaitAsync();
+            try
             {
-                await _callback(new BatchReadyEventArgs<T>(_objects));
-                _objects = Enumerable.Empty<T>().ToList();
+                if (_objects.Any())
+                {
+                    await _callback(new BatchReadyEventArgs<T>(_objects));
+                    _objects = Enumerable.Empty<T>().ToList();
+                }
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
             }
         }
     }

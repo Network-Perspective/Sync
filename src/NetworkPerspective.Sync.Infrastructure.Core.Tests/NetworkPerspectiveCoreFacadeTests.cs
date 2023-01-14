@@ -59,56 +59,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
             }
         }
 
-        public class PushInteractions : NetworkPerspectiveCoreFacadeTests
-        {
-            [Theory]
-            [InlineData(100)]
-            public async Task ShouldSendAllData(int count)
-            {
-                // Arrange
-                var interactions = InteractionFactory.CreateSet(count);
-
-                var sentInteractions = new List<HashedInteraction>();
-
-                _clientMock
-                    .Setup(x => x.SyncInteractionsAsync(It.IsAny<SyncHashedInteractionsCommand>(), It.IsAny<CancellationToken>()))
-                    .Callback<SyncHashedInteractionsCommand, CancellationToken>((x, y) => sentInteractions.AddRange(x.Interactions));
-
-                var dataSourceIdName = "SlackId";
-                var options = CreateNpCoreOptions(dataSourceIdName: dataSourceIdName);
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
-
-                // Act
-                await facade.PushInteractionsAsync("foo".ToSecureString(), interactions);
-
-                // Assert
-                var expectedSentInteractions = interactions.Select(x => InteractionMapper.DomainIntractionToDto(x, dataSourceIdName));
-                sentInteractions.Should().BeEquivalentTo(expectedSentInteractions);
-            }
-
-            [Theory]
-            [InlineData(0)]
-            [InlineData(99)]
-            [InlineData(100)]
-            [InlineData(101)]
-            public async Task ShouldPartitionData(int count)
-            {
-                // Arrange
-                var interactions = InteractionFactory.CreateSet(count);
-                var maxInteractionsPerRequestCount = 10;
-
-                var options = CreateNpCoreOptions(maxInteractionsPerRequestCount: maxInteractionsPerRequestCount);
-                var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
-
-                // Act
-                await facade.PushInteractionsAsync(new NetworkCredential(string.Empty, "foo").SecurePassword, interactions);
-
-                // Assert
-                var expectedCallsCount = (int)Math.Ceiling(count / (double)maxInteractionsPerRequestCount);
-                _clientMock.Verify(x => x.SyncInteractionsAsync(It.IsAny<SyncHashedInteractionsCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(expectedCallsCount));
-            }
-        }
-
         public class PushGroups : NetworkPerspectiveCoreFacadeTests
         {
             [Fact]

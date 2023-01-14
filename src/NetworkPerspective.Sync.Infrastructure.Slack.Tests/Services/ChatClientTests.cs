@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -11,7 +10,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
@@ -43,6 +41,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             var chatclient = new ChatClient(NullLogger<ChatClient>.Instance);
 
             var slackClientFacade = new SlackClientFacade(_httpClientFactory, paginationHandler);
+            var stream = new TestableInteractionStream();
 
             var employees = new List<Employee>()
                 .Add(existingEmail);
@@ -54,12 +53,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             try
             {
                 // Act
-                var storage = new InteractionsFileStorage("tmp");
-                await chatclient.GetInteractions(storage, slackClientFacade, network, interactionFactory, timeRange);
+                await chatclient.SyncInteractionsAsync(stream, slackClientFacade, network, interactionFactory, timeRange);
 
                 // Assert
-                var result = await storage.PullInteractionsAsync(new DateTime(2022, 07, 30));
-                result.Should().NotBeEmpty();
+                stream.SentInteractions.Count.Should().BePositive();
             }
             catch (Slack.Client.Exceptions.ApiException exception)
             {

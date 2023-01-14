@@ -11,7 +11,6 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
@@ -38,46 +37,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
         public IInteractionsStream OpenInteractionsStream(SecureString accessToken, CancellationToken stoppingToken = default)
             => new InteractionsStream(accessToken.Copy(), _client, _npCoreConfig, _loggerFactory.CreateLogger<InteractionsStream>(), stoppingToken);
-
-        public async Task PushInteractionsAsync(SecureString accessToken, ISet<Interaction> interactions, CancellationToken stoppingToken = default)
-        {
-            try
-            {
-                if (!interactions.Any())
-                {
-                    _logger.LogInformation("Skipping pushing interaction because there is nothing to push...");
-                    return;
-                }
-
-                _logger.LogInformation("Pushing {count} hashed interactions to {url}", interactions.Count, _npCoreConfig.BaseUrl);
-
-                var dataPartitionsCount = Math.Ceiling(interactions.Count / (double)_npCoreConfig.MaxInteractionsPerRequestCount);
-
-                for (int i = 0; i < dataPartitionsCount; i++)
-                {
-                    var interactionsToPush = interactions
-                            .Skip(_npCoreConfig.MaxInteractionsPerRequestCount * i)
-                            .Take(_npCoreConfig.MaxInteractionsPerRequestCount)
-                            .Select(x => InteractionMapper.DomainIntractionToDto(x, _npCoreConfig.DataSourceIdName))
-                            .ToList();
-
-                    var command = new SyncHashedInteractionsCommand
-                    {
-                        ServiceToken = accessToken.ToSystemString(),
-                        Interactions = interactionsToPush
-                    };
-
-                    var response = await _client.SyncInteractionsAsync(command, stoppingToken);
-
-                    _logger.LogInformation("Uploaded interactions batch {x} of {y} with count {count} hashed interactions to {url} successfully, correlationId: '{correlationId}'",
-                        (i + 1), dataPartitionsCount, interactionsToPush.Count, _npCoreConfig.BaseUrl, response);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new NetworkPerspectiveCoreException(_npCoreConfig.BaseUrl, ex);
-            }
-        }
 
         public async Task PushUsersAsync(SecureString accessToken, EmployeeCollection employees, CancellationToken stoppingToken = default)
         {

@@ -21,14 +21,14 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         private readonly INetworkService _networkService;
         private readonly ITokenService _tokenService;
         private readonly ISyncScheduler _syncScheduler;
-        private readonly IStatusLogger _statusLogger;
+        private readonly IStatusLoggerFactory _statusLoggerFactory;
 
-        public NetworksControllerBase(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLogger statusLogger) : base(networkPerspectiveCore)
+        public NetworksControllerBase(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLoggerFactory) : base(networkPerspectiveCore)
         {
             _networkService = networkService;
             _tokenService = tokenService;
             _syncScheduler = syncScheduler;
-            _statusLogger = statusLogger;
+            _statusLoggerFactory = statusLoggerFactory;
         }
 
         protected async Task<Guid> InitializeAsync<TProperties>(TProperties properties, CancellationToken stoppingToken = default) where TProperties : NetworkProperties, new()
@@ -39,7 +39,9 @@ namespace NetworkPerspective.Sync.Framework.Controllers
             await _tokenService.AddOrReplace(GetAccessToken(), tokenValidationResponse.NetworkId, stoppingToken);
             await _syncScheduler.AddOrReplaceAsync(tokenValidationResponse.NetworkId, stoppingToken);
 
-            await _statusLogger.LogInfoAsync(tokenValidationResponse.NetworkId, "Network added", stoppingToken);
+            await _statusLoggerFactory
+                .CreateForNetwork(tokenValidationResponse.NetworkId)
+                .LogInfoAsync("Network added", stoppingToken);
 
             return tokenValidationResponse.NetworkId;
         }

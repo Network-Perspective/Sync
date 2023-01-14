@@ -16,12 +16,12 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
 
         public IEnumerable<Interaction> MeetCriteria(IEnumerable<Interaction> input)
         {
-            _logger.LogDebug("Filtering out external to external interactions. Input has {count} interactions", input.Count());
+            _logger.LogTrace("Filtering out external to external interactions. Input has {count} interactions", input.Count());
 
             var result = input
                 .Where(x => !(x.Source.IsExternal && x.Target.IsExternal));
 
-            _logger.LogDebug("Filtering bot interactions completed. Output has {count} interactions", result.Count());
+            _logger.LogTrace("Filtering bot interactions completed. Output has {count} interactions", result.Count());
 
             return result;
         }

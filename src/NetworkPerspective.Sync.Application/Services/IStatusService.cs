@@ -51,7 +51,7 @@ namespace NetworkPerspective.Sync.Application.Services
             _logger.LogDebug("Network '{networkId}' authorization status to Core app is '{status}'", networkId, isAuthorizedToCoreApp);
 
             var dataSource = await _dataSourceFactory.CreateAsync(networkId, stoppingToken);
-            var isAuthorizedToDataSource = await dataSource.IsAuthorized(networkId, stoppingToken);
+            var isAuthorizedToDataSource = await dataSource.IsAuthorizedAsync(networkId, stoppingToken);
             var isRunning = await _scheduler.IsRunningAsync(networkId, stoppingToken);
 
             _logger.LogDebug("Network '{networkId}' authorization status to data source is '{status}'", networkId, isAuthorizedToDataSource);
