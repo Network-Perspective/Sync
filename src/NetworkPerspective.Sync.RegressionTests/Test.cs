@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 
+using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.RegressionTests.Interactions;
 using NetworkPerspective.Sync.RegressionTests.Services;
@@ -9,9 +10,10 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.RegressionTests
 {
-    public class Test
+    public class RegressionTests
     {
         [Fact]
+        [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
         public async Task Should()
         {
             // Arrange

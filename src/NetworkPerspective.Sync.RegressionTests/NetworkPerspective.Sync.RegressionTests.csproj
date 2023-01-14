@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\NetworkPerspective.Sync.Common.Tests\NetworkPerspective.Sync.Common.Tests.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Core\NetworkPerspective.Sync.Infrastructure.Core.csproj" />
     </ItemGroup>
 
