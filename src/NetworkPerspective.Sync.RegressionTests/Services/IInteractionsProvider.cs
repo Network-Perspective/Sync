@@ -8,6 +8,6 @@ namespace NetworkPerspective.Sync.RegressionTests.Services
 {
     internal interface IInteractionsProvider
     {
-        Task <IList<HashedInteraction>> GetInteractionsAsync(CancellationToken stoppingToken);
+        Task<IList<HashedInteraction>> GetInteractionsAsync(CancellationToken stoppingToken);
     }
 }

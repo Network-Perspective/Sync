@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using System.Linq;
+﻿using System.Linq;
+using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.RegressionTests.Interactions;
