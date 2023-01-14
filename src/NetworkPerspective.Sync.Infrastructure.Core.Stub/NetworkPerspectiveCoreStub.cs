@@ -50,7 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
 
                 foreach (var employee in employees.GetAllInternal())
                 {
-                    var entity = EntitiesMapper.ToEntity(employee, employees, changeDate, "test");
+                    var entity = EntitiesMapper.ToEntity(employee, employees, changeDate, _config.DataSourceIdName);
                     entities.Add(entity);
                 }
 

@@ -18,12 +18,12 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
 
         public IEnumerable<Interaction> MeetCriteria(IEnumerable<Interaction> input)
         {
-            _logger.LogDebug("Filtering out interactions outside timerange {timeRange}. Input has {count} interactions", _timeRange, input.Count());
+            _logger.LogTrace("Filtering out interactions outside timerange {timeRange}. Input has {count} interactions", _timeRange, input.Count());
 
             var result = input
                 .Where(x => _timeRange.IsInRange(x.Timestamp));
 
-            _logger.LogDebug("Filtering interactions outside timerange completed. Output has {count} interactions", result.Count());
+            _logger.LogTrace("Filtering interactions outside timerange completed. Output has {count} interactions", result.Count());
 
             return result;
         }
