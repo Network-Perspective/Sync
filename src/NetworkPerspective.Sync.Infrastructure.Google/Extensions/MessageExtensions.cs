@@ -47,7 +47,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
         public static string GetHeaderValue(this Message message, string headerName)
         {
             var headerNameEqualityComparer = StringComparer.InvariantCultureIgnoreCase;
-            var header = message.Payload.Headers.FirstOrDefault(x => headerNameEqualityComparer.Equals(x.Name, headerName));
+            var header = message.Payload?.Headers?.FirstOrDefault(x => headerNameEqualityComparer.Equals(x.Name, headerName));
 
             if (header == null)
                 return string.Empty;
