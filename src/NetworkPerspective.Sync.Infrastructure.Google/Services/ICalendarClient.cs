@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -119,10 +120,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             if (string.IsNullOrEmpty(recurrenceEventId))
                 return null;
 
-            var request = calendarService.Events.Get(userEmail, recurrenceEventId);
-            var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);
+            try
+            {
+                var request = calendarService.Events.Get(userEmail, recurrenceEventId);
 
-            return response.GetRecurrence();
+                var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);
+                return response.GetRecurrence();
+
+            }
+            catch(GoogleApiException ex) when (IndicatesNotFound(ex))
+            {
+                _logger.LogWarning(ex, "Unable to evaluate interaction's recurrence type - it might be caused by event changed. Assigning default value (null)");
+                return null;
+            }
+
         }
 
         private static bool IndicatesIsNotACalendarUser(GoogleApiException ex)
@@ -134,5 +145,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
             return notCalendarUserError is not null;
         }
+
+        private static bool IndicatesNotFound(GoogleApiException ex)
+            => ex.HttpStatusCode == HttpStatusCode.NotFound;
     }
 }
