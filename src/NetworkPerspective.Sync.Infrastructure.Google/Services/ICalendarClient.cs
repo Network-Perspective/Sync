@@ -128,7 +128,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 return response.GetRecurrence();
 
             }
-            catch(GoogleApiException ex) when (IndicatesNotFound(ex))
+            catch (GoogleApiException ex) when (IndicatesNotFound(ex))
             {
                 _logger.LogWarning(ex, "Unable to evaluate interaction's recurrence type - it might be caused by event changed. Assigning default value (null)");
                 return null;

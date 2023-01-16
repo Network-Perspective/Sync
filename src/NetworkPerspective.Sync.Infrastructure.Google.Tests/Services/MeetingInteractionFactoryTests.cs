@@ -22,7 +22,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
         {
             // Arrange
             const string user1Email = "user1@networkperspective.io";
-            const string user2Email = "<user2@networkperspective.io> user2";
+            const string user2Email = "user2 <user2@networkperspective.io>";
             const string user3Email = "user3@networkperspective.io";
             const string user3Email_alias = "user3_alias@networkperspective.io";
             const string externalUserEmail = "external@foo.com";
