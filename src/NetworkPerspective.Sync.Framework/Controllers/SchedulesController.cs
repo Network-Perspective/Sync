@@ -19,14 +19,14 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         private readonly INetworkService _networkService;
         private readonly ISyncScheduler _scheduler;
         private readonly ISyncHistoryService _syncHistoryService;
-        private readonly IStatusLogger _statusLogger;
+        private readonly IStatusLoggerFactory _statusLoggerFactory;
 
-        public SchedulesController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ISyncScheduler scheduler, ISyncHistoryService syncHistoryService, IStatusLogger statusLogger) : base(networkPerspectiveCore)
+        public SchedulesController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ISyncScheduler scheduler, ISyncHistoryService syncHistoryService, IStatusLoggerFactory statusLoggerFactory) : base(networkPerspectiveCore)
         {
             _networkService = networkService;
             _scheduler = scheduler;
             _syncHistoryService = syncHistoryService;
-            _statusLogger = statusLogger;
+            _statusLoggerFactory = statusLoggerFactory;
         }
 
         /// <summary>
@@ -51,7 +51,9 @@ namespace NetworkPerspective.Sync.Framework.Controllers
             await _scheduler.ScheduleAsync(tokenValidationResponse.NetworkId, stoppingToken);
             await _scheduler.TriggerNowAsync(tokenValidationResponse.NetworkId, stoppingToken);
 
-            await _statusLogger.LogInfoAsync("Schedule started", stoppingToken);
+            await _statusLoggerFactory
+                .CreateForNetwork(tokenValidationResponse.NetworkId)
+                .LogInfoAsync("Schedule started", stoppingToken);
 
             return Ok($"Scheduled sync {tokenValidationResponse.NetworkId}");
         }
@@ -74,7 +76,9 @@ namespace NetworkPerspective.Sync.Framework.Controllers
             await _scheduler.UnscheduleAsync(tokenValidationResponse.NetworkId, stoppingToken);
             await _scheduler.InterruptNowAsync(tokenValidationResponse.NetworkId, stoppingToken);
 
-            await _statusLogger.LogInfoAsync("Schedule stopped", stoppingToken);
+            await _statusLoggerFactory
+                .CreateForNetwork(tokenValidationResponse.NetworkId)
+                .LogInfoAsync("Schedule stopped", stoppingToken);
 
             return Ok($"Unscheduled sync {tokenValidationResponse.NetworkId}");
         }
