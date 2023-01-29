@@ -200,7 +200,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             var features = new FeatureCollection();
             features.Set<IHttpRequestFeature>(requestFeature);
 
-            var controller = new SchedulesController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _schduleFacadeMock.Object, _syncHistoryServiceMock.Object, Mock.Of<IStatusLogger>());
+            var controller = new SchedulesController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _schduleFacadeMock.Object, _syncHistoryServiceMock.Object, Mock.Of<IStatusLoggerFactory>());
             controller.ControllerContext.HttpContext = new DefaultHttpContext(features);
 
             return controller;

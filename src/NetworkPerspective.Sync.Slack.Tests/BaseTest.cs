@@ -38,7 +38,6 @@ namespace NetworkPerspective.Sync.Slack.Tests
             // Arrange
             var networkId = Guid.NewGuid();
             var httpClient = _service.CreateDefaultClient();
-            var client = new NetworksClient(httpClient);
 
             const bool autoJoinChannels = true;
             const bool syncChannelsNames = true;
@@ -48,7 +47,8 @@ namespace NetworkPerspective.Sync.Slack.Tests
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
             // Act
-            var result = await client.NetworksPostAsync(autoJoinChannels, syncChannelsNames, null);
+            var result = await new NetworksClient(httpClient)
+                .NetworksPostAsync(autoJoinChannels, syncChannelsNames, null);
 
             // Assert
             _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-Slack-{networkId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
@@ -59,6 +59,33 @@ namespace NetworkPerspective.Sync.Slack.Tests
             network.Properties.AutoJoinChannels.Should().Be(autoJoinChannels);
             network.Properties.SyncGroups.Should().Be(syncChannelsNames);
             network.Properties.ExternalKeyVaultUri.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task ShouldSetupSchedulesProperly()
+        {
+            // Arrange
+            var networkId = Guid.NewGuid();
+            var httpClient = _service.CreateDefaultClient();
+
+            const bool autoJoinChannels = true;
+            const bool syncChannelsNames = true;
+
+            _service.NetworkPerspectiveCoreMock
+                .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+
+            await new NetworksClient(httpClient)
+                .NetworksPostAsync(autoJoinChannels, syncChannelsNames, null);
+
+            // Act
+            var result = await new SchedulesClient(httpClient)
+                .SchedulesPostAsync(new SchedulerStartDto());
+
+            // Assert
+            var status = await new StatusClient(httpClient)
+                .StatusAsync();
+            status.Scheduled.Should().BeTrue();
         }
 
         [Fact]
