@@ -43,7 +43,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests
             serviceCollection.AddTransient(x => Mock.Of<ISecretRepositoryFactory>());
             serviceCollection.AddSingleton(Mock.Of<IUnitOfWork>());
             serviceCollection.AddSingleton(Mock.Of<ISyncScheduler>());
-            serviceCollection.AddSingleton(Mock.Of<IStatusLogger>());
             serviceCollection.AddSingleton(Mock.Of<IUnitOfWorkFactory>());
             serviceCollection.AddSingleton(Mock.Of<INetworkPerspectiveCore>());
             serviceCollection.AddApplication(config.GetSection("Connector"));
