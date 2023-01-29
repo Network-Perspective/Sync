@@ -45,6 +45,6 @@ namespace NetworkPerspective.Sync.Application.Domain
             => HashCode.Combine(Start, End);
 
         public override string ToString()
-            => $"{Start} - {End}";
+            => $"{Start.ToString(Consts.DefaultDateTimeFormat)} - {End.ToString(Consts.DefaultDateTimeFormat)}";
     }
 }

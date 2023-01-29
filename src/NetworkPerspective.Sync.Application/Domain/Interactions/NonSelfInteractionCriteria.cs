@@ -3,6 +3,8 @@ using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Application.Domain.Employees;
+
 namespace NetworkPerspective.Sync.Application.Domain.Interactions
 {
     public class NonSelfInteractionCriteria : IInteractionCritieria
@@ -19,7 +21,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
             _logger.LogTrace("Filtering out self interactions. Input has {count} interactions", input.Count());
 
             var result = input
-                .Where(x => !Consts.UserIdEqualityComparer.Equals(x.Source.Id.PrimaryId, x.Target.Id.PrimaryId));
+                .Where(x => !EmployeeId.EqualityComparer.Equals(x.Source.Id, x.Target.Id));
 
             _logger.LogTrace("Filtering self interactions completed. Output has {count} interactions", result.Count());
 
