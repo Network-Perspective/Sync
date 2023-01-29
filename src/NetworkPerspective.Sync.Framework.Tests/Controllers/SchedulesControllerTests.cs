@@ -31,6 +31,8 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
         private readonly Mock<ISyncScheduler> _schduleFacadeMock = new Mock<ISyncScheduler>();
         private readonly Mock<INetworkService> _networkServiceMock = new Mock<INetworkService>();
         private readonly Mock<ISyncHistoryService> _syncHistoryServiceMock = new Mock<ISyncHistoryService>();
+        private readonly Mock<IStatusLoggerFactory> _statusLoggerFactoryMock = new Mock<IStatusLoggerFactory>();
+        private readonly Mock<IStatusLogger> _statusLoggerMock = new Mock<IStatusLogger>();
 
         public SchedulesControllerTests()
         {
@@ -38,6 +40,12 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             _schduleFacadeMock.Reset();
             _networkServiceMock.Reset();
             _syncHistoryServiceMock.Reset();
+            _statusLoggerFactoryMock.Reset();
+            _statusLoggerMock.Reset();
+
+            _statusLoggerFactoryMock
+                .Setup(x => x.CreateForNetwork(It.IsAny<Guid>()))
+                .Returns(_statusLoggerMock.Object);
         }
 
         public class Start : SchedulesControllerTests
@@ -200,7 +208,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             var features = new FeatureCollection();
             features.Set<IHttpRequestFeature>(requestFeature);
 
-            var controller = new SchedulesController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _schduleFacadeMock.Object, _syncHistoryServiceMock.Object, Mock.Of<IStatusLoggerFactory>());
+            var controller = new SchedulesController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _schduleFacadeMock.Object, _syncHistoryServiceMock.Object, _statusLoggerFactoryMock.Object);
             controller.ControllerContext.HttpContext = new DefaultHttpContext(features);
 
             return controller;
