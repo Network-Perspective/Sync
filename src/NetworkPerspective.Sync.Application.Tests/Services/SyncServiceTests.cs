@@ -4,8 +4,6 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
-using FluentAssertions;
-
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -55,92 +53,88 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 .Returns(new HashSet<Interaction>());
         }
 
-        public class SyncInteractions : SyncServiceTests
+        [Fact]
+        [Trait(TestsConsts.TraitTestKind, TestsConsts.TraitAcceptance)]
+        public async Task ShouldReportSyncStartedAndSuccessToNpCoreApp()
         {
-            [Fact]
-            [Trait(TestsConsts.TraitTestKind, TestsConsts.TraitAcceptance)]
-            public async Task ShouldReportSyncStartedAndSuccessToNpCoreApp()
-            {
-                // Arrange
-                var start = new DateTime(2022, 01, 01);
-                var end = new DateTime(2022, 01, 02);
-                var timeRange = new TimeRange(start, end);
-                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
-                var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
+            // Arrange
+            var start = new DateTime(2022, 01, 01);
+            var end = new DateTime(2022, 01, 02);
+            var timeRange = new TimeRange(start, end);
+            var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
 
-                // Act
-                await syncService.SyncInteractionsAsync(context);
+            // Act
+            await syncService.SyncAsync(context);
 
-                // Assert
-                _networkPerspectiveCoreMock.Verify(x => x.ReportSyncStartAsync(It.IsAny<SecureString>(), context.TimeRange, It.IsAny<CancellationToken>()), Times.Once);
-                _networkPerspectiveCoreMock.Verify(x => x.ReportSyncSuccessfulAsync(It.IsAny<SecureString>(), context.TimeRange, It.IsAny<CancellationToken>()), Times.Once);
-            }
+            // Assert
+            _networkPerspectiveCoreMock.Verify(x => x.ReportSyncStartAsync(It.IsAny<SecureString>(), context.TimeRange, It.IsAny<CancellationToken>()), Times.Once);
+            _networkPerspectiveCoreMock.Verify(x => x.ReportSyncSuccessfulAsync(It.IsAny<SecureString>(), context.TimeRange, It.IsAny<CancellationToken>()), Times.Once);
+        }
 
-            [Fact]
-            public async Task ShouldAttemptToReportSyncFailedOnException()
-            {
-                // Arrange
-                var start = new DateTime(2022, 01, 01);
-                var end = new DateTime(2022, 01, 02);
-                var timeRange = new TimeRange(start, end);
-                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+        [Fact]
+        public async Task ShouldAttemptToReportSyncFailedOnException()
+        {
+            // Arrange
+            var start = new DateTime(2022, 01, 01);
+            var end = new DateTime(2022, 01, 02);
+            var timeRange = new TimeRange(start, end);
+            var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
-                _dataSourceMock
-                    .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
-                    .ThrowsAsync(new Exception());
+            _dataSourceMock
+                .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new Exception());
 
-                var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
 
-                // Act
-                Func<Task> func = async () => await syncService.SyncInteractionsAsync(context);
+            // Act
+            await syncService.SyncAsync(context);
 
-                // Assert
-                await func.Should().ThrowAsync<Exception>();
-                _networkPerspectiveCoreMock.Verify(x => x.ReportSyncStartAsync(It.IsAny<SecureString>(), context.TimeRange, It.IsAny<CancellationToken>()), Times.Once);
-                _networkPerspectiveCoreMock.Verify(x => x.TryReportSyncFailedAsync(It.IsAny<SecureString>(), context.TimeRange, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
-            }
+            // Assert
+            _networkPerspectiveCoreMock.Verify(x => x.ReportSyncStartAsync(It.IsAny<SecureString>(), context.TimeRange, It.IsAny<CancellationToken>()), Times.Once);
+            _networkPerspectiveCoreMock.Verify(x => x.TryReportSyncFailedAsync(It.IsAny<SecureString>(), context.TimeRange, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
 
-            [Fact]
-            public async Task ShouldUseFilteredInteractionsStreamDecorator()
-            {
-                // Arrange
-                var start = new DateTime(2022, 01, 01);
-                var end = new DateTime(2022, 01, 02);
-                var timeRange = new TimeRange(start, end);
-                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+        [Fact]
+        public async Task ShouldUseFilteredInteractionsStreamDecorator()
+        {
+            // Arrange
+            var start = new DateTime(2022, 01, 01);
+            var end = new DateTime(2022, 01, 02);
+            var timeRange = new TimeRange(start, end);
+            var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
-                var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
 
-                // Act
-                await syncService.SyncInteractionsAsync(context);
+            // Act
+            await syncService.SyncAsync(context);
 
-                // Assert
-                _dataSourceMock
-                    .Verify(x => x.SyncInteractionsAsync(It.Is<IInteractionsStream>(x => x.GetType() == typeof(FilteredInteractionStreamDecorator)), context, It.IsAny<CancellationToken>()), Times.Once);
-            }
+            // Assert
+            _dataSourceMock
+                .Verify(x => x.SyncInteractionsAsync(It.Is<IInteractionsStream>(x => x.GetType() == typeof(FilteredInteractionStreamDecorator)), context, It.IsAny<CancellationToken>()), Times.Once);
+        }
 
-            [Fact]
-            public async Task ShouldDisposeStream()
-            {
-                // Arrange
-                var start = new DateTime(2022, 01, 01);
-                var end = new DateTime(2022, 01, 02);
-                var timeRange = new TimeRange(start, end);
-                var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+        [Fact]
+        public async Task ShouldDisposeStream()
+        {
+            // Arrange
+            var start = new DateTime(2022, 01, 01);
+            var end = new DateTime(2022, 01, 02);
+            var timeRange = new TimeRange(start, end);
+            var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
-                var interactionsStreamMock = new Mock<IInteractionsStream>();
-                _networkPerspectiveCoreMock
-                    .Setup(x => x.OpenInteractionsStream(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                    .Returns(interactionsStreamMock.Object);
+            var interactionsStreamMock = new Mock<IInteractionsStream>();
+            _networkPerspectiveCoreMock
+                .Setup(x => x.OpenInteractionsStream(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
+                .Returns(interactionsStreamMock.Object);
 
-                var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
 
-                // Act
-                await syncService.SyncInteractionsAsync(context);
+            // Act
+            await syncService.SyncAsync(context);
 
-                // Assert
-                interactionsStreamMock.Verify(x => x.DisposeAsync(), Times.Once);
-            }
+            // Assert
+            interactionsStreamMock.Verify(x => x.DisposeAsync(), Times.Once);
         }
     }
 }

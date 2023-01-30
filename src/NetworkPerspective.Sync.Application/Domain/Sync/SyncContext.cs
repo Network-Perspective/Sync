@@ -14,15 +14,17 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
 
         public Guid NetworkId { get; }
         public NetworkConfig NetworkConfig { get; }
+        public NetworkProperties NetworkProperties { get; }
         public SecureString AccessToken { get; }
         public TimeRange TimeRange { get; }
         public IStatusLogger StatusLogger { get; }
         public HashFunction HashFunction { get; }
 
-        public SyncContext(Guid networkId, NetworkConfig networkConfig, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger, IHashingService hashingService)
+        public SyncContext(Guid networkId, NetworkConfig networkConfig, NetworkProperties networkProperties, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger, IHashingService hashingService)
         {
             NetworkId = networkId;
             NetworkConfig = networkConfig;
+            NetworkProperties = networkProperties;
             AccessToken = accessToken;
             TimeRange = timeRange;
             StatusLogger = statusLogger;

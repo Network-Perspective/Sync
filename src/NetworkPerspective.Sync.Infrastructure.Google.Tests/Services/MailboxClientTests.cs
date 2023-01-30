@@ -58,7 +58,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var interactionFactory = new EmailInteractionFactory((x) => $"{x}_hashed", employeesCollection, clock);
             var stream = new TestableInteractionStream();
             var timeRange = new TimeRange(new DateTime(2022, 11, 01), new DateTime(2022, 12, 31));
-            var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+            var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
             // Act
             await mailboxClient.SyncInteractionsAsync(syncContext, stream, new[] { Employee.CreateInternal(EmployeeId.Create(userEmail, userEmail), Array.Empty<Group>()) }, _googleClientFixture.Credential, interactionFactory);
