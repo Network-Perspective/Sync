@@ -128,7 +128,6 @@ namespace NetworkPerspective.Sync.Application.Services
 
         private async Task SyncInteractionsAsync(SyncContext context, CancellationToken stoppingToken)
         {
-
             _logger.LogInformation("Synchronizing interactions for network '{networkId}' for period {period}", context.NetworkId, context.TimeRange);
             await context.StatusLogger.LogInfoAsync($"Synchronizing interactions for period '{context.TimeRange}'...", stoppingToken);
 

@@ -70,7 +70,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             var result2 = stream.SentInteractions.Where(x => x.Timestamp.Date == new DateTime(2022, 12, 24));
             result2.Single(x => x.Source.Id.PrimaryId == $"{userEmail}_hashed" && x.Target.Id.PrimaryId == "john@worksmartona.com_hashed");
-
         }
     }
 }
