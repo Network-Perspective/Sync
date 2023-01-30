@@ -18,21 +18,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         private readonly INetworkService _networkService;
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IHashingServiceFactory _hashingServiceFactory;
+        private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly IClock _clock;
         private readonly ILoggerFactory _loggerFactory;
 
         public SlackFacadeFactory(INetworkService networkService,
                                   ISecretRepositoryFactory secretRepositoryFactory,
                                   IHttpClientFactory httpClientFactory,
-                                  IHashingServiceFactory hashingServiceFactory,
+                                  ITasksStatusesCache tasksStatusesCache,
                                   IClock clock,
                                   ILoggerFactory loggerFactory)
         {
             _networkService = networkService;
             _secretRepositoryFactory = secretRepositoryFactory;
             _httpClientFactory = httpClientFactory;
-            _hashingServiceFactory = hashingServiceFactory;
+            _tasksStatusesCache = tasksStatusesCache;
             _clock = clock;
             _loggerFactory = loggerFactory;
         }
@@ -45,9 +45,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             var paginationHandler = new CursorPaginationHandler(_loggerFactory.CreateLogger<CursorPaginationHandler>());
 
             var employeeProfileClient = new MembersClient(_loggerFactory.CreateLogger<MembersClient>());
-            var chatClient = new ChatClient(_loggerFactory.CreateLogger<ChatClient>());
+            var chatClient = new ChatClient(_tasksStatusesCache, _loggerFactory.CreateLogger<ChatClient>());
 
-            return new SlackFacade(_networkService, secretRepository, employeeProfileClient, chatClient, _hashingServiceFactory, _httpClientFactory, paginationHandler, _clock, logger);
+            return new SlackFacade(_networkService, secretRepository, employeeProfileClient, chatClient, _httpClientFactory, paginationHandler, _clock, logger);
         }
     }
 }

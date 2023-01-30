@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +17,9 @@ using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.GSuite.Client;
 using NetworkPerspective.Sync.GSuite.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Google;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 using Xunit;
 
@@ -38,7 +42,6 @@ namespace NetworkPerspective.Sync.GSuite.Tests
             // Arrange
             var networkId = Guid.NewGuid();
             var httpClient = _service.CreateDefaultClient();
-            var client = new NetworksClient(httpClient);
 
             const string adminEmail = "admin@networkperspective.io";
 
@@ -47,7 +50,8 @@ namespace NetworkPerspective.Sync.GSuite.Tests
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
             // Act
-            var result = await client.NetworksPostAsync(adminEmail, null);
+            var result = await new NetworksClient(httpClient)
+                .NetworksPostAsync(adminEmail, null);
 
             // Assert
             _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-GSuite-{networkId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
@@ -57,6 +61,32 @@ namespace NetworkPerspective.Sync.GSuite.Tests
             var network = await networksRepository.FindAsync(networkId);
             network.Properties.AdminEmail.Should().Be(adminEmail);
             network.Properties.ExternalKeyVaultUri.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task ShouldSetupSchedulesProperly()
+        {
+            // Arrange
+            var networkId = Guid.NewGuid();
+            var httpClient = _service.CreateDefaultClient();
+
+            const string adminEmail = "admin@networkperspective.io";
+
+            _service.NetworkPerspectiveCoreMock
+                .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+
+            await new NetworksClient(httpClient)
+                .NetworksPostAsync(adminEmail, null);
+
+            // Act
+            var result = await new SchedulesClient(httpClient)
+                .SchedulesPostAsync(new SchedulerStartDto());
+
+            // Assert
+            var status = await new StatusClient(httpClient)
+                .StatusAsync();
+            status.Scheduled.Should().BeTrue();
         }
 
         [Fact]

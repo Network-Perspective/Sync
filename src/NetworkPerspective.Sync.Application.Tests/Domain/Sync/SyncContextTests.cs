@@ -3,8 +3,10 @@ using System.Security;
 
 using Moq;
 
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
+using NetworkPerspective.Sync.Application.Services;
 
 using Xunit;
 
@@ -17,7 +19,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
         {
             // Arrange
             var mock = new Mock<IDisposable>();
-            var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new SecureString(), DateTime.UtcNow, DateTime.Now);
+            var hashingServiceMock = new Mock<IHashingService>();
+            var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new SecureString(), new TimeRange(DateTime.UtcNow, DateTime.Now), Mock.Of<IStatusLogger>(), hashingServiceMock.Object);
             context.Set(mock.Object);
 
             // Act
@@ -25,6 +28,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
 
             // Assert
             mock.Verify(x => x.Dispose(), Times.Once);
+            hashingServiceMock.Verify(x => x.Dispose(), Times.Once);
         }
     }
 }

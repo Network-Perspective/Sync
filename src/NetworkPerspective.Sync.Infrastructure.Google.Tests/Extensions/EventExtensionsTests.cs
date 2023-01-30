@@ -109,7 +109,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Extensions
                 {
                     Attendees = new[]
                     {
-                        new EventAttendee { Email = "<john.doe@networkperspective.io>John Doe"},
+                        new EventAttendee { Email = "John Doe <john.doe@networkperspective.io>"},
                         new EventAttendee { Email = "john.doe@worksmartona.com"}
                     }
                 };

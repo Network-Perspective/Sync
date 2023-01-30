@@ -16,12 +16,12 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
 
         public IEnumerable<Interaction> MeetCriteria(IEnumerable<Interaction> input)
         {
-            _logger.LogDebug("Filtering out self interactions. Input has {count} interactions", input.Count());
+            _logger.LogTrace("Filtering out self interactions. Input has {count} interactions", input.Count());
 
             var result = input
                 .Where(x => !Consts.UserIdEqualityComparer.Equals(x.Source.Id.PrimaryId, x.Target.Id.PrimaryId));
 
-            _logger.LogDebug("Filtering self interactions completed. Output has {count} interactions", result.Count());
+            _logger.LogTrace("Filtering self interactions completed. Output has {count} interactions", result.Count());
 
             return result;
         }

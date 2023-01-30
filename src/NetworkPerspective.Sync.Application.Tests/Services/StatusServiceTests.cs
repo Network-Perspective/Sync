@@ -60,7 +60,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 .ReturnsAsync(true);
 
             _dataSourceMock
-                .Setup(x => x.IsAuthorized(networkId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.IsAuthorizedAsync(networkId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             _schedulerMock

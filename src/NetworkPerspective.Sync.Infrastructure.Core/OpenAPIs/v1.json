@@ -5114,84 +5114,6 @@
         }
       }
     },
-    "/api/settings/health/{name}": {
-      "get": {
-        "tags": [
-          "Settings"
-        ],
-        "summary": "Enterprise health",
-        "operationId": "Settings_EnterpeiseHealth",
-        "produces": [
-          "application/json",
-          "text/json"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Healthy",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "400": {
-            "description": "Unhealthy",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "500": {
-            "description": "Seriously unhealthy"
-          },
-          "429": {
-            "description": "API calls quota exceeded"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Settings"
-        ],
-        "summary": "Enterprise ping",
-        "operationId": "Settings_ReportHealth",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "nextPingInSeconds",
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Model validation error"
-          },
-          "429": {
-            "description": "API calls quota exceeded"
-          }
-        }
-      }
-    },
     "/api/sync/demo/{networkId}": {
       "put": {
         "tags": [
@@ -5536,6 +5458,72 @@
         }
       }
     },
+    "/api/sync/hashed/start": {
+      "post": {
+        "tags": [
+          "SyncHashed"
+        ],
+        "summary": "Sync started",
+        "description": "Connector should call this endpoint when starting synchronization job",
+        "operationId": "SyncHashed_ReportStart",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ReportSyncStartedCommand"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/sync/hashed/completed": {
+      "post": {
+        "tags": [
+          "SyncHashed"
+        ],
+        "summary": "Sync completed",
+        "description": "Connector should call this endpoint when synchronization has completed or failed",
+        "operationId": "SyncHashed_ReportCompleted",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ReportSyncCompletedCommand"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
     "/api/sync/hashed/settings": {
       "post": {
         "tags": [
@@ -5576,7 +5564,7 @@
           "SyncHashed"
         ],
         "summary": "Retry sync",
-        "operationId": "SyncHashed_Settings",
+        "operationId": "SyncHashed_Retry",
         "consumes": [
           "application/json-patch+json",
           "application/json",
@@ -5587,9 +5575,43 @@
           {
             "in": "body",
             "name": "body",
-            "description": "",
             "schema": {
               "$ref": "#/definitions/RetryProcessingNetworkDataCommand"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/sync/hashed/retry-processing": {
+      "post": {
+        "tags": [
+          "SyncHashed"
+        ],
+        "summary": "Publish processing requests",
+        "operationId": "SyncHashed_RetryProcessing",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/PublishProcessingRequestCommand"
             }
           }
         ],
@@ -5703,6 +5725,304 @@
             "name": "body",
             "schema": {
               "$ref": "#/definitions/SyncJsonApplyChangesCommand"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/sync/status/{networkId}/overview": {
+      "post": {
+        "tags": [
+          "SyncStatus"
+        ],
+        "summary": "Get status",
+        "operationId": "SyncStatus_GetStatus",
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SyncStatusResult"
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/sync/status/{networkId}/incoming/process": {
+      "post": {
+        "tags": [
+          "SyncStatus"
+        ],
+        "summary": "Process incoming",
+        "operationId": "SyncStatus_ProcessIncoming",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/sync/status/{networkId}/incoming/discard": {
+      "post": {
+        "tags": [
+          "SyncStatus"
+        ],
+        "summary": "Discard incoming",
+        "operationId": "SyncStatus_DiscardIncoming",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/sync/status/{networkId}/sending/process": {
+      "post": {
+        "tags": [
+          "SyncStatus"
+        ],
+        "summary": "Process sending",
+        "operationId": "SyncStatus_ProcessSending",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/sync/status/{networkId}/sending/discard": {
+      "post": {
+        "tags": [
+          "SyncStatus"
+        ],
+        "summary": "Discard sending",
+        "operationId": "SyncStatus_DiscardSending",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/sync/status/snapshots": {
+      "post": {
+        "tags": [
+          "SyncStatus"
+        ],
+        "summary": "Create snapshot",
+        "operationId": "SyncStatus_SnapshotCreate",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/NetworkCreateFolderSnapshotCommand"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "SyncStatus"
+        ],
+        "summary": "Load snapshot",
+        "operationId": "SyncStatus_SnapshotLoad",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/NetworkLoadFolderSnapshotCommand"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/sync/status/snapshots/{networkId}": {
+      "post": {
+        "tags": [
+          "SyncStatus"
+        ],
+        "summary": "Get snapshots",
+        "operationId": "SyncStatus_SnapshotsList",
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "dataFolder"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/NetworkListFolderSnapshotResult"
+              }
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/sync/status/recalculate": {
+      "post": {
+        "tags": [
+          "SyncStatus"
+        ],
+        "summary": "Recalculate metrics",
+        "operationId": "SyncStatus_Recalculate",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/NetworkRecalculateMetricsCommand"
             }
           }
         ],
@@ -6101,6 +6421,9 @@
           "$ref": "#/definitions/AuthenticationModeResult"
         },
         "language": {
+          "type": "string"
+        },
+        "instrumentationKey": {
           "type": "string"
         },
         "syncConfig": {
@@ -6952,6 +7275,9 @@
       "description": "",
       "type": "object",
       "properties": {
+        "interactionId": {
+          "type": "string"
+        },
         "when": {
           "format": "date-time",
           "type": "string"
@@ -7347,6 +7673,9 @@
         },
         "relatedGroupName": {
           "type": "string"
+        },
+        "hasAccess": {
+          "type": "boolean"
         }
       }
     },
@@ -7456,6 +7785,24 @@
         }
       }
     },
+    "NetworkCreateFolderSnapshotCommand": {
+      "type": "object",
+      "properties": {
+        "networkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "dataFolder": {
+          "$ref": "#/definitions/SnapshotDataFolder"
+        }
+      }
+    },
     "NetworkEdgeResult": {
       "type": "object",
       "properties": {
@@ -7475,6 +7822,44 @@
         "props": {
           "type": "object",
           "additionalProperties": {}
+        }
+      }
+    },
+    "NetworkListFolderSnapshotResult": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "folder": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    },
+    "NetworkLoadFolderSnapshotCommand": {
+      "type": "object",
+      "properties": {
+        "networkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "snapshotId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "dataFolder": {
+          "$ref": "#/definitions/SnapshotDataFolder"
         }
       }
     },
@@ -7572,6 +7957,29 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/DataProcessingEvent"
+          }
+        }
+      }
+    },
+    "NetworkRecalculateMetricsCommand": {
+      "type": "object",
+      "properties": {
+        "networkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "processingCacheElements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProcessingCacheElement"
           }
         }
       }
@@ -7752,6 +8160,10 @@
           "format": "double",
           "type": "number"
         },
+        "prevValue": {
+          "format": "double",
+          "type": "number"
+        },
         "benchmark": {
           "$ref": "#/definitions/BenchmarkModel"
         }
@@ -7789,6 +8201,9 @@
       "properties": {
         "reportId": {
           "format": "uuid",
+          "type": "string"
+        },
+        "reportDescription": {
           "type": "string"
         },
         "groupId": {
@@ -7931,6 +8346,16 @@
         }
       }
     },
+    "ProcessingCacheElement": {
+      "enum": [
+        "Resources",
+        "Vertices",
+        "VertexProps",
+        "Edges",
+        "Interactions"
+      ],
+      "type": "string"
+    },
     "ProfileCardSettings": {
       "type": "object",
       "properties": {
@@ -7998,6 +8423,37 @@
           "additionalProperties": {}
         }
       }
+    },
+    "PublishProcessingRequestCommand": {
+      "type": "object",
+      "properties": {
+        "networkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "flags": {
+          "$ref": "#/definitions/PublishProcessingRequestFlags"
+        }
+      }
+    },
+    "PublishProcessingRequestFlags": {
+      "enum": [
+        "Default",
+        "SplitMonthly",
+        "ExcludeWeekdays",
+        "ExcludeRelated",
+        "ExcludeCompany",
+        "ExcludeRoles"
+      ],
+      "type": "string"
     },
     "RegisterForDemoCommand": {
       "type": "object",
@@ -8126,6 +8582,10 @@
         "component": {
           "type": "string"
         },
+        "sectionPerspectiveId": {
+          "format": "uuid",
+          "type": "string"
+        },
         "perspectiveId": {
           "format": "uuid",
           "type": "string"
@@ -8190,11 +8650,53 @@
           "format": "int32",
           "type": "integer"
         },
+        "order": {
+          "format": "int32",
+          "type": "integer"
+        },
         "overview": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/ReportMetricModel"
           }
+        }
+      }
+    },
+    "ReportSyncCompletedCommand": {
+      "type": "object",
+      "properties": {
+        "serviceToken": {
+          "type": "string"
+        },
+        "syncPeriodStart": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "syncPeriodEnd": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "ReportSyncStartedCommand": {
+      "type": "object",
+      "properties": {
+        "serviceToken": {
+          "type": "string"
+        },
+        "syncPeriodStart": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "syncPeriodEnd": {
+          "format": "date-time",
+          "type": "string"
         }
       }
     },
@@ -8251,6 +8753,9 @@
           "type": "boolean"
         },
         "publishProcessingRequests": {
+          "type": "boolean"
+        },
+        "sendDataToAnalyticalModule": {
           "type": "boolean"
         }
       }
@@ -8540,6 +9045,13 @@
         }
       }
     },
+    "SnapshotDataFolder": {
+      "enum": [
+        "Sending",
+        "Incoming"
+      ],
+      "type": "string"
+    },
     "StatementSchema": {
       "type": "object",
       "properties": {
@@ -8578,6 +9090,26 @@
         }
       }
     },
+    "SyncConnectorStatus": {
+      "type": "object",
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SyncFileInfo"
+          }
+        },
+        "connectorId": {
+          "format": "uuid",
+          "type": "string",
+          "readOnly": true
+        },
+        "connectorName": {
+          "type": "string",
+          "readOnly": true
+        }
+      }
+    },
     "SyncEntitiesCommand": {
       "type": "object",
       "properties": {
@@ -8589,6 +9121,22 @@
           "items": {
             "$ref": "#/definitions/JsonConnectorEntity"
           }
+        }
+      }
+    },
+    "SyncFileInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "length": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "type": "string"
         }
       }
     },
@@ -8835,6 +9383,29 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/SyncPropMappingSettings"
+          }
+        }
+      }
+    },
+    "SyncStatusResult": {
+      "type": "object",
+      "properties": {
+        "incoming": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SyncConnectorStatus"
+          }
+        },
+        "sending": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SyncConnectorStatus"
+          }
+        },
+        "failed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SyncConnectorStatus"
           }
         }
       }

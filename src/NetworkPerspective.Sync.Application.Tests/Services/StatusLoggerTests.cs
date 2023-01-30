@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 using FluentAssertions;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+
+using Moq;
 
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
@@ -23,29 +26,46 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
         public async Task ShouldReturnPersistedLogs()
         {
             // Arrange
-            var unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
-
             var networkId = Guid.NewGuid();
+            const string message1 = "Dummy message Error";
+            const string message2 = "Dummy message Info";
+            var timeStamp1 = DateTime.UtcNow;
+            var timeStamp2 = DateTime.UtcNow;
+
+            var unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+            var clockMock = new Mock<IClock>();
+            clockMock
+                .SetupSequence(x => x.UtcNow())
+                .Returns(timeStamp1)
+                .Returns(timeStamp2);
 
             var unitOfWork = unitOfWorkFactory.Create();
             var networkRepository = unitOfWork.GetNetworkRepository<TestableNetworkProperties>();
             await networkRepository.AddAsync(Network<TestableNetworkProperties>.Create(networkId, new TestableNetworkProperties(), DateTime.UtcNow));
             await unitOfWork.CommitAsync();
 
-            var status1 = StatusLog.Create(networkId, "Dummy message Error", StatusLogLevel.Error, DateTime.UtcNow);
-            var status2 = StatusLog.Create(networkId, "Dummy message Info", StatusLogLevel.Info, DateTime.UtcNow);
-
-            var statusLogger = new StatusLogger(unitOfWorkFactory, NullLogger);
+            var statusLogger = new StatusLogger(networkId, unitOfWorkFactory, clockMock.Object, NullLogger);
 
             // Act
-            await statusLogger.AddLogAsync(status1);
-            await statusLogger.AddLogAsync(status2);
+            await statusLogger.AddLogAsync(message1, StatusLogLevel.Error);
+            await statusLogger.AddLogAsync(message2, StatusLogLevel.Info);
 
             // Assert
             var result = await unitOfWork
                 .GetStatusLogRepository()
                 .GetListAsync(networkId);
-            result.Should().BeEquivalentTo(new[] { status1, status2 });
+
+            var log1 = result.First(x => x.Level == StatusLogLevel.Error);
+            log1.NetworkId.Should().Be(networkId);
+            log1.Message.Should().Be(message1);
+            log1.Level.Should().Be(StatusLogLevel.Error);
+            log1.TimeStamp.Should().Be(timeStamp1);
+
+            var log2 = result.First(x => x.Level == StatusLogLevel.Info);
+            log2.NetworkId.Should().Be(networkId);
+            log2.Message.Should().Be(message2);
+            log2.Level.Should().Be(StatusLogLevel.Info);
+            log2.TimeStamp.Should().Be(timeStamp2);
         }
 
         [Fact]
@@ -54,11 +74,9 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             // Arrange
             using var unitOfWorkFactory = new SqliteUnitOfWorkFactory();
 
-            var status1 = StatusLog.Create(Guid.NewGuid(), "Dummy message Error", StatusLogLevel.Error, DateTime.UtcNow);
+            var statusLogger = new StatusLogger(Guid.NewGuid(), unitOfWorkFactory, new Clock(), NullLogger);
 
-            var statusLogger = new StatusLogger(unitOfWorkFactory, NullLogger);
-
-            Func<Task> func = async () => await statusLogger.AddLogAsync(status1);
+            Func<Task> func = async () => await statusLogger.AddLogAsync("Dummy message Error", StatusLogLevel.Error);
 
             // Act Assert
             await func.Should().NotThrowAsync();

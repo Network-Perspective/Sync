@@ -7,12 +7,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Application;
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Scheduler;
 using NetworkPerspective.Sync.Framework;
 using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Framework.Docs;
 using NetworkPerspective.Sync.Infrastructure.Core;
+using NetworkPerspective.Sync.Infrastructure.Core.Stub;
 using NetworkPerspective.Sync.Infrastructure.Google;
 using NetworkPerspective.Sync.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Infrastructure.SecretStorage;
@@ -65,7 +65,7 @@ namespace NetworkPerspective.Sync.GSuite
 #if !DEBUG
             services.RemoveHttpClientLogging();
 #else
-            services.AddSingleton<INetworkPerspectiveCore, NetworkPerspectiveCoreStub>();
+            services.AddNetworkPerspectiveCoreStub(_config.GetSection(NetworkPerspectiveCoreConfigSection));
 #endif
         }
 

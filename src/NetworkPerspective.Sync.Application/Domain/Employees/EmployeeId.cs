@@ -6,15 +6,13 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 {
     public class EmployeeId
     {
+        public static readonly IEqualityComparer<EmployeeId> EqualityComparer = new EmployeeIdEqualityComparer();
         public static readonly EmployeeId Empty = new EmployeeId(string.Empty, string.Empty, Array.Empty<string>(), false);
 
-        public string PrimaryId { get; init; }
-        public string DataSourceId { get; init; }
-        public IEnumerable<string> Aliases { get; init; }
-        public bool IsHashed { get; init; }
-
-        public EmployeeId()
-        { }
+        public string PrimaryId { get; }
+        public string DataSourceId { get; }
+        public IEnumerable<string> Aliases { get; }
+        public bool IsHashed { get; }
 
         private EmployeeId(string primaryId, string dataSourceId, IEnumerable<string> aliases, bool isHashed)
         {
@@ -41,5 +39,8 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
         public override string ToString()
             => $"{PrimaryId} ({string.Join(", ", Aliases)})";
+
+        public override int GetHashCode()
+            => PrimaryId.GetHashCode();
     }
 }

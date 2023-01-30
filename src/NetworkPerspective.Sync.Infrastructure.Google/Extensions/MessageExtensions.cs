@@ -21,7 +21,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
                 return "empty";
         }
 
-        public static ISet<string> GetReceivers(this Message message)
+        public static ISet<string> GetRecipients(this Message message)
         {
             var receivers = message.GetHeaderValue("to").GetUserEmails();
             var copyReceivers = message.GetHeaderValue("cc").GetUserEmails();
@@ -47,7 +47,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
         public static string GetHeaderValue(this Message message, string headerName)
         {
             var headerNameEqualityComparer = StringComparer.InvariantCultureIgnoreCase;
-            var header = message.Payload.Headers.FirstOrDefault(x => headerNameEqualityComparer.Equals(x.Name, headerName));
+            var header = message.Payload?.Headers?.FirstOrDefault(x => headerNameEqualityComparer.Equals(x.Name, headerName));
 
             if (header == null)
                 return string.Empty;

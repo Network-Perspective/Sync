@@ -25,12 +25,12 @@ namespace NetworkPerspective.Sync.Application.Services
 
         public ISet<Interaction> Filter(IEnumerable<Interaction> interactions)
         {
-            _logger.LogDebug("Filtering {count} interactions", interactions.Count());
+            _logger.LogTrace("Filtering {count} interactions", interactions.Count());
 
             foreach (var criteria in _interactionCritierias)
                 interactions = criteria.MeetCriteria(interactions);
 
-            _logger.LogDebug("After filtering there are {count} interactions", interactions.Count());
+            _logger.LogTrace("After filtering there are {count} interactions", interactions.Count());
 
             return interactions.ToHashSet(new InteractionEqualityComparer());
         }

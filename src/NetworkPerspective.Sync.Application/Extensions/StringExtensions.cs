@@ -1,5 +1,8 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Security;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace NetworkPerspective.Sync.Application.Extensions
 {
@@ -8,6 +11,9 @@ namespace NetworkPerspective.Sync.Application.Extensions
         public static SecureString ToSecureString(this string str)
             => new NetworkCredential(string.Empty, str).SecurePassword;
 
+        /// <summary>
+        /// https://stackoverflow.com/a/36845864
+        /// </summary>
         public static int GetStableHashCode(this string str)
         {
             unchecked
@@ -25,6 +31,14 @@ namespace NetworkPerspective.Sync.Application.Extensions
 
                 return hash1 + (hash2 * 1566083941);
             }
+        }
+
+        public static string GetMd5HashCode(this string str)
+        {
+            var inputBytes = Encoding.Unicode.GetBytes(str);
+            var outputBytes = MD5.HashData(inputBytes);
+            var outputStrings = outputBytes.Select(x => x.ToString("x2"));
+            return string.Join(string.Empty, outputStrings);
         }
     }
 }

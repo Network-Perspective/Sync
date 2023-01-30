@@ -23,6 +23,7 @@
     <ItemGroup>
         <ProjectReference Include="..\NetworkPerspective.Sync.Application\NetworkPerspective.Sync.Application.csproj" />
         <ProjectReference Include="..\NetworkPerspective.Sync.Framework\NetworkPerspective.Sync.Framework.csproj" />
+        <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Core.Stub\NetworkPerspective.Sync.Infrastructure.Core.Stub.csproj" />
         <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Core\NetworkPerspective.Sync.Infrastructure.Core.csproj" />
         <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Persistence\NetworkPerspective.Sync.Infrastructure.Persistence.csproj" />
         <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.SecretStorage\NetworkPerspective.Sync.Infrastructure.SecretStorage.csproj" />

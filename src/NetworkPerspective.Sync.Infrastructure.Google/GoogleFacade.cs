@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
@@ -30,7 +26,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         private readonly IMailboxClient _mailboxClient;
         private readonly ICalendarClient _calendarClient;
         private readonly IUsersClient _usersClient;
-        private readonly IHashingServiceFactory _hashingServiceFactory;
         private readonly IClock _clock;
         private readonly GoogleConfig _config;
         private readonly ILogger<GoogleFacade> _logger;
@@ -41,7 +36,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
                             IMailboxClient mailboxClient,
                             ICalendarClient calendarClient,
                             IUsersClient usersClient,
-                            IHashingServiceFactory hashingServiceFactory,
                             IClock clock,
                             IOptions<GoogleConfig> config,
                             ILogger<GoogleFacade> logger)
@@ -52,55 +46,36 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _mailboxClient = mailboxClient;
             _calendarClient = calendarClient;
             _usersClient = usersClient;
-            _hashingServiceFactory = hashingServiceFactory;
             _clock = clock;
             _config = config.Value;
             _logger = logger;
         }
 
-        public async Task<ISet<Interaction>> GetInteractions(SyncContext context, CancellationToken stoppingToken = default)
+        public async Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
-            _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.CurrentRange);
-
-            var storagePath = Path.Combine("tmp", context.NetworkId.ToString());
+            _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);
 
             await InitializeInContext(context, () => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
             await InitializeInContext(context, () => _credentialsProvider.GetCredentialsAsync(stoppingToken));
-            await InitializeInContext(context, () => _hashingServiceFactory.CreateAsync(_secretRepository, stoppingToken));
 
             var credentials = context.Get<GoogleCredential>();
             var network = context.Get<Network<GoogleNetworkProperties>>();
-            var hashingService = context.Get<IHashingService>();
 
             await InitializeInContext(context, () => _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken));
 
             var employeeCollection = context.Get<EmployeeCollection>();
 
-            var interactionFactory = new InteractionFactory(hashingService.Hash, employeeCollection, _clock);
-            var result = new HashSet<Interaction>(new InteractionEqualityComparer());
+            var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employeeCollection, _clock);
+            var meetingInteractionFactory = new MeetingInteractionFactory(context.HashFunction, employeeCollection);
 
-            var periodStart = context.CurrentRange.Start.AddMinutes(-_config.SyncOverlapInMinutes);
-            _logger.LogInformation("To not miss any email interactions period start is extended by {minutes}min. As result mailbox interactions are eveluated starting from {start}", _config.SyncOverlapInMinutes, periodStart);
 
-            await InitializeInContext(context, async () =>
-            {
-                var storage = new InteractionsFileStorage(storagePath) as IInteractionsStorage;
-                await _mailboxClient.GetInteractionsAsync(storage, context.NetworkId, employeeCollection.GetAllInternal(), periodStart, credentials, interactionFactory, stoppingToken);
-                return storage;
-            });
-
-            var storage = context.Get<IInteractionsStorage>();
-            result.UnionWith(await storage.PullInteractionsAsync(context.CurrentRange.Start.Date, stoppingToken));
-
-            var meetingInteractions = await _calendarClient.GetInteractionsAsync(context.NetworkId, employeeCollection.GetAllInternal(), context.CurrentRange, credentials, interactionFactory, stoppingToken);
-            result.UnionWith(meetingInteractions);
+            await _mailboxClient.SyncInteractionsAsync(context, stream, employeeCollection.GetAllInternal(), credentials, emailInteractionFactory, stoppingToken);
+            await _calendarClient.SyncInteractionsAsync(context, stream, employeeCollection.GetAllInternal(), credentials, meetingInteractionFactory, stoppingToken);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
-
-            return result;
         }
 
-        public async Task<EmployeeCollection> GetEmployees(SyncContext context, CancellationToken stoppingToken = default)
+        public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Getting employees for network '{networkId}'", context.NetworkId);
 
@@ -119,25 +94,23 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             return context.Get<EmployeeCollection>();
         }
 
-        public async Task<EmployeeCollection> GetHashedEmployees(SyncContext context, CancellationToken stoppingToken = default)
+        public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Getting hashed employees for network '{networkId}'", context.NetworkId);
 
             await InitializeInContext(context, () => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
             await InitializeInContext(context, () => _credentialsProvider.GetCredentialsAsync(stoppingToken));
-            await InitializeInContext(context, () => _hashingServiceFactory.CreateAsync(_secretRepository, stoppingToken));
 
             var credentials = context.Get<GoogleCredential>();
             var network = context.Get<Network<GoogleNetworkProperties>>();
-            var hashingService = context.Get<IHashingService>();
             var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
 
-            var mapper = new HashedEmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes), hashingService.Hash);
+            var mapper = new HashedEmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes), context.HashFunction);
 
             return mapper.ToEmployees(users);
         }
 
-        public async Task<bool> IsAuthorized(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)
         {
             try
             {
