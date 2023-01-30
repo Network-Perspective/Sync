@@ -5,8 +5,6 @@ namespace NetworkPerspective.Sync.Application.Domain.Aggregation
 {
     public class DefaultActionsAggregatorPrinter
     {
-        public const string DateTimeFormat = "dd.MM.yyyy";
-
         public string Print(ActionsAggregator aggregator)
         {
             var messagesPerDay = aggregator.GetActionsPerDay();
@@ -17,7 +15,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Aggregation
                 sb.AppendLine($"Subject '{aggregator.Subject}' has:");
 
                 foreach (var entry in messagesPerDay)
-                    sb.AppendLine($"{entry.Value} action/s at {entry.Key.ToString(DateTimeFormat)}");
+                    sb.AppendLine($"{entry.Value} action/s at {entry.Key.ToString(Consts.DefaultDateTimeFormat)}");
             }
             else
             {

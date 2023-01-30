@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Scheduler;
 using NetworkPerspective.Sync.Application.Services;
@@ -25,28 +24,17 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
         private readonly Mock<ISyncContextFactory> _syncContextFactory = new Mock<ISyncContextFactory>();
         private readonly Mock<ISyncServiceFactory> _syncServiceFactoryMock = new Mock<ISyncServiceFactory>();
         private readonly Mock<ISyncService> _syncServiceMock = new Mock<ISyncService>();
-        private readonly Mock<IStatusLoggerFactory> _statusLoggerFactoryMock = new Mock<IStatusLoggerFactory>();
-        private readonly Mock<IStatusLogger> _statusLoggerMock = new Mock<IStatusLogger>();
-        private readonly Mock<INetworkService> _networkServiceMock = new Mock<INetworkService>();
         private readonly ILogger<SyncJob> _logger = NullLogger<SyncJob>.Instance;
         public SyncJobTests()
         {
             _syncContextFactory.Reset();
             _syncServiceFactoryMock.Reset();
             _syncServiceMock.Reset();
-            _statusLoggerFactoryMock.Reset();
-            _statusLoggerMock.Reset();
-            _networkServiceMock.Reset();
 
             _syncServiceFactoryMock
                 .Setup(x => x.CreateAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_syncServiceMock.Object);
-
-            _statusLoggerFactoryMock
-                .Setup(x => x.CreateForNetwork(It.IsAny<Guid>()))
-                .Returns(_statusLoggerMock.Object);
         }
-
 
         [Fact]
         public async Task ShouldCatchExceptions()
@@ -56,17 +44,16 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             var jobContextMock = CreateContext(networkId);
 
             _syncServiceMock
-                .Setup(x => x.SyncInteractionsAsync(It.IsAny<SyncContext>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.SyncAsync(It.IsAny<SyncContext>(), It.IsAny<CancellationToken>()))
                 .Throws(new Exception());
 
-            var syncJob = new SyncJob(_syncContextFactory.Object, _syncServiceFactoryMock.Object, _statusLoggerFactoryMock.Object, _networkServiceMock.Object, _logger);
+            var syncJob = new SyncJob(_syncContextFactory.Object, _syncServiceFactoryMock.Object, _logger);
 
             // Act
             Func<Task> func = async () => await syncJob.Execute(jobContextMock);
 
             // Assert
             await func.Should().NotThrowAsync();
-            _statusLoggerMock.Verify(x => x.AddLogAsync(It.IsAny<string>(), It.Is<StatusLogLevel>(l => l == StatusLogLevel.Error), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         private static IJobExecutionContext CreateContext(Guid networkId)

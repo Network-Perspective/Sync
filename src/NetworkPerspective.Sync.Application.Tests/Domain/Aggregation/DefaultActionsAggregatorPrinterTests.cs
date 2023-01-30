@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Aggregation;
 
 using Xunit;
@@ -34,8 +31,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Aggregation
 
             // Assert
             result.Should().Contain(subject);
-            result.Should().Contain(date1.ToString(DefaultActionsAggregatorPrinter.DateTimeFormat));
-            result.Should().Contain(date2.ToString(DefaultActionsAggregatorPrinter.DateTimeFormat));
+            result.Should().Contain(date1.ToString(Consts.DefaultDateTimeFormat));
+            result.Should().Contain(date2.ToString(Consts.DefaultDateTimeFormat));
         }
 
         [Fact]
