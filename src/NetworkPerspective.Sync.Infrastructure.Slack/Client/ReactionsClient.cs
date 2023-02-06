@@ -2,13 +2,15 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
     internal class ReactionsClient : ApiClientBase
     {
-        public ReactionsClient(HttpClient client) : base(client)
+        public ReactionsClient(HttpClient client, ILogger<ReactionsClient> logger) : base(client, logger)
         { }
 
         /// <summary>

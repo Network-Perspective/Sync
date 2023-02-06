@@ -3,13 +3,15 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
     internal class OAuthClient : ApiClientBase
     {
-        public OAuthClient(HttpClient httpClient) : base(httpClient)
+        public OAuthClient(HttpClient httpClient, ILogger<OAuthClient> logger) : base(httpClient, logger)
         { }
 
         public async Task<OAuthAccessResponse> AccessAsync(OAuthAccessRequest request, CancellationToken stoppingToken = default)

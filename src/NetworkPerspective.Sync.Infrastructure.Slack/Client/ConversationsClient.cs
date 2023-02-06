@@ -3,6 +3,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
 
@@ -10,7 +12,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
     internal class ConversationsClient : ApiClientBase
     {
-        public ConversationsClient(HttpClient client) : base(client)
+        public ConversationsClient(HttpClient client, ILogger<ConversationsClient> logger) : base(client, logger)
         { }
 
         /// <see href="https://api.slack.com/methods/conversations.list"

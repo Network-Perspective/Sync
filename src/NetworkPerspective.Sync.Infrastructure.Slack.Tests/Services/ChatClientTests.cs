@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
@@ -26,6 +27,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
     public class ChatClientTests : IClassFixture<SlackClientFixture>
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILoggerFactory _loggerFactory = NullLoggerFactory.Instance;
 
         public ChatClientTests(SlackClientFixture slackClientFixture)
         {
@@ -43,7 +45,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             var paginationHandler = new CursorPaginationHandler(NullLogger<CursorPaginationHandler>.Instance);
             var chatclient = new ChatClient(Mock.Of<ITasksStatusesCache>(), NullLogger<ChatClient>.Instance);
 
-            var slackClientFacade = new SlackClientFacade(_httpClientFactory, paginationHandler);
+            var slackClientFacade = new SlackClientFacade(_httpClientFactory, _loggerFactory, paginationHandler);
             var stream = new TestableInteractionStream();
 
             var employees = new List<Employee>()

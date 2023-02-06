@@ -6,6 +6,8 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
@@ -38,14 +40,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         private readonly UsersClient _usersClient;
         private readonly OAuthClient _oauthClient;
 
-        public SlackClientFacade(IHttpClientFactory httpClientFactory, CursorPaginationHandler cursorPaginationHandler)
+        public SlackClientFacade(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, CursorPaginationHandler cursorPaginationHandler)
         {
             _httpClient = httpClientFactory.CreateClient(Consts.SlackApiHttpClientName);
             _paginationHandler = cursorPaginationHandler;
-            _conversationsClient = new ConversationsClient(_httpClient);
-            _reactionsClient = new ReactionsClient(_httpClient);
-            _usersClient = new UsersClient(_httpClient);
-            _oauthClient = new OAuthClient(_httpClient);
+            _conversationsClient = new ConversationsClient(_httpClient, loggerFactory.CreateLogger<ConversationsClient>());
+            _reactionsClient = new ReactionsClient(_httpClient, loggerFactory.CreateLogger<ReactionsClient>());
+            _usersClient = new UsersClient(_httpClient, loggerFactory.CreateLogger<UsersClient>());
+            _oauthClient = new OAuthClient(_httpClient, loggerFactory.CreateLogger<OAuthClient>());
         }
 
         public void Dispose()

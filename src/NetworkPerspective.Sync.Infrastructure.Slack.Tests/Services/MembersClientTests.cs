@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using NetworkPerspective.Sync.Application.Domain.Networks;
@@ -18,6 +19,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
     public class MembersClientTests : IClassFixture<SlackClientFixture>
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILoggerFactory _loggerFactory = NullLoggerFactory.Instance;
 
         public MembersClientTests(SlackClientFixture slackClientFixture)
         {
@@ -34,7 +36,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
 
             var paginationHandler = new CursorPaginationHandler(paginationLogger);
 
-            var slackClientFacade = new SlackClientFacade(_httpClientFactory, paginationHandler);
+            var slackClientFacade = new SlackClientFacade(_httpClientFactory, _loggerFactory, paginationHandler);
             var membersClient = new MembersClient(clientLogger);
 
             try

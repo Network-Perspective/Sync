@@ -56,6 +56,5 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 .HandleResult<HttpResponseMessage>(r => r.StatusCode == HttpStatusCode.TooManyRequests)
                 .WaitAndRetryAsync(30, SleepDurationProvider, OnRetryAsync);
         }
-
     }
 }

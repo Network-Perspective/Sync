@@ -41,13 +41,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         {
             var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId, stoppingToken);
 
-            var logger = _loggerFactory.CreateLogger<SlackFacade>();
             var paginationHandler = new CursorPaginationHandler(_loggerFactory.CreateLogger<CursorPaginationHandler>());
 
             var employeeProfileClient = new MembersClient(_loggerFactory.CreateLogger<MembersClient>());
             var chatClient = new ChatClient(_tasksStatusesCache, _loggerFactory.CreateLogger<ChatClient>());
 
-            return new SlackFacade(_networkService, secretRepository, employeeProfileClient, chatClient, _httpClientFactory, paginationHandler, _clock, logger);
+            return new SlackFacade(_networkService, secretRepository, employeeProfileClient, chatClient, _httpClientFactory, paginationHandler, _clock, _loggerFactory);
         }
     }
 }

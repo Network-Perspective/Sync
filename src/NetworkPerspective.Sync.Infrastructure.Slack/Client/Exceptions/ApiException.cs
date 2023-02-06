@@ -4,18 +4,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Exceptions
 {
     public class ApiException : Exception
     {
-        public int StatusCode { get; }
+        public int HttpStatusCode { get; }
+        public string ApiErrorCode { get; } = string.Empty;
 
-        public ApiException(int statusCode, Exception innerException)
+        public ApiException(int httpStatusCode, Exception innerException)
             : base("Something went wrong during requesting data from Slack Api. Please see inner exception for details", innerException)
         {
-            StatusCode = statusCode;
+            HttpStatusCode = httpStatusCode;
         }
 
-        public ApiException(int statusCode, string error)
-            : base($"Response message indicate something went wrong. Error: {error}")
+        public ApiException(int httpStatusCode, string apiErrorCode)
+            : base($"Response message indicate something went wrong. Error: {apiErrorCode}")
         {
-            StatusCode = statusCode;
+            HttpStatusCode = httpStatusCode;
+            ApiErrorCode = apiErrorCode;
         }
     }
 }

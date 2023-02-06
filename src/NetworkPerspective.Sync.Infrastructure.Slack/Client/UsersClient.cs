@@ -2,13 +2,15 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
     internal class UsersClient : ApiClientBase
     {
-        public UsersClient(HttpClient client) : base(client)
+        public UsersClient(HttpClient client, ILogger<UsersClient> logger) : base(client, logger)
         { }
 
         /// <see href="https://api.slack.com/methods/users.list"

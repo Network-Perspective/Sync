@@ -103,8 +103,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             }
             catch (TooManyMailsPerUserException tmmpuex)
             {
-                await context.StatusLogger.LogWarningAsync($"Skipping mailbox '{tmmpuex.Email}' too many messages", stoppingToken);
-                _logger.LogWarning("Skipping mailbox '{email}' too many messages", tmmpuex.Email);
+                await context.StatusLogger.LogWarningAsync($"Skipping mailbox '***' too many messages", stoppingToken);
+                _logger.LogWarning("Skipping mailbox '{email}' too many messages", "***");
+                _logger.LogTrace("Skipping mailbox '{email}' too many messages", tmmpuex.Email);
             }
             catch (GoogleApiException gaex) when (IsMailServiceNotEnabledException(gaex))
             {
