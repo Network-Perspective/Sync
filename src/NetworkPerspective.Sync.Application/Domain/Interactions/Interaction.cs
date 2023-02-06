@@ -62,7 +62,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         public static Interaction CreateMeeting(DateTime timestamp, Employee source, Employee target, string eventId, RecurrenceType? recurring, int duration)
         {
             return new Interaction(
-                id: (timestamp.Ticks.ToString() + source.Id.PrimaryId + target.Id.PrimaryId + eventId).GetStableHashCode().ToString(),
+                id: (timestamp.Ticks.ToString() + source.Id.PrimaryId + target.Id.PrimaryId + eventId).GetMd5HashCode(),
                 timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
@@ -88,7 +88,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         private static Interaction CreateChatInteraction(DateTime timestamp, Employee source, Employee target, string eventId, string parentEventId, string channelId, ISet<UserActionType> userActionType)
         {
             return new Interaction(
-                id: (timestamp.Ticks.ToString() + source.Id.PrimaryId + target.Id.PrimaryId + eventId).GetStableHashCode().ToString(),
+                id: (timestamp.Ticks.ToString() + source.Id.PrimaryId + target.Id.PrimaryId + eventId).GetMd5HashCode(),
                 timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
