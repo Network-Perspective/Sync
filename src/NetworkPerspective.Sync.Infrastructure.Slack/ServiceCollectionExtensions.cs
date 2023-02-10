@@ -29,10 +29,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 })
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy());
 
+            services.AddTransient<ISlackHttpClientFactory, SlackHttpClientFactory>();
             services.AddSingleton<ISlackAuthService, SlackAuthService>();
             services.AddSingleton<IStateKeyFactory, StateKeyFactory>();
             services.AddTransient<CursorPaginationHandler>();
-            services.AddTransient<ISlackClientFacade, SlackClientFacade>();
+            services.AddTransient<ISlackClientFacadeFactory, SlackClientFacadeFactory>();
             services.AddMemoryCache();
 
             services.AddSingleton<IDataSourceFactory, SlackFacadeFactory>();

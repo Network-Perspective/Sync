@@ -43,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
                     .WithBody(SampleResponse.Access));
 
 
-            var oAuthClient = new OAuthClient(_httpClient, NullLogger<OAuthClient>.Instance);
+            var oAuthClient = new OAuthClient(new SlackHttpClient(_httpClient, NullLogger<SlackHttpClient>.Instance));
 
             // Act
             Func<Task<OAuthAccessResponse>> func = () => oAuthClient.AccessAsync(new OAuthAccessRequest());

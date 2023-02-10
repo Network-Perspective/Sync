@@ -24,7 +24,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
     {
         private readonly HttpClient _httpClient;
         private readonly WireMockServer _wireMockServer;
-        private readonly ILogger<ConversationsClient> _logger = NullLogger<ConversationsClient>.Instance;
+        private readonly ILogger<SlackHttpClient> _logger = NullLogger<SlackHttpClient>.Instance;
 
         public ConversationsClientTests(MockedRestServerFixture slackClientFixture)
         {
@@ -44,7 +44,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
                     .WithStatusCode(HttpStatusCode.OK)
                     .WithBody(SampleResponse.GetConversationsList));
 
-            var conversationsClient = new ConversationsClient(_httpClient, _logger);
+            var conversationsClient = new ConversationsClient(new SlackHttpClient(_httpClient, _logger));
 
             // Act
             Func<Task<ConversationsListResponse>> func = () => conversationsClient.GetListAsync(2);
@@ -65,7 +65,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
                     .WithStatusCode(HttpStatusCode.OK)
                     .WithBody(SampleResponse.GetConversationMembers));
 
-            var conversationsClient = new ConversationsClient(_httpClient, _logger);
+            var conversationsClient = new ConversationsClient(new SlackHttpClient(_httpClient, _logger));
 
             // Act
             Func<Task<ConversationMembersResponse>> func = () => conversationsClient.GetConversationMembersAsync("foo", 10);
@@ -86,7 +86,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
                     .WithStatusCode(HttpStatusCode.OK)
                     .WithBody(SampleResponse.GetConversationMembers));
 
-            var conversationsClient = new ConversationsClient(_httpClient, _logger);
+            var conversationsClient = new ConversationsClient(new SlackHttpClient(_httpClient, _logger));
 
             // Act
             Func<Task<ConversationHistoryResponse>> func = () => conversationsClient.GetConversationHistoryAsync("foo", 1, new DateTime(2020, 01, 01), new DateTime(2030, 01, 01));
@@ -107,7 +107,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
                     .WithStatusCode(HttpStatusCode.OK)
                     .WithBody(SampleResponse.GetReplies));
 
-            var conversationsClient = new ConversationsClient(_httpClient, _logger);
+            var conversationsClient = new ConversationsClient(new SlackHttpClient(_httpClient, _logger));
 
             // Act
             Func<Task<ConversationRepliesResponse>> func = () => conversationsClient.GetRepliesAsync("foo", "123", "oldest", "latest", 1);
@@ -128,7 +128,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
                     .WithStatusCode(HttpStatusCode.OK)
                     .WithBody(SampleResponse.GetReplies));
 
-            var conversationsClient = new ConversationsClient(_httpClient, _logger);
+            var conversationsClient = new ConversationsClient(new SlackHttpClient(_httpClient, _logger));
 
             // Act
             Func<Task<JoinConversationResponse>> func = () => conversationsClient.JoinConversationAsync("foo");

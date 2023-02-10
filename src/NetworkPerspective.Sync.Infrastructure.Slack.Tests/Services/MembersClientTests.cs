@@ -18,12 +18,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
 {
     public class MembersClientTests : IClassFixture<SlackClientFixture>
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILoggerFactory _loggerFactory = NullLoggerFactory.Instance;
+        private readonly ISlackHttpClient _slackHttpClient;
 
         public MembersClientTests(SlackClientFixture slackClientFixture)
         {
-            _httpClientFactory = slackClientFixture.HttpClientFactory;
+            _slackHttpClient = slackClientFixture.SlackHttpClient;
         }
 
         [SkippableFact]
@@ -36,7 +35,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
 
             var paginationHandler = new CursorPaginationHandler(paginationLogger);
 
-            var slackClientFacade = new SlackClientFacade(_httpClientFactory, _loggerFactory, paginationHandler);
+            var slackClientFacade = new SlackClientFacade(_slackHttpClient, paginationHandler);
             var membersClient = new MembersClient(clientLogger);
 
             try

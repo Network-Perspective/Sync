@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,9 +10,7 @@ using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
@@ -23,33 +20,28 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
     internal class SlackFacade : IDataSource
     {
         private readonly INetworkService _networkService;
-        private readonly ISecretRepository _secretRepository;
         private readonly IMembersClient _employeeProfileClient;
         private readonly IChatClient _chatClient;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ISlackHttpClientFactory _slackHttpClientFactory;
         private readonly CursorPaginationHandler _cursorPaginationHandler;
         private readonly IClock _clock;
-        private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<SlackFacade> _logger;
 
         public SlackFacade(INetworkService networkService,
-                           ISecretRepository secretRepository,
                            IMembersClient employeeProfileClient,
                            IChatClient chatClient,
-                           IHttpClientFactory httpClientFactory,
+                           ISlackHttpClientFactory slackHttpClientFactory,
                            CursorPaginationHandler cursorPaginationHandler,
                            IClock clock,
-                           ILoggerFactory loggerFactory)
+                           ILogger<SlackFacade> logger)
         {
             _networkService = networkService;
-            _secretRepository = secretRepository;
             _employeeProfileClient = employeeProfileClient;
             _chatClient = chatClient;
-            _httpClientFactory = httpClientFactory;
+            _slackHttpClientFactory = slackHttpClientFactory;
             _cursorPaginationHandler = cursorPaginationHandler;
             _clock = clock;
-            _loggerFactory = loggerFactory;
-            _logger = loggerFactory.CreateLogger<SlackFacade>();
+            _logger = logger;
         }
 
         public async Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
@@ -61,18 +53,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             await InitializeInContext(context, () => _networkService.GetAsync<SlackNetworkProperties>(context.NetworkId, stoppingToken));
             await InitializeInContext(context, async () =>
             {
-                var tokenKey = string.Format(SlackKeys.TokenKeyPattern, context.NetworkId);
-                var token = await _secretRepository.GetSecretAsync(tokenKey, stoppingToken);
-                var slackClientFacade = new SlackClientFacade(_httpClientFactory, _loggerFactory, _cursorPaginationHandler);
-                slackClientFacade.SetAccessToken(token.ToSystemString());
+                var slackClient = await _slackHttpClientFactory.CreateAsync(context.NetworkId, stoppingToken);
+                var slackClientFacade = new SlackClientFacade(slackClient, _cursorPaginationHandler);
                 return slackClientFacade as ISlackClientFacade;
             });
 
 
-            var slackClientFacace = context.Get<ISlackClientFacade>();
+            var slackClientFacade = context.Get<ISlackClientFacade>();
             var network = context.Get<Network<SlackNetworkProperties>>();
 
-            await InitializeInContext(context, () => _employeeProfileClient.GetEmployees(slackClientFacace, context.NetworkConfig.EmailFilter, stoppingToken));
+            await InitializeInContext(context, () => _employeeProfileClient.GetEmployees(slackClientFacade, context.NetworkConfig.EmailFilter, stoppingToken));
 
             var employees = context.Get<EmployeeCollection>();
 
@@ -80,7 +70,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
             var timeRange = new TimeRange(context.TimeRange.Start.AddDays(-30), _clock.UtcNow());
 
-            await _chatClient.SyncInteractionsAsync(stream, slackClientFacace, network, interactionFactory, timeRange, stoppingToken);
+            await _chatClient.SyncInteractionsAsync(stream, slackClientFacade, network, interactionFactory, timeRange, stoppingToken);
         }
 
         public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
@@ -89,10 +79,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
             await InitializeInContext(context, async () =>
             {
-                var tokenKey = string.Format(SlackKeys.TokenKeyPattern, context.NetworkId);
-                var token = await _secretRepository.GetSecretAsync(tokenKey, stoppingToken);
-                var slackClientFacade = new SlackClientFacade(_httpClientFactory, _loggerFactory, _cursorPaginationHandler);
-                slackClientFacade.SetAccessToken(token.ToSystemString());
+                var slackClient = await _slackHttpClientFactory.CreateAsync(context.NetworkId, stoppingToken);
+                var slackClientFacade = new SlackClientFacade(slackClient, _cursorPaginationHandler);
                 return slackClientFacade as ISlackClientFacade;
             });
 
@@ -108,10 +96,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             try
             {
                 _logger.LogInformation("Checking if network '{networkId}' is authorized", networkId);
-                var tokenKey = string.Format(SlackKeys.TokenKeyPattern, networkId);
-                var token = await _secretRepository.GetSecretAsync(tokenKey, stoppingToken);
-                using var slackClientFacade = new SlackClientFacade(_httpClientFactory, _loggerFactory, _cursorPaginationHandler);
-                slackClientFacade.SetAccessToken(token.ToSystemString());
+                var slackClient = await _slackHttpClientFactory.CreateAsync(networkId, stoppingToken);
+                var slackClientFacade = new SlackClientFacade(slackClient, _cursorPaginationHandler);
                 await slackClientFacade.GetCurrentUserChannels(stoppingToken);
                 return true;
             }
