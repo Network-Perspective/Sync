@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using Microsoft.Extensions.Logging.Abstractions;
+
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
@@ -41,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
                     .WithBody(SampleResponse.Access));
 
 
-            var oAuthClient = new OAuthClient(_httpClient);
+            var oAuthClient = new OAuthClient(new SlackHttpClient(_httpClient, NullLogger<SlackHttpClient>.Instance));
 
             // Act
             Func<Task<OAuthAccessResponse>> func = () => oAuthClient.AccessAsync(new OAuthAccessRequest());

@@ -21,6 +21,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         {
             var slackBaseUrl = configurationSection.GetValue<string>("BaseUrl");
             services.Configure<AuthConfig>(configurationSection.GetSection("Auth"));
+            services.Configure<Resiliency>(configurationSection.GetSection("Resiliency"));
 
             services
                 .AddHttpClient(Consts.SlackApiHttpClientName, x =>
@@ -29,10 +30,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 })
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy());
 
+            services.AddTransient<ISlackHttpClientFactory, SlackHttpClientFactory>();
             services.AddSingleton<ISlackAuthService, SlackAuthService>();
             services.AddSingleton<IStateKeyFactory, StateKeyFactory>();
             services.AddTransient<CursorPaginationHandler>();
-            services.AddTransient<ISlackClientFacade, SlackClientFacade>();
+            services.AddTransient<ISlackClientFacadeFactory, SlackClientFacadeFactory>();
             services.AddMemoryCache();
 
             services.AddSingleton<IDataSourceFactory, SlackFacadeFactory>();
@@ -56,6 +58,5 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 .HandleResult<HttpResponseMessage>(r => r.StatusCode == HttpStatusCode.TooManyRequests)
                 .WaitAndRetryAsync(30, SleepDurationProvider, OnRetryAsync);
         }
-
     }
 }

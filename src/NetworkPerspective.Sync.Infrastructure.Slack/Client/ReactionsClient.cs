@@ -1,15 +1,18 @@
-﻿using System.Net.Http;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
-    internal class ReactionsClient : ApiClientBase
+    internal class ReactionsClient
     {
-        public ReactionsClient(HttpClient client) : base(client)
-        { }
+        private readonly ISlackHttpClient _client;
+
+        public ReactionsClient(ISlackHttpClient client)
+        {
+            _client = client;
+        }
 
         /// <summary>
         /// Double check this... not tested
@@ -19,7 +22,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         {
             var url = string.Format("reactions.get?full=true&channel={0}&timestamp={1}", channel, messageTimestamp);
 
-            return await Get<ReactionsGetResponse>(url, stoppingToken);
+            return await _client.Get<ReactionsGetResponse>(url, stoppingToken);
         }
     }
 }

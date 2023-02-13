@@ -33,7 +33,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
         private readonly Mock<IStateKeyFactory> _stateFactoryMock = new Mock<IStateKeyFactory>();
         private readonly Mock<ISecretRepositoryFactory> _secretRepositoryFactoryMock = new Mock<ISecretRepositoryFactory>();
         private readonly Mock<ISecretRepository> _secretRepositoryMock = new Mock<ISecretRepository>();
-        private readonly Mock<ISlackClientFacade> _slackClientFacadeMock = new Mock<ISlackClientFacade>();
+        private readonly Mock<ISlackClientFacadeFactory> _slackClientFacadeFactoryMock = new Mock<ISlackClientFacadeFactory>();
         private readonly Mock<IStatusLoggerFactory> _statusLoggerFactoryMock = new Mock<IStatusLoggerFactory>();
         private readonly Mock<IStatusLogger> _statusLoggerMock = new Mock<IStatusLogger>();
         private readonly ILogger<SlackAuthService> _logger = NullLogger<SlackAuthService>.Instance;
@@ -43,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             _stateFactoryMock.Reset();
             _secretRepositoryFactoryMock.Reset();
             _secretRepositoryMock.Reset();
-            _slackClientFacadeMock.Reset();
+            _slackClientFacadeFactoryMock.Reset();
             _statusLoggerFactoryMock.Reset();
             _statusLoggerMock.Reset();
 
@@ -80,7 +80,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _stateFactoryMock.Object,
                     config,
                     _secretRepositoryFactoryMock.Object,
-                    _slackClientFacadeMock.Object,
+                    _slackClientFacadeFactoryMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
                     _logger);
@@ -116,7 +116,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _stateFactoryMock.Object,
                     config,
                     _secretRepositoryFactoryMock.Object,
-                    _slackClientFacadeMock.Object,
+                    _slackClientFacadeFactoryMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
                     _logger);
@@ -145,7 +145,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _stateFactoryMock.Object,
                     config,
                     _secretRepositoryFactoryMock.Object,
-                    _slackClientFacadeMock.Object,
+                    _slackClientFacadeFactoryMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
                     _logger);

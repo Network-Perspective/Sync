@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,39 +23,33 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         Task<ReactionsGetResponse> GetAllReactions(string slackChannelId, string messageTimestamp, CancellationToken stoppingToken = default);
         Task<UsersInfoResponse> GetUserAsync(string id, CancellationToken stoppingToken = default);
         Task<OAuthAccessResponse> AccessAsync(OAuthAccessRequest request, CancellationToken stoppingToken = default);
-        void SetAccessToken(string accessToken);
     }
 
     internal class SlackClientFacade : ISlackClientFacade
     {
         private const int DEFAULT_LIMIT = 1000;
-        private readonly HttpClient _httpClient;
+        private readonly ISlackHttpClient _slackHttpClient;
         private readonly CursorPaginationHandler _paginationHandler;
         private readonly ConversationsClient _conversationsClient;
         private readonly ReactionsClient _reactionsClient;
         private readonly UsersClient _usersClient;
         private readonly OAuthClient _oauthClient;
 
-        public SlackClientFacade(IHttpClientFactory httpClientFactory, CursorPaginationHandler cursorPaginationHandler)
+        public SlackClientFacade(ISlackHttpClient slackHttpClient, CursorPaginationHandler cursorPaginationHandler)
         {
-            _httpClient = httpClientFactory.CreateClient(Consts.SlackApiHttpClientName);
+            _slackHttpClient = slackHttpClient;
             _paginationHandler = cursorPaginationHandler;
-            _conversationsClient = new ConversationsClient(_httpClient);
-            _reactionsClient = new ReactionsClient(_httpClient);
-            _usersClient = new UsersClient(_httpClient);
-            _oauthClient = new OAuthClient(_httpClient);
+
+            _conversationsClient = new ConversationsClient(_slackHttpClient);
+            _reactionsClient = new ReactionsClient(_slackHttpClient);
+            _usersClient = new UsersClient(_slackHttpClient);
+            _oauthClient = new OAuthClient(_slackHttpClient);
         }
 
         public void Dispose()
         {
-            _conversationsClient?.Dispose();
-            _reactionsClient?.Dispose();
-            _usersClient?.Dispose();
-            _oauthClient?.Dispose();
+            _slackHttpClient?.Dispose();
         }
-
-        public void SetAccessToken(string accessToken)
-            => _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         public async Task<IReadOnlyCollection<ConversationsListResponse.SingleConversation>> GetAllSlackChannels(CancellationToken stoppingToken)
         {

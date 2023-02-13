@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -25,11 +24,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
 {
     public class ChatClientTests : IClassFixture<SlackClientFixture>
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ISlackHttpClient _slackHttpClient;
 
         public ChatClientTests(SlackClientFixture slackClientFixture)
         {
-            _httpClientFactory = slackClientFixture.HttpClientFactory;
+            _slackHttpClient = slackClientFixture.SlackHttpClient;
         }
 
         [SkippableFact]
@@ -43,7 +42,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             var paginationHandler = new CursorPaginationHandler(NullLogger<CursorPaginationHandler>.Instance);
             var chatclient = new ChatClient(Mock.Of<ITasksStatusesCache>(), NullLogger<ChatClient>.Instance);
 
-            var slackClientFacade = new SlackClientFacade(_httpClientFactory, paginationHandler);
+            var slackClientFacade = new SlackClientFacade(_slackHttpClient, paginationHandler);
             var stream = new TestableInteractionStream();
 
             var employees = new List<Employee>()
