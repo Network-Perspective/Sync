@@ -59,48 +59,50 @@ namespace NetworkPerspective.Sync.Cli
 
         private readonly ISyncHashedClient _client;
         private readonly IFileSystem _fileSystem;
+        private readonly GroupsOpts _options;
 
-        public GroupsClient(ISyncHashedClient client, IFileSystem fileSystem)
+        public GroupsClient(ISyncHashedClient client, IFileSystem fileSystem, GroupsOpts options)
         {
             _client = client;
             _fileSystem = fileSystem;
+            _options = options;
         }
 
-        public async Task Main(GroupsOpts args)
+        public async Task Main()
         {
-            if (string.IsNullOrWhiteSpace(args.IdCol) || string.IsNullOrWhiteSpace(args.NameCol) ||
-                string.IsNullOrWhiteSpace(args.CategoryCol) || string.IsNullOrWhiteSpace(args.ParentCol))
+            if (string.IsNullOrWhiteSpace(_options.IdCol) || string.IsNullOrWhiteSpace(_options.NameCol) ||
+                string.IsNullOrWhiteSpace(_options.CategoryCol) || string.IsNullOrWhiteSpace(_options.ParentCol))
             {
                 throw new ArgException("Please provide column names (or use defaults)");
             }
-            if (string.IsNullOrWhiteSpace(args.BaseUrl) && string.IsNullOrWhiteSpace(args.DebugFn))
+            if (string.IsNullOrWhiteSpace(_options.BaseUrl) && string.IsNullOrWhiteSpace(_options.DebugFn))
             {
                 throw new ArgException("Either BaseUrl or DebugFn must be specified");
             }
 
-            _idCols = args.IdCol.AsColumnDescriptorDictionary();
-            _nameCols = args.NameCol.AsColumnDescriptorDictionary();
-            _categoryCols = args.CategoryCol.AsColumnDescriptorDictionary();
-            _parentCols = args.ParentCol.AsColumnDescriptorDictionary();
+            _idCols = _options.IdCol.AsColumnDescriptorDictionary();
+            _nameCols = _options.NameCol.AsColumnDescriptorDictionary();
+            _categoryCols = _options.CategoryCol.AsColumnDescriptorDictionary();
+            _parentCols = _options.ParentCol.AsColumnDescriptorDictionary();
 
             var timer = Stopwatch.StartNew();
 
             // read the CSV (tab separated by default)            
-            var groups = ReadCsvGroups(args.Csv, args.CsvDelimiter);
+            var groups = ReadCsvGroups(_options.Csv, _options.CsvDelimiter);
 
             var request = new SyncHashedGroupStructureCommand()
             {
                 Groups = groups,
-                ServiceToken = args.Token
+                ServiceToken = _options.Token
             };
 
             ColoredConsole.WriteLine("Uploading groups:");
             ColoredConsole.WriteLine(" - uploading " + groups.Count.ToString().Cyan() + " records...");
 
             // dump to file or send to api
-            if (!string.IsNullOrWhiteSpace(args.DebugFn))
+            if (!string.IsNullOrWhiteSpace(_options.DebugFn))
             {
-                using (var file = _fileSystem.File.CreateText(args.DebugFn))
+                using (var file = _fileSystem.File.CreateText(_options.DebugFn))
                 {
                     var json = JsonConvert.SerializeObject(request, Formatting.Indented);
                     file.Write(json);

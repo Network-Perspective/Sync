@@ -1,9 +1,0 @@
-When	From	To	EventId	RecurrenceType	Duration
-2021-05-04T08:05:00	hash1	hash2	event1	Daily	20
-2021-05-04T08:05:00	hash2	hash3	event1	Weekly	20
-2021-05-04T08:05:00	hash1	hash3	event1	Monthly	25
-2021-05-04T08:05:00	external	hash1	event1		60
-2021-05-04T08:05:00	internal	hash1	event1		30
-2021-05-04T08:05:00	hash1	hash2	event2	Daily	20
-2021-05-04T08:05:00	hash2	hash3	event2	Weekly	20
-2021-05-04T08:05:00	hash1	hash3	event2	Monthly	25

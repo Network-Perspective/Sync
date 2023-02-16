@@ -8,7 +8,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.Core;
-using NetworkPerspective.Sync.Infrastructure.Core.Services;
 
 using Polly;
 
@@ -26,23 +25,23 @@ namespace NetworkPerspective.Sync.Cli
         [ArgActionMethod, ArgDescription("Add or update entities / nodes in an existing network")]
         public async Task Entities(EntitiesOpts args)
         {
-            var client = Program.Setup<EntitiesClient>(args);
-            await client!.Main(args);
+            var client = Program.Setup<EntitiesClient, EntitiesOpts>(args);
+            await client!.Main();
         }
 
 
         [ArgActionMethod, ArgDescription("Add or update groups / reports in an existing network")]
         public async Task Groups(GroupsOpts args)
         {
-            var client = Program.Setup<GroupsClient>(args);
-            await client!.Main(args);
+            var client = Program.Setup<GroupsClient, GroupsOpts>(args);
+            await client!.Main();
         }
 
         [ArgActionMethod, ArgDescription("Import interactions")]
         public async Task Interactions(InteractionsOpts args)
         {
-            var client = Program.Setup<InteractionsClient>(args);
-            await client!.Main(args);
+            var client = Program.Setup<InteractionsClient, InteractionsOpts>(args);
+            await client!.Main();
         }
     }
 
@@ -66,17 +65,17 @@ namespace NetworkPerspective.Sync.Cli
             return 1;
         }
 
-        public static T? Setup<T>(ICommonOpts args) where T : class
+        public static TService Setup<TService, TOptions>(TOptions args)
+            where TService : class
+            where TOptions : class, ICommonOpts
         {
             var hostBuilder = Host.CreateDefaultBuilder()
                 .ConfigureServices((_, services) =>
                 {
-                    services.AddTransient<EntitiesClient>();
-                    services.AddTransient<GroupsClient>();
-                    services.AddTransient<InteractionsClient>();
+                    services.AddTransient<TService>();
+                    services.AddTransient(x => args);
 
                     services.AddTransient<IFileSystem, FileSystem>();
-                    services.AddTransient<IInteractionsBatchSplitter, InteractionsBatchSplitter>();
 
                     var httpClientBuilder = services
                         .AddHttpClient<ISyncHashedClient, SyncHashedClient>();
@@ -105,7 +104,7 @@ namespace NetworkPerspective.Sync.Cli
                     .AddFilter("System.Net.Http.HttpClient", LogLevel.Warning);
             });
             var host = hostBuilder.Build();
-            return host.Services.GetService<T>();
+            return host.Services.GetRequiredService<TService>();
         }
     }
 }

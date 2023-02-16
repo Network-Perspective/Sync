@@ -9,8 +9,8 @@ using Colors.Net.StringColorExtensions;
 using CsvHelper;
 using CsvHelper.Configuration;
 
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Infrastructure.Core;
-using NetworkPerspective.Sync.Infrastructure.Core.Services;
 
 using Newtonsoft.Json;
 
@@ -72,7 +72,7 @@ namespace NetworkPerspective.Sync.Cli
     }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-    public class InteractionsClient
+    public class InteractionsClient : IAsyncDisposable
     {
         private Dictionary<string, ColumnDescriptor> _fromCols = new Dictionary<string, ColumnDescriptor>();
         private Dictionary<string, ColumnDescriptor> _toCols = new Dictionary<string, ColumnDescriptor>();
@@ -83,25 +83,34 @@ namespace NetworkPerspective.Sync.Cli
 
         private readonly ISyncHashedClient _client;
         private readonly IFileSystem _fileSystem;
-        private readonly IInteractionsBatchSplitter _batchSplitter;
+        private readonly InteractionsOpts _options;
+        private readonly Batcher<HashedInteraction> _batchSplitter;
         private long estimatedNoOfBatches = 0;
-        private ProgressBar _sendingProgress;
+        private readonly ProgressBar _sendingProgress = new ProgressBar();
 
-        public InteractionsClient(ISyncHashedClient client, IFileSystem fileSystem, IInteractionsBatchSplitter batchSplitter)
+        public InteractionsClient(ISyncHashedClient client, IFileSystem fileSystem, InteractionsOpts options)
         {
             _client = client;
             _fileSystem = fileSystem;
-            _batchSplitter = batchSplitter;
+            _options = options;
+            _batchSplitter = new Batcher<HashedInteraction>(options.BatchSize);
         }
 
-        public async Task Main(InteractionsOpts args)
+        public async ValueTask DisposeAsync()
         {
-            if (string.IsNullOrWhiteSpace(args.FromCol) || string.IsNullOrWhiteSpace(args.ToCol) ||
-                string.IsNullOrWhiteSpace(args.WhenCol))
+            await _batchSplitter.FlushAsync();
+            _sendingProgress.Dispose();
+        }
+
+        public async Task Main()
+        {
+
+            if (string.IsNullOrWhiteSpace(_options.FromCol) || string.IsNullOrWhiteSpace(_options.ToCol) ||
+                string.IsNullOrWhiteSpace(_options.WhenCol))
             {
                 throw new ArgException("Please provide column names (or use defaults)");
             }
-            if (string.IsNullOrWhiteSpace(args.BaseUrl) && string.IsNullOrWhiteSpace(args.DebugFn))
+            if (string.IsNullOrWhiteSpace(_options.BaseUrl) && string.IsNullOrWhiteSpace(_options.DebugFn))
             {
                 throw new ArgException("Either BaseUrl or DebugFn must be specified");
             }
@@ -109,29 +118,24 @@ namespace NetworkPerspective.Sync.Cli
             // w don't want extra logging to appear on console
             LogManager.DisableLogging();
 
-            _fromCols = args.FromCol.AsColumnDescriptorDictionary();
-            _toCols = args.ToCol.AsColumnDescriptorDictionary();
-            _whenCols = args.WhenCol.AsColumnDescriptorDictionary();
-            _eventIdCols = args.EventIdCol.AsColumnDescriptorDictionary();
-            _recurrenceCols = args.RecurrentceCol.AsColumnDescriptorDictionary();
-            _durationCols = args.DurationCol.AsColumnDescriptorDictionary();
+            _fromCols = _options.FromCol.AsColumnDescriptorDictionary();
+            _toCols = _options.ToCol.AsColumnDescriptorDictionary();
+            _whenCols = _options.WhenCol.AsColumnDescriptorDictionary();
+            _eventIdCols = _options.EventIdCol.AsColumnDescriptorDictionary();
+            _recurrenceCols = _options.RecurrentceCol.AsColumnDescriptorDictionary();
+            _durationCols = _options.DurationCol.AsColumnDescriptorDictionary();
 
             var timer = Stopwatch.StartNew();
-            _batchSplitter.BatchSize = args.BatchSize;
-            _batchSplitter.BufferSize = null;
-            _batchSplitter.BatchIsReadyAsync += async (object sender, BatchIsReadyEventArgs e) =>
-            {
-                await SendBatch(e.BatchNo, e.Interactions, args);
-            };
+
+            _batchSplitter.OnBatchReady(SendBatch);
 
             // read the CSV             
-            foreach (var fn in args.Csv)
+            foreach (var fn in _options.Csv)
             {
-                await ReadCsvInteractions(fn, args);
+                await ReadCsvInteractions(fn, _options);
             }
 
             ColoredConsole.WriteLine($"Uploading data");
-            _sendingProgress = new ProgressBar();
             await _batchSplitter.FlushAsync();
             _sendingProgress.Dispose();
 
@@ -139,26 +143,26 @@ namespace NetworkPerspective.Sync.Cli
             ColoredConsole.WriteLine("Time elapsed " + timer.Elapsed);
         }
 
-        private async Task SendBatch(int batchNo, ICollection<HashedInteraction> interactions, InteractionsOpts args)
+        private async Task SendBatch(BatchReadyEventArgs<HashedInteraction> args)
         {
             var request = new SyncHashedInteractionsCommand()
             {
-                Interactions = interactions,
-                ServiceToken = args.Token
+                Interactions = args.BatchItems,
+                ServiceToken = _options.Token
             };
 
-            _sendingProgress.Report((double)batchNo / estimatedNoOfBatches);
+            _sendingProgress.Report((double)args.BatchNumber / estimatedNoOfBatches);
 
             // dump to file or send to api
-            if (!string.IsNullOrWhiteSpace(args.DebugFn))
+            if (!string.IsNullOrWhiteSpace(_options.DebugFn))
             {
-                var fileName = string.Format("{0}-batch-{1}{2}", Path.GetFileNameWithoutExtension(args.DebugFn), $"{batchNo}", Path.GetExtension(args.DebugFn));
-                var fullPath = Path.Combine(Path.GetDirectoryName(args.DebugFn)!, fileName);
+                var fileName = string.Format("{0}-batch-{1}{2}", Path.GetFileNameWithoutExtension(_options.DebugFn), $"{args.BatchNumber}", Path.GetExtension(_options.DebugFn));
+                var fullPath = Path.Combine(Path.GetDirectoryName(_options.DebugFn)!, fileName);
 
                 using (var file = _fileSystem.File.CreateText(fullPath))
                 {
                     var json = JsonConvert.SerializeObject(request, Formatting.Indented);
-                    file.Write(json);
+                    await file.WriteAsync(json);
                 }
             }
             else
@@ -166,8 +170,6 @@ namespace NetworkPerspective.Sync.Cli
                 var corellationId = await _client.SyncInteractionsAsync(request);
                 ColoredConsole.WriteLine("CorellationId: " + corellationId.ToString().Cyan());
             }
-
-            await Task.CompletedTask;
         }
 
         private async Task ReadCsvInteractions(string fileName, InteractionsOpts args)
@@ -260,7 +262,7 @@ namespace NetworkPerspective.Sync.Cli
                         }
                     }
 
-                    await _batchSplitter.PushInteractionAsync(interaction);
+                    await _batchSplitter.AddRangeAsync(new[] { interaction });
 
                     lineCounter++;
 
@@ -269,7 +271,7 @@ namespace NetworkPerspective.Sync.Cli
                     progress.Report((double)position / (double)fileSize);
                 }
 
-                estimatedNoOfBatches += lineCounter / _batchSplitter.BatchSize;
+                estimatedNoOfBatches += lineCounter / _options.BatchSize;
             }
         }
     }

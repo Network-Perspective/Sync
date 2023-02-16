@@ -66,48 +66,50 @@ namespace NetworkPerspective.Sync.Cli
 
         private readonly ISyncHashedClient _client;
         private readonly IFileSystem _fileSystem;
+        private readonly EntitiesOpts _options;
 
-        public EntitiesClient(ISyncHashedClient client, IFileSystem fileSystem)
+        public EntitiesClient(ISyncHashedClient client, IFileSystem fileSystem, EntitiesOpts options)
         {
             _client = client;
             _fileSystem = fileSystem;
+            _options = options;
         }
 
-        public async Task Main(EntitiesOpts args)
+        public async Task Main()
         {
-            if (string.IsNullOrWhiteSpace(args.IdColumns))
+            if (string.IsNullOrWhiteSpace(_options.IdColumns))
             {
                 throw new ArgException("At least one id column required");
             }
-            if (string.IsNullOrWhiteSpace(args.BaseUrl) && string.IsNullOrWhiteSpace(args.DebugFn))
+            if (string.IsNullOrWhiteSpace(_options.BaseUrl) && string.IsNullOrWhiteSpace(_options.DebugFn))
             {
                 throw new ArgException("Either BaseUrl or DebugFn must be specified");
             }
 
-            _idCols = args.IdColumns.AsColumnDescriptorDictionary();
-            _propCols = args.PropColumns.AsColumnDescriptorDictionary();
-            _groupsCols = args.GroupColumns.AsColumnDescriptorDictionary();
-            _relationshipCols = args.RealtionshipColumns.AsColumnDescriptorDictionary();
-            _changeDateCols = args.ChangeDateColumns.AsColumnDescriptorDictionary();
+            _idCols = _options.IdColumns.AsColumnDescriptorDictionary();
+            _propCols = _options.PropColumns.AsColumnDescriptorDictionary();
+            _groupsCols = _options.GroupColumns.AsColumnDescriptorDictionary();
+            _relationshipCols = _options.RealtionshipColumns.AsColumnDescriptorDictionary();
+            _changeDateCols = _options.ChangeDateColumns.AsColumnDescriptorDictionary();
 
             var timer = Stopwatch.StartNew();
 
             // read the CSV (tab separated by default)            
-            var entities = ReadCsvEntries(args);
+            var entities = ReadCsvEntries(_options);
 
             var request = new SyncHashedEntitesCommand()
             {
                 Entites = entities,
-                ServiceToken = args.Token
+                ServiceToken = _options.Token
             };
 
             ColoredConsole.WriteLine("Uploading entities:");
             ColoredConsole.WriteLine(" - uploading " + entities.Count.ToString().Cyan() + " records...");
 
             // dump to file or send to api
-            if (!string.IsNullOrWhiteSpace(args.DebugFn))
+            if (!string.IsNullOrWhiteSpace(_options.DebugFn))
             {
-                using (var file = _fileSystem.File.CreateText(args.DebugFn))
+                using (var file = _fileSystem.File.CreateText(_options.DebugFn))
                 {
                     var json = JsonConvert.SerializeObject(request, Formatting.Indented);
                     file.Write(json);

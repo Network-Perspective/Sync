@@ -4,7 +4,6 @@ namespace NetworkPerspective.Sync.Cli.Tests
     {
         private readonly Mock<ISyncHashedClient> _coreClient;
         private readonly MockFileSystem _fileSystem;
-        private readonly GroupsClient _entitiesClient;
         private SyncHashedGroupStructureCommand? _interceptedCommand;
 
         public GroupsTest(EmbeddedSamplesFixture samples)
@@ -15,14 +14,13 @@ namespace NetworkPerspective.Sync.Cli.Tests
                 .Callback<SyncHashedGroupStructureCommand>(req => _interceptedCommand = req);
 
             _fileSystem = samples.FileSystem;
-            _entitiesClient = new GroupsClient(_coreClient.Object, _fileSystem);
         }
 
         [Fact]
         public async Task ItShouldReadAndProcessGroups()
         {
             // Arrange
-            var args = new GroupsOpts()
+            var options = new GroupsOpts()
             {
                 Csv = @"groups.csv",
                 BaseUrl = "http://localhost",
@@ -34,8 +32,11 @@ namespace NetworkPerspective.Sync.Cli.Tests
                 ParentCol = "ParentCode"
             };
 
+            var entitiesClient = new GroupsClient(_coreClient.Object, _fileSystem, options);
+
+
             // Act
-            await _entitiesClient.Main(args);
+            await entitiesClient.Main();
 
             // Assert
             var expected = JsonConvert.DeserializeObject<SyncHashedGroupStructureCommand>(_fileSystem.File.ReadAllText(@"groups-expected.json"));

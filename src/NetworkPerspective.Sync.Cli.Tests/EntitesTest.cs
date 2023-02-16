@@ -4,7 +4,6 @@ namespace NetworkPerspective.Sync.Cli.Tests
     {
         private readonly Mock<ISyncHashedClient> _coreClient;
         private readonly MockFileSystem _fileSystem;
-        private readonly EntitiesClient _entitiesClient;
         private SyncHashedEntitesCommand? _interceptedCommand;
 
         public EntitesTest(EmbeddedSamplesFixture samples)
@@ -15,14 +14,13 @@ namespace NetworkPerspective.Sync.Cli.Tests
                 .Callback<SyncHashedEntitesCommand>(req => _interceptedCommand = req);
 
             _fileSystem = samples.FileSystem;
-            _entitiesClient = new EntitiesClient(_coreClient.Object, _fileSystem);
         }
 
         [Fact]
         public async Task ItShouldReadAndProcessEntities()
         {
             // Arrange
-            var args = new EntitiesOpts()
+            var options = new EntitiesOpts()
             {
                 Csv = @"entites.csv",
                 BaseUrl = "http://localhost",
@@ -35,8 +33,10 @@ namespace NetworkPerspective.Sync.Cli.Tests
                 GroupColumns = ""
             };
 
+            var entitiesClient = new EntitiesClient(_coreClient.Object, _fileSystem, options);
+
             // Act
-            await _entitiesClient.Main(args);
+            await entitiesClient.Main();
 
             // Assert            
             var expected = JsonConvert.DeserializeObject<SyncHashedEntitesCommand>(_fileSystem.File.ReadAllText(@"entites-expected.json"));
