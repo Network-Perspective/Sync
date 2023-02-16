@@ -100,6 +100,7 @@ namespace NetworkPerspective.Sync.Cli
         {
             await _batchSplitter.FlushAsync();
             _sendingProgress.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         public async Task Main()

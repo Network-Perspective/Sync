@@ -47,7 +47,6 @@ namespace NetworkPerspective.Sync.Cli
 
     internal sealed class Program
     {
-
         static async Task<int> Main(string[] args)
         {
             try
