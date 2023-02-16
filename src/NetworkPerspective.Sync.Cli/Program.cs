@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Abstractions;
-using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO.Abstractions;
 
 using Colors.Net;
 using Colors.Net.StringColorExtensions;
@@ -51,7 +45,6 @@ namespace NetworkPerspective.Sync.Cli
             await client!.Main(args);
         }
     }
-
 
     internal sealed class Program
     {

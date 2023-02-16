@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.IO.Abstractions;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Colors.Net;
 using Colors.Net.StringColorExtensions;
@@ -18,10 +11,8 @@ using CsvHelper.Configuration;
 using NetworkPerspective.Sync.Infrastructure.Core;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 using PowerArgs;
-using PowerArgs.Cli;
 
 namespace NetworkPerspective.Sync.Cli
 {

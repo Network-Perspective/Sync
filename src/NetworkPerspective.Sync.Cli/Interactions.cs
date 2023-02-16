@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.IO.Abstractions;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Colors.Net;
 using Colors.Net.StringColorExtensions;
@@ -19,12 +13,10 @@ using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Core.Services;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 using NLog;
 
 using PowerArgs;
-using PowerArgs.Cli;
 
 namespace NetworkPerspective.Sync.Cli
 {
@@ -160,7 +152,7 @@ namespace NetworkPerspective.Sync.Cli
             // dump to file or send to api
             if (!string.IsNullOrWhiteSpace(args.DebugFn))
             {
-                var fileName = String.Format("{0}-batch-{1}{2}", Path.GetFileNameWithoutExtension(args.DebugFn), $"{batchNo}", Path.GetExtension(args.DebugFn));
+                var fileName = string.Format("{0}-batch-{1}{2}", Path.GetFileNameWithoutExtension(args.DebugFn), $"{batchNo}", Path.GetExtension(args.DebugFn));
                 var fullPath = Path.Combine(Path.GetDirectoryName(args.DebugFn)!, fileName);
 
                 using (var file = _fileSystem.File.CreateText(fullPath))

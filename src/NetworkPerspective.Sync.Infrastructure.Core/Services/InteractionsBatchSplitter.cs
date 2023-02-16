@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core.Services
@@ -26,7 +25,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
         public delegate Task BatchIsReadyAsyncEventHandler(object sender, BatchIsReadyEventArgs e);
 
         public event BatchIsReadyAsyncEventHandler BatchIsReadyAsync;
-        
+
         public int BatchSize { get; set; } = 10000;
         public long? BufferSize { get; set; } = 100000;
 
@@ -35,9 +34,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
 
         public InteractionsBatchSplitter()
         {
-             _queue = new PriorityQueue<HashedInteraction, Tuple<DateTime, string>>();
+            _queue = new PriorityQueue<HashedInteraction, Tuple<DateTime, string>>();
         }
-        
+
         public async Task PushInteractionAsync(HashedInteraction interaction)
         {
             if (interaction.When == null) return;
@@ -52,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
 
         private async Task EmitNewBatchAsync()
         {
-            var batch = new List<HashedInteraction>(BatchSize);            
+            var batch = new List<HashedInteraction>(BatchSize);
             HashedInteraction nextItem = null, prevItem = null;
             int size = 0;
 
@@ -60,11 +59,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
             {
                 if (_queue.Count == 0) break;
 
-                prevItem = nextItem;                
-                nextItem = _queue.Peek();                                
+                prevItem = nextItem;
+                nextItem = _queue.Peek();
 
                 if (size >= BatchSize && !string.Equals(prevItem.EventId, nextItem.EventId, StringComparison.InvariantCultureIgnoreCase)) break;
-                                
+
                 batch.Add(_queue.Dequeue());
                 size++;
             }
@@ -77,7 +76,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
         }
 
         private readonly long _ticksIn10Minutes = TimeSpan.FromMinutes(10).Ticks;
-            
+
         private Tuple<DateTime, string> GetKey(HashedInteraction interaction)
         {
             if (interaction == null) return null;
@@ -89,7 +88,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
         }
 
         public async Task FlushAsync()
-        {            
+        {
             while (_queue.Count > 0)
             {
                 await EmitNewBatchAsync();
@@ -104,8 +103,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
             BatchNo = batchNo;
             Interactions = interactions;
         }
-        
+
         public int BatchNo { get; }
-        public ICollection<HashedInteraction> Interactions { get; }            
+        public ICollection<HashedInteraction> Interactions { get; }
     }
 }
