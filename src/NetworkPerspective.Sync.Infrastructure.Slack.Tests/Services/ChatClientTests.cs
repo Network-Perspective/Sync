@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 using FluentAssertions;
 
 using Microsoft.Extensions.Logging.Abstractions;
+
+using Moq;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
@@ -24,11 +24,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
 {
     public class ChatClientTests : IClassFixture<SlackClientFixture>
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ISlackHttpClient _slackHttpClient;
 
         public ChatClientTests(SlackClientFixture slackClientFixture)
         {
-            _httpClientFactory = slackClientFixture.HttpClientFactory;
+            _slackHttpClient = slackClientFixture.SlackHttpClient;
         }
 
         [SkippableFact]
@@ -40,9 +40,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             var timeRange = new TimeRange(new DateTime(1970, 01, 01, 0, 0, 0, DateTimeKind.Utc), DateTime.UtcNow);
             var network = Network<SlackNetworkProperties>.Create(Guid.NewGuid(), new SlackNetworkProperties(), DateTime.UtcNow);
             var paginationHandler = new CursorPaginationHandler(NullLogger<CursorPaginationHandler>.Instance);
-            var chatclient = new ChatClient(NullLogger<ChatClient>.Instance);
+            var chatclient = new ChatClient(Mock.Of<ITasksStatusesCache>(), NullLogger<ChatClient>.Instance);
 
-            var slackClientFacade = new SlackClientFacade(_httpClientFactory, paginationHandler);
+            var slackClientFacade = new SlackClientFacade(_slackHttpClient, paginationHandler);
+            var stream = new TestableInteractionStream();
 
             var employees = new List<Employee>()
                 .Add(existingEmail);
@@ -54,12 +55,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             try
             {
                 // Act
-                var storage = new InteractionsFileStorage("tmp");
-                await chatclient.GetInteractions(storage, slackClientFacade, network, interactionFactory, timeRange);
+                await chatclient.SyncInteractionsAsync(stream, slackClientFacade, network, interactionFactory, timeRange);
 
                 // Assert
-                var result = await storage.PullInteractionsAsync(new DateTime(2022, 07, 30));
-                result.Should().NotBeEmpty();
+                stream.SentInteractions.Count.Should().BePositive();
             }
             catch (Slack.Client.Exceptions.ApiException exception)
             {

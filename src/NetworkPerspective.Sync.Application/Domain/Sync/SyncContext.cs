@@ -3,33 +3,33 @@ using System.Collections.Generic;
 using System.Security;
 
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Services;
 
 namespace NetworkPerspective.Sync.Application.Domain.Sync
 {
     public class SyncContext : IDisposable
     {
         private readonly IDictionary<Type, object> _container = new Dictionary<Type, object>();
+        private readonly IHashingService _hashingService;
 
         public Guid NetworkId { get; }
         public NetworkConfig NetworkConfig { get; }
+        public NetworkProperties NetworkProperties { get; }
         public SecureString AccessToken { get; }
-        public DateTime Since { get; }
-        public TimeRange CurrentRange { get; private set; }
+        public TimeRange TimeRange { get; }
+        public IStatusLogger StatusLogger { get; }
+        public HashFunction HashFunction { get; }
 
-        public SyncContext(Guid networkId, NetworkConfig networkConfig, SecureString accessToken, DateTime since, DateTime currentTime)
+        public SyncContext(Guid networkId, NetworkConfig networkConfig, NetworkProperties networkProperties, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger, IHashingService hashingService)
         {
             NetworkId = networkId;
             NetworkConfig = networkConfig;
+            NetworkProperties = networkProperties;
             AccessToken = accessToken;
-            Since = since;
-            CurrentRange = new TimeRange(since, since.Date.AddDays(1) > currentTime ? currentTime : since.Date.AddDays(1));
-        }
-
-        public void MoveToNextSyncRange(DateTime currentTime)
-        {
-            var start = CurrentRange.End.Date;
-            var end = CurrentRange.End.Date.AddDays(1) > currentTime ? currentTime : CurrentRange.End.Date.AddDays(1);
-            CurrentRange = new TimeRange(start, end);
+            TimeRange = timeRange;
+            StatusLogger = statusLogger;
+            _hashingService = hashingService;
+            HashFunction = hashingService.Hash;
         }
 
         public bool Contains<T>()
@@ -49,6 +49,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
         public void Dispose()
         {
             AccessToken?.Dispose();
+            _hashingService?.Dispose();
 
             foreach (var type in _container.Keys)
             {

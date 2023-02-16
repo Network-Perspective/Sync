@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Application.Domain.Statuses;
@@ -9,22 +8,13 @@ namespace NetworkPerspective.Sync.Application.Extensions
 {
     public static class StatusLoggerExtensions
     {
-        public static Task LogErrorAsync(this IStatusLogger service, Guid networkId, string message, CancellationToken stoppingToken = default)
-        {
-            var log = StatusLog.Create(networkId, message, StatusLogLevel.Error, DateTime.UtcNow);
-            return service.AddLogAsync(log, stoppingToken);
-        }
+        public static Task LogErrorAsync(this IStatusLogger service, string message, CancellationToken stoppingToken = default)
+            => service.AddLogAsync(message, StatusLogLevel.Error, stoppingToken);
 
-        public static Task LogWarningAsync(this IStatusLogger service, Guid networkId, string message, CancellationToken stoppingToken = default)
-        {
-            var log = StatusLog.Create(networkId, message, StatusLogLevel.Warning, DateTime.UtcNow);
-            return service.AddLogAsync(log, stoppingToken);
-        }
+        public static Task LogWarningAsync(this IStatusLogger service, string message, CancellationToken stoppingToken = default)
+            => service.AddLogAsync(message, StatusLogLevel.Warning, stoppingToken);
 
-        public static Task LogInfoAsync(this IStatusLogger service, Guid networkId, string message, CancellationToken stoppingToken = default)
-        {
-            var log = StatusLog.Create(networkId, message, StatusLogLevel.Info, DateTime.UtcNow);
-            return service.AddLogAsync(log, stoppingToken);
-        }
+        public static Task LogInfoAsync(this IStatusLogger service, string message, CancellationToken stoppingToken = default)
+            => service.AddLogAsync(message, StatusLogLevel.Info, stoppingToken);
     }
 }

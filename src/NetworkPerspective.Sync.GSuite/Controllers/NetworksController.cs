@@ -16,7 +16,7 @@ namespace NetworkPerspective.Sync.GSuite.Controllers
 {
     public class NetworksController : NetworksControllerBase
     {
-        public NetworksController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLogger statusLogger) : base(networkPerspectiveCore, networkService, authService, syncScheduler, statusLogger)
+        public NetworksController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLogger) : base(networkPerspectiveCore, networkService, authService, syncScheduler, statusLogger)
         { }
 
         /// <summary>

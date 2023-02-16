@@ -23,10 +23,11 @@ namespace NetworkPerspective.Sync.Application
             services.AddTransient<ISyncServiceFactory, SyncServiceFactory>();
 
             services.AddTransient<INetworkService, NetworkService>();
-            services.AddTransient<IStatusLogger, StatusLogger>();
+            services.AddTransient<IStatusLoggerFactory, StatusLoggerFactory>();
             services.AddTransient<IStatusService, StatusService>();
             services.AddTransient<ITokenService, TokenService>();
             services.AddTransient<ISyncHistoryService, SyncHistoryService>();
+            services.AddTransient<ISyncContextFactory, SyncContextFactory>();
 
             services.AddSingleton<ITasksStatusesCache, TasksStatusesCache>();
 

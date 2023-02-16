@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
@@ -21,6 +24,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
     {
         private readonly HttpClient _httpClient;
         private readonly WireMockServer _wireMockServer;
+        private readonly ILogger<SlackHttpClient> _logger = NullLogger<SlackHttpClient>.Instance;
 
         public ReactionsClientTests(MockedRestServerFixture slackClientFixture)
         {
@@ -40,7 +44,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
                     .WithStatusCode(HttpStatusCode.OK)
                     .WithBody(SampleResponse.GetReactions));
 
-            var reactionsClient = new ReactionsClient(_httpClient);
+            var reactionsClient = new ReactionsClient(new SlackHttpClient(_httpClient, _logger));
 
             // Act
             Func<Task<ReactionsGetResponse>> func = () => reactionsClient.GetAsync("foo", "bar");

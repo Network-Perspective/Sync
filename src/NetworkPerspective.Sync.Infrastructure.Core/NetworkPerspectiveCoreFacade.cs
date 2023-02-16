@@ -11,12 +11,12 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
+using NetworkPerspective.Sync.Infrastructure.Core.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core
 {
@@ -24,54 +24,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
     {
         private readonly NetworkPerspectiveCoreConfig _npCoreConfig;
         private readonly ISyncHashedClient _client;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<NetworkPerspectiveCoreFacade> _logger;
 
-        public NetworkPerspectiveCoreFacade(ISyncHashedClient client, IOptions<NetworkPerspectiveCoreConfig> npCoreConfig, ILogger<NetworkPerspectiveCoreFacade> logger)
+        public NetworkPerspectiveCoreFacade(ISyncHashedClient client, IOptions<NetworkPerspectiveCoreConfig> npCoreConfig, ILoggerFactory loggerFactory)
         {
             _npCoreConfig = npCoreConfig.Value;
             _client = client;
-            _logger = logger;
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<NetworkPerspectiveCoreFacade>();
         }
 
-        public async Task PushInteractionsAsync(SecureString accessToken, ISet<Interaction> interactions, CancellationToken stoppingToken = default)
-        {
-            try
-            {
-                if (!interactions.Any())
-                {
-                    _logger.LogInformation("Skipping pushing interaction because there is nothing to push...");
-                    return;
-                }
-
-                _logger.LogInformation("Pushing {count} hashed interactions to {url}", interactions.Count, _npCoreConfig.BaseUrl);
-
-                var dataPartitionsCount = Math.Ceiling(interactions.Count / (double)_npCoreConfig.MaxInteractionsPerRequestCount);
-
-                for (int i = 0; i < dataPartitionsCount; i++)
-                {
-                    var interactionsToPush = interactions
-                            .Skip(_npCoreConfig.MaxInteractionsPerRequestCount * i)
-                            .Take(_npCoreConfig.MaxInteractionsPerRequestCount)
-                            .Select(x => InteractionMapper.DomainIntractionToDto(x, _npCoreConfig.DataSourceIdName))
-                            .ToList();
-
-                    var command = new SyncHashedInteractionsCommand
-                    {
-                        ServiceToken = accessToken.ToSystemString(),
-                        Interactions = interactionsToPush
-                    };
-
-                    var response = await _client.SyncInteractionsAsync(command, stoppingToken);
-
-                    _logger.LogInformation("Uploaded interactions batch {x} of {y} with count {count} hashed interactions to {url} successfully, correlationId: '{correlationId}'",
-                        (i + 1), dataPartitionsCount, interactionsToPush.Count, _npCoreConfig.BaseUrl, response);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new NetworkPerspectiveCoreException(_npCoreConfig.BaseUrl, ex);
-            }
-        }
+        public IInteractionsStream OpenInteractionsStream(SecureString accessToken, CancellationToken stoppingToken = default)
+            => new InteractionsStream(accessToken.Copy(), _client, _npCoreConfig, _loggerFactory.CreateLogger<InteractionsStream>(), stoppingToken);
 
         public async Task PushUsersAsync(SecureString accessToken, EmployeeCollection employees, CancellationToken stoppingToken = default)
         {
@@ -204,6 +169,79 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             catch (Exception ex)
             {
                 throw new NetworkPerspectiveCoreException(_npCoreConfig.BaseUrl, ex);
+            }
+        }
+
+        public async Task ReportSyncStartAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Notifying NetworkPerspective Core App sync started...");
+
+                var command = new ReportSyncStartedCommand
+                {
+                    ServiceToken = accessToken.ToSystemString(),
+                    SyncPeriodStart = timeRange.Start,
+                    SyncPeriodEnd = timeRange.End,
+                };
+
+                await _client.ReportStartAsync(command, stoppingToken);
+
+                _logger.LogInformation("NetworkPerspective Core App has been notified sync started");
+            }
+            catch (Exception ex)
+            {
+                throw new NetworkPerspectiveCoreException(_npCoreConfig.BaseUrl, ex);
+            }
+        }
+
+        public async Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Notifying NetworkPerspective Core App sync successed...");
+
+                var command = new ReportSyncCompletedCommand
+                {
+                    ServiceToken = accessToken.ToSystemString(),
+                    SyncPeriodStart = timeRange.Start,
+                    SyncPeriodEnd = timeRange.End,
+                    Success = true,
+                    Message = string.Empty
+                };
+
+                await _client.ReportCompletedAsync(command, stoppingToken);
+
+                _logger.LogInformation("NetworkPerspective Core App has been notified sync successed");
+            }
+            catch (Exception ex)
+            {
+                throw new NetworkPerspectiveCoreException(_npCoreConfig.BaseUrl, ex);
+            }
+        }
+
+        public async Task TryReportSyncFailedAsync(SecureString accessToken, TimeRange timeRange, string message, CancellationToken stoppingToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Notifying NetworkPerspective Core App sync failed...");
+
+                var command = new ReportSyncCompletedCommand
+                {
+                    ServiceToken = accessToken.ToSystemString(),
+                    SyncPeriodStart = timeRange.Start,
+                    SyncPeriodEnd = timeRange.End,
+                    Success = false,
+                    Message = message
+                };
+
+                await _client.ReportCompletedAsync(command, stoppingToken);
+
+                _logger.LogInformation("NetworkPerspective Core App has been notified sync failed");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "NetworkPerspective Core App has been NOT notified sync failed");
             }
         }
     }

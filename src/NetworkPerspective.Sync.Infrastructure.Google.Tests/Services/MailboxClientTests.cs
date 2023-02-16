@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -9,7 +11,10 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
@@ -34,7 +39,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
         public async Task ShouldReturnNonEmptyEmailCollection()
         {
             // Arrange
-            const string existingEmail = "nptestuser12@worksmartona.com";
+            const string userEmail = "nptestuser12@worksmartona.com";
 
             var googleConfig = new GoogleConfig
             {
@@ -45,22 +50,26 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             var clock = new Clock();
 
-            var mailboxClient = new MailboxClient(Mock.Of<IStatusLogger>(), Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
+            var mailboxClient = new MailboxClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
 
             var employees = new List<Employee>()
-                .Add(existingEmail);
+                .Add(userEmail);
             var employeesCollection = new EmployeeCollection(employees, null);
-            var interactionFactory = new InteractionFactory((x) => $"{x}_hashed", employeesCollection, clock);
-            var date = new DateTime(2021, 11, 01);
+            var interactionFactory = new EmailInteractionFactory((x) => $"{x}_hashed", employeesCollection, clock);
+            var stream = new TestableInteractionStream();
+            var timeRange = new TimeRange(new DateTime(2022, 11, 01), new DateTime(2022, 12, 31));
+            var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
             // Act
-            var storage = new InteractionsFileStorage("tmp");
-            await mailboxClient.GetInteractionsAsync(storage, Guid.NewGuid(), new[] { Employee.CreateInternal(EmployeeId.Create(existingEmail, existingEmail), Array.Empty<Group>()) }, new DateTime(2021, 11, 01), _googleClientFixture.Credential, interactionFactory);
-
-            var result = await storage.PullInteractionsAsync(date.Date);
+            await mailboxClient.SyncInteractionsAsync(syncContext, stream, new[] { Employee.CreateInternal(EmployeeId.Create(userEmail, userEmail), Array.Empty<Group>()) }, _googleClientFixture.Credential, interactionFactory);
 
             // Assert
-            result.Should().NotBeNullOrEmpty();
+
+            var result1 = stream.SentInteractions.Where(x => x.Timestamp.Date == new DateTime(2022, 11, 20));
+            result1.Single(x => x.Source.Id.PrimaryId == "maciej@networkperspective.io_hashed" && x.Target.Id.PrimaryId == $"{userEmail}_hashed");
+
+            var result2 = stream.SentInteractions.Where(x => x.Timestamp.Date == new DateTime(2022, 12, 24));
+            result2.Single(x => x.Source.Id.PrimaryId == $"{userEmail}_hashed" && x.Target.Id.PrimaryId == "john@worksmartona.com_hashed");
         }
     }
 }

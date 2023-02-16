@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Net.Mail;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
 {
@@ -14,22 +16,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
         }
 
         public static string[] ExtractEmailAddress(this string[] conversationParticipant)
-        {
-            var array = new string[conversationParticipant.Length];
-
-            for (int i = 0; i < conversationParticipant.Length; i++)
-            {
-                var oryginalValue = conversationParticipant[i];
-                var startBraceIndex = oryginalValue.IndexOf('<');
-                var endBraceIndex = oryginalValue.IndexOf('>');
-
-                if (startBraceIndex != -1 && endBraceIndex != -1)
-                    array[i] = oryginalValue[(startBraceIndex + 1)..endBraceIndex];
-                else
-                    array[i] = oryginalValue;
-            }
-
-            return array;
-        }
+            => conversationParticipant
+                .Select(x => new MailAddress(x).Address)
+                .ToArray();
     }
 }

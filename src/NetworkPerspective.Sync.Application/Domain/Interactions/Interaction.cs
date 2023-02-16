@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Meetings;
@@ -9,27 +10,25 @@ using NetworkPerspective.Sync.Application.Extensions;
 
 namespace NetworkPerspective.Sync.Application.Domain.Interactions
 {
+    [DebuggerDisplay("{Source.Id.PrimaryId} -> {Target.Id.PrimaryId}")]
     public class Interaction
     {
-        public bool IsHashed { get; init; }
-        public DateTime Timestamp { get; init; }
-        public Employee Source { get; init; }
-        public Employee Target { get; init; }
-        public InteractionType Type { get; init; }
-        public string ChannelId { get; init; }
-        public string ParentEventId { get; init; }
-        public string EventId { get; init; }
-        public RecurrenceType? Recurring { get; init; }
-        public ISet<UserActionType> UserAction { get; init; }
-        public int? Duration { get; init; }
+        public string Id { get; }
+        public bool IsHashed { get; }
+        public DateTime Timestamp { get; }
+        public Employee Source { get; }
+        public Employee Target { get; }
+        public InteractionType Type { get; }
+        public string ChannelId { get; }
+        public string ParentEventId { get; }
+        public string EventId { get; }
+        public RecurrenceType? Recurring { get; }
+        public ISet<UserActionType> UserAction { get; }
+        public int? Duration { get; }
 
-        public Interaction()
+        private Interaction(string id, DateTime timestamp, Employee source, Employee target, InteractionType type, string channelId, string eventId, string parentEventId, RecurrenceType? recurring, ISet<UserActionType> userActions, int? duration, bool isHashed)
         {
-
-        }
-
-        private Interaction(DateTime timestamp, Employee source, Employee target, InteractionType type, string channelId, string eventId, string parentEventId, RecurrenceType? recurring, ISet<UserActionType> userActions, int? duration, bool isHashed)
-        {
+            Id = id;
             Timestamp = timestamp;
             Source = source;
             Target = target;
@@ -46,6 +45,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         public static Interaction CreateEmail(DateTime timestamp, Employee source, Employee target, string eventId)
         {
             return new Interaction(
+                id: (timestamp.Ticks.ToString() + source.Id.PrimaryId + target.Id.PrimaryId + eventId).GetMd5HashCode(),
                 timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
@@ -62,6 +62,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         public static Interaction CreateMeeting(DateTime timestamp, Employee source, Employee target, string eventId, RecurrenceType? recurring, int duration)
         {
             return new Interaction(
+                id: (timestamp.Ticks.ToString() + source.Id.PrimaryId + target.Id.PrimaryId + eventId).GetMd5HashCode(),
                 timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
@@ -87,6 +88,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
         private static Interaction CreateChatInteraction(DateTime timestamp, Employee source, Employee target, string eventId, string parentEventId, string channelId, ISet<UserActionType> userActionType)
         {
             return new Interaction(
+                id: (timestamp.Ticks.ToString() + source.Id.PrimaryId + target.Id.PrimaryId + eventId).GetMd5HashCode(),
                 timestamp: timestamp.Bucket(TimeSpan.FromMinutes(5)),
                 source: source,
                 target: target,
@@ -106,6 +108,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
                 throw new DoubleHashingException(nameof(Interaction));
 
             return new Interaction(
+                id: Id,
                 timestamp: Timestamp,
                 source: Source.Hash(hashFunc),
                 target: Target.Hash(hashFunc),

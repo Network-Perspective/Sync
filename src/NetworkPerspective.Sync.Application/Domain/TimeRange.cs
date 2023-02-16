@@ -7,6 +7,8 @@ namespace NetworkPerspective.Sync.Application.Domain
     {
         public DateTime Start { get; }
         public DateTime End { get; }
+        public TimeSpan Duration => End - Start;
+
 
         public TimeRange(DateTime? start, DateTime? end)
         {
@@ -43,6 +45,6 @@ namespace NetworkPerspective.Sync.Application.Domain
             => HashCode.Combine(Start, End);
 
         public override string ToString()
-            => $"{Start} - {End}";
+            => $"{Start.ToString(Consts.DefaultDateTimeFormat)} - {End.ToString(Consts.DefaultDateTimeFormat)}";
     }
 }

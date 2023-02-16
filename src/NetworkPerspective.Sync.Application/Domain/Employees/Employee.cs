@@ -25,19 +25,16 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         private readonly IList<Group> _groups;
         private readonly IDictionary<string, object> _props;
 
-        public EmployeeId Id { get; init; }
-        public bool IsExternal { get; init; }
-        public bool IsBot { get; init; }
-        public bool IsHashed { get; init; }
+        public EmployeeId Id { get; }
+        public bool IsExternal { get; }
+        public bool IsBot { get; }
+        public bool IsHashed { get; }
         [JsonIgnore] public bool HasManager => Relations.Contains(SupervisorRelationName);
         [JsonIgnore] public string ManagerEmail => HasManager ? Relations.GetTargetEmployeeEmail(SupervisorRelationName) : string.Empty;
 
         [JsonIgnore] public IReadOnlyDictionary<string, object> Props => _props.ToImmutableDictionary();
         [JsonIgnore] public IReadOnlyCollection<Group> Groups => new ReadOnlyCollection<Group>(_groups);
         [JsonIgnore] public RelationsCollection Relations { get; }
-
-        public Employee()
-        { }
 
         private Employee(EmployeeId id, IEnumerable<Group> groups, bool isExternal, bool isBot, bool isHashed, IDictionary<string, object> props, RelationsCollection relations)
         {

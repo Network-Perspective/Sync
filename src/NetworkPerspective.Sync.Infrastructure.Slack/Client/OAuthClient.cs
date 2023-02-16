@@ -7,10 +7,14 @@ using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
-    internal class OAuthClient : ApiClientBase
+    internal class OAuthClient
     {
-        public OAuthClient(HttpClient httpClient) : base(httpClient)
-        { }
+        private readonly ISlackHttpClient _client;
+
+        public OAuthClient(ISlackHttpClient client)
+        {
+            _client = client;
+        }
 
         public async Task<OAuthAccessResponse> AccessAsync(OAuthAccessRequest request, CancellationToken stoppingToken = default)
         {
@@ -25,7 +29,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
                 new KeyValuePair<string, string>("refresh_token", request.RefreshToken)
             });
 
-            return await Post<OAuthAccessResponse>(path, content, stoppingToken);
+            return await _client.Post<OAuthAccessResponse>(path, content, stoppingToken);
         }
     }
 }

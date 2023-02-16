@@ -22,6 +22,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
 
             return new HashedInteraction
             {
+                InteractionId = domainInteraction.Id,
                 When = domainInteraction.Timestamp,
                 SourceIds = IdsMapper.ToIds(domainInteraction.Source, dataSourceIdName),
                 TargetIds = IdsMapper.ToIds(domainInteraction.Target, dataSourceIdName),
