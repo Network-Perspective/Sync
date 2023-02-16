@@ -128,5 +128,33 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain
             // Act Assert
             action.Should().Throw<ArgumentException>();
         }
+
+        [Fact]
+        public async Task ShouldIncrementBatchNumber()
+        {
+            // Arrange
+            const int size = 2;
+
+            var batchNumbers = new List<int>();
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            Task Callback(BatchReadyEventArgs<int> args)
+            {
+                batchNumbers.Add(args.BatchNumber);
+                return Task.CompletedTask;
+            };
+
+            var buffer = new Batcher<int>(size);
+            buffer.OnBatchReady(Callback);
+
+            var items = Enumerable.Range(0, 5);
+
+            // Act
+            await buffer.AddRangeAsync(items, cancellationTokenSource.Token);
+            await buffer.FlushAsync();
+
+            // Assert
+            batchNumbers.Should().BeEquivalentTo(Enumerable.Range(1, 3));
+        }
     }
 }
