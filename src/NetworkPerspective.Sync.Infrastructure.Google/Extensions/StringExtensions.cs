@@ -16,8 +16,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
         }
 
         public static string[] ExtractEmailAddress(this string[] conversationParticipant)
-            => conversationParticipant
+        {
+            return conversationParticipant
+                .Where(x => !x.Contains(':')) // Group
                 .Select(x => new MailAddress(x).Address)
                 .ToArray();
+        }
     }
 }
