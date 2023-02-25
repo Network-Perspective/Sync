@@ -27,6 +27,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         private readonly ICalendarClient _calendarClient;
         private readonly IUsersClient _usersClient;
         private readonly IClock _clock;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly GoogleConfig _config;
         private readonly ILogger<GoogleFacade> _logger;
 
@@ -38,7 +39,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
                             IUsersClient usersClient,
                             IClock clock,
                             IOptions<GoogleConfig> config,
-                            ILogger<GoogleFacade> logger)
+                            ILoggerFactory loggerFactory)
         {
             _networkService = networkService;
             _secretRepository = secretRepository;
@@ -47,8 +48,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _calendarClient = calendarClient;
             _usersClient = usersClient;
             _clock = clock;
+            _loggerFactory = loggerFactory;
             _config = config.Value;
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<GoogleFacade>();
         }
 
         public async Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
@@ -65,8 +67,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var employeeCollection = context.Get<EmployeeCollection>();
 
-            var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employeeCollection, _clock);
-            var meetingInteractionFactory = new MeetingInteractionFactory(context.HashFunction, employeeCollection);
+            var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employeeCollection, _clock, _loggerFactory.CreateLogger<EmailInteractionFactory>());
+            var meetingInteractionFactory = new MeetingInteractionFactory(context.HashFunction, employeeCollection, _loggerFactory.CreateLogger<MeetingInteractionFactory>());
 
 
             await _mailboxClient.SyncInteractionsAsync(context, stream, employeeCollection.GetAllInternal(), credentials, emailInteractionFactory, stoppingToken);

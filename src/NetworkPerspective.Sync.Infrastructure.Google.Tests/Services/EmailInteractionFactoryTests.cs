@@ -5,6 +5,9 @@ using FluentAssertions;
 
 using Google.Apis.Gmail.v1.Data;
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Services;
@@ -17,6 +20,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 {
     public class EmailInteractionFactoryTests
     {
+        private readonly ILogger<EmailInteractionFactory> _logger = NullLogger<EmailInteractionFactory>.Instance;
+
         [Fact]
         public void ShouldCreateForAllRecipientsOnOutgoing()
         {
@@ -55,7 +60,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var employeesCollection = new EmployeeCollection(employees, null);
 
             // Act
-            var interactions = new EmailInteractionFactory(x => $"{x}_hashed", employeesCollection, new Clock())
+            var interactions = new EmailInteractionFactory(x => $"{x}_hashed", employeesCollection, new Clock(), _logger)
                 .CreateForUser(email, user1Email);
 
             // Assert
@@ -96,7 +101,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var employeesCollection = new EmployeeCollection(employees, null);
 
             // Act
-            var interactions = new EmailInteractionFactory(x => $"{x}_hashed", employeesCollection, new Clock())
+            var interactions = new EmailInteractionFactory(x => $"{x}_hashed", employeesCollection, new Clock(), _logger)
                 .CreateForUser(email, user1Email);
 
             // Assert

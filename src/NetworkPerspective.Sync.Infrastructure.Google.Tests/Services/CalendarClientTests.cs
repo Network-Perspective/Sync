@@ -57,7 +57,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
 
             var employeesCollection = new EmployeeCollection(employees, null);
 
-            var interactionFactory = new MeetingInteractionFactory((x) => $"{x}_hashed", employeesCollection);
+            var interactionFactory = new MeetingInteractionFactory((x) => $"{x}_hashed", employeesCollection, NullLogger<MeetingInteractionFactory>.Instance);
 
             var stream = new TestableInteractionStream();
 

@@ -47,7 +47,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var employeeCriterias = new[] { new NonServiceUserCriteria(_loggerFactory.CreateLogger<NonServiceUserCriteria>()) };
             var employeeProfileClient = new UsersClient(_tasksStatusesCache, _googleConfig, employeeCriterias, _loggerFactory.CreateLogger<UsersClient>());
 
-            return new GoogleFacade(_networkService, secretRepository, credentialsProvider, mailboxClient, meetingsClient, employeeProfileClient, _clock, _googleConfig, _loggerFactory.CreateLogger<GoogleFacade>());
+            return new GoogleFacade(_networkService, secretRepository, credentialsProvider, mailboxClient, meetingsClient, employeeProfileClient, _clock, _googleConfig, _loggerFactory);
         }
     }
 }
