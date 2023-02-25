@@ -6,6 +6,8 @@ using FluentAssertions;
 
 using Google.Apis.Calendar.v3.Data;
 
+using Microsoft.Extensions.Logging.Abstractions;
+
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
@@ -52,7 +54,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var employeesCollection = new EmployeeCollection(employees, null);
 
             // Act
-            var interactions = new MeetingInteractionFactory(x => $"{x}_hashed", employeesCollection)
+            var interactions = new MeetingInteractionFactory(x => $"{x}_hashed", employeesCollection, NullLogger<MeetingInteractionFactory>.Instance)
                 .CreateForUser(meeting, user1Email, null);
 
             // Assert
@@ -92,7 +94,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var employeesCollection = new EmployeeCollection(employees, null);
 
             // Act
-            var interactions = new MeetingInteractionFactory(x => $"{x}_hashed", employeesCollection)
+            var interactions = new MeetingInteractionFactory(x => $"{x}_hashed", employeesCollection, NullLogger<MeetingInteractionFactory>.Instance)
                 .CreateForUser(meeting, user1Email, null);
 
             // Assert
