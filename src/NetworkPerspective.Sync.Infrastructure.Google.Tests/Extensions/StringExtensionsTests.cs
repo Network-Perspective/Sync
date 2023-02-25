@@ -13,6 +13,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Extensions
         [Theory]
         [InlineData("John Doe <john.doe@networkperspective.io>", "john.doe@networkperspective.io")]
         [InlineData("john.doe@networkperspective.io", "john.doe@networkperspective.io")]
+        [InlineData("\"Giant; \\\"Big\\\" Box\" <sysservices@example.net>", "sysservices@example.net")]
+        [InlineData("\"Joe Q. Public\" <john.q.public@example.com>", "john.q.public@example.com")]
         public void ShouldExtractEmail(string input, string expectedOutput)
         {
             // Arrange

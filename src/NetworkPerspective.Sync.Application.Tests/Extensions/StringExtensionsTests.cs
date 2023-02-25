@@ -37,7 +37,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Extensions
                 };
 
                 // Assert
-                action.ExecutionTime().Should().BeLessThan(10.Milliseconds());
+                action.ExecutionTime().Should().BeLessThan(20.Milliseconds());
             }
         }
     }

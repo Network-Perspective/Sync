@@ -99,7 +99,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 _logger.LogTrace("Evaluation interactions based on mailbox for user '{user}' completed. Processed {mailsCount} email/s", userEmail, mailboxTraverser.FetchedMessagesCount);
 
                 _logger.LogTrace(new DefaultActionsAggregatorPrinter().Print(actionsAggregator));
-
             }
             catch (TooManyMailsPerUserException tmmpuex)
             {
