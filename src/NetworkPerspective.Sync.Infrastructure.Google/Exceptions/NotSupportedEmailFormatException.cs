@@ -4,12 +4,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Exceptions
 {
     internal class NotSupportedEmailFormatException : Exception
     {
-        public string Email { get; }
+        public string Input { get; }
 
-        public NotSupportedEmailFormatException(string email) :
-            base($"Provided email has not supported format: '{email}'")
+        public NotSupportedEmailFormatException(string input) :
+            base($"Provided input has not supported format: '{input}'")
         {
-            Email = email;
+            Input = input;
         }
     }
 }
