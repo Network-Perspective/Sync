@@ -10,7 +10,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
     {
         public static string[] GetUserEmails(this string headerValue)
         {
-            if (headerValue is null)
+            if (string.IsNullOrEmpty(headerValue))
                 return Array.Empty<string>();
 
             if (ContainsGroup(headerValue))

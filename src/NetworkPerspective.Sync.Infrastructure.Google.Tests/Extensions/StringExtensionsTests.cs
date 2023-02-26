@@ -33,6 +33,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Extensions
         public class GetUserEmails : StringExtensionsTests
         {
             [Theory]
+            [InlineData(null)]
+            [InlineData("")]
             [InlineData("John Doe <john.doe@networkperspective.io>", "john.doe@networkperspective.io")]
             [InlineData("John Doe <john.doe@networkperspective.io>, \"Giant;, \\\"Big\\\" Box\" <sysservices@example.net>", "john.doe@networkperspective.io", "sysservices@example.net")]
             // Not supported yet, for now just skip
