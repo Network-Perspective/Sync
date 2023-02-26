@@ -17,14 +17,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
                 return Array.Empty<string>();
 
             var mailAddressessCollection = new MailAddressCollection();
-            mailAddressessCollection.Add(headerValue);
+
+            try
+            {
+                mailAddressessCollection.Add(headerValue);
+            }
+
+            catch
+            {
+                throw new NotSupportedEmailFormatException(headerValue);
+            }
 
             return mailAddressessCollection
                 .Select(x => x.Address)
                 .ToArray();
         }
-
-
 
         public static string[] ExtractEmailAddress(this string[] conversationParticipant)
         {
@@ -40,7 +47,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
             {
                 return new MailAddress(email).Address;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw new NotSupportedEmailFormatException(email);
             }
