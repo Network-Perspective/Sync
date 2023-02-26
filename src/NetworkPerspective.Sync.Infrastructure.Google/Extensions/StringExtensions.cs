@@ -13,14 +13,23 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
             if (headerValue is null)
                 return Array.Empty<string>();
 
-            var participantsArray = headerValue.Split(", ", StringSplitOptions.RemoveEmptyEntries);
-            return ExtractEmailAddress(participantsArray);
+            if (ContainsGroup(headerValue))
+                return Array.Empty<string>();
+
+            var mailAddressessCollection = new MailAddressCollection();
+            mailAddressessCollection.Add(headerValue);
+
+            return mailAddressessCollection
+                .Select(x => x.Address)
+                .ToArray();
         }
+
+
 
         public static string[] ExtractEmailAddress(this string[] conversationParticipant)
         {
             return conversationParticipant
-                .Where(x => !x.Contains(':')) // Group
+                .Where(DoesntContainGroup)
                 .Select(ExtractSingleEmailAddress)
                 .ToArray();
         }
@@ -36,5 +45,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
                 throw new NotSupportedEmailFormatException(email);
             }
         }
+
+        private static bool DoesntContainGroup(string input)
+            => !ContainsGroup(input);
+
+        private static bool ContainsGroup(string input)
+            => input.Contains(':') && input.Contains(';');
     }
 }
