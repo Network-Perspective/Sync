@@ -10,21 +10,44 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Extensions
 {
     public class StringExtensionsTests
     {
-        [Theory]
-        [InlineData("John Doe <john.doe@networkperspective.io>", "john.doe@networkperspective.io")]
-        [InlineData("john.doe@networkperspective.io", "john.doe@networkperspective.io")]
-        [InlineData("\"Giant; \\\"Big\\\" Box\" <sysservices@example.net>", "sysservices@example.net")]
-        [InlineData("\"Joe Q. Public\" <john.q.public@example.com>", "john.q.public@example.com")]
-        public void ShouldExtractEmail(string input, string expectedOutput)
+        public class ExtractEmailAddress : StringExtensionsTests
         {
-            // Arrange
-            var array = new[] { input };
+            [Theory]
+            [InlineData("John Doe <john.doe@networkperspective.io>", "john.doe@networkperspective.io")]
+            [InlineData("john.doe@networkperspective.io", "john.doe@networkperspective.io")]
+            [InlineData("\"Giant; \\\"Big\\\" Box\" <sysservices@example.net>", "sysservices@example.net")]
+            [InlineData("\"Joe Q. Public\" <john.q.public@example.com>", "john.q.public@example.com")]
+            public void ShouldExtractEmail(string input, string expectedOutput)
+            {
+                // Arrange
+                var array = new[] { input };
 
-            // Act
-            var result = array.ExtractEmailAddress();
+                // Act
+                var result = array.ExtractEmailAddress();
 
-            // Assert
-            result.Single().Should().Be(expectedOutput);
+                // Assert
+                result.Single().Should().Be(expectedOutput);
+            }
+        }
+
+        public class GetUserEmails : StringExtensionsTests
+        {
+            [Theory]
+            [InlineData(null)]
+            [InlineData("")]
+            [InlineData("John Doe <john.doe@networkperspective.io>", "john.doe@networkperspective.io")]
+            [InlineData("John Doe <john.doe@networkperspective.io>, \"Giant;, \\\"Big\\\" Box\" <sysservices@example.net>", "john.doe@networkperspective.io", "sysservices@example.net")]
+            // Not supported yet, for now just skip
+            // [InlineData("Group:john.doe@networkperspective.io, sysservices@example.net; foo@bar.com", "john.doe@networkperspective.io", "sysservices@example.net", "foo@bar.com")]
+            [InlineData("Group:john.doe@networkperspective.io, sysservices@example.net; foo@bar.com")]
+            public void ShouldExtractEmail(string input, params string[] expectedEmails)
+            {
+                // Act
+                var result = input.GetUserEmails();
+
+                // Assert
+                result.Should().BeEquivalentTo(expectedEmails);
+            }
         }
     }
 }
