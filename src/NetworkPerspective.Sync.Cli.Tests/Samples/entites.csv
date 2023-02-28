@@ -1,0 +1,4 @@
+RowDate	EmployeeId	Supervisor (EmployeeId)	Sex	Kpi1	EmploymentDate
+2021-05-01	eid1		M	8	2006-04-30
+2021-05-01	eid2	eid1	F	2	1998-12-14
+2021-05-01	eid3	eid2	M	3	1995-11-30
