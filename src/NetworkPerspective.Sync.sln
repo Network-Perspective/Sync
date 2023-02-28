@@ -59,7 +59,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.GSu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.Core.Stub", "NetworkPerspective.Sync.Infrastructure.Core.Stub\NetworkPerspective.Sync.Infrastructure.Core.Stub.csproj", "{51619BB3-6F56-4584-96DD-6232EEC858D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.RegressionTests", "NetworkPerspective.Sync.RegressionTests\NetworkPerspective.Sync.RegressionTests.csproj", "{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.RegressionTests", "NetworkPerspective.Sync.RegressionTests\NetworkPerspective.Sync.RegressionTests.csproj", "{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Infrastructure.Microsoft", "NetworkPerspective.Sync.Infrastructure.Microsoft\NetworkPerspective.Sync.Infrastructure.Microsoft.csproj", "{A4BA2161-DFCD-41D8-8518-CC6D16EE2962}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Office365", "NetworkPerspective.Sync.Office365\NetworkPerspective.Sync.Office365.csproj", "{A668CD8B-4B3E-4E9A-8749-C93D50C06655}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -167,6 +171,14 @@ Global
 		{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4BA2161-DFCD-41D8-8518-CC6D16EE2962}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4BA2161-DFCD-41D8-8518-CC6D16EE2962}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4BA2161-DFCD-41D8-8518-CC6D16EE2962}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4BA2161-DFCD-41D8-8518-CC6D16EE2962}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A668CD8B-4B3E-4E9A-8749-C93D50C06655}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A668CD8B-4B3E-4E9A-8749-C93D50C06655}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A668CD8B-4B3E-4E9A-8749-C93D50C06655}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A668CD8B-4B3E-4E9A-8749-C93D50C06655}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -199,6 +211,8 @@ Global
 		{1637F593-4B6E-48F3-A646-C9349640C4D0} = {6EFA829B-C784-47D9-9825-3264F052057B}
 		{51619BB3-6F56-4584-96DD-6232EEC858D6} = {527F899C-F2B0-4EB7-B9ED-B90CDAAF18E0}
 		{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A} = {6EFA829B-C784-47D9-9825-3264F052057B}
+		{A4BA2161-DFCD-41D8-8518-CC6D16EE2962} = {527F899C-F2B0-4EB7-B9ED-B90CDAAF18E0}
+		{A668CD8B-4B3E-4E9A-8749-C93D50C06655} = {9AC2B900-B353-4879-A540-108F67D429C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}
