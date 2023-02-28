@@ -1,0 +1,32 @@
+{
+  "profiles": {
+    "NetworkPerspective.Sync.Cli": {
+      "commandName": "Project"
+    },
+    "Entites": {
+      "commandName": "Project",
+      "commandLineArgs": "Entities -Token sample_token -Csv ..\\NetworkPerspective.Sync.Cli.Tests\\Samples\\entites.csv -DebugFn .\\output\\entites-expected.json",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "Groups": {
+      "commandName": "Project",
+      "commandLineArgs": "Groups -Token sample_token -Csv ..\\NetworkPerspective.Sync.Cli.Tests\\Samples\\groups.csv -DebugFn .\\output\\groups-expected.json",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "Interactions": {
+      "commandName": "Project",
+      "commandLineArgs": "Interactions -Token sample_token -Csv ..\\NetworkPerspective.Sync.Cli.Tests\\Samples\\interactions.csv -DebugFn .\\output\\interactions-expected.json -DataSourceType meeting",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "InteractionBatched": {
+      "commandName": "Project",
+      "commandLineArgs": "Interactions -Token sample_token -Csv ..\\NetworkPerspective.Sync.Cli.Tests\\Samples\\interactions.csv -DebugFn .\\output\\interactions-expected.json -DataSourceType meeting -BatchSize 2 -TimeZone UTC",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "InteractionsSplitTest": {
+      "commandName": "Project",
+      "commandLineArgs": "Interactions -Token sample_token -Csv ..\\NetworkPerspective.Sync.Cli.Tests\\Samples\\interactions-split2.csv -DebugFn .\\output\\interactions-split2-expected.json -DataSourceType meeting -BatchSize 2 -TimeZone UTC",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}
