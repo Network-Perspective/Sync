@@ -7,6 +7,8 @@ namespace NetworkPerspective.Sync.RegressionTests.Interactions
 {
     internal class VertexIdEqualityComparer : IEqualityComparer<IDictionary<string, string>>
     {
+        public static readonly VertexIdEqualityComparer Instance = new VertexIdEqualityComparer();
+
         public bool Equals(IDictionary<string, string> x, IDictionary<string, string> y)
         {
             if (x == null || y == null)
