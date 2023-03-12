@@ -10,6 +10,7 @@ namespace NetworkPerspective.Sync.Application.Domain
     {
         private List<T> _objects = new List<T>();
         private readonly int _batchSize;
+        private int batchCount = 0;
         private BatchReadyCallback<T> _callback = _ => Task.CompletedTask;
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
 
@@ -36,7 +37,9 @@ namespace NetworkPerspective.Sync.Application.Domain
                     if (stoppingToken.IsCancellationRequested)
                         return;
 
-                    await _callback(new BatchReadyEventArgs<T>(_objects.Take(_batchSize)));
+                    batchCount++;
+
+                    await _callback(new BatchReadyEventArgs<T>(_objects.Take(_batchSize), batchCount));
                     _objects = _objects.Skip(_batchSize).ToList();
                 }
             }
@@ -53,7 +56,9 @@ namespace NetworkPerspective.Sync.Application.Domain
             {
                 if (_objects.Any())
                 {
-                    await _callback(new BatchReadyEventArgs<T>(_objects));
+                    batchCount++;
+
+                    await _callback(new BatchReadyEventArgs<T>(_objects, batchCount));
                     _objects = Enumerable.Empty<T>().ToList();
                 }
             }
