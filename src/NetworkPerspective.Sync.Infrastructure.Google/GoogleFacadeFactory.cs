@@ -43,11 +43,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var credentialsProvider = new CredentialsProvider(secretRepository);
             var mailboxClient = new MailboxClient(_tasksStatusesCache, _googleConfig, _loggerFactory, _clock);
-            var meetingsClient = new CalendarClient(_tasksStatusesCache, _googleConfig, _loggerFactory.CreateLogger<CalendarClient>());
+            var callendarClient = new CalendarClient(_tasksStatusesCache, _googleConfig, _loggerFactory.CreateLogger<CalendarClient>());
             var employeeCriterias = new[] { new NonServiceUserCriteria(_loggerFactory.CreateLogger<NonServiceUserCriteria>()) };
-            var employeeProfileClient = new UsersClient(_tasksStatusesCache, _googleConfig, employeeCriterias, _loggerFactory.CreateLogger<UsersClient>());
+            var usersClient = new UsersClient(_tasksStatusesCache, _googleConfig, employeeCriterias, _loggerFactory.CreateLogger<UsersClient>());
 
-            return new GoogleFacade(_networkService, secretRepository, credentialsProvider, mailboxClient, meetingsClient, employeeProfileClient, _clock, _googleConfig, _loggerFactory);
+            return new GoogleFacade(_networkService, credentialsProvider, mailboxClient, callendarClient, usersClient, _clock, _loggerFactory);
         }
     }
 }

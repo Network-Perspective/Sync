@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Security;
+using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Services;
 
 namespace NetworkPerspective.Sync.Application.Domain.Sync
 {
-    public class SyncContext : IDisposable
+    public sealed class SyncContext : IDisposable
     {
         private readonly IDictionary<Type, object> _container = new Dictionary<Type, object>();
         private readonly IHashingService _hashingService;
@@ -32,19 +33,21 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
             HashFunction = hashingService.Hash;
         }
 
-        public bool Contains<T>()
-            => _container.ContainsKey(typeof(T));
-
-        public T Get<T>()
+        public T EnsureSet<T>(Func<T> obj)
         {
-            if (!Contains<T>())
-                throw new KeyNotFoundException($"Context does not contain type '{typeof(T)}'");
+            if (!_container.ContainsKey(typeof(T)))
+                _container[typeof(T)] = obj();
 
             return (T)_container[typeof(T)];
         }
 
-        public void Set<T>(T obj)
-            => _container[typeof(T)] = obj;
+        public async Task<T> EnsureSetAsync<T>(Func<Task<T>> obj)
+        {
+            if (!_container.ContainsKey(typeof(T)))
+                _container[typeof(T)] = await obj();
+
+            return (T)_container[typeof(T)];
+        }
 
         public void Dispose()
         {

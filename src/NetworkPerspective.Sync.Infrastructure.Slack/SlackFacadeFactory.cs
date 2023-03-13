@@ -34,12 +34,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
         public Task<IDataSource> CreateAsync(Guid networkId, CancellationToken stoppingToken = default)
         {
-            var paginationHandler = new CursorPaginationHandler(_loggerFactory.CreateLogger<CursorPaginationHandler>());
-
-            var employeeProfileClient = new MembersClient(_loggerFactory.CreateLogger<MembersClient>());
+            var membersClient = new MembersClient(_loggerFactory.CreateLogger<MembersClient>());
             var chatClient = new ChatClient(_tasksStatusesCache, _loggerFactory.CreateLogger<ChatClient>());
 
-            var facade = new SlackFacade(_networkService, employeeProfileClient, chatClient, _slackClientFacadeFactory, paginationHandler, _clock, _loggerFactory.CreateLogger<SlackFacade>());
+            var facade = new SlackFacade(_networkService, membersClient, chatClient, _slackClientFacadeFactory, _clock, _loggerFactory.CreateLogger<SlackFacade>());
             return Task.FromResult(facade as IDataSource);
         }
     }
