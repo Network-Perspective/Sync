@@ -49,6 +49,9 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("Timestamp column name"), ArgRequired, DefaultValue("When")]
         public string WhenCol { get; set; }
 
+        [ArgDescription("InteractionId column name"), ArgRequired, DefaultValue("InteractionId")]
+        public string InteractionId { get; set; }
+
         [ArgDescription("Timestamp timezone (see TimeZoneInfo.FindSystemTimeZoneById)"), ArgRequired, DefaultValue("Central European Standard Time")]
         public string TimeZone { get; set; }
 
@@ -80,6 +83,7 @@ namespace NetworkPerspective.Sync.Cli
         private Dictionary<string, ColumnDescriptor> _eventIdCols = new Dictionary<string, ColumnDescriptor>();
         private Dictionary<string, ColumnDescriptor> _recurrenceCols = new Dictionary<string, ColumnDescriptor>();
         private Dictionary<string, ColumnDescriptor> _durationCols = new Dictionary<string, ColumnDescriptor>();
+        private Dictionary<string, ColumnDescriptor> _interactionIdCols = new Dictionary<string, ColumnDescriptor>();
 
         private readonly ISyncHashedClient _client;
         private readonly IFileSystem _fileSystem;
@@ -125,6 +129,7 @@ namespace NetworkPerspective.Sync.Cli
             _eventIdCols = _options.EventIdCol.AsColumnDescriptorDictionary();
             _recurrenceCols = _options.RecurrentceCol.AsColumnDescriptorDictionary();
             _durationCols = _options.DurationCol.AsColumnDescriptorDictionary();
+            _interactionIdCols = _options.InteractionId.AsColumnDescriptorDictionary();
 
             var timer = Stopwatch.StartNew();
 
@@ -240,6 +245,10 @@ namespace NetworkPerspective.Sync.Cli
                         else if (_whenCols.ContainsKey(fieldName))
                         {
                             interaction.When = value.AsUtcDate(args.TimeZone);
+                        }
+                        else if (_interactionIdCols.ContainsKey(fieldName))
+                        {
+                            interaction.InteractionId = value;
                         }
                         else if (_eventIdCols.ContainsKey(fieldName))
                         {
