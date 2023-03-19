@@ -55,10 +55,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var employeesCollection = context.EnsureSet(() => mapper.ToEmployees(users));
 
-
             var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employeesCollection, _clock, _loggerFactory.CreateLogger<EmailInteractionFactory>());
             var meetingInteractionFactory = new MeetingInteractionFactory(context.HashFunction, employeesCollection, _loggerFactory.CreateLogger<MeetingInteractionFactory>());
-
 
             await _mailboxClient.SyncInteractionsAsync(context, stream, employeesCollection.GetAllInternal(), credentials, emailInteractionFactory, stoppingToken);
             await _calendarClient.SyncInteractionsAsync(context, stream, employeesCollection.GetAllInternal(), credentials, meetingInteractionFactory, stoppingToken);
