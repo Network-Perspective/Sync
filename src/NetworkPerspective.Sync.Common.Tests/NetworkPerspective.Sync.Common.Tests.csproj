@@ -19,6 +19,7 @@
     <ItemGroup>
         <ProjectReference Include="..\NetworkPerspective.Sync.Application\NetworkPerspective.Sync.Application.csproj" />
         <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Persistence\NetworkPerspective.Sync.Infrastructure.Persistence.csproj" />
+        <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.SecretStorage\NetworkPerspective.Sync.Infrastructure.SecretStorage.csproj" />
     </ItemGroup>
 
     <ItemGroup>

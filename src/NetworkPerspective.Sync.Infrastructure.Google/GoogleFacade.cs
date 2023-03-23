@@ -75,7 +75,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var mapper = new EmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes));
 
-            var employeesCollection = context.EnsureSet(() =>mapper.ToEmployees(users));
+            var employeesCollection = context.EnsureSet(() => mapper.ToEmployees(users));
             return employeesCollection;
         }
 
