@@ -16,8 +16,6 @@ using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 
-using Quartz;
-
 namespace NetworkPerspective.Sync.Common.Tests.Fixtures
 {
     public class InMemoryHostedServiceFixture<TStartup> : WebApplicationFactory<TStartup>
