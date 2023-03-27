@@ -11,7 +11,7 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Mappers
 {
-    public class EmployeesMapperTests
+    public class HashedEmployeesMapperTests
     {
         [Fact]
         public void ShouldMapToEmployeesCollection()
@@ -34,7 +34,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Mappers
             };
 
             // Act
-            var employees = EmployeesMapper.ToEmployees(users);
+            var employees = HashedEmployeesMapper.ToEmployees(users, x => x);
 
             // Assert
             employees.GetAllInternal().Should().NotBeEmpty();

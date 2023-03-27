@@ -32,18 +32,27 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             return EmployeesMapper.ToEmployees(users);
         }
 
-        public Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
+        public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
-            return Task.FromResult(new EmployeeCollection(Array.Empty<Employee>(), x => x));
+            _logger.LogInformation("Getting hashed employees for network '{networkId}'", context.NetworkId);
+
+            var users = await _usersClient.GetUsersAsync(context, stoppingToken);
+
+            return HashedEmployeesMapper.ToEmployees(users, context.HashFunction);
         }
 
         public Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)
         {
+            _logger.LogInformation("Checking if network '{networkId}' is authorized", networkId);
+
             return Task.FromResult(true);
         }
 
         public Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
+            _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);
+
+            _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
             return Task.CompletedTask;
         }
     }
