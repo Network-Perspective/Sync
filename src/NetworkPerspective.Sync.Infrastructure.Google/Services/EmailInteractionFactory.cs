@@ -18,12 +18,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal class EmailInteractionFactory
     {
-        private readonly HashFunction _hashFunc;
+        private readonly HashFunction.Delegate _hashFunc;
         private readonly EmployeeCollection _employeeLookupTable;
         private readonly IClock _clock;
         private readonly ILogger<EmailInteractionFactory> _logger;
 
-        public EmailInteractionFactory(HashFunction hash, EmployeeCollection employeeLookupTable, IClock clock, ILogger<EmailInteractionFactory> logger)
+        public EmailInteractionFactory(HashFunction.Delegate hash, EmployeeCollection employeeLookupTable, IClock clock, ILogger<EmailInteractionFactory> logger)
         {
             _hashFunc = hash;
             _employeeLookupTable = employeeLookupTable;

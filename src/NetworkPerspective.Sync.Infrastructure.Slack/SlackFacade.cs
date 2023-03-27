@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +7,6 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Services;
@@ -23,7 +21,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         private readonly IMembersClient _employeeProfileClient;
         private readonly IChatClient _chatClient;
         private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
-        private readonly CursorPaginationHandler _cursorPaginationHandler;
         private readonly IClock _clock;
         private readonly ILogger<SlackFacade> _logger;
 
@@ -31,7 +28,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                            IMembersClient employeeProfileClient,
                            IChatClient chatClient,
                            ISlackClientFacadeFactory slackClientFacadeFactory,
-                           CursorPaginationHandler cursorPaginationHandler,
                            IClock clock,
                            ILogger<SlackFacade> logger)
         {
@@ -39,7 +35,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             _employeeProfileClient = employeeProfileClient;
             _chatClient = chatClient;
             _slackClientFacadeFactory = slackClientFacadeFactory;
-            _cursorPaginationHandler = cursorPaginationHandler;
             _clock = clock;
             _logger = logger;
         }
@@ -48,17 +43,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         {
             _logger.LogInformation("Fetching employees data...");
 
-            var storagePath = Path.Combine("tmp", context.NetworkId.ToString());
-
-            await InitializeInContext(context, () => _networkService.GetAsync<SlackNetworkProperties>(context.NetworkId, stoppingToken));
-            await InitializeInContext(context, () => _slackClientFacadeFactory.CreateAsync(context.NetworkId, stoppingToken));
-
-            var slackClientFacade = context.Get<ISlackClientFacade>();
-            var network = context.Get<Network<SlackNetworkProperties>>();
-
-            await InitializeInContext(context, () => _employeeProfileClient.GetEmployees(slackClientFacade, context.NetworkConfig.EmailFilter, stoppingToken));
-
-            var employees = context.Get<EmployeeCollection>();
+            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<SlackNetworkProperties>(context.NetworkId, stoppingToken));
+            var slackClientFacade = await context.EnsureSetAsync(() => _slackClientFacadeFactory.CreateAsync(context.NetworkId, stoppingToken));
+            var employees = await context.EnsureSetAsync(() => _employeeProfileClient.GetEmployees(slackClientFacade, context.NetworkConfig.EmailFilter, stoppingToken));
 
             var interactionFactory = new InteractionFactory(context.HashFunction, employees);
 
@@ -69,11 +56,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
         public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
-            await InitializeInContext(context, () => _networkService.GetAsync<SlackNetworkProperties>(context.NetworkId, stoppingToken));
-            await InitializeInContext(context, () => _slackClientFacadeFactory.CreateAsync(context.NetworkId, stoppingToken));
-
-            var slackClientFacade = context.Get<ISlackClientFacade>();
-            var network = context.Get<Network<SlackNetworkProperties>>();
+            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<SlackNetworkProperties>(context.NetworkId, stoppingToken));
+            var slackClientFacade = await context.EnsureSetAsync(() => _slackClientFacadeFactory.CreateAsync(context.NetworkId, stoppingToken));
 
             return await _employeeProfileClient.GetHashedEmployees(slackClientFacade, context.NetworkConfig.EmailFilter, context.HashFunction, stoppingToken);
         }
@@ -92,19 +76,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 _logger.LogInformation("Network '{networkId}' is not authorized", networkId);
                 _logger.LogDebug(ex, string.Empty);
                 return false;
-            }
-        }
-
-        private async Task InitializeInContext<T>(SyncContext context, Func<Task<T>> initializer)
-        {
-            if (!context.Contains<T>())
-            {
-                _logger.LogDebug($"{typeof(T)} is not initialized yet in the {nameof(SyncContext)}. Initializing {typeof(T)}");
-                context.Set(await initializer());
-            }
-            else
-            {
-                _logger.LogDebug($"{typeof(T)} is already initialized in {nameof(SyncContext)}");
             }
         }
 

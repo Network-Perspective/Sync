@@ -25,7 +25,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
 
             var group = Group.CreateWithParentId(groupId, groupName, groupCategory, groupParentId);
 
-            HashFunction hashingFunction = (x) => $"{x}_hashed";
+            HashFunction.Delegate hashingFunction = (x) => $"{x}_hashed";
 
             var relation = new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, managerEmail) });
             var employeeId = EmployeeId.Create(email, sourceInternalId);

@@ -21,7 +21,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
             var mock = new Mock<IDisposable>();
             var hashingServiceMock = new Mock<IHashingService>();
             var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), new TimeRange(DateTime.UtcNow, DateTime.Now), Mock.Of<IStatusLogger>(), hashingServiceMock.Object);
-            context.Set(mock.Object);
+            context.EnsureSet(() => mock.Object);
 
             // Act
             context.Dispose();
