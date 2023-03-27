@@ -19,7 +19,7 @@
         public static Relation Create(string name, string targetEmployeeEmail)
             => new Relation(name, targetEmployeeEmail, false);
 
-        public Relation Hash(HashFunction hash)
+        public Relation Hash(HashFunction.Delegate hash)
             => new Relation(Name, hash(TargetEmployeeEmail), true);
 
         public override string ToString()

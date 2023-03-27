@@ -62,7 +62,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public static Employee CreateBot(string email)
             => new Employee(EmployeeId.Create(email, string.Empty), Array.Empty<Group>(), false, true, false, ImmutableDictionary<string, object>.Empty, RelationsCollection.Empty);
 
-        public Employee Hash(HashFunction hashFunc)
+        public Employee Hash(HashFunction.Delegate hashFunc)
         {
             if (IsHashed)
                 throw new DoubleHashingException(nameof(Employee));

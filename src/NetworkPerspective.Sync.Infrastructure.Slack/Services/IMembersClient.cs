@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +16,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
     internal interface IMembersClient
     {
         Task<EmployeeCollection> GetEmployees(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, CancellationToken stoppingToken = default);
-        Task<EmployeeCollection> GetHashedEmployees(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, HashFunction hashFunc, CancellationToken stoppingToken = default);
+        Task<EmployeeCollection> GetHashedEmployees(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default);
     }
 
     internal class MembersClient : IMembersClient
@@ -34,10 +33,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         public Task<EmployeeCollection> GetEmployees(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, CancellationToken stoppingToken = default)
             => GetEmployeesInternalAsync(slackClientFacade, emailFilter, null, stoppingToken);
 
-        public Task<EmployeeCollection> GetHashedEmployees(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, HashFunction hashFunc, CancellationToken stoppingToken = default)
+        public Task<EmployeeCollection> GetHashedEmployees(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default)
             => GetEmployeesInternalAsync(slackClientFacade, emailFilter, hashFunc, stoppingToken);
 
-        private async Task<EmployeeCollection> GetEmployeesInternalAsync(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, HashFunction hashFunc, CancellationToken stoppingToken = default)
+        private async Task<EmployeeCollection> GetEmployeesInternalAsync(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default)
         {
             if (hashFunc == null)
                 _logger.LogDebug("Fetching employees... Skipping hashing due to null {func}", nameof(hashFunc));

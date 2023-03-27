@@ -19,7 +19,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
         public SecureString AccessToken { get; }
         public TimeRange TimeRange { get; }
         public IStatusLogger StatusLogger { get; }
-        public HashFunction HashFunction { get; }
+        public HashFunction.Delegate HashFunction { get; }
 
         public SyncContext(Guid networkId, NetworkConfig networkConfig, NetworkProperties networkProperties, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger, IHashingService hashingService)
         {

@@ -18,11 +18,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal class MeetingInteractionFactory
     {
-        private readonly HashFunction _hashFunc;
+        private readonly HashFunction.Delegate _hashFunc;
         private readonly EmployeeCollection _employeeLookupTable;
         private readonly ILogger<MeetingInteractionFactory> _logger;
 
-        public MeetingInteractionFactory(HashFunction hash, EmployeeCollection employeeLookupTable, ILogger<MeetingInteractionFactory> logger)
+        public MeetingInteractionFactory(HashFunction.Delegate hash, EmployeeCollection employeeLookupTable, ILogger<MeetingInteractionFactory> logger)
         {
             _hashFunc = hash;
             _employeeLookupTable = employeeLookupTable;

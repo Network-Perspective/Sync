@@ -23,7 +23,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             IsHashed = isHashed;
         }
 
-        public RelationsCollection Hash(HashFunction hashFunction)
+        public RelationsCollection Hash(HashFunction.Delegate hashFunction)
         {
             var hashedRelations = _relations.Select(x => x.Hash(hashFunction));
             return new RelationsCollection(hashedRelations, true);

@@ -17,9 +17,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
     {
         private readonly ICompanyStructureService _companyStructureService;
         private readonly ICustomAttributesService _customAttributesService;
-        private readonly HashFunction _hashFunc;
+        private readonly HashFunction.Delegate _hashFunc;
 
-        public HashedEmployeesMapper(ICompanyStructureService companyStructureService, ICustomAttributesService customAttributesService, HashFunction hashFunc)
+        public HashedEmployeesMapper(ICompanyStructureService companyStructureService, ICustomAttributesService customAttributesService, HashFunction.Delegate hashFunc)
         {
             _companyStructureService = companyStructureService;
             _customAttributesService = customAttributesService;

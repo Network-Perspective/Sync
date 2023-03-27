@@ -12,7 +12,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 {
     public static class HashedEmployeesMapper
     {
-        public static EmployeeCollection ToEmployees(IEnumerable<User> users, HashFunction hashFunc)
+        public static EmployeeCollection ToEmployees(IEnumerable<User> users, HashFunction.Delegate hashFunc)
         {
             var employees = new List<Employee>();
 
