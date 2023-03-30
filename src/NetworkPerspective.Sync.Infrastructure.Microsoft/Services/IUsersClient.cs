@@ -19,6 +19,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
     internal class UsersClient : IUsersClient
     {
+        private const int MaxPageSize = 999;
         private readonly GraphServiceClient _graphClient;
         private readonly ILogger<UsersClient> _logger;
 
@@ -32,22 +33,39 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         {
             _logger.LogDebug("Fetching users for network '{networkId}'...", context.NetworkId);
 
+            var result = new List<User>();
+
             var usersResponse = await _graphClient
                 .Users
                 .GetAsync(x =>
                 {
                     x.QueryParameters = new UsersRequestBuilder.UsersRequestBuilderGetQueryParameters
                     {
-                        Select = new[] { "Id", "Mail", "OtherMails" }
+                        Select = new[] { "Id", "Mail", "OtherMails" },
+                        Top = MaxPageSize
                     };
                 }, stoppingToken);
 
-            if (!usersResponse.Value.Any())
+            var pageIterator = PageIterator<User, UserCollectionResponse>
+                .CreatePageIterator(_graphClient, usersResponse,
+                user =>
+                {
+                    result.Add(user);
+                    return true;
+                },
+                request =>
+                {
+                    return request;
+                });
+
+            await pageIterator.IterateAsync(stoppingToken);
+
+            if (!result.Any())
                 _logger.LogWarning("No users found in network '{networkId}'", context.NetworkId);
             else
                 _logger.LogDebug("Fetching employees for network '{networkId}' completed. '{count}' employees found", context.NetworkId, usersResponse.Value.Count);
 
-            return usersResponse.Value;
+            return result;
         }
     }
 }

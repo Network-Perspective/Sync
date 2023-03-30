@@ -19,14 +19,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
     internal class EmailInteractionFactory
     {
         private readonly HashFunction.Delegate _hashFunc;
-        private readonly EmployeeCollection _employeeLookupTable;
+        private readonly EmployeeCollection _employees;
         private readonly IClock _clock;
         private readonly ILogger<EmailInteractionFactory> _logger;
 
-        public EmailInteractionFactory(HashFunction.Delegate hash, EmployeeCollection employeeLookupTable, IClock clock, ILogger<EmailInteractionFactory> logger)
+        public EmailInteractionFactory(HashFunction.Delegate hash, EmployeeCollection employees, IClock clock, ILogger<EmailInteractionFactory> logger)
         {
             _hashFunc = hash;
-            _employeeLookupTable = employeeLookupTable;
+            _employees = employees;
             _clock = clock;
             _logger = logger;
         }
@@ -35,11 +35,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         {
             try
             {
-                var user = _employeeLookupTable.Find(userEmail);
-                var sender = _employeeLookupTable.Find(message.GetSender());
+                var user = _employees.Find(userEmail);
+                var sender = _employees.Find(message.GetSender());
                 var recipients = message
                     .GetRecipients()
-                    .Select(_employeeLookupTable.Find)
+                    .Select(_employees.Find)
                     .Distinct(Employee.EqualityComparer);
                 var timestamp = message.GetDateTime(_clock);
 
