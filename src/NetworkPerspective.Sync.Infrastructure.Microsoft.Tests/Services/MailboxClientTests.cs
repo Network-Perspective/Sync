@@ -48,10 +48,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var employees = EmployeesMapper.ToEmployees(users);
 
             var interactionFactory = new InteractionFactory(HashFunction.Empty, employees, NullLogger<InteractionFactory>.Instance);
-            var mailboxClient = new MailboxClient(_microsoftClientFixture.GraphServiceClient, Mock.Of<ITasksStatusesCache>(), interactionFactory, _mailboxClientlogger);
+            var mailboxClient = new MailboxClient(_microsoftClientFixture.GraphServiceClient, Mock.Of<ITasksStatusesCache>(), _mailboxClientlogger);
 
             // Act
-            await mailboxClient.SyncInteractionsAsync(syncContext, stream, users.Select(x => x.Mail));
+            await mailboxClient.SyncInteractionsAsync(syncContext, stream, users.Select(x => x.Mail), interactionFactory);
 
             stream.SentInteractions.Should().HaveCount(55);
         }
