@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft
@@ -12,11 +13,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
     internal class MicrosoftFacadeFactory : IDataSourceFactory
     {
         private readonly IMicrosoftClientFactory _microsoftClientFactory;
+        private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ILoggerFactory _loggerFactory;
 
-        public MicrosoftFacadeFactory(IMicrosoftClientFactory microsoftClientFactory, ILoggerFactory loggerFactory)
+        public MicrosoftFacadeFactory(
+            IMicrosoftClientFactory microsoftClientFactory,
+            ITasksStatusesCache tasksStatusesCache,
+            ILoggerFactory loggerFactory)
         {
             _microsoftClientFactory = microsoftClientFactory;
+            _tasksStatusesCache = tasksStatusesCache;
             _loggerFactory = loggerFactory;
         }
 
@@ -25,7 +31,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             var microsoftClient = await _microsoftClientFactory.GetMicrosoftClientAsync(networkId, stoppingToken);
 
             var usersClient = new UsersClient(microsoftClient, _loggerFactory.CreateLogger<UsersClient>());
-            return new MicrosoftFacade(usersClient, _loggerFactory.CreateLogger<MicrosoftFacade>());
+            var mailboxClient = new MailboxClient(microsoftClient, _tasksStatusesCache, _loggerFactory.CreateLogger<MailboxClient>());
+            return new MicrosoftFacade(usersClient, mailboxClient, _loggerFactory);
         }
     }
 }

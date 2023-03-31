@@ -62,7 +62,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var stream = new TestableInteractionStream();
 
             // Act
-            await client.SyncInteractionsAsync(syncContext, stream, employeesCollection.GetAllInternal(), _googleClientFixture.Credential, interactionFactory);
+            await client.SyncInteractionsAsync(syncContext, stream, employeesCollection.GetAllInternal().Select(x => x.Id.PrimaryId), _googleClientFixture.Credential, interactionFactory);
 
             // Assert
             stream.SentInteractions.Should().HaveCount(8);
