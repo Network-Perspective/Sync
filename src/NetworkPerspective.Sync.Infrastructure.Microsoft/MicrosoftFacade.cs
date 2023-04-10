@@ -17,13 +17,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
     {
         private readonly IUsersClient _usersClient;
         private readonly IMailboxClient _mailboxClient;
+        private readonly ICalendarClient _calendarClient;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<MicrosoftFacade> _logger;
 
-        public MicrosoftFacade(IUsersClient usersClient, IMailboxClient mailboxClient, ILoggerFactory loggerFactory)
+        public MicrosoftFacade(IUsersClient usersClient, IMailboxClient mailboxClient, ICalendarClient calendarClient, ILoggerFactory loggerFactory)
         {
             _usersClient = usersClient;
             _mailboxClient = mailboxClient;
+            _calendarClient = calendarClient;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<MicrosoftFacade>();
         }
@@ -67,13 +69,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
                 return EmployeesMapper.ToEmployees(users);
             });
 
-            var emailInteractionfactory = new InteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<InteractionFactory>());
+            var emailInteractionfactory = new EmailInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<EmailInteractionFactory>());
+            var meetingInteractionfactory = new MeetingInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<MeetingInteractionFactory>());
 
             var usersEmails = employees
                 .GetAllInternal()
                 .Select(x => x.Id.PrimaryId);
 
             await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, emailInteractionfactory, stoppingToken);
+            await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, meetingInteractionfactory, stoppingToken);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
         }

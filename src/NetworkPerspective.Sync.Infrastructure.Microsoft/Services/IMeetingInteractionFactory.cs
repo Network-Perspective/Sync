@@ -1,58 +1,71 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
-using Google.Apis.Calendar.v3.Data;
-
 using Microsoft.Extensions.Logging;
+using Microsoft.Graph.Models;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Meetings;
-using NetworkPerspective.Sync.Infrastructure.Google.Exceptions;
-using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
 
-namespace NetworkPerspective.Sync.Infrastructure.Google.Services
+namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
-    internal class MeetingInteractionFactory
+    internal interface IMeetingInteractionFactory
+    {
+        ISet<Interaction> CreateForUser(Event @event, string userEmail);
+    }
+
+    internal class MeetingInteractionFactory : IMeetingInteractionFactory
     {
         private readonly HashFunction.Delegate _hashFunc;
         private readonly EmployeeCollection _employees;
         private readonly ILogger<MeetingInteractionFactory> _logger;
 
-        public MeetingInteractionFactory(HashFunction.Delegate hash, EmployeeCollection employees, ILogger<MeetingInteractionFactory> logger)
+        public MeetingInteractionFactory(HashFunction.Delegate hashFunc, EmployeeCollection employees, ILogger<MeetingInteractionFactory> logger)
         {
-            _hashFunc = hash;
+            _hashFunc = hashFunc;
             _employees = employees;
             _logger = logger;
         }
 
-        public ISet<Interaction> CreateForUser(Event meeting, string userEmail, RecurrenceType? recurrence)
+        public ISet<Interaction> CreateForUser(Event @event, string userEmail)
         {
-            try
-            {
-                var user = _employees.Find(userEmail);
-                var duration = meeting.GetDurationInMinutes();
-                var timestamp = meeting.GetStart();
-                var participants = meeting
-                    .GetParticipants()                                      // Participants as email address 
-                    .Select(_employees.Find)                                // Map to Employee
-                    .Where(x => !Employee.EqualityComparer.Equals(x, user)) // Skip the user
-                    .Distinct(Employee.EqualityComparer);                   // Remove duplicates
+            var user = _employees.Find(userEmail);
+            var duration = (@event.End.ToDateTimeOffset() - @event.Start.ToDateTimeOffset()).TotalMinutes;
+            var timestamp = @event.Start.ToDateTimeOffset().DateTime;
+            var participants = @event
+                .Attendees
+                .Select(x => x.EmailAddress.Address)                    // Participants as email address 
+                .Select(_employees.Find)                                // Map to Employee                   
+                .Where(x => !Employee.EqualityComparer.Equals(x, user)) // Skip the user
+                .Distinct(Employee.EqualityComparer);                   // Remove duplicates
 
-                if (IsSmallMeeting(participants.Count()))
-                    return CreateForSmallMeeting(meeting.Id, user, participants, timestamp, duration, recurrence);
-                else
-                    return CreateForBigMeeting(meeting.Id, user, participants, timestamp, duration, recurrence);
-            }
-            catch (NotSupportedEmailFormatException ex)
+            var recurrence = GetRecurrence(@event.Recurrence);
+
+            if (IsSmallMeeting(participants.Count()))
+                return CreateForSmallMeeting(@event.Id, user, participants, timestamp, (int)duration, recurrence);
+            else
+                return CreateForBigMeeting(@event.Id, user, participants, timestamp, (int)duration, recurrence);
+        }
+
+        private static RecurrenceType? GetRecurrence(PatternedRecurrence recurrence)
+        {
+            if (recurrence?.Pattern == null)
+                return null;
+
+            if (recurrence.Pattern.Type == RecurrencePatternType.Daily)
+                return RecurrenceType.Daily;
+            else if (recurrence.Pattern.Type == RecurrencePatternType.Weekly)
             {
-                _logger.LogWarning("Invalid email format");
-                _logger.LogTrace(ex, "Invalid email format");
-                return ImmutableHashSet<Interaction>.Empty;
+                if (recurrence.Pattern.DaysOfWeek.Count == 1)
+                    return RecurrenceType.Weekly;
+                else
+                    return RecurrenceType.Daily;
             }
+            else
+                return null;
         }
 
         private ISet<Interaction> CreateForSmallMeeting(string eventId, Employee user, IEnumerable<Employee> participants, DateTime timestamp, int duration, RecurrenceType? recurrence)

@@ -12,18 +12,18 @@ using NetworkPerspective.Sync.Application.Domain.Interactions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
-    public interface IInteractionFactory
+    public interface IEmailInteractionFactory
     {
         ISet<Interaction> CreateForUser(Message message, string userEmail);
     }
 
-    internal class InteractionFactory : IInteractionFactory
+    internal class EmailInteractionFactory : IEmailInteractionFactory
     {
         private readonly HashFunction.Delegate _hash;
         private readonly EmployeeCollection _employees;
-        private readonly ILogger<InteractionFactory> _logger;
+        private readonly ILogger<EmailInteractionFactory> _logger;
 
-        public InteractionFactory(HashFunction.Delegate hash, EmployeeCollection employees, ILogger<InteractionFactory> logger)
+        public EmailInteractionFactory(HashFunction.Delegate hash, EmployeeCollection employees, ILogger<EmailInteractionFactory> logger)
         {
             _hash = hash;
             _employees = employees;

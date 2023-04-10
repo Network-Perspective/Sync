@@ -14,7 +14,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             services.Configure<Resiliency>(configurationSection.GetSection("Resiliency"));
 
             services.AddTransient<IMicrosoftClientFactory, MicrosoftClientFactory>();
-            services.AddSingleton<IDataSourceFactory, MicrosoftFacadeFactory>();
+            services.AddTransient<IDataSourceFactory, MicrosoftFacadeFactory>();
             return services;
         }
     }

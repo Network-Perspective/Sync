@@ -47,7 +47,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var users = await usersClient.GetUsersAsync(syncContext);
             var employees = EmployeesMapper.ToEmployees(users);
 
-            var interactionFactory = new InteractionFactory(HashFunction.Empty, employees, NullLogger<InteractionFactory>.Instance);
+            var interactionFactory = new EmailInteractionFactory(HashFunction.Empty, employees, NullLogger<EmailInteractionFactory>.Instance);
             var mailboxClient = new MailboxClient(_microsoftClientFixture.GraphServiceClient, Mock.Of<ITasksStatusesCache>(), _mailboxClientlogger);
 
             // Act
