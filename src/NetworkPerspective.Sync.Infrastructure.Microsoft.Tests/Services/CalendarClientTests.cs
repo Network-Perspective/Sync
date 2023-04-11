@@ -23,35 +23,41 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
 {
-    public class MailboxClientTests : IClassFixture<MicrosoftClientFixture>
+    public class CalendarClientTests : IClassFixture<MicrosoftClientFixture>
     {
         private readonly MicrosoftClientFixture _microsoftClientFixture;
         private readonly ILogger<UsersClient> _usersClientlogger = NullLogger<UsersClient>.Instance;
-        private readonly ILogger<MailboxClient> _mailboxClientlogger = NullLogger<MailboxClient>.Instance;
+        private readonly ILogger<CalendarClient> _calendarClientlogger = NullLogger<CalendarClient>.Instance;
 
-        public MailboxClientTests(MicrosoftClientFixture microsoftClientFixture)
+        public CalendarClientTests(MicrosoftClientFixture microsoftClientFixture)
         {
             _microsoftClientFixture = microsoftClientFixture;
         }
 
         [Fact]
         [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
-        public async Task ShouldCollectFilteredMails()
+        public async Task ShouldSyncInteractions()
         {
             // Arrange
             var stream = new TestableInteractionStream();
             var usersClient = new UsersClient(_microsoftClientFixture.GraphServiceClient, _usersClientlogger);
 
-            var timeRange = new TimeRange(new DateTime(2021, 12, 01), new DateTime(2021, 12, 02));
+            var timeRange = new TimeRange(new DateTime(2023, 04, 10), new DateTime(2023, 04, 11));
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
             var users = await usersClient.GetUsersAsync(syncContext);
             var employees = EmployeesMapper.ToEmployees(users);
 
-            var interactionFactory = new EmailInteractionFactory(HashFunction.Empty, employees, NullLogger<EmailInteractionFactory>.Instance);
-            var mailboxClient = new MailboxClient(_microsoftClientFixture.GraphServiceClient, Mock.Of<ITasksStatusesCache>(), _mailboxClientlogger);
+            var interactionFactory = new MeetingInteractionFactory(HashFunction.Empty, employees, NullLogger<MeetingInteractionFactory>.Instance);
+            var calednarClient = new CalendarClient(_microsoftClientFixture.GraphServiceClient, Mock.Of<ITasksStatusesCache>(), _calendarClientlogger);
 
             // Act
-            await mailboxClient.SyncInteractionsAsync(syncContext, stream, users.Select(x => x.Mail), interactionFactory);
+            await calednarClient.SyncInteractionsAsync(syncContext, stream, users.Select(x => x.Mail), interactionFactory);
+
+            var interactions_1 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2023, 04, 10, 06, 00, 00));
+            interactions_1.Should().HaveCount(2);
+
+            var interactions_2 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2023, 04, 10, 07, 00, 00));
+            interactions_2.Should().HaveCount(2);
 
             stream.SentInteractions.Should().HaveCount(55);
         }
