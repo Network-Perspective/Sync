@@ -11,12 +11,12 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
+using NetworkPerspective.Sync.Application.Exceptions;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
-using NetworkPerspective.Sync.Infrastructure.Slack.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Models;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
 
@@ -30,7 +30,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
         private static readonly string[] Scopes = new[] { "scope1", "scope2" };
         private static readonly string[] UserScopes = new[] { "userScope1", "userScope2" };
 
-        private readonly Mock<IStateKeyFactory> _stateFactoryMock = new Mock<IStateKeyFactory>();
+        private readonly Mock<IAuthStateKeyFactory> _stateFactoryMock = new Mock<IAuthStateKeyFactory>();
         private readonly Mock<ISecretRepositoryFactory> _secretRepositoryFactoryMock = new Mock<ISecretRepositoryFactory>();
         private readonly Mock<ISecretRepository> _secretRepositoryMock = new Mock<ISecretRepository>();
         private readonly Mock<ISlackClientFacadeFactory> _slackClientFacadeFactoryMock = new Mock<ISlackClientFacadeFactory>();
@@ -154,7 +154,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                 Func<Task> func = () => service.HandleAuthorizationCodeCallbackAsync("foo", state);
 
                 // Assert
-                await func.Should().ThrowAsync<AuthException>();
+                await func.Should().ThrowAsync<OAuthException>();
             }
 
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
@@ -59,6 +60,20 @@ namespace NetworkPerspective.Sync.Framework
                             title: "Authentication Error",
                             details: iatex.Message,
                             statusCode: StatusCodes.Status401Unauthorized);
+                    }
+                case OAuthException aex:
+                    {
+                        var details = new StringBuilder();
+                        details.Append(aex.Error);
+
+                        if (!string.IsNullOrEmpty(aex.ErrorDescription))
+                            details.Append($" ({aex.ErrorDescription})");
+
+                        return new Error(
+                            type: Error.Types.Security,
+                            title: "OAuth error",
+                            details: details.ToString(),
+                            statusCode: StatusCodes.Status500InternalServerError);
                     }
                 case SecretStorageException ssex:
                     {

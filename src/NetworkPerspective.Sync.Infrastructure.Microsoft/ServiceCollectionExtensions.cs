@@ -13,8 +13,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         {
             services.Configure<Resiliency>(configurationSection.GetSection("Resiliency"));
 
+            services.AddTransient<IMicrosoftAuthService, MicrosoftAuthService>();
             services.AddTransient<IMicrosoftClientFactory, MicrosoftClientFactory>();
             services.AddTransient<IDataSourceFactory, MicrosoftFacadeFactory>();
+
+            services.AddMemoryCache();
+
             return services;
         }
     }
