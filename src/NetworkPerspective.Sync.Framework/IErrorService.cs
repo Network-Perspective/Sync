@@ -73,7 +73,7 @@ namespace NetworkPerspective.Sync.Framework
                             type: Error.Types.Security,
                             title: "OAuth error",
                             details: details.ToString(),
-                            statusCode: StatusCodes.Status500InternalServerError);
+                            statusCode: StatusCodes.Status400BadRequest);
                     }
                 case SecretStorageException ssex:
                     {
