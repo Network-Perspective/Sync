@@ -74,7 +74,7 @@ namespace NetworkPerspective.Sync.Office365.Controllers
             if (error is not null || error_description is not null)
                 throw new OAuthException(error, error_description);
 
-            await _authService.HandleAuthorizationCodeCallbackAsync(tenant, state, stoppingToken);
+            await _authService.HandleCallbackAsync(tenant, state, stoppingToken);
 
             return Ok("Admin consent completed!");
         }

@@ -17,7 +17,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
     public interface IMicrosoftAuthService
     {
         Task<AuthStartProcessResult> StartAuthProcessAsync(AuthProcess authProcess, CancellationToken stoppingToken = default);
-        Task HandleAuthorizationCodeCallbackAsync(Guid tenant, string state, CancellationToken stoppingToken = default);
+        Task HandleCallbackAsync(Guid tenant, string state, CancellationToken stoppingToken = default);
     }
 
     internal class MicrosoftAuthService : IMicrosoftAuthService
@@ -65,7 +65,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return new AuthStartProcessResult(authUri);
         }
 
-        public async Task HandleAuthorizationCodeCallbackAsync(Guid tenant, string state, CancellationToken stoppingToken = default)
+        public async Task HandleCallbackAsync(Guid tenant, string state, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Received admin consent callback.");
 
