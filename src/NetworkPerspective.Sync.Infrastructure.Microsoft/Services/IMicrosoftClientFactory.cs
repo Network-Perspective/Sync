@@ -62,11 +62,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, networkId);
             var tenantId = await secretRepository.GetSecretAsync(tenantIdKey, stoppingToken);
 
-            var clientIdKey = string.Format(MicrosoftKeys.MicrosoftClientIdPattern, networkId);
-            var clientId = await secretRepository.GetSecretAsync(clientIdKey, stoppingToken);
-
-            var clientSecretKey = string.Format(MicrosoftKeys.MicrosoftClientSecretPattern, networkId);
-            var clientSecret = await secretRepository.GetSecretAsync(clientSecretKey, stoppingToken);
+            var clientId = await secretRepository.GetSecretAsync(MicrosoftKeys.MicrosoftClientIdKey, stoppingToken);
+            var clientSecret = await secretRepository.GetSecretAsync(MicrosoftKeys.MicrosoftClientSecretKey, stoppingToken);
 
             var options = new TokenCredentialOptions
             {

@@ -19,6 +19,7 @@ namespace NetworkPerspective.Sync.Application
             services.AddTransient<IHashingServiceFactory, HashingServiceFactory>();
             services.AddTransient<IInteractionsFilterFactory, InteractionsFilterFactory>();
             services.AddTransient<IHashingServiceFactory, HashingServiceFactory>();
+            services.AddTransient<IAuthStateKeyFactory, AuthStateKeyFactory>();
 
             services.AddTransient<ISyncServiceFactory, SyncServiceFactory>();
 

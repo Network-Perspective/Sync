@@ -7,13 +7,13 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Application.Exceptions;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
-using NetworkPerspective.Sync.Infrastructure.Slack.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Models;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
@@ -27,15 +27,23 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
     internal class SlackAuthService : ISlackAuthService
     {
         private const int SlackAuthorizationCodeExpirationTimeInMinutes = 10;
+
         private readonly AuthConfig _slackAuthConfig;
-        private readonly IStateKeyFactory _stateKeyFactory;
+        private readonly IAuthStateKeyFactory _stateKeyFactory;
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
         private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
         private readonly IMemoryCache _cache;
         private readonly IStatusLoggerFactory _statusLoggerFactory;
         private readonly ILogger<SlackAuthService> _logger;
 
-        public SlackAuthService(IStateKeyFactory stateFactory, IOptions<AuthConfig> slackAuthConfig, ISecretRepositoryFactory secretRepositoryFactory, ISlackClientFacadeFactory slackClientFacadeFactory, IMemoryCache cache, IStatusLoggerFactory statusLoggerFactory, ILogger<SlackAuthService> logger)
+        public SlackAuthService(
+            IAuthStateKeyFactory stateFactory,
+            IOptions<AuthConfig> slackAuthConfig,
+            ISecretRepositoryFactory secretRepositoryFactory,
+            ISlackClientFacadeFactory slackClientFacadeFactory,
+            IMemoryCache cache,
+            IStatusLoggerFactory statusLoggerFactory,
+            ILogger<SlackAuthService> logger)
         {
             _slackAuthConfig = slackAuthConfig.Value;
             _stateKeyFactory = stateFactory;
@@ -71,7 +79,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _logger.LogInformation("Received Authentication callback.");
 
             if (!_cache.TryGetValue(state, out AuthProcess authProcess))
-                throw new AuthException("State does not match initialized value");
+                throw new OAuthException("State does not match initialized value");
 
             var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.NetworkId, stoppingToken);
 
