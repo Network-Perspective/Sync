@@ -50,7 +50,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                             nameof(User.Department),
                             nameof(User.CreatedDateTime)
                         },
-                        Top = MaxPageSize
+                        Top = MaxPageSize,
+                        Expand = new[]
+                        {
+                            nameof(User.Manager)
+                        }
                     };
                 }, stoppingToken);
 

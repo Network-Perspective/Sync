@@ -54,7 +54,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 
         private static RelationsCollection GetEmployeeRelations(User user)
         {
-            return new RelationsCollection(Enumerable.Empty<Relation>());
+            var relations = new List<Relation>();
+
+            if(user.Manager is User manager)
+            {
+                if (manager.Mail is not null)
+                    relations.Add(Relation.Create(Employee.SupervisorRelationName, manager.Mail));
+            }
+
+            return new RelationsCollection(relations);
         }
     }
 }
