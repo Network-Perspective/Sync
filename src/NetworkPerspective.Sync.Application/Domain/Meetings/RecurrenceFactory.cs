@@ -4,8 +4,6 @@ using System.Linq;
 
 using NetworkPerspective.Sync.Application.Exceptions;
 
-using Newtonsoft.Json.Linq;
-
 namespace NetworkPerspective.Sync.Application.Domain.Meetings
 {
     public sealed class RecurrenceFactory

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using Microsoft.Graph.Models;
 
@@ -59,7 +58,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
             if(user.Manager is User manager)
             {
                 if (manager.Mail is not null)
-                    relations.Add(Relation.Create(Employee.SupervisorRelationName, manager.Mail));
+                    relations.Add(Relation.Create(Relation.SupervisorRelationName, manager.Mail));
             }
 
             return new RelationsCollection(relations);

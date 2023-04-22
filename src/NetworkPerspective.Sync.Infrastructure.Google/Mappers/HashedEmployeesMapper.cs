@@ -83,7 +83,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
             var managerEmail = user.GetManagerEmail();
 
             if (!string.IsNullOrEmpty(managerEmail))
-                relations.Add(Relation.Create(Employee.SupervisorRelationName, managerEmail));
+                relations.Add(Relation.Create(Relation.SupervisorRelationName, managerEmail));
 
             return new RelationsCollection(relations);
         }

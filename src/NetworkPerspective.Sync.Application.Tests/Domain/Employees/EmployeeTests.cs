@@ -27,7 +27,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
 
             HashFunction.Delegate hashingFunction = (x) => $"{x}_hashed";
 
-            var relation = new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, managerEmail) });
+            var relation = new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, managerEmail) });
             var employeeId = EmployeeId.Create(email, sourceInternalId);
             var employee = Employee.CreateInternal(employeeId, new[] { group }, null, relation);
 
@@ -44,7 +44,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             hashedEmployee.Groups.Single().Category.Should().Be(groupCategory);
             hashedEmployee.Groups.Single().ParentId.Should().Be($"{groupParentId}_hashed");
 
-            hashedEmployee.Relations.GetTargetEmployeeEmail(Employee.SupervisorRelationName).Should().Be($"{managerEmail}_hashed");
+            hashedEmployee.Relations.GetTargetEmployeeEmail(Relation.SupervisorRelationName).Should().Be($"{managerEmail}_hashed");
         }
 
         [Fact]
