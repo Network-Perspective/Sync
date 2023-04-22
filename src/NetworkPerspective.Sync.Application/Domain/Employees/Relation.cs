@@ -4,12 +4,9 @@
     {
         public const string SupervisorRelationName = "Supervisor";
 
-        public string Name { get; init; }
-        public string TargetEmployeeEmail { get; init; }
-        public bool IsHashed { get; init; }
-
-        public Relation()
-        { }
+        public string Name { get; }
+        public string TargetEmployeeEmail { get; }
+        public bool IsHashed { get; }
 
         private Relation(string name, string targetEmployeeEmail, bool isHashed)
         {
