@@ -19,12 +19,20 @@ steps:
     includePreviewVersions: true # Required for preview versions
   
 - task: DotNetCoreCLI@2
+  displayName: 'dotnet format'
+  inputs:
+    command: 'custom'
+    custom: 'format'
+    arguments: '--verify-no-changes'
+    projects: 'src/NetworkPerspective.Sync.sln'
+
+- task: DotNetCoreCLI@2
   displayName: 'dotnet build'
   inputs:
     command: 'build'
     configuration: $(buildConfiguration)    
     projects: 'src/NetworkPerspective.Sync.sln'
-  
+
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test'
   inputs:
