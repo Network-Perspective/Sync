@@ -42,7 +42,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 
             props.Add(Employee.PropKeyName, user.GetFullName());
 
-            if(user.CreatedDateTime.HasValue)
+            if (user.CreatedDateTime.HasValue)
             {
                 var bucketAccCreationDate = new DateTime(user.CreatedDateTime.Value.Year, user.CreatedDateTime.Value.Month, 1);
                 props.Add(Employee.PropKeyCreationTime, bucketAccCreationDate);
@@ -55,7 +55,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
         {
             var relations = new List<Relation>();
 
-            if(user.Manager is User manager)
+            if (user.Manager is User manager)
             {
                 if (manager.Mail is not null)
                     relations.Add(Relation.Create(Relation.SupervisorRelationName, manager.Mail));

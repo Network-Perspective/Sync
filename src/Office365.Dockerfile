@@ -8,10 +8,10 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR "/src"
 COPY . .
-RUN dotnet publish "NetworkPerspective.Sync.GSuite/NetworkPerspective.Sync.GSuite.csproj" -c Release -o /app/publish
+RUN dotnet publish "NetworkPerspective.Sync.Office365/NetworkPerspective.Sync.Office365.csproj" -c Release -o /app/publish
 
 # copy artefacts to final image
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "NetworkPerspective.Sync.GSuite.dll"]
+ENTRYPOINT ["dotnet", "NetworkPerspective.Sync.Office365.dll"]

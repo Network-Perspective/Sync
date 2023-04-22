@@ -59,6 +59,16 @@ stages:
         tags: |
           $(tag)
           latest
+    - task: Docker@2
+      displayName: Build and push Office365 connector
+      inputs:
+        command: buildAndPush
+        repository: 'connectors/office365'
+        dockerfile: '$(Build.SourcesDirectory)/src/Office365.Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          latest
     - script: |
         git tag v$(tag)
         git push origin v$(tag)
