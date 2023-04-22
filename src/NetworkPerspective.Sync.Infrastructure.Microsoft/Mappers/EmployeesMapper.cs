@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 
 using Microsoft.Graph.Models;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Infrastructure.Microsoft.Extensions;
 
 using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
 
@@ -32,17 +33,35 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 
         private static IEnumerable<Group> GetEmployeeGroups(User user)
         {
-            return Enumerable.Empty<Group>();
+            return user.GetDepartmentGroups();
         }
 
         private static IDictionary<string, object> GetEmployeeProps(User user)
         {
-            return new Dictionary<string, object>();
+            var props = new Dictionary<string, object>();
+
+            props.Add(Employee.PropKeyName, user.GetFullName());
+
+            if(user.CreatedDateTime.HasValue)
+            {
+                var bucketAccCreationDate = new DateTime(user.CreatedDateTime.Value.Year, user.CreatedDateTime.Value.Month, 1);
+                props.Add(Employee.PropKeyCreationTime, bucketAccCreationDate);
+            }
+
+            return props;
         }
 
         private static RelationsCollection GetEmployeeRelations(User user)
         {
-            return new RelationsCollection(Enumerable.Empty<Relation>());
+            var relations = new List<Relation>();
+
+            if(user.Manager is User manager)
+            {
+                if (manager.Mail is not null)
+                    relations.Add(Relation.Create(Relation.SupervisorRelationName, manager.Mail));
+            }
+
+            return new RelationsCollection(relations);
         }
     }
 }

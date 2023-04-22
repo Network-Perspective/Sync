@@ -6,8 +6,6 @@ using System.Linq;
 
 using NetworkPerspective.Sync.Application.Exceptions;
 
-using Newtonsoft.Json;
-
 namespace NetworkPerspective.Sync.Application.Domain.Employees
 {
     public class Employee
@@ -18,8 +16,6 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public const string PropKeyCreationTime = "CreationTime";
         public const string PropKeyName = "Name";
 
-        public const string SupervisorRelationName = "Supervisor";
-
         public static readonly IEqualityComparer<Employee> EqualityComparer = new EmployeeEqualityComparer();
 
         private readonly IList<Group> _groups;
@@ -29,12 +25,12 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public bool IsExternal { get; }
         public bool IsBot { get; }
         public bool IsHashed { get; }
-        [JsonIgnore] public bool HasManager => Relations.Contains(SupervisorRelationName);
-        [JsonIgnore] public string ManagerEmail => HasManager ? Relations.GetTargetEmployeeEmail(SupervisorRelationName) : string.Empty;
+        public bool HasManager => Relations.Contains(Relation.SupervisorRelationName);
+        public string ManagerEmail => HasManager ? Relations.GetTargetEmployeeEmail(Relation.SupervisorRelationName) : string.Empty;
 
-        [JsonIgnore] public IReadOnlyDictionary<string, object> Props => _props.ToImmutableDictionary();
-        [JsonIgnore] public IReadOnlyCollection<Group> Groups => new ReadOnlyCollection<Group>(_groups);
-        [JsonIgnore] public RelationsCollection Relations { get; }
+        public IReadOnlyDictionary<string, object> Props => _props.ToImmutableDictionary();
+        public IReadOnlyCollection<Group> Groups => new ReadOnlyCollection<Group>(_groups);
+        public RelationsCollection Relations { get; }
 
         private Employee(EmployeeId id, IEnumerable<Group> groups, bool isExternal, bool isBot, bool isHashed, IDictionary<string, object> props, RelationsCollection relations)
         {
