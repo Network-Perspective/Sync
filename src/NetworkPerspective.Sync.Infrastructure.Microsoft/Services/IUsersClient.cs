@@ -41,7 +41,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 {
                     x.QueryParameters = new UsersRequestBuilder.UsersRequestBuilderGetQueryParameters
                     {
-                        Select = new[] { "Id", "Mail", "OtherMails" },
+                        Select = new[] { "Id", "Mail", "OtherMails", "Department" },
                         Top = MaxPageSize
                     };
                 }, stoppingToken);

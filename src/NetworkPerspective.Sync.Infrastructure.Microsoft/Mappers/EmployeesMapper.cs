@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Graph.Models;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Infrastructure.Microsoft.Extensions;
 
 using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
 
@@ -32,7 +33,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 
         private static IEnumerable<Group> GetEmployeeGroups(User user)
         {
-            return Enumerable.Empty<Group>();
+            return user.GetDepartmentGroups();
         }
 
         private static IDictionary<string, object> GetEmployeeProps(User user)
