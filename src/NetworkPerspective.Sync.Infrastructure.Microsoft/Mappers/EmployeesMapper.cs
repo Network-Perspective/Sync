@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.Graph.Models;
@@ -38,7 +39,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 
         private static IDictionary<string, object> GetEmployeeProps(User user)
         {
-            return new Dictionary<string, object>();
+            var props = new Dictionary<string, object>();
+
+            props.Add(Employee.PropKeyName, user.GetFullName());
+
+            if(user.CreatedDateTime.HasValue)
+            {
+                var bucketAccCreationDate = new DateTime(user.CreatedDateTime.Value.Year, user.CreatedDateTime.Value.Month, 1);
+                props.Add(Employee.PropKeyCreationTime, bucketAccCreationDate);
+            }
+
+            return props;
         }
 
         private static RelationsCollection GetEmployeeRelations(User user)

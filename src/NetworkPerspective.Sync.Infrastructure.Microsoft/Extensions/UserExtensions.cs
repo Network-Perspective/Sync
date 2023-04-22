@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Microsoft.Graph.Models;
 
@@ -17,5 +18,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Extensions
 
             return groups;
         }
+
+        public static string GetFullName(this User user)
+            => user.DisplayName ?? string.Empty;
     }
 }
