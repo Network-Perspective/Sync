@@ -14,7 +14,6 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Aggregation;
-using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Extensions;
@@ -26,7 +25,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface IMailboxClient
     {
-        Task SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<Employee> userEmails, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        Task SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class MailboxClient : IMailboxClient
@@ -51,7 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _clock = clock;
         }
 
-        public async Task SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<Employee> users, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, GoogleCredential credentials, EmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             var maxMessagesCountPerUser = CalculateMaxMessagesCount(context.TimeRange);
 
@@ -64,10 +63,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             Task SingleTaskAsync(string userEmail)
                 => GetSingleUserInteractionsAsync(context, stream, userEmail, maxMessagesCountPerUser, credentials, interactionFactory, stoppingToken);
 
-            _logger.LogInformation("Evaluating interactions based on mailbox for timerange {timerange} for {count} users...", context.TimeRange, users.Count());
+            _logger.LogInformation("Evaluating interactions based on mailbox for timerange {timerange} for {count} users...", context.TimeRange, usersEmails.Count());
 
-            var userEmails = users.Select(x => x.Id.PrimaryId);
-            await ParallelTask.RunAsync(userEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+            await ParallelTask.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
 
             _logger.LogInformation("Evaluation of interactions based on mailbox for timerange '{timerange}' completed", context.TimeRange);
         }

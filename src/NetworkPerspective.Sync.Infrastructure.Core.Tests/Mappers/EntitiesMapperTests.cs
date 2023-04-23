@@ -43,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
 
             var manager = Employee.CreateInternal(EmployeeId.Create(managerEmail, managerDataSourceId), Array.Empty<Group>());
 
-            var relations = new RelationsCollection(new[] { Relation.Create(Employee.SupervisorRelationName, managerEmail) });
+            var relations = new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, managerEmail) });
 
             var employee = Employee.CreateInternal(EmployeeId.Create("foo", "bar"), Array.Empty<Group>(), null, relations);
 
@@ -58,7 +58,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
                 { "Email", managerEmail },
                 { dataSourceId, managerDataSourceId }
             };
-            var expectedRelations = new[] { new HashedEntityRelationship { RelationshipName = Employee.SupervisorRelationName, TargetIds = managerId } };
+            var expectedRelations = new[] { new HashedEntityRelationship { RelationshipName = Relation.SupervisorRelationName, TargetIds = managerId } };
             result.Relationships.Should().BeEquivalentTo(expectedRelations);
         }
 

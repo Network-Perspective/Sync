@@ -28,7 +28,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public static EmployeeId CreateWithAliases(string primaryId, string dataSourceId, IEnumerable<string> aliases)
             => new EmployeeId(primaryId, dataSourceId, aliases, false);
 
-        public EmployeeId Hash(HashFunction hashFunction)
+        public EmployeeId Hash(HashFunction.Delegate hashFunction)
         {
             var hashedPrimaryId = hashFunction(PrimaryId);
             var hashedDataSourceId = string.IsNullOrEmpty(DataSourceId) ? DataSourceId : hashFunction(DataSourceId);

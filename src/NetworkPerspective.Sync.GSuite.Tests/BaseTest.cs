@@ -18,9 +18,6 @@ using NetworkPerspective.Sync.GSuite.Client;
 using NetworkPerspective.Sync.GSuite.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Google;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 using Xunit;
 
 namespace NetworkPerspective.Sync.GSuite.Tests

@@ -18,14 +18,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal class MeetingInteractionFactory
     {
-        private readonly HashFunction _hashFunc;
-        private readonly EmployeeCollection _employeeLookupTable;
+        private readonly HashFunction.Delegate _hashFunc;
+        private readonly EmployeeCollection _employees;
         private readonly ILogger<MeetingInteractionFactory> _logger;
 
-        public MeetingInteractionFactory(HashFunction hash, EmployeeCollection employeeLookupTable, ILogger<MeetingInteractionFactory> logger)
+        public MeetingInteractionFactory(HashFunction.Delegate hash, EmployeeCollection employees, ILogger<MeetingInteractionFactory> logger)
         {
             _hashFunc = hash;
-            _employeeLookupTable = employeeLookupTable;
+            _employees = employees;
             _logger = logger;
         }
 
@@ -33,12 +33,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         {
             try
             {
-                var user = _employeeLookupTable.Find(userEmail);
+                var user = _employees.Find(userEmail);
                 var duration = meeting.GetDurationInMinutes();
                 var timestamp = meeting.GetStart();
                 var participants = meeting
                     .GetParticipants()                                      // Participants as email address 
-                    .Select(_employeeLookupTable.Find)                      // Map to Employee
+                    .Select(_employees.Find)                                // Map to Employee
                     .Where(x => !Employee.EqualityComparer.Equals(x, user)) // Skip the user
                     .Distinct(Employee.EqualityComparer);                   // Remove duplicates
 

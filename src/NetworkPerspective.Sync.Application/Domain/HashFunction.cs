@@ -1,4 +1,9 @@
 ﻿namespace NetworkPerspective.Sync.Application.Domain
 {
-    public delegate string HashFunction(string input);
+    public class HashFunction
+    {
+        public delegate string Delegate(string input);
+
+        public readonly static Delegate Empty = x => x;
+    }
 }
