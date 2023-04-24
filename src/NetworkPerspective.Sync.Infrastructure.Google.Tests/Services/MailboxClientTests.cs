@@ -61,7 +61,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
             // Act
-            await mailboxClient.SyncInteractionsAsync(syncContext, stream, new[] { Employee.CreateInternal(EmployeeId.Create(userEmail, userEmail), Array.Empty<Group>()) }, _googleClientFixture.Credential, interactionFactory);
+            await mailboxClient.SyncInteractionsAsync(syncContext, stream, new[] { userEmail }, _googleClientFixture.Credential, interactionFactory);
 
             // Assert
 

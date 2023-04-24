@@ -70,7 +70,7 @@ namespace NetworkPerspective.Sync.RegressionTests
 
                 foreach (var singleUserMeetingInteractions in usersMeetingInteractions.Where(x => x.Key["Email"] != "external"))
                 {
-                    if(singleUserMeetingInteractions.Count() != referenceUser.Count())
+                    if (singleUserMeetingInteractions.Count() != referenceUser.Count())
                     {
                         var output = string.Format("{0},{1},{2},{3},{4}", singleMeetingInteractions.Key, singleUserMeetingInteractions.Key["Email"], singleUserMeetingInteractions.Count().ToString(), referenceUser.Key["Email"], referenceUser.Count());
                         _output.WriteLine(output);

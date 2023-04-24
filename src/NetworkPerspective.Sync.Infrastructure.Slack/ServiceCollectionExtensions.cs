@@ -32,7 +32,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
             services.AddTransient<ISlackHttpClientFactory, SlackHttpClientFactory>();
             services.AddSingleton<ISlackAuthService, SlackAuthService>();
-            services.AddSingleton<IStateKeyFactory, StateKeyFactory>();
             services.AddTransient<CursorPaginationHandler>();
             services.AddTransient<ISlackClientFacadeFactory, SlackClientFacadeFactory>();
             services.AddMemoryCache();

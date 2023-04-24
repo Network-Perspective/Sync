@@ -2,12 +2,11 @@
 {
     public class Relation
     {
-        public string Name { get; init; }
-        public string TargetEmployeeEmail { get; init; }
-        public bool IsHashed { get; init; }
+        public const string SupervisorRelationName = "Supervisor";
 
-        public Relation()
-        { }
+        public string Name { get; }
+        public string TargetEmployeeEmail { get; }
+        public bool IsHashed { get; }
 
         private Relation(string name, string targetEmployeeEmail, bool isHashed)
         {
@@ -19,7 +18,7 @@
         public static Relation Create(string name, string targetEmployeeEmail)
             => new Relation(name, targetEmployeeEmail, false);
 
-        public Relation Hash(HashFunction hash)
+        public Relation Hash(HashFunction.Delegate hash)
             => new Relation(Name, hash(TargetEmployeeEmail), true);
 
         public override string ToString()

@@ -9,9 +9,9 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public bool IsHashed => _hashFunc != null;
 
         private readonly IDictionary<string, Employee> _emailLookupTable = new Dictionary<string, Employee>(StringComparer.InvariantCultureIgnoreCase);
-        private readonly HashFunction _hashFunc;
+        private readonly HashFunction.Delegate _hashFunc;
 
-        public EmployeeCollection(IEnumerable<Employee> employees, HashFunction hashFunc)
+        public EmployeeCollection(IEnumerable<Employee> employees, HashFunction.Delegate hashFunc)
         {
             _hashFunc = hashFunc;
 

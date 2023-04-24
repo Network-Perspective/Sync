@@ -102,7 +102,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Interactions
                 isHashed: false);
         }
 
-        public Interaction Hash(HashFunction hashFunc)
+        public Interaction Hash(HashFunction.Delegate hashFunc)
         {
             if (IsHashed)
                 throw new DoubleHashingException(nameof(Interaction));

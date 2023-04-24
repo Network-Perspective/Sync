@@ -1,33 +1,85 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers;
+using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 {
-    internal class MicrosoftFacade : IDataSource
+    internal sealed class MicrosoftFacade : IDataSource
     {
-        public Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
+        private readonly IUsersClient _usersClient;
+        private readonly IMailboxClient _mailboxClient;
+        private readonly ICalendarClient _calendarClient;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly ILogger<MicrosoftFacade> _logger;
+
+        public MicrosoftFacade(IUsersClient usersClient, IMailboxClient mailboxClient, ICalendarClient calendarClient, ILoggerFactory loggerFactory)
         {
-            return Task.FromResult(new EmployeeCollection(Array.Empty<Employee>(), x => x));
+            _usersClient = usersClient;
+            _mailboxClient = mailboxClient;
+            _calendarClient = calendarClient;
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<MicrosoftFacade>();
         }
 
-        public Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
+        public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
-            return Task.FromResult(new EmployeeCollection(Array.Empty<Employee>(), x => x));
+            _logger.LogInformation("Getting employees for network '{networkId}'", context.NetworkId);
+
+            var employees = await context.EnsureSetAsync(async () =>
+            {
+                var users = await _usersClient.GetUsersAsync(context, stoppingToken);
+                return EmployeesMapper.ToEmployees(users);
+            });
+
+            return employees;
+        }
+
+        public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
+        {
+            _logger.LogInformation("Getting hashed employees for network '{networkId}'", context.NetworkId);
+
+            var users = await _usersClient.GetUsersAsync(context, stoppingToken);
+            return HashedEmployeesMapper.ToEmployees(users, context.HashFunction);
+
         }
 
         public Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)
         {
+            _logger.LogInformation("Checking if network '{networkId}' is authorized", networkId);
+
             return Task.FromResult(true);
         }
 
-        public Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
+        public async Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
-            return Task.CompletedTask;
+            _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);
+
+            var employees = await context.EnsureSetAsync(async () =>
+            {
+                var users = await _usersClient.GetUsersAsync(context, stoppingToken);
+                return EmployeesMapper.ToEmployees(users);
+            });
+
+            var emailInteractionfactory = new EmailInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<EmailInteractionFactory>());
+            var meetingInteractionfactory = new MeetingInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<MeetingInteractionFactory>());
+
+            var usersEmails = employees
+                .GetAllInternal()
+                .Select(x => x.Id.PrimaryId);
+
+            await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, emailInteractionfactory, stoppingToken);
+            await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, meetingInteractionfactory, stoppingToken);
+
+            _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
         }
     }
 }

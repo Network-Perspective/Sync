@@ -11,14 +11,11 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
         public static IEqualityComparer<Group> EqualityComparer = new GroupEqualityComparer();
 
-        public string Id { get; init; }
-        public string Name { get; init; }
-        public string Category { get; init; }
-        public string ParentId { get; init; }
-        public bool IsHashed { get; init; }
-
-        public Group()
-        { }
+        public string Id { get; }
+        public string Name { get; }
+        public string Category { get; }
+        public string ParentId { get; }
+        public bool IsHashed { get; }
 
         private Group(string id, string name, string category, string parentId, bool isHashed)
         {
@@ -35,7 +32,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public static Group CreateWithParentId(string id, string name, string category, string parentId)
             => new Group(id, name, category, parentId, false);
 
-        public Group Hash(HashFunction hashFunc)
+        public Group Hash(HashFunction.Delegate hashFunc)
         {
             if (IsHashed)
                 throw new InvalidOperationException("Group is already hashed. Hashing twice is just silly... isn't it?");
