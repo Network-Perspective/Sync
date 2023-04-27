@@ -27,6 +27,11 @@
       "commandName": "Project",
       "commandLineArgs": "Interactions -Token sample_token -Csv ..\\NetworkPerspective.Sync.Cli.Tests\\Samples\\interactions-split2.csv -DebugFn .\\output\\interactions-split2-expected.json -DataSourceType meeting -BatchSize 2 -TimeZone UTC",
       "workingDirectory": "$(ProjectDir)"
+    },
+    "Signal": {
+      "commandName": "Project",
+      "commandLineArgs": " Signal -Token sample -Action SyncStart -PeriodStart 2022-09-01 -PeriodEnd 2022-10-01",
+      "workingDirectory": "$(ProjectDir)"
     }
   }
 }

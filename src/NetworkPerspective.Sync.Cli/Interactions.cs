@@ -67,7 +67,7 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("One of (Chat, Email, Meeting)"), ArgRequired]
         public string DataSourceType { get; set; }
 
-        [ArgDescription("Split requests into batches of specified number of interactions"), ArgRequired, DefaultValue(100000)]
+        [ArgDescription("Split requests into batches of specified number of interactions"), ArgRequired, DefaultValue(1_000_000)]
         public int BatchSize { get; set; }
 
         [ArgDescription("Run in debug mode - save request to file DebugFn, but do not send it to remote service")]
