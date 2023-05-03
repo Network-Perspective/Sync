@@ -37,7 +37,7 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("Text file delimiter (Default = tab delimited)"), DefaultValue("\t")]
         public string CsvDelimiter { get; set; }
 
-        [ArgDescription("New line delimiter (Default = Environment.NewLine)")]
+        [ArgDescription("New line delimiter (Default = CRLF)")]
         public string CsvNewLine { get; set; }
 
         [ArgDescription("SourceId column (IdProperty)"), ArgRequired, DefaultValue("From (EmployeeId)")]
@@ -67,7 +67,7 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("One of (Chat, Email, Meeting)"), ArgRequired]
         public string DataSourceType { get; set; }
 
-        [ArgDescription("Split requests into batches of specified number of interactions"), ArgRequired, DefaultValue(1_000_000)]
+        [ArgDescription("Split requests into batches of specified number of interactions"), ArgRequired, DefaultValue(100_000)]
         public int BatchSize { get; set; }
 
         [ArgDescription("Run in debug mode - save request to file DebugFn, but do not send it to remote service")]
@@ -193,11 +193,14 @@ namespace NetworkPerspective.Sync.Cli
             var bufferSize = 1024 * 1024 * 10; // 10MB
             var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                NewLine = args.CsvNewLine ?? Environment.NewLine,
                 HasHeaderRecord = true,
                 Delimiter = args.CsvDelimiter,
                 BufferSize = bufferSize,
             };
+            if (!string.IsNullOrEmpty(args.CsvNewLine))
+            {
+                csvConfig.NewLine = args.CsvNewLine;
+            }
 
             using (var progress = new ProgressBar())
             using (var stream = _fileSystem.FileStream.Create(fileName, FileMode.Open, FileAccess.Read))
