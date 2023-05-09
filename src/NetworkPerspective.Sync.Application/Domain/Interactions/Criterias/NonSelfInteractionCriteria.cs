@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
 
-namespace NetworkPerspective.Sync.Application.Domain.Interactions
+namespace NetworkPerspective.Sync.Application.Domain.Interactions.Criterias
 {
     public class NonSelfInteractionCriteria : IInteractionCritieria
     {

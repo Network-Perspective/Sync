@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NetworkPerspective.Sync.Application.Domain
+namespace NetworkPerspective.Sync.Application.Domain.Batching
 {
     public class Batcher<T>
     {

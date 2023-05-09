@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace NetworkPerspective.Sync.Application.Domain
+namespace NetworkPerspective.Sync.Application.Domain.Batching
 {
     public class BatchReadyEventArgs<T>
     {

@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 
-using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Application.Domain.Sync;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Application.Tests.Services
+namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
 {
     public class ParallelTaskTests
     {

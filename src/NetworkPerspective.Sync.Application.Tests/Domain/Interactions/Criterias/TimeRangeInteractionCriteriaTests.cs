@@ -7,10 +7,11 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Domain.Interactions.Criterias;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
+namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions.Criterias
 {
     public class TimeRangeInteractionCriteriaTests
     {

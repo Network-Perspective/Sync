@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NetworkPerspective.Sync.Application.Services
+namespace NetworkPerspective.Sync.Application.Domain.Sync
 {
     public class ParallelTask
     {
