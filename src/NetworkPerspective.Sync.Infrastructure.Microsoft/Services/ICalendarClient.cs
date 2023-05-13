@@ -17,7 +17,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
     internal interface ICalendarClient
     {
-        public Task SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, IMeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        public Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, IMeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal class CalendarClient : ICalendarClient
@@ -36,7 +36,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             _logger = logger;
         }
 
-        public async Task SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, IMeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, IMeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             async Task ReportProgressCallbackAsync(double progressRate)
             {
@@ -44,18 +44,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 await _tasksStatusesCache.SetStatusAsync(context.NetworkId, taskStatus, stoppingToken);
             }
 
-            Task SingleTaskAsync(string userEmail)
+            Task<SingleTaskResult> SingleTaskAsync(string userEmail)
                 => GetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on callendar for '{timerange}' for {count} users...", context.TimeRange, usersEmails.Count());
-
-            await ParallelTask.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
-
+            var result = await ParallelSyncTask.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
             _logger.LogInformation("Evaluation of interactions based on callendar for '{timerange}' completed", context.TimeRange);
+
+            return result;
         }
 
-        private async Task GetSingleUserInteractionsAsync(SyncContext context, IInteractionsStream stream, string userEmail, IMeetingInteractionFactory interactionFactory, CancellationToken stoppingToken)
+        private async Task<SingleTaskResult> GetSingleUserInteractionsAsync(SyncContext context, IInteractionsStream stream, string userEmail, IMeetingInteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
+            var interactionsCount = 0;
             var mailsResponse = await _graphClient
                 .Users[userEmail]
                 .Calendar
@@ -92,7 +93,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                     }
 
                     var interactions = interactionFactory.CreateForUser(@event, userEmail);
-                    await stream.SendAsync(interactions);
+                    var sentInteractionsCount = await stream.SendAsync(interactions);
+                    interactionsCount += sentInteractionsCount;
                     return true;
                 },
                 request =>
@@ -101,6 +103,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 });
 
             await pageIterator.IterateAsync(stoppingToken);
+            return new SingleTaskResult(interactionsCount);
         }
     }
 }

@@ -10,5 +10,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Entities
         public DateTime TimeStamp { get; set; }
         public DateTime SyncPeriodStart { get; set; }
         public DateTime SyncPeriodEnd { get; set; }
+        public double? SuccessRate { get; set; }
+        public long InteractionsCount { get; set; }
+        public int TasksCount { get; set; }
     }
 }

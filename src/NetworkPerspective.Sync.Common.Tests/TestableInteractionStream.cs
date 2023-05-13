@@ -19,7 +19,7 @@ namespace NetworkPerspective.Sync.Common.Tests
         public ValueTask DisposeAsync()
             => ValueTask.CompletedTask;
 
-        public async Task SendAsync(IEnumerable<Interaction> interactions)
+        public async Task<int> SendAsync(IEnumerable<Interaction> interactions)
         {
             await _semaphore.WaitAsync();
 
@@ -31,6 +31,8 @@ namespace NetworkPerspective.Sync.Common.Tests
             {
                 _semaphore.Release();
             }
+
+            return interactions.Count();
         }
 
         public void Reset()

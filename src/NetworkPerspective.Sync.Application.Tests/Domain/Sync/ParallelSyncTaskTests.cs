@@ -13,7 +13,7 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
 {
-    public class ParallelTaskTests
+    public class ParallelSyncTaskTests
     {
         [Fact]
         public async Task ShouldUpdateStatus()
@@ -30,7 +30,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
             }
 
             // Act
-            await ParallelTask.RunAsync(userIds, StatusReportCallback, EmptySingleFetchTask);
+            await ParallelSyncTask.RunAsync(userIds, StatusReportCallback, EmptySingleFetchTask);
 
             // Assert
             completionRateReports.Should().BeEquivalentTo(new[] { 0.0, 20.0, 40.0, 60.0, 80.0, 100.0 });
@@ -44,20 +44,21 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
                 .Range(0, 4)
                 .Select(x => x.ToString());
 
-            static async Task SingleFetchTask(string id)
+            static async Task<SingleTaskResult> SingleFetchTask(string id)
             {
                 await Task.Delay(50);
+                return new SingleTaskResult(42);
             }
 
             // Act
-            Func<Task> func = () => ParallelTask.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
+            Func<Task> func = () => ParallelSyncTask.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
 
             // Assert
             func.ExecutionTime().Should().BeLessThan(150.Milliseconds());
         }
 
         [Fact]
-        public async void ShouldCollectAllInteractions()
+        public async Task ShouldCollectAllInteractions()
         {
             // Arrange
             var userIds = Enumerable
@@ -66,23 +67,52 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
 
             var invocationCount = 0;
 
-            Task SingleFetchTask(string id)
+            Task<SingleTaskResult> SingleFetchTask(string id)
             {
                 Interlocked.Increment(ref invocationCount);
-                return Task.CompletedTask;
+                return Task.FromResult(new SingleTaskResult(42));
             }
 
             // Act
-            await ParallelTask.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
+            await ParallelSyncTask.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
 
             // Assert
             invocationCount.Should().Be(userIds.Count());
         }
 
+        [Fact]
+        public async Task ShouldReturnResult()
+        {
+            // Arrange
+            var userIds = Enumerable
+                .Range(0, 4)
+                .Select(x => x.ToString());
+            var exception = new Exception();
+
+            var invocationCount = 0;
+            var expectedResult = new SyncResult(userIds.Count(), 126, new[] { exception });
+
+
+            Task<SingleTaskResult> SingleFetchTask(string id)
+            {
+                if (id == "0")
+                    throw exception;
+
+                Interlocked.Increment(ref invocationCount);
+                return Task.FromResult(new SingleTaskResult(42));
+            }
+
+            // Act
+            var result = await ParallelSyncTask.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
+
+            // Assert
+            result.Should().BeEquivalentTo(expectedResult);
+        }
+
         private static Task EmptyStatusReportCallback(double completionRate)
             => Task.CompletedTask;
 
-        private static Task EmptySingleFetchTask(string id)
-                => Task.CompletedTask;
+        private static Task<SingleTaskResult> EmptySingleFetchTask(string id)
+                => Task.FromResult(new SingleTaskResult(42));
     }
 }

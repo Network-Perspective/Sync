@@ -43,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _logger = loggerFactory.CreateLogger<GoogleFacade>();
         }
 
-        public async Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
+        public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);
 
@@ -63,10 +63,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
                 .GetAllInternal()
                 .Select(x => x.Id.PrimaryId);
 
-            await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, credentials, emailInteractionFactory, stoppingToken);
-            await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, credentials, meetingInteractionFactory, stoppingToken);
+            var resultEmails = await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, credentials, emailInteractionFactory, stoppingToken);
+            var resultCalendar = await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, credentials, meetingInteractionFactory, stoppingToken);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
+
+            return SyncResult.Combine(resultEmails, resultCalendar);
         }
 
         public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)

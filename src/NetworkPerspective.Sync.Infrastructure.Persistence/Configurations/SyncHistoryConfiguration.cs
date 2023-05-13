@@ -23,6 +23,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Configurations
 
             builder
                 .Property(x => x.SyncPeriodEnd);
+
+            builder
+                .Property(x => x.SuccessRate)
+                .IsRequired(false);
+
+            builder
+                .Property(x => x.TasksCount);
+
+            builder
+                .Property(x => x.InteractionsCount);
         }
     }
 }

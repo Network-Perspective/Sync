@@ -32,13 +32,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
             await _batcher.FlushAsync();
         }
 
-        public async Task SendAsync(IEnumerable<Interaction> interactions)
+        public async Task<int> SendAsync(IEnumerable<Interaction> interactions)
         {
             var interactionsToPush = interactions
                 .Select(x => InteractionMapper.DomainIntractionToDto(x, _npCoreConfig.DataSourceIdName))
                 .ToList();
 
             await _batcher.AddRangeAsync(interactionsToPush);
+
+            return interactionsToPush.Count;
         }
 
         private async Task PushAsync(BatchReadyEventArgs<HashedInteraction> args)
