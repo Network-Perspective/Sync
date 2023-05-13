@@ -9,7 +9,7 @@ using Colors.Net.StringColorExtensions;
 using CsvHelper;
 using CsvHelper.Configuration;
 
-using NetworkPerspective.Sync.Application.Domain;
+using NetworkPerspective.Sync.Application.Domain.Batching;
 using NetworkPerspective.Sync.Infrastructure.Core;
 
 using Newtonsoft.Json;

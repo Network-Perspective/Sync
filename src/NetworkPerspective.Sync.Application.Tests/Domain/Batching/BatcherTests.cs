@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
-using NetworkPerspective.Sync.Application.Domain;
+using NetworkPerspective.Sync.Application.Domain.Batching;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Application.Tests.Domain
+namespace NetworkPerspective.Sync.Application.Tests.Domain.Batching
 {
     public class BatcherTests
     {

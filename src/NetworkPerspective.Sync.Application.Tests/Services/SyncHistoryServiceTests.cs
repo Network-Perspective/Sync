@@ -31,7 +31,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var syncEnd = DateTime.UtcNow.AddDays(1);
             var networkId = Guid.NewGuid();
 
-            var record = new SyncHistoryEntry(networkId, DateTime.UtcNow, new TimeRange(syncStart, syncEnd));
+            var record = SyncHistoryEntry.Create(networkId, DateTime.UtcNow, new TimeRange(syncStart, syncEnd));
 
             var unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
             using var unitOfWork = unitOfWorkFactory.Create();
@@ -83,7 +83,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var networkId = Guid.NewGuid();
             var overridenSyncStart = new DateTime(2020, 01, 01);
 
-            var record = new SyncHistoryEntry(networkId, DateTime.UtcNow, new TimeRange(syncStart, syncEnd));
+            var record = SyncHistoryEntry.Create(networkId, DateTime.UtcNow, new TimeRange(syncStart, syncEnd));
 
             var unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
             using var unitOfWork = unitOfWorkFactory.Create();

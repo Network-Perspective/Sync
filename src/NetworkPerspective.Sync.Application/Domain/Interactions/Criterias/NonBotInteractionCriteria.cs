@@ -3,7 +3,7 @@ using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
-namespace NetworkPerspective.Sync.Application.Domain.Interactions
+namespace NetworkPerspective.Sync.Application.Domain.Interactions.Criterias
 {
     internal class NonBotInteractionCriteria : IInteractionCritieria
     {
