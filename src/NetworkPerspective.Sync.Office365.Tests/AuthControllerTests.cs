@@ -50,8 +50,13 @@ namespace NetworkPerspective.Sync.Office365.Tests
                 .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(clientId.ToSecureString());
 
+            var networkConfig = new NetworkConfigDto
+            {
+                SyncMsTeams = false
+            };
+
             var networkCreateResponse = await new NetworksClient(httpClient)
-                .NetworksPostAsync(null);
+                .NetworksPostAsync(networkConfig);
 
             // Act
             var response = await new AuthClient(httpClient)
@@ -85,8 +90,13 @@ namespace NetworkPerspective.Sync.Office365.Tests
                 .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(clientId.ToSecureString());
 
+            var networkConfig = new NetworkConfigDto
+            {
+                SyncMsTeams = false
+            };
+
             var networkCreateResponse = await new NetworksClient(httpClient)
-                .NetworksPostAsync(null);
+                .NetworksPostAsync(networkConfig);
 
             var authClient = new AuthClient(httpClient);
 
@@ -121,8 +131,13 @@ namespace NetworkPerspective.Sync.Office365.Tests
                 .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(clientId.ToSecureString());
 
+            var networkConfig = new NetworkConfigDto
+            {
+                SyncMsTeams = false
+            };
+
             var networkCreateResponse = await new NetworksClient(httpClient)
-                .NetworksPostAsync(null);
+                .NetworksPostAsync(networkConfig);
 
             var authClient = new AuthClient(httpClient);
 
