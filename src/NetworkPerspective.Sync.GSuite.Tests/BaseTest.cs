@@ -46,9 +46,14 @@ namespace NetworkPerspective.Sync.GSuite.Tests
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
+            var networkConfig = new NetworkConfigDto
+            {
+                AdminEmail = adminEmail
+            };
+
             // Act
             var result = await new NetworksClient(httpClient)
-                .NetworksPostAsync(adminEmail, null);
+                .NetworksPostAsync(networkConfig);
 
             // Assert
             _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-GSuite-{networkId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
@@ -73,8 +78,13 @@ namespace NetworkPerspective.Sync.GSuite.Tests
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
+            var networkConfig = new NetworkConfigDto
+            {
+                AdminEmail = adminEmail
+            };
+
             await new NetworksClient(httpClient)
-                .NetworksPostAsync(adminEmail, null);
+                .NetworksPostAsync(networkConfig);
 
             // Act
             var result = await new SchedulesClient(httpClient)
@@ -97,8 +107,13 @@ namespace NetworkPerspective.Sync.GSuite.Tests
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidTokenException("https://networkperspective.io/"));
 
+            var networkConfig = new NetworkConfigDto
+            {
+                AdminEmail = "foo@networkperspective.io"
+            };
+
             // Act
-            var exception = await Record.ExceptionAsync(() => client.NetworksPostAsync("foo@networkperspective.io", null));
+            var exception = await Record.ExceptionAsync(() => client.NetworksPostAsync(networkConfig));
 
             // Assert
             (exception as GSuiteClientException).StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
