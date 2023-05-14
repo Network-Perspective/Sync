@@ -77,7 +77,7 @@ namespace NetworkPerspective.Sync.Office365.Tests
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
-            
+
             var networkConfig = new NetworkConfigDto
             {
                 SyncMsTeams = false

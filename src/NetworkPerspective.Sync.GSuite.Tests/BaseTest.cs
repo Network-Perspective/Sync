@@ -46,8 +46,8 @@ namespace NetworkPerspective.Sync.GSuite.Tests
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
-            var networkConfig = new NetworkConfigDto 
-            { 
+            var networkConfig = new NetworkConfigDto
+            {
                 AdminEmail = adminEmail
             };
 
@@ -78,9 +78,9 @@ namespace NetworkPerspective.Sync.GSuite.Tests
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
-            var networkConfig = new NetworkConfigDto 
-            { 
-                AdminEmail = adminEmail 
+            var networkConfig = new NetworkConfigDto
+            {
+                AdminEmail = adminEmail
             };
 
             await new NetworksClient(httpClient)

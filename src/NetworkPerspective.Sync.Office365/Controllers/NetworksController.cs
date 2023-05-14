@@ -30,7 +30,7 @@ namespace NetworkPerspective.Sync.Office365.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, "Network added", typeof(string))]
         [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
-        public async Task<IActionResult> AddAsync([FromBody]NetworkConfigDto config, CancellationToken stoppingToken = default)
+        public async Task<IActionResult> AddAsync([FromBody] NetworkConfigDto config, CancellationToken stoppingToken = default)
         {
             var properties = new MicrosoftNetworkProperties(config.SyncMsTeams, config.ExternalKeyVaultUri);
 

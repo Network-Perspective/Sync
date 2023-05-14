@@ -112,7 +112,7 @@ namespace NetworkPerspective.Sync.Slack.Tests
                 .ThrowsAsync(new InvalidTokenException("https://networkperspective.io/"));
 
             var networkConfig = new NetworkConfigDto
-            { 
+            {
                 AutoJoinChannels = true,
                 SyncChannelsNames = true
             };
