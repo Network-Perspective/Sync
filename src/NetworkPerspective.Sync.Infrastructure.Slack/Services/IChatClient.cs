@@ -15,14 +15,14 @@ using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
-using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Mappers;
 using NetworkPerspective.Sync.Infrastructure.Slack.Models;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
     internal interface IChatClient
     {
-        Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
+        Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
     }
 
     internal class ChatClient : IChatClient
@@ -39,7 +39,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _logger = logger;
         }
 
-        public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
+        public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
         {
             var channels = await GetChannelsAsync(slackClientFacade, network, stoppingToken);
 
@@ -66,7 +66,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             return result;
         }
 
-        private async Task JoinPublicChannelsAsync(ISlackClientFacade slackClientFacade, IEnumerable<Channel> slackChannels, CancellationToken stoppingToken)
+        private async Task JoinPublicChannelsAsync(ISlackClientBotScopeFacade slackClientFacade, IEnumerable<Channel> slackChannels, CancellationToken stoppingToken)
         {
             _logger.LogDebug("Joining public channels...");
 
@@ -76,13 +76,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _logger.LogDebug("Joining public channels completed");
         }
 
-        private async Task<SingleTaskResult> SyncSingleChannnelInteractionsAsync(IInteractionsStream stream, ISlackClientFacade slackClientFacade, InteractionFactory interactionFactory, TimeRange timeRange, string slackChannelId, CancellationToken stoppingToken)
+        private async Task<SingleTaskResult> SyncSingleChannnelInteractionsAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, InteractionFactory interactionFactory, TimeRange timeRange, string slackChannelId, CancellationToken stoppingToken)
         {
             _logger.LogDebug("Getting interactions from channel...");
             var interactionsCount = 0;
             var actionsAggregator = new ActionsAggregator(slackChannelId);
 
-            var channelMembers = await slackClientFacade.GetAllSlackChannelMembers(slackChannelId, stoppingToken);
+            var channelMembers = await slackClientFacade.GetAllSlackChannelMembersAsync(slackChannelId, stoppingToken);
 
             _logger.LogDebug("There are {count} users in the channel", channelMembers.Count);
 
@@ -95,7 +95,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             var slackThreadsTimeRange = new TimeRange(timeRange.Start.AddDays(-30), timeRange.End);
             _logger.LogDebug("Getting slack theads that started in range: {timeRange}", slackThreadsTimeRange);
 
-            var slackThreadsMessages = await slackClientFacade.GetSlackThreads(slackChannelId, slackThreadsTimeRange, stoppingToken);
+            var slackThreadsMessages = await slackClientFacade.GetSlackThreadsAsync(slackChannelId, slackThreadsTimeRange, stoppingToken);
 
             _logger.LogDebug("There are {count} threads in the channel started within {timeRange}", slackThreadsMessages.Count, slackThreadsTimeRange);
 
@@ -115,7 +115,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                     {
                         _logger.LogDebug("Getting interactions from the thread replies...");
 
-                        var slackThreadReplies = await slackClientFacade.GetAllSlackThreadReplies(slackChannelId, slackThreadMessage.TimeStamp, stoppingToken);
+                        var slackThreadReplies = await slackClientFacade.GetAllSlackThreadRepliesAsync(slackChannelId, slackThreadMessage.TimeStamp, stoppingToken);
 
                         foreach (var slackThreadReply in slackThreadReplies)
                             actionsAggregator.Add(TimeStampMapper.SlackTimeStampToDateTime(slackThreadReply.TimeStamp));
@@ -156,17 +156,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             return new SingleTaskResult(interactionsCount);
         }
 
-        private async Task<IEnumerable<Channel>> GetChannelsAsync(ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, CancellationToken stoppingToken = default)
+        private async Task<IEnumerable<Channel>> GetChannelsAsync(ISlackClientBotScopeFacade slackClientFacade, Network<SlackNetworkProperties> network, CancellationToken stoppingToken = default)
         {
             if (network.Properties.AutoJoinChannels)
             {
                 _logger.LogDebug("Getting list of all channels for network '{networkId}'...", network.NetworkId);
-                return (await slackClientFacade.GetAllSlackChannels(stoppingToken)).Select(x => new Channel(x.Id, x.Name, x.IsPrivate));
+                return (await slackClientFacade.GetPublicSlackChannelsAsync(stoppingToken)).Select(x => new Channel(x.Id, x.Name, x.IsPrivate));
             }
             else
             {
                 _logger.LogDebug("Getting list of channels, the application has been added to, for network '{networkId}'...", network.NetworkId);
-                return (await slackClientFacade.GetCurrentUserChannels(stoppingToken)).Select(x => new Channel(x.Id, x.Name, x.IsPrivate));
+                return (await slackClientFacade.GetCurrentUserChannelsAsync(stoppingToken)).Select(x => new Channel(x.Id, x.Name, x.IsPrivate));
             }
         }
 

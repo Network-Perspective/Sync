@@ -11,8 +11,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Infrastructure.Slack.Client;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
 

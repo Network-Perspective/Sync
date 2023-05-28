@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 
@@ -19,7 +19,7 @@ using WireMock.Server;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.ApiClients
 {
     public class ConversationsClientTests : IClassFixture<MockedRestServerFixture>
     {

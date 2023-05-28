@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination
 {
     internal class MetadataResponse
     {

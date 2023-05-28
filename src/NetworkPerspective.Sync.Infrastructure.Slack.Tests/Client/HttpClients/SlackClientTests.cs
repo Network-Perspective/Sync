@@ -15,7 +15,6 @@ using Moq;
 
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
 

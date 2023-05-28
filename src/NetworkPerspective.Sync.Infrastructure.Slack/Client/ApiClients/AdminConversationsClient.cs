@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients
 {
     internal class AdminConversationsClient
     {

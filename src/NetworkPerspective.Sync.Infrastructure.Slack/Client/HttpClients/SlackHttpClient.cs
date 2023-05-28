@@ -5,9 +5,6 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.Exceptions;
-
 using Newtonsoft.Json;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients

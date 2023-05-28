@@ -6,14 +6,15 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
     internal interface ISlackClientFacadeFactory
     {
-        Task<ISlackClientFacade> CreateWithBotTokenAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task<ISlackClientFacade> CreateWithUserTokenAsync(Guid networkId, CancellationToken stoppingToken = default);
-        ISlackClientFacade CreateUnauthorized();
+        Task<ISlackClientBotScopeFacade> CreateWithBotTokenAsync(Guid networkId, CancellationToken stoppingToken = default);
+        Task<ISlackClientBotScopeFacade> CreateWithUserTokenAsync(Guid networkId, CancellationToken stoppingToken = default);
+        ISlackClientUnauthorizedFacade CreateUnauthorized();
     }
 
     internal class SlackClientFacadeFactory : ISlackClientFacadeFactory
@@ -29,21 +30,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             _loggerFactory = loggerFactory;
         }
 
-        public Task<ISlackClientFacade> CreateWithBotTokenAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task<ISlackClientBotScopeFacade> CreateWithBotTokenAsync(Guid networkId, CancellationToken stoppingToken = default)
             => CreateWithTokenAsync(networkId, SlackKeys.TokenKeyPattern, stoppingToken);
 
-        public Task<ISlackClientFacade> CreateWithUserTokenAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task<ISlackClientBotScopeFacade> CreateWithUserTokenAsync(Guid networkId, CancellationToken stoppingToken = default)
             => CreateWithTokenAsync(networkId, SlackKeys.UserTokenKeyPattern, stoppingToken);
 
-        public ISlackClientFacade CreateUnauthorized()
+        public ISlackClientUnauthorizedFacade CreateUnauthorized()
         {
             var slackHttpClient = _slackHttpClientFactory.Create();
-            var paginationHandler = new CursorPaginationHandler(_loggerFactory.CreateLogger<CursorPaginationHandler>());
 
-            return new SlackClientFacade(slackHttpClient, paginationHandler);
+            return new SlackClientUnauthorizedFacade(slackHttpClient);
         }
 
-        private async Task<ISlackClientFacade> CreateWithTokenAsync(Guid networkId, string tokenKeyPattern, CancellationToken stoppingToken = default)
+        private async Task<ISlackClientBotScopeFacade> CreateWithTokenAsync(Guid networkId, string tokenKeyPattern, CancellationToken stoppingToken = default)
         {
             var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId, stoppingToken);
             var tokenKey = string.Format(tokenKeyPattern, networkId);
@@ -52,7 +52,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             var slackHttpClient = _slackHttpClientFactory.CreateWithToken(token);
             var paginationHandler = new CursorPaginationHandler(_loggerFactory.CreateLogger<CursorPaginationHandler>());
 
-            return new SlackClientFacade(slackHttpClient, paginationHandler);
+            return new SlackClientBotScopeFacade(slackHttpClient, paginationHandler);
         }
     }
 }

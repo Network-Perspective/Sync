@@ -16,6 +16,7 @@ using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Tests.Fixtures;
 
@@ -43,7 +44,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             var paginationHandler = new CursorPaginationHandler(NullLogger<CursorPaginationHandler>.Instance);
             var chatclient = new ChatClient(Mock.Of<ITasksStatusesCache>(), NullLogger<ChatClient>.Instance);
 
-            var slackClientFacade = new SlackClientFacade(_slackHttpClient, paginationHandler);
+            var slackClientFacade = new SlackClientBotScopeFacade(_slackHttpClient, paginationHandler);
             var stream = new TestableInteractionStream();
 
             var employees = new List<Employee>()
@@ -61,7 +62,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                 // Assert
                 stream.SentInteractions.Count.Should().BePositive();
             }
-            catch (Slack.Client.Exceptions.ApiException exception)
+            catch (ApiException exception)
             {
                 Skip.If(exception.Message.Contains("invalid_auth"), "Please setup slack auth for slack api changes testing");
 

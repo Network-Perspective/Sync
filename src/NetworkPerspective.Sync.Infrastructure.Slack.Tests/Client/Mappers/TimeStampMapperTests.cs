@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 using FluentAssertions;
 
-using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Mappers;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Mappers
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.Mappers
 {
     public class TimeStampMapperTests
     {

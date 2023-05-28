@@ -15,8 +15,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
     internal interface IMembersClient
     {
-        Task<EmployeeCollection> GetEmployees(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, CancellationToken stoppingToken = default);
-        Task<EmployeeCollection> GetHashedEmployees(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default);
+        Task<EmployeeCollection> GetEmployees(ISlackClientBotScopeFacade slackClientFacade, EmailFilter emailFilter, CancellationToken stoppingToken = default);
+        Task<EmployeeCollection> GetHashedEmployees(ISlackClientBotScopeFacade slackClientFacade, EmailFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default);
     }
 
     internal class MembersClient : IMembersClient
@@ -30,20 +30,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _logger = logger;
         }
 
-        public Task<EmployeeCollection> GetEmployees(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, CancellationToken stoppingToken = default)
+        public Task<EmployeeCollection> GetEmployees(ISlackClientBotScopeFacade slackClientFacade, EmailFilter emailFilter, CancellationToken stoppingToken = default)
             => GetEmployeesInternalAsync(slackClientFacade, emailFilter, null, stoppingToken);
 
-        public Task<EmployeeCollection> GetHashedEmployees(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default)
+        public Task<EmployeeCollection> GetHashedEmployees(ISlackClientBotScopeFacade slackClientFacade, EmailFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default)
             => GetEmployeesInternalAsync(slackClientFacade, emailFilter, hashFunc, stoppingToken);
 
-        private async Task<EmployeeCollection> GetEmployeesInternalAsync(ISlackClientFacade slackClientFacade, EmailFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default)
+        private async Task<EmployeeCollection> GetEmployeesInternalAsync(ISlackClientBotScopeFacade slackClientFacade, EmailFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default)
         {
             if (hashFunc == null)
                 _logger.LogDebug("Fetching employees... Skipping hashing due to null {func}", nameof(hashFunc));
             else
                 _logger.LogDebug("Fetching employees...");
 
-            var allSlackUsers = await slackClientFacade.GetAllUsers(stoppingToken);
+            var allSlackUsers = await slackClientFacade.GetAllUsersAsync(stoppingToken);
 
             var slackUsers = allSlackUsers
                 .Where(x => emailFilter.IsInternalUser(x.Profile.Email))
@@ -64,7 +64,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
             foreach (var slackUser in slackUsers)
             {
-                var usersChannels = await slackClientFacade.GetAllUsersChannels(slackUser.Id, stoppingToken);
+                var usersChannels = await slackClientFacade.GetAllUsersChannelsAsync(slackUser.Id, stoppingToken);
                 var groups = usersChannels.Select(x => Group.Create(x.Id, x.Name, "Project"));
                 var employeeId = EmployeeId.Create(slackUser.Profile.Email, slackUser.Id);
                 var employee = Employee.CreateInternal(employeeId, groups);

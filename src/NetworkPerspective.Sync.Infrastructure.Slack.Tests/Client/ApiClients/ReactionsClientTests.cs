@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 
@@ -18,36 +19,36 @@ using WireMock.Server;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.ApiClients
 {
-    public class OAuthClientTests : IClassFixture<MockedRestServerFixture>
+    public class ReactionsClientTests : IClassFixture<MockedRestServerFixture>
     {
         private readonly HttpClient _httpClient;
         private readonly WireMockServer _wireMockServer;
+        private readonly ILogger<SlackHttpClient> _logger = NullLogger<SlackHttpClient>.Instance;
 
-        public OAuthClientTests(MockedRestServerFixture slackClientFixture)
+        public ReactionsClientTests(MockedRestServerFixture slackClientFixture)
         {
             _httpClient = slackClientFixture.HttpClient;
             _wireMockServer = slackClientFixture.WireMockServer;
         }
 
         [Fact]
-        public async Task ShouldBeAbleToGetUsersList()
+        public async Task ShouldBeAbleToGetReactions()
         {
             // Arrange
             _wireMockServer
                 .Given(Request.Create()
-                    .UsingPost()
-                    .WithPath("/oauth.v2.access*"))
+                    .UsingGet()
+                    .WithPath("/reactions.get*"))
                 .RespondWith(Response.Create()
                     .WithStatusCode(HttpStatusCode.OK)
-                    .WithBody(SampleResponse.Access));
+                    .WithBody(SampleResponse.GetReactions));
 
-
-            var oAuthClient = new OAuthClient(new SlackHttpClient(_httpClient, NullLogger<SlackHttpClient>.Instance));
+            var reactionsClient = new ReactionsClient(new SlackHttpClient(_httpClient, _logger));
 
             // Act
-            Func<Task<OAuthAccessResponse>> func = () => oAuthClient.AccessAsync(new OAuthAccessRequest());
+            Func<Task<ReactionsGetResponse>> func = () => reactionsClient.GetAsync("foo", "bar");
 
             // Assert
             await func.Should().NotThrowAsync();

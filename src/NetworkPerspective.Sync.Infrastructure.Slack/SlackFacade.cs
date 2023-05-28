@@ -68,7 +68,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             {
                 _logger.LogInformation("Checking if network '{networkId}' is authorized", networkId);
                 var slackClientFacade = await _slackClientFacadeFactory.CreateWithBotTokenAsync(networkId, stoppingToken);
-                await slackClientFacade.GetCurrentUserChannels(stoppingToken);
+                await slackClientFacade.GetCurrentUserChannelsAsync(stoppingToken);
                 return true;
             }
             catch (Exception ex)

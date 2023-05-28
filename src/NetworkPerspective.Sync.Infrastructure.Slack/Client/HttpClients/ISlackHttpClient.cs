@@ -3,8 +3,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
-
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
 {
     public interface ISlackHttpClient : IDisposable

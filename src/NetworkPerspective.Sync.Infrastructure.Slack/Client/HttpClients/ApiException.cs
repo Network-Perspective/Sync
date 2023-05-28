@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Exceptions
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
 {
     public class ApiException : Exception
     {

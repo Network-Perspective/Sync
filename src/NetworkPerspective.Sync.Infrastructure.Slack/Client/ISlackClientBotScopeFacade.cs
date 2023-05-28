@@ -5,28 +5,29 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Application.Domain;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
-using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Mappers;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
-    internal interface ISlackClientFacade : IDisposable
+    internal interface ISlackClientBotScopeFacade : IDisposable
     {
-        Task<ISet<string>> GetAllSlackChannelMembers(string slackChannelId, CancellationToken stoppingToken);
-        Task<IReadOnlyCollection<ConversationsListResponse.SingleConversation>> GetAllSlackChannels(CancellationToken stoppingToken);
-        Task<IEnumerable<ConversationRepliesResponse.SingleMessage>> GetAllSlackThreadReplies(string slackChannelId, string timestamp, CancellationToken stoppingToken);
-        Task<IReadOnlyCollection<ConversationHistoryResponse.SingleMessage>> GetSlackThreads(string slackChannelId, TimeRange timeRange, CancellationToken stoppingToken);
-        Task<IEnumerable<UsersListResponse.SingleUser>> GetAllUsers(CancellationToken stoppingToken);
-        Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetCurrentUserChannels(CancellationToken stoppingToken = default);
-        Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetAllUsersChannels(string slackUserId, CancellationToken stoppingToken = default);
+        Task<ISet<string>> GetAllSlackChannelMembersAsync(string slackChannelId, CancellationToken stoppingToken);
+        Task<IReadOnlyCollection<ConversationsListResponse.SingleConversation>> GetPublicSlackChannelsAsync(CancellationToken stoppingToken);
+        Task<IEnumerable<ConversationRepliesResponse.SingleMessage>> GetAllSlackThreadRepliesAsync(string slackChannelId, string timestamp, CancellationToken stoppingToken);
+        Task<IReadOnlyCollection<ConversationHistoryResponse.SingleMessage>> GetSlackThreadsAsync(string slackChannelId, TimeRange timeRange, CancellationToken stoppingToken);
+        Task<IEnumerable<UsersListResponse.SingleUser>> GetAllUsersAsync(CancellationToken stoppingToken);
+        Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetCurrentUserChannelsAsync(CancellationToken stoppingToken = default);
+        Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetAllUsersChannelsAsync(string slackUserId, CancellationToken stoppingToken = default);
         Task<ConversationJoinResponse> JoinChannelAsync(string conversationId, CancellationToken stoppingToken = default);
-        Task<ReactionsGetResponse> GetAllReactions(string slackChannelId, string messageTimestamp, CancellationToken stoppingToken = default);
+        Task<ReactionsGetResponse> GetAllReactionsAsync(string slackChannelId, string messageTimestamp, CancellationToken stoppingToken = default);
         Task<UsersInfoResponse> GetUserAsync(string id, CancellationToken stoppingToken = default);
-        Task<OAuthAccessResponse> AccessAsync(OAuthAccessRequest request, CancellationToken stoppingToken = default);
     }
 
-    internal class SlackClientFacade : ISlackClientFacade
+    internal class SlackClientBotScopeFacade : ISlackClientBotScopeFacade
     {
         private const int DEFAULT_LIMIT = 1000;
         private readonly ISlackHttpClient _slackHttpClient;
@@ -34,17 +35,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         private readonly ConversationsClient _conversationsClient;
         private readonly ReactionsClient _reactionsClient;
         private readonly UsersClient _usersClient;
-        private readonly OAuthClient _oauthClient;
 
-        public SlackClientFacade(ISlackHttpClient slackHttpClient, CursorPaginationHandler cursorPaginationHandler)
+        public SlackClientBotScopeFacade(ISlackHttpClient slackHttpClient, CursorPaginationHandler paginationHandler)
         {
             _slackHttpClient = slackHttpClient;
-            _paginationHandler = cursorPaginationHandler;
+            _paginationHandler = paginationHandler;
 
             _conversationsClient = new ConversationsClient(_slackHttpClient);
             _reactionsClient = new ReactionsClient(_slackHttpClient);
             _usersClient = new UsersClient(_slackHttpClient);
-            _oauthClient = new OAuthClient(_slackHttpClient);
         }
 
         public void Dispose()
@@ -52,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             _slackHttpClient?.Dispose();
         }
 
-        public async Task<IReadOnlyCollection<ConversationsListResponse.SingleConversation>> GetAllSlackChannels(CancellationToken stoppingToken)
+        public async Task<IReadOnlyCollection<ConversationsListResponse.SingleConversation>> GetPublicSlackChannelsAsync(CancellationToken stoppingToken)
         {
             Task<ConversationsListResponse> CallApi(string nextCursor, CancellationToken stoppingToken)
                 => _conversationsClient.GetListAsync(DEFAULT_LIMIT, nextCursor, stoppingToken);
@@ -64,7 +63,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             return slackChannels.ToList().AsReadOnly();
         }
 
-        public async Task<IReadOnlyCollection<ConversationHistoryResponse.SingleMessage>> GetSlackThreads(string slackChannelId, TimeRange timeRange, CancellationToken stoppingToken)
+        public async Task<IReadOnlyCollection<ConversationHistoryResponse.SingleMessage>> GetSlackThreadsAsync(string slackChannelId, TimeRange timeRange, CancellationToken stoppingToken)
         {
             Task<ConversationHistoryResponse> CallApi(string nextCursor, CancellationToken stoppingToken)
                 => _conversationsClient.GetConversationHistoryAsync(slackChannelId, DEFAULT_LIMIT, timeRange.Start, timeRange.End, nextCursor, stoppingToken);
@@ -79,7 +78,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
                 .AsReadOnly();
         }
 
-        public async Task<ISet<string>> GetAllSlackChannelMembers(string slackChannelId, CancellationToken stoppingToken)
+        public async Task<ISet<string>> GetAllSlackChannelMembersAsync(string slackChannelId, CancellationToken stoppingToken)
         {
             Task<ConversationMembersResponse> CallApi(string nextCursor, CancellationToken stoppingToken)
                 => _conversationsClient.GetConversationMembersAsync(slackChannelId, DEFAULT_LIMIT, nextCursor, stoppingToken);
@@ -91,7 +90,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             return slackThreadMembers.ToHashSet(StringComparer.InvariantCultureIgnoreCase);
         }
 
-        public async Task<IEnumerable<ConversationRepliesResponse.SingleMessage>> GetAllSlackThreadReplies(string slackChannelId, string timestamp, CancellationToken stoppingToken)
+        public async Task<IEnumerable<ConversationRepliesResponse.SingleMessage>> GetAllSlackThreadRepliesAsync(string slackChannelId, string timestamp, CancellationToken stoppingToken)
         {
             var oldest = TimeStampMapper.DateTimeToSlackTimeStamp(DateTime.UnixEpoch);
             var latest = TimeStampMapper.DateTimeToSlackTimeStamp(DateTime.MaxValue);
@@ -111,7 +110,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         public Task<ConversationJoinResponse> JoinChannelAsync(string conversationId, CancellationToken stoppingToken = default)
             => _conversationsClient.JoinConversationAsync(conversationId, stoppingToken);
 
-        public async Task<IEnumerable<UsersListResponse.SingleUser>> GetAllUsers(CancellationToken stoppingToken)
+        public async Task<IEnumerable<UsersListResponse.SingleUser>> GetAllUsersAsync(CancellationToken stoppingToken)
         {
             Task<UsersListResponse> CallApi(string nextCursor, CancellationToken stoppingToken)
                 => _usersClient.GetListAsync(DEFAULT_LIMIT, nextCursor, stoppingToken);
@@ -122,10 +121,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             return await _paginationHandler.GetAllAsync(CallApi, GetEntitiesFromResponse, stoppingToken);
         }
 
-        public Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetCurrentUserChannels(CancellationToken stoppingToken = default)
-            => GetAllUsersChannels(string.Empty, stoppingToken);
+        public Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetCurrentUserChannelsAsync(CancellationToken stoppingToken = default)
+            => GetAllUsersChannelsAsync(string.Empty, stoppingToken);
 
-        public async Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetAllUsersChannels(string slackUserId, CancellationToken stoppingToken = default)
+        public async Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetAllUsersChannelsAsync(string slackUserId, CancellationToken stoppingToken = default)
         {
             Task<UsersConversationsResponse> CallApi(string nextCursor, CancellationToken stoppingToken)
                 => _usersClient.GetConversationsAsync(slackUserId, DEFAULT_LIMIT, nextCursor, stoppingToken);
@@ -136,13 +135,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             return await _paginationHandler.GetAllAsync(CallApi, GetEntitiesFromResponse, stoppingToken);
         }
 
-        public Task<ReactionsGetResponse> GetAllReactions(string slackChannelId, string messageTimestamp, CancellationToken stoppingToken = default)
+        public Task<ReactionsGetResponse> GetAllReactionsAsync(string slackChannelId, string messageTimestamp, CancellationToken stoppingToken = default)
             => _reactionsClient.GetAsync(slackChannelId, messageTimestamp, stoppingToken);
 
         public Task<UsersInfoResponse> GetUserAsync(string id, CancellationToken stoppingToken = default)
             => _usersClient.GetAsync(id, stoppingToken);
-
-        public Task<OAuthAccessResponse> AccessAsync(OAuthAccessRequest request, CancellationToken stoppingToken = default)
-            => _oauthClient.AccessAsync(request, stoppingToken);
     }
 }

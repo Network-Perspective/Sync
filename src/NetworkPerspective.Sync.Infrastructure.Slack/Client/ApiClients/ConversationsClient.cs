@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
-using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Mappers;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients
 {
     internal class ConversationsClient
     {

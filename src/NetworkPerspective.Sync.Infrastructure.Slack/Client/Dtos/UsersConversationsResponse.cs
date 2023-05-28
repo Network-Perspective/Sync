@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
+
 using Newtonsoft.Json;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos

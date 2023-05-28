@@ -1,4 +1,4 @@
-﻿namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
+﻿namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
 {
     public static class SlackApiErrorCodes
     {

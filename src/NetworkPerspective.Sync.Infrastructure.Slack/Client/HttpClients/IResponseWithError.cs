@@ -1,4 +1,4 @@
-﻿namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos
+﻿namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
 {
     public interface IResponseWithError
     {

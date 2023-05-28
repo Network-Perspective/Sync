@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
-
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination
 {
     /// <see href="https://api.slack.com/docs/pagination"/>
     internal class CursorPaginationHandler

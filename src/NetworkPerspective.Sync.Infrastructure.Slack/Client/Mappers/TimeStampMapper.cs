@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Mappers
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Mappers
 {
     // Please do not try optimize it with DateTimeOffset.FromUnixTimeSeconds.. it's not precise enough!
     internal static class TimeStampMapper
@@ -10,8 +10,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Mappers
         public static DateTime SlackTimeStampToDateTime(string timestamp)
         {
             var epoch = decimal.Parse(timestamp);
-            var epochTicks = BaseEpochTicks + (epoch * TimeSpan.TicksPerSecond);
-            var dateTime = new DateTime((long)(epochTicks));
+            var epochTicks = BaseEpochTicks + epoch * TimeSpan.TicksPerSecond;
+            var dateTime = new DateTime((long)epochTicks);
 
             return dateTime;
         }

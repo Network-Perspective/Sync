@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
+
+using Newtonsoft.Json;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos
 {

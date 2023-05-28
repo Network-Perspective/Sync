@@ -9,12 +9,12 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.Pagination
 {
     public class CursorPaginationHandlerTests
     {

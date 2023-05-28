@@ -1,4 +1,6 @@
-﻿namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos
+﻿using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
+
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos
 {
     internal class AdminConversationInvite : IResponseWithError
     {
