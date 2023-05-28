@@ -33,7 +33,7 @@ namespace NetworkPerspective.Sync.Slack.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
         public async Task<IActionResult> AddAsync([FromBody] NetworkConfigDto config, CancellationToken stoppingToken = default)
         {
-            var properties = new SlackNetworkProperties(config.AutoJoinChannels, config.SyncChannelsNames, config.ExternalKeyVaultUri);
+            var properties = new SlackNetworkProperties(config.AutoJoinChannels, config.UsesAdminPrivileges, config.SyncChannelsNames, config.ExternalKeyVaultUri);
 
             var networkId = await InitializeAsync(properties, stoppingToken);
 

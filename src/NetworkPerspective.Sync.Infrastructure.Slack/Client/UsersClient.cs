@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
@@ -19,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         {
             var path = string.Format("users.list?limit={0}&cursor={1}", limit, cursor);
 
-            return await _client.Get<UsersListResponse>(path, stoppingToken);
+            return await _client.GetAsync<UsersListResponse>(path, stoppingToken);
         }
 
         /// <see href="https://api.slack.com/methods/users.info"
@@ -27,7 +28,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         {
             var path = string.Format("users.info?user={0}", id);
 
-            return await _client.Get<UsersInfoResponse>(path, stoppingToken);
+            return await _client.GetAsync<UsersInfoResponse>(path, stoppingToken);
         }
 
         /// <see href="https://api.slack.com/methods/users.conversations"
@@ -37,7 +38,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             var user = string.IsNullOrEmpty(userId) ? string.Empty : $"&user={userId}";
             var path = string.Format("users.conversations?&limit={0}&types={1}&cursor={2}{3}", limit, conversationTypes, cursor, user);
 
-            return await _client.Get<UsersConversationsResponse>(path, stoppingToken);
+            return await _client.GetAsync<UsersConversationsResponse>(path, stoppingToken);
         }
     }
 }

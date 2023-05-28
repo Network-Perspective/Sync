@@ -10,7 +10,7 @@ using NetworkPerspective.Sync.Infrastructure.Slack.Client.Exceptions;
 
 using Newtonsoft.Json;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
 {
     internal class SlackHttpClient : ISlackHttpClient
     {
@@ -28,13 +28,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             _httpClient?.Dispose();
         }
 
-        public Task<T> Get<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
+        public Task<T> GetAsync<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
             => Invoke<T>(() => _httpClient.GetAsync(path, stoppingToken));
 
-        public Task<T> Post<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
+        public Task<T> PostAsync<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
             => Invoke<T>(() => _httpClient.PostAsync(path, null, stoppingToken));
 
-        public Task<T> Post<T>(string path, HttpContent content, CancellationToken stoppingToken = default) where T : IResponseWithError
+        public Task<T> PostAsync<T>(string path, HttpContent content, CancellationToken stoppingToken = default) where T : IResponseWithError
             => Invoke<T>(() => _httpClient.PostAsync(path, content, stoppingToken));
 
         private static async Task<T> Invoke<T>(Func<Task<HttpResponseMessage>> innerMethod) where T : IResponseWithError

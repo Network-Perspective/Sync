@@ -13,7 +13,7 @@ using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
 using Polly;
 using Polly.Retry;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
 {
     internal class ResilientSlackHttpClientDecorator : ISlackHttpClient
     {
@@ -35,26 +35,26 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             _client?.Dispose();
         }
 
-        public async Task<T> Get<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
+        public async Task<T> GetAsync<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
         {
             Task<T> Method(CancellationToken ct)
-                => _client.Get<T>(path, stoppingToken);
+                => _client.GetAsync<T>(path, stoppingToken);
 
             return await _retryPolicy.ExecuteAsync(Method, stoppingToken);
         }
 
-        public async Task<T> Post<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
+        public async Task<T> PostAsync<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
         {
             Task<T> Method(CancellationToken ct)
-                => _client.Post<T>(path, stoppingToken);
+                => _client.PostAsync<T>(path, stoppingToken);
 
             return await _retryPolicy.ExecuteAsync(Method, stoppingToken);
         }
 
-        public async Task<T> Post<T>(string path, HttpContent content, CancellationToken stoppingToken = default) where T : IResponseWithError
+        public async Task<T> PostAsync<T>(string path, HttpContent content, CancellationToken stoppingToken = default) where T : IResponseWithError
         {
             Task<T> Method(CancellationToken ct)
-                => _client.Post<T>(path, content, stoppingToken);
+                => _client.PostAsync<T>(path, content, stoppingToken);
 
             return await _retryPolicy.ExecuteAsync(Method, stoppingToken);
         }

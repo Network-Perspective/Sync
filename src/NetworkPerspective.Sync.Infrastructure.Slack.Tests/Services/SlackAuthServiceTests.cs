@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,6 +30,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
         private const string ClientId = "1234";
         private static readonly string[] Scopes = new[] { "scope1", "scope2" };
         private static readonly string[] UserScopes = new[] { "userScope1", "userScope2" };
+        private static readonly string[] AdminUserScopes = new[] { "adminUserScope1", "adminUserScope2" };
 
         private readonly Mock<IAuthStateKeyFactory> _stateFactoryMock = new Mock<IAuthStateKeyFactory>();
         private readonly Mock<ISecretRepositoryFactory> _secretRepositoryFactoryMock = new Mock<ISecretRepositoryFactory>();
@@ -59,7 +61,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
         public class StartAuthProcess : SlackAuthServiceTests
         {
             [Fact]
-            public async Task ShouldBuildCorrectAuthUri()
+            public async Task ShouldBuildCorrectAuthUriWithoutAdminPrivileges()
             {
                 // Arrange
                 var state = Guid.NewGuid().ToString();
@@ -86,7 +88,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _logger);
 
                 // Act
-                var result = await service.StartAuthProcessAsync(new AuthProcess(Guid.NewGuid(), new Uri(redirectUrl)));
+                var result = await service.StartAuthProcessAsync(new AuthProcess(Guid.NewGuid(), new Uri(redirectUrl), false));
 
                 // Assert
                 result.SlackAuthUri.Should().Contain("oauth/v2/authorize");
@@ -97,12 +99,50 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             }
 
             [Fact]
+            public async Task ShouldBuildCorrectAuthUriWithAdminPrivileges()
+            {
+                // Arrange
+                var state = Guid.NewGuid().ToString();
+                var config = CreateDefaultOptions();
+                const string redirectUrl = "https://networkperspective.io:5001/callback";
+
+                _stateFactoryMock
+                    .Setup(x => x.Create())
+                    .Returns(state);
+
+                _secretRepositoryMock
+                    .Setup(x => x.GetSecretAsync(SlackKeys.SlackClientIdKey, It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(ClientId.ToSecureString());
+
+                var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
+
+                var service = new SlackAuthService(
+                    _stateFactoryMock.Object,
+                    config,
+                    _secretRepositoryFactoryMock.Object,
+                    _slackClientFacadeFactoryMock.Object,
+                    cache,
+                    _statusLoggerFactoryMock.Object,
+                    _logger);
+
+                // Act
+                var result = await service.StartAuthProcessAsync(new AuthProcess(Guid.NewGuid(), new Uri(redirectUrl), true));
+
+                // Assert
+                result.SlackAuthUri.Should().Contain("oauth/v2/authorize");
+                result.SlackAuthUri.Should().Contain($"client_id={ClientId}");
+                result.SlackAuthUri.Should().Contain($"scope={string.Join(',', Scopes)}");
+                result.SlackAuthUri.Should().Contain($"user_scope={string.Join(',', UserScopes.Union(AdminUserScopes))}");
+                result.SlackAuthUri.Should().Contain($"redirect_uri={redirectUrl}");
+            }
+
+            [Fact]
             public void ShouldPutStateToCache()
             {
                 // Arrange
                 var networkId = Guid.NewGuid();
                 var callbackUri = new Uri("https://localhost:5001/callback");
-                var authProcess = new AuthProcess(networkId, callbackUri);
+                var authProcess = new AuthProcess(networkId, callbackUri, false);
 
                 var stateKey = Guid.NewGuid().ToString();
                 var config = CreateDefaultOptions();
@@ -162,7 +202,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             => Options.Create(new AuthConfig
             {
                 Scopes = Scopes,
-                UserScopes = UserScopes
+                UserScopes = UserScopes,
+                AdminUserScopes = AdminUserScopes,
             });
     }
 }

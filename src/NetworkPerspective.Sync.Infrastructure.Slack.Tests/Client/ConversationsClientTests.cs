@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
@@ -131,7 +132,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
             var conversationsClient = new ConversationsClient(new SlackHttpClient(_httpClient, _logger));
 
             // Act
-            Func<Task<JoinConversationResponse>> func = () => conversationsClient.JoinConversationAsync("foo");
+            Func<Task<ConversationJoinResponse>> func = () => conversationsClient.JoinConversationAsync("foo");
 
             // Assert
             await func.Should().NotThrowAsync();

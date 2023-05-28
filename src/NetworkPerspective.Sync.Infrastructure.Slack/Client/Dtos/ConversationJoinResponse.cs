@@ -2,7 +2,7 @@
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos
 {
-    internal class JoinConversationResponse : IResponseWithError
+    internal class ConversationJoinResponse : IResponseWithError
     {
         [JsonProperty("ok")]
         public bool IsOk { get; set; }

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;

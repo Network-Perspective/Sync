@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
@@ -29,7 +30,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
                 new KeyValuePair<string, string>("refresh_token", request.RefreshToken)
             });
 
-            return await _client.Post<OAuthAccessResponse>(path, content, stoppingToken);
+            return await _client.PostAsync<OAuthAccessResponse>(path, content, stoppingToken);
         }
     }
 }

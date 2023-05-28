@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
@@ -22,7 +23,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         {
             var url = string.Format("reactions.get?full=true&channel={0}&timestamp={1}", channel, messageTimestamp);
 
-            return await _client.Get<ReactionsGetResponse>(url, stoppingToken);
+            return await _client.GetAsync<ReactionsGetResponse>(url, stoppingToken);
         }
     }
 }

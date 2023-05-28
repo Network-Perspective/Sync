@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -67,7 +68,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             var stateKey = _stateKeyFactory.Create();
             _cache.Set(stateKey, authProcess, DateTimeOffset.UtcNow.AddMinutes(SlackAuthorizationCodeExpirationTimeInMinutes));
 
-            var authUri = BuildSlackAuthUri(stateKey, authProcess.CallbackUri, clientId);
+            var authUri = BuildSlackAuthUri(stateKey, authProcess, clientId);
 
             _logger.LogInformation("Slack authentication process started. Unique state id: '{state}'", stateKey);
 
@@ -101,22 +102,32 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             var tokenKey = string.Format(SlackKeys.TokenKeyPattern, authProcess.NetworkId);
             await secretRepository.SetSecretAsync(tokenKey, response.AccessToken.ToSecureString(), stoppingToken);
 
+            if(authProcess.RequireAdminPrivileges)
+            {
+                var userTokenKey = string.Format(SlackKeys.UserTokenKeyPattern, authProcess.NetworkId);
+                await secretRepository.SetSecretAsync(userTokenKey, response.User.AccessToken.ToSecureString(), stoppingToken);
+            }
+
             await _statusLoggerFactory
                 .CreateForNetwork(authProcess.NetworkId)
                 .LogInfoAsync("Connector authorized successfully", stoppingToken);
             _logger.LogInformation("Authentication callback processed successfully. Network '{networkId}' is configured for synchronization", authProcess.NetworkId);
         }
 
-        private string BuildSlackAuthUri(string state, Uri callbackUrl, SecureString slackClientId)
+        private string BuildSlackAuthUri(string state, AuthProcess authProcess, SecureString slackClientId)
         {
-            _logger.LogDebug("Building slack auth path...");
+            _logger.LogDebug("Building slack auth path... The {parameter} is set to '{value}'", nameof(authProcess.RequireAdminPrivileges), authProcess.RequireAdminPrivileges);
 
             var uriBuilder = new UriBuilder("https://slack.com/oauth/v2/authorize");
 
             var scopesParameter = string.Join(',', _slackAuthConfig.Scopes);
-            var userScopesParameter = string.Join(',', _slackAuthConfig.UserScopes);
 
-            uriBuilder.Query = string.Format("redirect_uri={0}&client_id={1}&scope={2}&user_scope={3}&state={4}", callbackUrl.ToString(), slackClientId.ToSystemString(), scopesParameter, userScopesParameter, state);
+            var userScopes = authProcess.RequireAdminPrivileges
+                ? _slackAuthConfig.UserScopes.Union(_slackAuthConfig.AdminUserScopes)
+                : _slackAuthConfig.UserScopes;
+            var userScopesParameter = string.Join(',', userScopes);
+
+            uriBuilder.Query = string.Format("redirect_uri={0}&client_id={1}&scope={2}&user_scope={3}&state={4}", authProcess.CallbackUri.ToString(), slackClientId.ToSystemString(), scopesParameter, userScopesParameter, state);
 
             _logger.LogDebug("Built slack auth path: '{uriBuilder}'", uriBuilder);
 

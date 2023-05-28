@@ -41,7 +41,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
         public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
         {
-            var channels = await GetChannels(slackClientFacade, network, stoppingToken);
+            var channels = await GetChannelsAsync(slackClientFacade, network, stoppingToken);
 
             if (network.Properties.AutoJoinChannels)
                 await JoinPublicChannelsAsync(slackClientFacade, channels, stoppingToken);
@@ -156,7 +156,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             return new SingleTaskResult(interactionsCount);
         }
 
-        private async Task<IEnumerable<Channel>> GetChannels(ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, CancellationToken stoppingToken = default)
+        private async Task<IEnumerable<Channel>> GetChannelsAsync(ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, CancellationToken stoppingToken = default)
         {
             if (network.Properties.AutoJoinChannels)
             {

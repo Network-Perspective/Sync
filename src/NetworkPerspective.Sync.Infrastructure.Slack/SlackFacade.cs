@@ -44,7 +44,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             _logger.LogInformation("Fetching employees data...");
 
             var network = await context.EnsureSetAsync(() => _networkService.GetAsync<SlackNetworkProperties>(context.NetworkId, stoppingToken));
-            var slackClientFacade = await context.EnsureSetAsync(() => _slackClientFacadeFactory.CreateAsync(context.NetworkId, stoppingToken));
+            var slackClientFacade = await context.EnsureSetAsync(() => _slackClientFacadeFactory.CreateWithBotTokenAsync(context.NetworkId, stoppingToken));
             var employees = await context.EnsureSetAsync(() => _employeeProfileClient.GetEmployees(slackClientFacade, context.NetworkConfig.EmailFilter, stoppingToken));
 
             var interactionFactory = new InteractionFactory(context.HashFunction, employees);
@@ -57,7 +57,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
             var network = await context.EnsureSetAsync(() => _networkService.GetAsync<SlackNetworkProperties>(context.NetworkId, stoppingToken));
-            var slackClientFacade = await context.EnsureSetAsync(() => _slackClientFacadeFactory.CreateAsync(context.NetworkId, stoppingToken));
+            var slackClientFacade = await context.EnsureSetAsync(() => _slackClientFacadeFactory.CreateWithBotTokenAsync(context.NetworkId, stoppingToken));
 
             return await _employeeProfileClient.GetHashedEmployees(slackClientFacade, context.NetworkConfig.EmailFilter, context.HashFunction, stoppingToken);
         }
@@ -67,7 +67,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             try
             {
                 _logger.LogInformation("Checking if network '{networkId}' is authorized", networkId);
-                var slackClientFacade = await _slackClientFacadeFactory.CreateAsync(networkId, stoppingToken);
+                var slackClientFacade = await _slackClientFacadeFactory.CreateWithBotTokenAsync(networkId, stoppingToken);
                 await slackClientFacade.GetCurrentUserChannels(stoppingToken);
                 return true;
             }

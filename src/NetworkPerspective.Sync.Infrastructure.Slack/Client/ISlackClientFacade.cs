@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
@@ -19,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         Task<IEnumerable<UsersListResponse.SingleUser>> GetAllUsers(CancellationToken stoppingToken);
         Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetCurrentUserChannels(CancellationToken stoppingToken = default);
         Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetAllUsersChannels(string slackUserId, CancellationToken stoppingToken = default);
-        Task<JoinConversationResponse> JoinChannelAsync(string conversationId, CancellationToken stoppingToken = default);
+        Task<ConversationJoinResponse> JoinChannelAsync(string conversationId, CancellationToken stoppingToken = default);
         Task<ReactionsGetResponse> GetAllReactions(string slackChannelId, string messageTimestamp, CancellationToken stoppingToken = default);
         Task<UsersInfoResponse> GetUserAsync(string id, CancellationToken stoppingToken = default);
         Task<OAuthAccessResponse> AccessAsync(OAuthAccessRequest request, CancellationToken stoppingToken = default);
@@ -107,7 +108,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
                 .Where(x => x.TimeStamp != x.ThreadTimestamp); // exclude the thread message itself
         }
 
-        public Task<JoinConversationResponse> JoinChannelAsync(string conversationId, CancellationToken stoppingToken = default)
+        public Task<ConversationJoinResponse> JoinChannelAsync(string conversationId, CancellationToken stoppingToken = default)
             => _conversationsClient.JoinConversationAsync(conversationId, stoppingToken);
 
         public async Task<IEnumerable<UsersListResponse.SingleUser>> GetAllUsers(CancellationToken stoppingToken)

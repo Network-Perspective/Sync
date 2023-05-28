@@ -9,7 +9,7 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Application.Tests.Domain.Interactions
 {
-    public class InteractionEqualityComparerTest
+    public class InteractionEqualityComparerTests
     {
         [Fact]
         public void ShoudReturnFalseOnNotEqualDateTime()
