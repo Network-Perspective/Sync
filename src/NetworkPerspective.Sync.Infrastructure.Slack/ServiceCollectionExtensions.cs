@@ -33,9 +33,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy());
 
             services.AddTransient<ISlackHttpClientFactory, SlackHttpClientFactory>();
+            services.AddTransient<ISlackHttpClient>(sp => sp.GetRequiredService<ISlackHttpClientFactory>().Create());
             services.AddSingleton<ISlackAuthService, SlackAuthService>();
             services.AddTransient<CursorPaginationHandler>();
             services.AddTransient<ISlackClientFacadeFactory, SlackClientFacadeFactory>();
+            services.AddTransient<ISlackClientUnauthorizedFacade>(sp => sp.GetRequiredService<ISlackClientFacadeFactory>().CreateUnauthorized());
             services.AddMemoryCache();
 
             services.AddSingleton<IDataSourceFactory, SlackFacadeFactory>();

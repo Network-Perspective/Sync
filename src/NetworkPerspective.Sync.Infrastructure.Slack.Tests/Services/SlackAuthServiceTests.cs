@@ -32,12 +32,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
         private static readonly string[] UserScopes = new[] { "userScope1", "userScope2" };
         private static readonly string[] AdminUserScopes = new[] { "adminUserScope1", "adminUserScope2" };
 
-        private readonly Mock<IAuthStateKeyFactory> _stateFactoryMock = new Mock<IAuthStateKeyFactory>();
-        private readonly Mock<ISecretRepositoryFactory> _secretRepositoryFactoryMock = new Mock<ISecretRepositoryFactory>();
-        private readonly Mock<ISecretRepository> _secretRepositoryMock = new Mock<ISecretRepository>();
-        private readonly Mock<ISlackClientFacadeFactory> _slackClientFacadeFactoryMock = new Mock<ISlackClientFacadeFactory>();
-        private readonly Mock<IStatusLoggerFactory> _statusLoggerFactoryMock = new Mock<IStatusLoggerFactory>();
-        private readonly Mock<IStatusLogger> _statusLoggerMock = new Mock<IStatusLogger>();
+        private readonly Mock<IAuthStateKeyFactory> _stateFactoryMock = new();
+        private readonly Mock<ISecretRepositoryFactory> _secretRepositoryFactoryMock = new();
+        private readonly Mock<ISecretRepository> _secretRepositoryMock = new();
+        private readonly Mock<ISlackClientUnauthorizedFacade> _slackClientUnauthorizedFacadeMock = new();
+        private readonly Mock<IStatusLoggerFactory> _statusLoggerFactoryMock = new();
+        private readonly Mock<IStatusLogger> _statusLoggerMock = new();
         private readonly ILogger<SlackAuthService> _logger = NullLogger<SlackAuthService>.Instance;
 
         public SlackAuthServiceTests()
@@ -45,7 +45,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             _stateFactoryMock.Reset();
             _secretRepositoryFactoryMock.Reset();
             _secretRepositoryMock.Reset();
-            _slackClientFacadeFactoryMock.Reset();
+            _slackClientUnauthorizedFacadeMock.Reset();
             _statusLoggerFactoryMock.Reset();
             _statusLoggerMock.Reset();
 
@@ -82,7 +82,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _stateFactoryMock.Object,
                     config,
                     _secretRepositoryFactoryMock.Object,
-                    _slackClientFacadeFactoryMock.Object,
+                    _slackClientUnauthorizedFacadeMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
                     _logger);
@@ -120,7 +120,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _stateFactoryMock.Object,
                     config,
                     _secretRepositoryFactoryMock.Object,
-                    _slackClientFacadeFactoryMock.Object,
+                    _slackClientUnauthorizedFacadeMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
                     _logger);
@@ -156,7 +156,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _stateFactoryMock.Object,
                     config,
                     _secretRepositoryFactoryMock.Object,
-                    _slackClientFacadeFactoryMock.Object,
+                    _slackClientUnauthorizedFacadeMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
                     _logger);
@@ -185,7 +185,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _stateFactoryMock.Object,
                     config,
                     _secretRepositoryFactoryMock.Object,
-                    _slackClientFacadeFactoryMock.Object,
+                    _slackClientUnauthorizedFacadeMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
                     _logger);

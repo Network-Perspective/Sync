@@ -32,7 +32,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         private readonly AuthConfig _slackAuthConfig;
         private readonly IAuthStateKeyFactory _stateKeyFactory;
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
-        private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
+        private readonly ISlackClientUnauthorizedFacade _slackClientUnauthorizedFacade;
         private readonly IMemoryCache _cache;
         private readonly IStatusLoggerFactory _statusLoggerFactory;
         private readonly ILogger<SlackAuthService> _logger;
@@ -41,7 +41,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             IAuthStateKeyFactory stateFactory,
             IOptions<AuthConfig> slackAuthConfig,
             ISecretRepositoryFactory secretRepositoryFactory,
-            ISlackClientFacadeFactory slackClientFacadeFactory,
+            ISlackClientUnauthorizedFacade slackClientUnauthorizedFacade,
             IMemoryCache cache,
             IStatusLoggerFactory statusLoggerFactory,
             ILogger<SlackAuthService> logger)
@@ -49,7 +49,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _slackAuthConfig = slackAuthConfig.Value;
             _stateKeyFactory = stateFactory;
             _secretRepositoryFactory = secretRepositoryFactory;
-            _slackClientFacadeFactory = slackClientFacadeFactory;
+            _slackClientUnauthorizedFacade = slackClientUnauthorizedFacade;
             _cache = cache;
             _statusLoggerFactory = statusLoggerFactory;
             _logger = logger;
@@ -96,8 +96,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 Code = code,
             };
 
-            using var slackClientFacade = _slackClientFacadeFactory.CreateUnauthorized();
-            var response = await slackClientFacade.AccessAsync(request, stoppingToken);
+            var response = await _slackClientUnauthorizedFacade.AccessAsync(request, stoppingToken);
 
             var tokenKey = string.Format(SlackKeys.TokenKeyPattern, authProcess.NetworkId);
             await secretRepository.SetSecretAsync(tokenKey, response.AccessToken.ToSecureString(), stoppingToken);
