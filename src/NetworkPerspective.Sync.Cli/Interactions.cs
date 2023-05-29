@@ -37,7 +37,7 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("Text file delimiter (Default = tab delimited)"), DefaultValue("\t")]
         public string CsvDelimiter { get; set; }
 
-        [ArgDescription("New line delimiter (Default = Environment.NewLine)")]
+        [ArgDescription("New line delimiter (Default = CRLF)")]
         public string CsvNewLine { get; set; }
 
         [ArgDescription("SourceId column (IdProperty)"), ArgRequired, DefaultValue("From (EmployeeId)")]
@@ -48,6 +48,9 @@ namespace NetworkPerspective.Sync.Cli
 
         [ArgDescription("Timestamp column name"), ArgRequired, DefaultValue("When")]
         public string WhenCol { get; set; }
+
+        [ArgDescription("InteractionId column name"), ArgRequired, DefaultValue("InteractionId")]
+        public string InteractionId { get; set; }
 
         [ArgDescription("Timestamp timezone (see TimeZoneInfo.FindSystemTimeZoneById)"), ArgRequired, DefaultValue("Central European Standard Time")]
         public string TimeZone { get; set; }
@@ -64,7 +67,7 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("One of (Chat, Email, Meeting)"), ArgRequired]
         public string DataSourceType { get; set; }
 
-        [ArgDescription("Split requests into batches of specified number of interactions"), ArgRequired, DefaultValue(100000)]
+        [ArgDescription("Split requests into batches of specified number of interactions"), ArgRequired, DefaultValue(100_000)]
         public int BatchSize { get; set; }
 
         [ArgDescription("Run in debug mode - save request to file DebugFn, but do not send it to remote service")]
@@ -80,6 +83,7 @@ namespace NetworkPerspective.Sync.Cli
         private Dictionary<string, ColumnDescriptor> _eventIdCols = new Dictionary<string, ColumnDescriptor>();
         private Dictionary<string, ColumnDescriptor> _recurrenceCols = new Dictionary<string, ColumnDescriptor>();
         private Dictionary<string, ColumnDescriptor> _durationCols = new Dictionary<string, ColumnDescriptor>();
+        private Dictionary<string, ColumnDescriptor> _interactionIdCols = new Dictionary<string, ColumnDescriptor>();
 
         private readonly ISyncHashedClient _client;
         private readonly IFileSystem _fileSystem;
@@ -125,6 +129,7 @@ namespace NetworkPerspective.Sync.Cli
             _eventIdCols = _options.EventIdCol.AsColumnDescriptorDictionary();
             _recurrenceCols = _options.RecurrentceCol.AsColumnDescriptorDictionary();
             _durationCols = _options.DurationCol.AsColumnDescriptorDictionary();
+            _interactionIdCols = _options.InteractionId.AsColumnDescriptorDictionary();
 
             var timer = Stopwatch.StartNew();
 
@@ -188,11 +193,14 @@ namespace NetworkPerspective.Sync.Cli
             var bufferSize = 1024 * 1024 * 10; // 10MB
             var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                NewLine = args.CsvNewLine ?? Environment.NewLine,
                 HasHeaderRecord = true,
                 Delimiter = args.CsvDelimiter,
                 BufferSize = bufferSize,
             };
+            if (!string.IsNullOrEmpty(args.CsvNewLine))
+            {
+                csvConfig.NewLine = args.CsvNewLine;
+            }
 
             using (var progress = new ProgressBar())
             using (var stream = _fileSystem.FileStream.Create(fileName, FileMode.Open, FileAccess.Read))
@@ -240,6 +248,10 @@ namespace NetworkPerspective.Sync.Cli
                         else if (_whenCols.ContainsKey(fieldName))
                         {
                             interaction.When = value.AsUtcDate(args.TimeZone);
+                        }
+                        else if (_interactionIdCols.ContainsKey(fieldName))
+                        {
+                            interaction.InteractionId = value;
                         }
                         else if (_eventIdCols.ContainsKey(fieldName))
                         {
