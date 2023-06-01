@@ -5,8 +5,6 @@ FROM mcr.microsoft.com/azure-cli AS az
 FROM mcr.microsoft.com/powershell:latest AS base
 RUN apt-get update && apt-get dist-upgrade -y
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
 
 # run publish
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
