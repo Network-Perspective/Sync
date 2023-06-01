@@ -135,7 +135,6 @@ namespace NetworkPerspective.Sync.Cli
                 reader = args.Csv != null ? _fileSystem.File.OpenText(args.Csv) : Console.In;
                 var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
                 {
-                    NewLine = Environment.NewLine,
                     HasHeaderRecord = true,
                     Delimiter = args.CsvDelimiter,
                 };
