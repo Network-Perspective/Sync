@@ -22,6 +22,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         Task<IEnumerable<UsersListResponse.SingleUser>> GetAllUsersAsync(CancellationToken stoppingToken);
         Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetCurrentUserChannelsAsync(CancellationToken stoppingToken = default);
         Task<IEnumerable<UsersConversationsResponse.SingleConversation>> GetAllUsersChannelsAsync(string slackUserId, CancellationToken stoppingToken = default);
+        Task<IEnumerable<TeamsListResponse.SingleTeam>> GetTeamsListAsync(CancellationToken stoppingToken = default);
         Task<ConversationJoinResponse> JoinChannelAsync(string conversationId, CancellationToken stoppingToken = default);
         Task<ReactionsGetResponse> GetAllReactionsAsync(string slackChannelId, string messageTimestamp, CancellationToken stoppingToken = default);
         Task<UsersInfoResponse> GetUserAsync(string id, CancellationToken stoppingToken = default);
@@ -35,6 +36,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         private readonly ConversationsClient _conversationsClient;
         private readonly ReactionsClient _reactionsClient;
         private readonly UsersClient _usersClient;
+        private readonly AuthClient _authClient;
 
         public SlackClientBotScopeFacade(ISlackHttpClient slackHttpClient, CursorPaginationHandler paginationHandler)
         {
@@ -44,6 +46,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             _conversationsClient = new ConversationsClient(_slackHttpClient);
             _reactionsClient = new ReactionsClient(_slackHttpClient);
             _usersClient = new UsersClient(_slackHttpClient);
+            _authClient = new AuthClient(_slackHttpClient);
         }
 
         public void Dispose()
@@ -140,5 +143,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 
         public Task<UsersInfoResponse> GetUserAsync(string id, CancellationToken stoppingToken = default)
             => _usersClient.GetAsync(id, stoppingToken);
+
+        public async Task<IEnumerable<TeamsListResponse.SingleTeam>> GetTeamsListAsync(CancellationToken stoppingToken = default)
+        {
+            Task<TeamsListResponse> CallApi(string nextCursor, CancellationToken stoppingToken)
+                => _authClient.GetTeamsListAsync(DEFAULT_LIMIT, nextCursor, stoppingToken);
+
+            IEnumerable<TeamsListResponse.SingleTeam> GetEntitiesFromResponse(TeamsListResponse response)
+                => response.Teams;
+
+            return await _paginationHandler.GetAllAsync(CallApi, GetEntitiesFromResponse, stoppingToken);
+        }
     }
 }
