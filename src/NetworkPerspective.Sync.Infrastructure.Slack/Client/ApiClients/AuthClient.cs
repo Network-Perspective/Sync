@@ -22,5 +22,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients
 
             return await _client.GetAsync<TeamsListResponse>(path, stoppingToken);
         }
+
+        /// <see href="https://api.slack.com/methods/auth.test"/>
+        public async Task<TestResponse> TestAsync(CancellationToken stoppingToken = default)
+        {
+            const string path = "auth.test";
+
+            return await _client.PostAsync<TestResponse>(path, stoppingToken);
+        }
     }
 }

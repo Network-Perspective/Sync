@@ -48,7 +48,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.ApiClients
             var usersClient = new UsersClient(new SlackHttpClient(_httpClient, _logger));
 
             // Act
-            Func<Task<UsersListResponse>> func = () => usersClient.GetListAsync(2);
+            Func<Task<UsersListResponse>> func = () => usersClient.GetListAsync("foo", 2);
 
             // Assert
             await func.Should().NotThrowAsync();
@@ -69,7 +69,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.ApiClients
             var usersClient = new UsersClient(new SlackHttpClient(_httpClient, _logger));
 
             // Act
-            Func<Task<UsersConversationsResponse>> func = () => usersClient.GetConversationsAsync("foo");
+            Func<Task<UsersConversationsResponse>> func = () => usersClient.GetConversationsAsync("foo", "bar");
 
             // Assert
             await func.Should().NotThrowAsync();

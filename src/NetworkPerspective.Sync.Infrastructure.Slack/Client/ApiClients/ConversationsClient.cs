@@ -18,10 +18,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients
         }
 
         /// <see href="https://api.slack.com/methods/conversations.list"/>
-        public async Task<ConversationsListResponse> GetListAsync(int limit = 100, string cursor = default, CancellationToken stoppingToken = default)
+        public async Task<ConversationsListResponse> GetListAsync(string teamId = default, int limit = 100, string cursor = default, CancellationToken stoppingToken = default)
         {
             var conversationTypes = "public_channel,private_channel";
-            var path = string.Format("conversations.list?limit={0}&types={1}&cursor={2}", limit, conversationTypes, cursor);
+            var path = string.Format("conversations.list?team_id={0}&limit={1}&types={2}&cursor={3}", teamId, limit, conversationTypes, cursor);
 
             return await _client.GetAsync<ConversationsListResponse>(path, stoppingToken);
         }

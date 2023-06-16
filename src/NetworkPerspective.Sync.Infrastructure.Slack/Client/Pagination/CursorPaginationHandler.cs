@@ -32,8 +32,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination
                 var response = await callApi(nextCursor, stoppingToken);
                 var responseEntities = getEnties(response);
 
-                _logger.LogTrace($"Got {responseEntities.Count()} from api");
-                entities.AddRange(responseEntities);
+                _logger.LogTrace($"Got {responseEntities?.Count() ?? 0} from api");
+                entities.AddRange(responseEntities ?? Enumerable.Empty<TEntity>());
                 nextCursor = response.Metadata?.NextCursor ?? string.Empty;
 
                 _logger.LogTrace($"Next page cursor is '{nextCursor}'");

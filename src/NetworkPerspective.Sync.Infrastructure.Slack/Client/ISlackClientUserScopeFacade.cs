@@ -13,13 +13,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
     internal interface ISlackClientUserScopeFacade : IDisposable
     {
-        Task<IReadOnlyCollection<ConversationsListResponse.SingleConversation>> GetPrivateSlackChannelsAsync(CancellationToken stoppingToken = default);
+        Task<IReadOnlyCollection<AdminConversationsListResponse.SingleConversation>> GetPrivateSlackChannelsAsync(CancellationToken stoppingToken = default);
         Task<AdminConversationInvite> JoinChannelAsync(string conversationId, string userId, CancellationToken stoppingToken = default);
     }
 
     internal class SlackClientUserScopeFacade : ISlackClientUserScopeFacade
     {
-        private const int DEFAULT_LIMIT = 1000;
         private readonly ISlackHttpClient _slackHttpClient;
         private readonly CursorPaginationHandler _paginationHandler;
         private readonly AdminConversationsClient _adminConversationsClient;
@@ -36,12 +35,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
             _slackHttpClient.Dispose();
         }
 
-        public async Task<IReadOnlyCollection<ConversationsListResponse.SingleConversation>> GetPrivateSlackChannelsAsync(CancellationToken stoppingToken = default)
+        public async Task<IReadOnlyCollection<AdminConversationsListResponse.SingleConversation>> GetPrivateSlackChannelsAsync(CancellationToken stoppingToken = default)
         {
-            Task<ConversationsListResponse> CallApi(string nextCursor, CancellationToken stoppingToken)
-                => _adminConversationsClient.GetPrivateChannelsListAsync(DEFAULT_LIMIT, nextCursor, stoppingToken);
+            Task<AdminConversationsListResponse> CallApi(string nextCursor, CancellationToken stoppingToken)
+                => _adminConversationsClient.GetPrivateChannelsListAsync(nextCursor, stoppingToken);
 
-            IEnumerable<ConversationsListResponse.SingleConversation> GetEntitiesFromResponse(ConversationsListResponse response)
+            IEnumerable<AdminConversationsListResponse.SingleConversation> GetEntitiesFromResponse(AdminConversationsListResponse response)
                 => response.Conversations;
 
             var slackChannels = await _paginationHandler.GetAllAsync(CallApi, GetEntitiesFromResponse, stoppingToken);

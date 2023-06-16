@@ -10,6 +10,7 @@ using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
@@ -43,7 +44,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             else
                 _logger.LogDebug("Fetching employees...");
 
-            var allSlackUsers = await slackClientFacade.GetAllUsersAsync(stoppingToken);
+            var teams = await slackClientFacade.GetTeamsListAsync(stoppingToken);
+
+            var allSlackUsers = new HashSet<UsersListResponse.SingleUser>();
+
+            foreach (var team in teams)
+            {
+                var singleWorkspaceUsers = await slackClientFacade.GetAllUsersAsync(team.Id, stoppingToken);
+                allSlackUsers = allSlackUsers.UnionBy(singleWorkspaceUsers, x => x.Id).ToHashSet();
+            }
 
             var slackUsers = allSlackUsers
                 .Where(x => emailFilter.IsInternalUser(x.Profile.Email))
@@ -62,14 +71,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
             var employees = new List<Employee>();
 
-            foreach (var slackUser in slackUsers)
+            foreach (var team in teams)
             {
-                var usersChannels = await slackClientFacade.GetAllUsersChannelsAsync(slackUser.Id, stoppingToken);
-                var groups = usersChannels.Select(x => Group.Create(x.Id, x.Name, "Project"));
-                var employeeId = EmployeeId.Create(slackUser.Profile.Email, slackUser.Id);
-                var employee = Employee.CreateInternal(employeeId, groups);
-                employees.Add(employee);
-                _logger.LogTrace("User: '{email}'", slackUser.Profile.Email);
+                foreach (var slackUser in slackUsers)
+                {
+                    var usersChannels = await slackClientFacade.GetAllUsersChannelsAsync(team.Id, slackUser.Id, stoppingToken);
+                    var groups = usersChannels.Select(x => Group.Create(x.Id, x.Name, "Project"));
+                    var employeeId = EmployeeId.Create(slackUser.Profile.Email, slackUser.Id);
+                    var employee = Employee.CreateInternal(employeeId, groups);
+                    employees.Add(employee);
+                    _logger.LogTrace("User: '{email}'", slackUser.Profile.Email);
+                }
             }
 
             foreach (var botId in botsIds)

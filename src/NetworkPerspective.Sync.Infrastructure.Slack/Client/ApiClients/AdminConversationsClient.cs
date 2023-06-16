@@ -16,18 +16,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients
         }
 
         /// <see href="https://api.slack.com/methods/admin.conversations.search"/>
-        public async Task<ConversationsListResponse> GetPrivateChannelsListAsync(int limit = 100, string cursor = default, CancellationToken stoppingToken = default)
+        public async Task<AdminConversationsListResponse> GetPrivateChannelsListAsync(string cursor = default, CancellationToken stoppingToken = default)
         {
+            const int limit = 20;
             var searchTypes = "private";
             var path = string.Format("admin.conversations.search?limit={0}&cursor={1}&search_channel_types={2}", limit, cursor, searchTypes);
 
-            return await _client.PostAsync<ConversationsListResponse>(path, stoppingToken);
+            return await _client.PostAsync<AdminConversationsListResponse>(path, stoppingToken);
         }
 
         /// <see href="https://api.slack.com/methods/admin.conversations.invite"/>
         public async Task<AdminConversationInvite> JoinAsync(string channelId, string userId, CancellationToken stoppingToken = default)
         {
-            var path = string.Format("admin.conversations.search?channel_id={0}&user_ids={1}", channelId, userId);
+            var path = string.Format("admin.conversations.invite?channel_id={0}&user_ids={1}", channelId, userId);
 
             return await _client.PostAsync<AdminConversationInvite>(path, stoppingToken);
         }

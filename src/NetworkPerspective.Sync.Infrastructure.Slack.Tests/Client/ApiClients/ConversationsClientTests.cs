@@ -48,7 +48,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.ApiClients
             var conversationsClient = new ConversationsClient(new SlackHttpClient(_httpClient, _logger));
 
             // Act
-            Func<Task<ConversationsListResponse>> func = () => conversationsClient.GetListAsync(2);
+            Func<Task<ConversationsListResponse>> func = () => conversationsClient.GetListAsync("foo", 2);
 
             // Assert
             await func.Should().NotThrowAsync();

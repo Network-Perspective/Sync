@@ -16,9 +16,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients
         }
 
         /// <see href="https://api.slack.com/methods/users.list"
-        public async Task<UsersListResponse> GetListAsync(int limit = 100, string cursor = default, CancellationToken stoppingToken = default)
+        public async Task<UsersListResponse> GetListAsync(string teamId = default, int limit = 100, string cursor = default, CancellationToken stoppingToken = default)
         {
-            var path = string.Format("users.list?limit={0}&cursor={1}", limit, cursor);
+            var path = string.Format("users.list?team_id={0}&limit={1}&cursor={2}", teamId, limit, cursor);
 
             return await _client.GetAsync<UsersListResponse>(path, stoppingToken);
         }
@@ -32,11 +32,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients
         }
 
         /// <see href="https://api.slack.com/methods/users.conversations"
-        public async Task<UsersConversationsResponse> GetConversationsAsync(string userId, int limit = 100, string cursor = default, CancellationToken stoppingToken = default)
+        public async Task<UsersConversationsResponse> GetConversationsAsync(string teamId, string userId, int limit = 100, string cursor = default, CancellationToken stoppingToken = default)
         {
             var conversationTypes = "public_channel,private_channel";
             var user = string.IsNullOrEmpty(userId) ? string.Empty : $"&user={userId}";
-            var path = string.Format("users.conversations?&limit={0}&types={1}&cursor={2}{3}", limit, conversationTypes, cursor, user);
+            var path = string.Format("users.conversations?team_id={0}&limit={1}&types={2}&cursor={3}{4}", teamId, limit, conversationTypes, cursor, user);
 
             return await _client.GetAsync<UsersConversationsResponse>(path, stoppingToken);
         }
