@@ -27,7 +27,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         {
             var network = await _networkService.GetAsync<SlackNetworkProperties>(networkId, stoppingToken);
 
-            if(network.Properties.UsesAdminPrivileges)
+            if (network.Properties.UsesAdminPrivileges)
             {
                 var isUserTokenOk = await TestUserTokenAsync(networkId, stoppingToken);
                 var isBotTokenOk = await TestBotTokenAsync(networkId, stoppingToken);
