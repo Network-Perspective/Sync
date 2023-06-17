@@ -82,6 +82,10 @@ namespace NetworkPerspective.Sync.Cli
             }
             if (parsed == default(DateTime))
             {
+                DateTime.TryParseExact(value, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out parsed);
+            }
+            if (parsed == default(DateTime))
+            {
                 DateTime.TryParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out parsed);
             }
 

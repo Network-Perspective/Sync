@@ -43,6 +43,13 @@ namespace NetworkPerspective.Sync.Cli
             var client = Program.Setup<InteractionsClient, InteractionsOpts>(args);
             await client!.Main();
         }
+
+        [ArgActionMethod, ArgDescription("Signal action")]
+        public async Task Signal(SignalOpts args)
+        {
+            var client = Program.Setup<SignalClient, SignalOpts>(args);
+            await client!.Main();
+        }
     }
 
     internal sealed class Program

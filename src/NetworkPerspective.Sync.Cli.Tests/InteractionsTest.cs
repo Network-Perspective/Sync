@@ -47,6 +47,39 @@ namespace NetworkPerspective.Sync.Cli.Tests
             _coreClient.Verify(c => c.SyncInteractionsAsync(It.IsAny<SyncHashedInteractionsCommand>()), Times.Once());
         }
 
+
+        [Fact]
+        public async Task ItShouldReadAndProcessInteractionsWithIds()
+        {
+            // Arrange
+            var options = new InteractionsOpts()
+            {
+                Csv = new[] { @"interactions-with-id.csv" },
+                BaseUrl = "http://localhost",
+                Token = "sample_token",
+                CsvDelimiter = "\t",
+                FromCol = "From(EmployeeId)",
+                ToCol = "To(EmployeeId)",
+                WhenCol = "When",
+                EventIdCol = "EventId",
+                DurationCol = "Duration",
+                RecurrentceCol = "RecurrenceType",
+                DataSourceType = "Meeting",
+                InteractionId = "Id",
+                BatchSize = 100000,
+            };
+
+            var interactionsClient = new InteractionsClient(_coreClient.Object, _fileSystem, options);
+
+            // Act
+            await interactionsClient.Main();
+
+            // Assert
+            var expected = JsonConvert.DeserializeObject<SyncHashedInteractionsCommand>(_fileSystem.File.ReadAllText(@"interactions-with-id-expected.json"));
+            _interceptedCommand[0].Should().BeEquivalentTo(expected);
+            _coreClient.Verify(c => c.SyncInteractionsAsync(It.IsAny<SyncHashedInteractionsCommand>()), Times.Once());
+        }
+
         [Fact]
         public async Task ItShouldSendRequestInBatchesOfSpecifiedSize()
         {
