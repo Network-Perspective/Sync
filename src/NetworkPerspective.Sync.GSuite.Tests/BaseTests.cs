@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,11 +22,11 @@ using Xunit;
 namespace NetworkPerspective.Sync.GSuite.Tests
 {
     [Collection(GSuiteTestsCollection.Name)]
-    public class BaseTest
+    public class BaseTests
     {
         private readonly InMemoryHostedServiceFixture<Startup> _service;
 
-        public BaseTest(InMemoryHostedServiceFixture<Startup> service)
+        public BaseTests(InMemoryHostedServiceFixture<Startup> service)
         {
             _service = service;
             service.Reset();
