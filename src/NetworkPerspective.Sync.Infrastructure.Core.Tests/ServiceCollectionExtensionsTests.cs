@@ -41,25 +41,25 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
             const string stateOk = "state_ok";
 
             _wireMockServer
-              .Given(Request.Create()
-                .WithPath("/*"))
-              .InScenario(scenarioName)
-              .WillSetStateTo(stateOk, 2)
-              .RespondWith(Response.Create()
-                .WithStatusCode(HttpStatusCode.RequestTimeout));
+                .Given(Request.Create()
+                    .WithPath("/*"))
+                .InScenario(scenarioName)
+                .WillSetStateTo(stateOk, 2)
+                .RespondWith(Response.Create()
+                    .WithStatusCode(HttpStatusCode.RequestTimeout));
 
             _wireMockServer
-              .Given(Request.Create()
-                .WithPath("/*"))
-              .InScenario(scenarioName)
-              .WhenStateIs(stateOk)
-              .RespondWith(Response.Create()
-                .WithStatusCode(HttpStatusCode.OK)
-                .WithBodyAsJson(new ServiceResult
-                {
-                    ConnectorId = Guid.NewGuid(),
-                    NetworkId = Guid.NewGuid()
-                }));
+                .Given(Request.Create()
+                    .WithPath("/*"))
+                .InScenario(scenarioName)
+                .WhenStateIs(stateOk)
+                .RespondWith(Response.Create()
+                    .WithStatusCode(HttpStatusCode.OK)
+                    .WithBodyAsJson(new ServiceResult
+                    {
+                        ConnectorId = Guid.NewGuid(),
+                        NetworkId = Guid.NewGuid()
+                    }));
 
             var services = new ServiceCollection();
             var config = new ConfigurationBuilder()
@@ -82,7 +82,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
             var client = serviceProvider.GetRequiredService<ISyncHashedClient>();
 
             // Assert
-            var result = await client.QueryAsync("foo");
+            var _ = await client.QueryAsync("foo");
             _wireMockServer.LogEntries.Count().Should().Be(3);
 
         }

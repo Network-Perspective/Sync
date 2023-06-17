@@ -41,6 +41,7 @@ namespace NetworkPerspective.Sync.Slack.Tests
 
             const bool autoJoinChannels = true;
             const bool syncChannelsNames = true;
+            const bool usesAdminPrivileges = true;
 
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
@@ -49,7 +50,8 @@ namespace NetworkPerspective.Sync.Slack.Tests
             var networkConfig = new NetworkConfigDto
             {
                 AutoJoinChannels = autoJoinChannels,
-                SyncChannelsNames = syncChannelsNames
+                SyncChannelsNames = syncChannelsNames,
+                UsesAdminPrivileges = usesAdminPrivileges
             };
 
             // Act
@@ -65,6 +67,7 @@ namespace NetworkPerspective.Sync.Slack.Tests
             network.Properties.AutoJoinChannels.Should().Be(autoJoinChannels);
             network.Properties.SyncGroups.Should().Be(syncChannelsNames);
             network.Properties.ExternalKeyVaultUri.Should().BeNull();
+            network.Properties.UsesAdminPrivileges.Should().Be(usesAdminPrivileges);
         }
 
         [Fact]

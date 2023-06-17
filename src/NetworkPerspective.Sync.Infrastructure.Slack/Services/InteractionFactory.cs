@@ -7,7 +7,7 @@ using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
-using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Mappers;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {

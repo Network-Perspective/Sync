@@ -418,5 +418,22 @@
                 ""token_type"": ""user""
             }
         }";
+
+        public const string ConversationsList = @"{
+            ""ok"": true,
+            ""teams"": [
+                {
+                    ""name"": ""Shinichi's workspace"",
+                    ""id"": ""T12345678""
+                },
+                {
+                    ""name"": ""Migi's workspace"",
+                    ""id"": ""T12345679""
+                }
+            ],
+            ""response_metadata"": {
+                ""next_cursor"": ""dXNlcl9pZDo5MTQyOTI5Mzkz""
+            }
+        }";
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -50,13 +49,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             var users = await _usersClient.GetUsersAsync(context, stoppingToken);
             return HashedEmployeesMapper.ToEmployees(users, context.HashFunction);
 
-        }
-
-        public Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)
-        {
-            _logger.LogInformation("Checking if network '{networkId}' is authorized", networkId);
-
-            return Task.FromResult(true);
         }
 
         public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)

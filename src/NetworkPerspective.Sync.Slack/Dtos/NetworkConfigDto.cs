@@ -22,5 +22,10 @@ namespace NetworkPerspective.Sync.Slack.Dtos
         /// Enable/disable channels names synchronization
         /// </summary>
         public bool SyncChannelsNames { get; set; } = false;
+
+        /// <summary>
+        /// Determines if network requires to be authorized with admin privileges
+        /// </summary>
+        public bool UsesAdminPrivileges { get; set; } = false;
     }
 }

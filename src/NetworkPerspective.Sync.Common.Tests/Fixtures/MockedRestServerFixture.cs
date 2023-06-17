@@ -5,7 +5,7 @@ using WireMock.Server;
 
 namespace NetworkPerspective.Sync.Common.Tests.Fixtures
 {
-    public class MockedRestServerFixture : IDisposable
+    public sealed class MockedRestServerFixture : IDisposable
     {
         public HttpClient HttpClient { get; }
         public WireMockServer WireMockServer { get; }

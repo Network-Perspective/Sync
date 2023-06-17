@@ -37,7 +37,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             var membersClient = new MembersClient(_loggerFactory.CreateLogger<MembersClient>());
             var chatClient = new ChatClient(_tasksStatusesCache, _loggerFactory.CreateLogger<ChatClient>());
 
-            var facade = new SlackFacade(_networkService, membersClient, chatClient, _slackClientFacadeFactory, _clock, _loggerFactory.CreateLogger<SlackFacade>());
+            var facade = new SlackFacade(_networkService, membersClient, chatClient, _slackClientFacadeFactory, _clock, _loggerFactory);
             return Task.FromResult(facade as IDataSource);
         }
     }
