@@ -40,7 +40,7 @@ namespace NetworkPerspective.Sync.Application.Services
                 .FindLastLogAsync(networkId, stoppingToken);
             var lastSyncPeriodEnd = lastSyncHistoryEntry?.SyncPeriod.End;
 
-            _logger.LogDebug("Last syncronization of network '{networkId}' {lastSync}", networkId, lastSyncPeriodEnd?.ToString(Consts.DefaultDateTimeFormat) ?? "not found");
+            _logger.LogDebug("Last synchronization of network '{networkId}' {lastSync}", networkId, lastSyncPeriodEnd?.ToString(Consts.DefaultDateTimeFormat) ?? "not found");
 
             return lastSyncPeriodEnd ?? _clock.UtcNow().AddDays(-_config.DefaultSyncLookbackInDays);
         }

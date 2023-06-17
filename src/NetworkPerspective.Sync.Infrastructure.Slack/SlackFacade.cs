@@ -51,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
             var interactionFactory = new InteractionFactory(context.HashFunction, employees);
 
-            if(network.Properties.AutoJoinChannels)
+            if (network.Properties.AutoJoinChannels)
             {
                 if (network.Properties.UsesAdminPrivileges)
                 {

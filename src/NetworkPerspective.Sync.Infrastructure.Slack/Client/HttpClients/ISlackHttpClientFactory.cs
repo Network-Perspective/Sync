@@ -39,7 +39,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
         {
             var httpClient = _httpClientFactory.CreateClient(Consts.SlackApiHttpClientName);
 
-            if(token is not null)
+            if (token is not null)
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.ToSystemString());
 
             var slackHttpClient = new SlackHttpClient(httpClient, _loggerFactory.CreateLogger<SlackHttpClient>());

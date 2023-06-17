@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
-using System.Linq;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client

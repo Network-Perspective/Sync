@@ -101,7 +101,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             var tokenKey = string.Format(SlackKeys.TokenKeyPattern, authProcess.NetworkId);
             await secretRepository.SetSecretAsync(tokenKey, response.AccessToken.ToSecureString(), stoppingToken);
 
-            if(authProcess.RequireAdminPrivileges)
+            if (authProcess.RequireAdminPrivileges)
             {
                 var userTokenKey = string.Format(SlackKeys.UserTokenKeyPattern, authProcess.NetworkId);
                 await secretRepository.SetSecretAsync(userTokenKey, response.User.AccessToken.ToSecureString(), stoppingToken);
