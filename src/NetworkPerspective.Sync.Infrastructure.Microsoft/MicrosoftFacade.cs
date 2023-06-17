@@ -52,13 +52,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 
         }
 
-        public Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)
-        {
-            _logger.LogInformation("Checking if network '{networkId}' is authorized", networkId);
-
-            return Task.FromResult(true);
-        }
-
         public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);

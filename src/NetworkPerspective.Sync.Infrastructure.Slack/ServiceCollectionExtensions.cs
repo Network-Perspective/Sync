@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
@@ -32,6 +33,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 })
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy());
 
+            services.AddTransient<IAuthTester, AuthTester>();
             services.AddTransient<ISlackHttpClientFactory, SlackHttpClientFactory>();
             services.AddTransient<ISlackHttpClient>(sp => sp.GetRequiredService<ISlackHttpClientFactory>().Create());
             services.AddSingleton<ISlackAuthService, SlackAuthService>();

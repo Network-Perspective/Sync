@@ -99,23 +99,5 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             return mapper.ToEmployees(users);
         }
-
-        public async Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)
-        {
-            try
-            {
-                _logger.LogInformation("Checking if network '{networkId}' is authorized", networkId);
-                var network = await _networkService.GetAsync<GoogleNetworkProperties>(networkId, stoppingToken);
-                var credentials = await _credentialsProvider.GetCredentialsAsync(stoppingToken);
-
-                return await _usersClient.CanGetUsersAsync(network, credentials, stoppingToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation("Network '{networkId}' is not authorized", networkId);
-                _logger.LogDebug(ex, string.Empty);
-                return false;
-            }
-        }
     }
 }

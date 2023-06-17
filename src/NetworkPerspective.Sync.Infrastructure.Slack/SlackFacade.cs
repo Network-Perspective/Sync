@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -78,24 +77,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             var slackClientFacade = await context.EnsureSetAsync(() => _slackClientFacadeFactory.CreateWithBotTokenAsync(context.NetworkId, stoppingToken));
 
             return await _employeeProfileClient.GetHashedEmployees(slackClientFacade, context.NetworkConfig.EmailFilter, context.HashFunction, stoppingToken);
-        }
-
-        public async Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)
-        {
-            try
-            {
-                _logger.LogInformation("Checking if network '{networkId}' is authorized", networkId);
-                using var slackClientFacade = await _slackClientFacadeFactory.CreateWithBotTokenAsync(networkId, stoppingToken);
-                //await slackClientFacade.GetCurrentUserChannelsAsync(stoppingToken);
-#warning HERE need to be implemented
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation("Network '{networkId}' is not authorized", networkId);
-                _logger.LogDebug(ex, string.Empty);
-                return false;
-            }
         }
 
         public Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)

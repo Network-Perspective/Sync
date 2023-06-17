@@ -15,6 +15,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
     {
         Task<IReadOnlyCollection<AdminConversationsListResponse.SingleConversation>> GetPrivateSlackChannelsAsync(CancellationToken stoppingToken = default);
         Task<AdminConversationInvite> JoinChannelAsync(string conversationId, string userId, CancellationToken stoppingToken = default);
+        Task<TestResponse> TestAsync(CancellationToken stoppingToken = default);
     }
 
     internal class SlackClientUserScopeFacade : ISlackClientUserScopeFacade
@@ -22,12 +23,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         private readonly ISlackHttpClient _slackHttpClient;
         private readonly CursorPaginationHandler _paginationHandler;
         private readonly AdminConversationsClient _adminConversationsClient;
+        private readonly AuthClient _authClient;
 
         public SlackClientUserScopeFacade(ISlackHttpClient slackHttpClient, CursorPaginationHandler paginationHandler)
         {
             _slackHttpClient = slackHttpClient;
             _paginationHandler = paginationHandler;
             _adminConversationsClient = new AdminConversationsClient(_slackHttpClient);
+            _authClient = new AuthClient(_slackHttpClient);
         }
 
         public void Dispose()
@@ -48,5 +51,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
         }
         public Task<AdminConversationInvite> JoinChannelAsync(string conversationId, string userId, CancellationToken stoppingToken = default)
             => _adminConversationsClient.JoinAsync(conversationId, userId, stoppingToken);
+
+        public Task<TestResponse> TestAsync(CancellationToken stoppingToken = default)
+            => _authClient.TestAsync(stoppingToken);
     }
 }
