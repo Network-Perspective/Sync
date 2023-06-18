@@ -1,45 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AssemblyName>np-sync</AssemblyName>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>np-sync</AssemblyName>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="output\**" />
-    <Compile Remove="publish\**" />
-    <EmbeddedResource Remove="output\**" />
-    <EmbeddedResource Remove="publish\**" />
-    <None Remove="output\**" />
-    <None Remove="publish\**" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="output\**" />
+        <Compile Remove="publish\**" />
+        <EmbeddedResource Remove="output\**" />
+        <EmbeddedResource Remove="publish\**" />
+        <None Remove="output\**" />
+        <None Remove="publish\**" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Connector.cs" />
-    <Compile Remove="CryptoExtensions.cs" />
-    <Compile Remove="LegacyInteractions.cs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="Connector.cs" />
+        <Compile Remove="CryptoExtensions.cs" />
+        <Compile Remove="LegacyInteractions.cs" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="appsettings.json" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Remove="appsettings.json" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Colors.Net" Version="1.1.0" />
-    <PackageReference Include="CsvHelper" Version="30.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="6.0.18" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="NLog" Version="4.7.15" />
-    <PackageReference Include="PowerArgs" Version="3.6.0" />
-    <PackageReference Include="System.IO.Abstractions" Version="17.2.3" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Colors.Net" Version="1.1.0" />
+        <PackageReference Include="CsvHelper" Version="30.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="7.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="NLog" Version="5.2.0" />
+        <PackageReference Include="PowerArgs" Version="4.0.2" />
+        <PackageReference Include="System.IO.Abstractions" Version="17.2.3" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Core\NetworkPerspective.Sync.Infrastructure.Core.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Core\NetworkPerspective.Sync.Infrastructure.Core.csproj" />
+    </ItemGroup>
 
 </Project>

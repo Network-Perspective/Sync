@@ -5,8 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.4.0" />
-        <PackageReference Include="Quartz.Serialization.Json" Version="3.4.0" />
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.6.2" />
+        <PackageReference Include="Quartz.Serialization.Json" Version="3.6.2" />
         <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
     </ItemGroup>
 
