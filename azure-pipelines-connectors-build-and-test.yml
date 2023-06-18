@@ -37,7 +37,6 @@ steps:
   displayName: 'NuGet audit'
   inputs:
     targetType: 'inline'
-    failOnStderr: false
     script: |
       dotnet list ./src/NetworkPerspective.Sync.sln package --vulnerable --include-transitive 2>&1 | tee audit.log
       grep -i -q  -e critical -e high -e moderate audit.log && exit 1 || exit 0    
