@@ -18,20 +18,20 @@ steps:
     version: '6.0.x'
     includePreviewVersions: true # Required for preview versions
   
-#- task: DotNetCoreCLI@2
-#  displayName: 'dotnet format'
-#  inputs:
-#    command: 'custom'
-#    custom: 'format'
-#    arguments: '--verify-no-changes'
-#    projects: 'src/NetworkPerspective.Sync.sln'
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet format'
+  inputs:
+    command: 'custom'
+    custom: 'format'
+    arguments: '--verify-no-changes'
+    projects: 'src/NetworkPerspective.Sync.sln'
 
-#- task: DotNetCoreCLI@2
-#  displayName: 'dotnet build'
-#  inputs:
-#    command: 'build'
-#    configuration: $(buildConfiguration)    
-#    projects: 'src/NetworkPerspective.Sync.sln'
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'build'
+    configuration: $(buildConfiguration)    
+    projects: 'src/NetworkPerspective.Sync.sln'
 
 - task: Bash@3
   displayName: 'NuGet audit'
@@ -39,11 +39,8 @@ steps:
     targetType: 'inline'
     failOnStderr: false
     script: |
-      dotnet restore ./src/NetworkPerspective.Sync.sln
       dotnet list ./src/NetworkPerspective.Sync.sln package --vulnerable --include-transitive 2>&1 | tee audit.log
-      grep -i -q  -e critical -e high -e moderate audit.log && exit 1 || exit 0
-      #grep -q -i  -e critical -e high -e moderate audit.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1
-    
+      grep -i -q  -e critical -e high -e moderate audit.log && exit 1 || exit 0    
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test'
