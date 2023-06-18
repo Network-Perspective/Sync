@@ -31,7 +31,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      dotnet list package --vulnerable --include-transitive 2>&1 | tee audit.log
+      dotnet list ./src/NetworkPerspective.Sync.sln package --vulnerable --include-transitive 2>&1 | tee audit.log
       echo "Audit logs:"
       cat audit.log
       grep -q -i "critical\|high\|moderate\|low" audit.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found in the audit logs" && exit 1      
