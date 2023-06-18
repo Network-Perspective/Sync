@@ -32,7 +32,8 @@ steps:
     targetType: 'inline'
     script: |
       dotnet list ./src/NetworkPerspective.Sync.sln package --vulnerable --include-transitive 2>&1 | tee audit.log
-      grep -i "critical\|high\|moderate" audit.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found in the audit logs" && exit 1      
+      echo here
+      grep -i -q "critical\|high\|moderate" audit.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found in the audit logs" && exit 1      
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet build'
