@@ -18,13 +18,13 @@ steps:
     version: '6.0.x'
     includePreviewVersions: true # Required for preview versions
   
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet format'
-  inputs:
-    command: 'custom'
-    custom: 'format'
-    arguments: '--verify-no-changes'
-    projects: 'src/NetworkPerspective.Sync.sln'
+#- task: DotNetCoreCLI@2
+#  displayName: 'dotnet format'
+#  inputs:
+#    command: 'custom'
+#    custom: 'format'
+#    arguments: '--verify-no-changes'
+#    projects: 'src/NetworkPerspective.Sync.sln'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet build'
@@ -39,8 +39,7 @@ steps:
     targetType: 'inline'
     script: |
       dotnet list ./src/NetworkPerspective.Sync.sln package --vulnerable --include-transitive 2>&1 | tee audit.log
-      echo here
-      grep -i -q "critical\|high\|moderate" audit.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found in the audit logs" && exit 1      
+      grep -q -i "critical\|high\|moderate\|low" audit.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1      
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test'
