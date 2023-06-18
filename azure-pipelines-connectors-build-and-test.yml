@@ -33,24 +33,15 @@ steps:
 #    configuration: $(buildConfiguration)    
 #    projects: 'src/NetworkPerspective.Sync.sln'
 
-#- task: Bash@3
-#  displayName: 'NuGet audit'
-#  inputs:
-#    targetType: 'inline'
-#    script: |
-#      dotnet restore ./src/NetworkPerspective.Sync.sln
-#      dotnet list ./src/NetworkPerspective.Sync.sln package --vulnerable --include-transitive 2>&1 | tee audit.log
-#      grep -q -i  -e critical -e high -e moderate audit.log
-#      #grep -q -i  -e critical -e high -e moderate audit.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1      
-
 - task: Bash@3
-  displayName: Check NuGet vulnerabilities
+  displayName: 'NuGet audit'
   inputs:
     targetType: 'inline'
     script: |
-      dotnet list package --vulnerable --include-transitive 2>&1 | tee build.log
-      echo "Analyze dotnet list package command log output..."
-      grep -q -i "critical\|high\|moderate\|low" build.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1 
+      dotnet restore ./src/NetworkPerspective.Sync.sln
+      dotnet list ./src/NetworkPerspective.Sync.sln package --vulnerable --include-transitive 2>&1 | tee audit.log
+      grep -i  -e critical -e high -e moderate audit.log
+      #grep -q -i  -e critical -e high -e moderate audit.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found on the log output" && exit 1      
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test'
