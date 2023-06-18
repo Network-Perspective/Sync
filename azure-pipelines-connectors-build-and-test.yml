@@ -26,6 +26,16 @@ steps:
     arguments: '--verify-no-changes'
     projects: 'src/NetworkPerspective.Sync.sln'
 
+- task: Bash@3
+  displayName: 'NuGet audit'
+  inputs:
+    targetType: 'inline'
+    script: |
+      dotnet list package --vulnerable --include-transitive 2>&1 | tee audit.log
+      echo "Audit logs:"
+      cat audit.log
+      grep -q -i "critical\|high\|moderate\|low" audit.log; [ $? -eq 0 ] && echo "Security Vulnerabilities found in the audit logs" && exit 1      
+
 - task: DotNetCoreCLI@2
   displayName: 'dotnet build'
   inputs:
