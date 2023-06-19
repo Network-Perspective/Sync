@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Aggregation;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
@@ -73,7 +72,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         {
             _logger.LogDebug("Getting interactions from channel...");
             var interactionsCount = 0;
-            var actionsAggregator = new ActionsAggregator(slackChannelId);
 
             var channelMembers = await slackClientFacade.GetAllSlackChannelMembersAsync(slackChannelId, stoppingToken);
 
@@ -100,8 +98,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 {
                     _logger.LogDebug("Synchonizing thread...");
 
-                    actionsAggregator.Add(TimeStampMapper.SlackTimeStampToDateTime(slackThreadMessage.TimeStamp));
-
                     interactions.UnionWith(interactionFactory.CreateFromThreadMessage(slackThreadMessage, slackChannelId, channelMembers));
 
                     if (HasThreadReplies(slackThreadMessage))
@@ -109,9 +105,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                         _logger.LogDebug("Getting interactions from the thread replies...");
 
                         var slackThreadReplies = await slackClientFacade.GetAllSlackThreadRepliesAsync(slackChannelId, slackThreadMessage.TimeStamp, stoppingToken);
-
-                        foreach (var slackThreadReply in slackThreadReplies)
-                            actionsAggregator.Add(TimeStampMapper.SlackTimeStampToDateTime(slackThreadReply.TimeStamp));
 
                         var repliesInteractions = interactionFactory.CreateFromThreadReplies(slackThreadReplies, slackChannelId, slackChannelId + slackThreadMessage.TimeStamp, slackThreadMessage.User, timeRange);
 
@@ -143,8 +136,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 interactionsCount += sentInteractionsCount;
             }
 
-            _logger.LogTrace(new DefaultActionsAggregatorPrinter().Print(actionsAggregator));
-
             _logger.LogDebug("Getting interactions from channel completed");
             return new SingleTaskResult(interactionsCount);
         }
@@ -157,7 +148,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 return TimeStampMapper.SlackTimeStampToDateTime(slackThreadMessage.TimeStamp);
         }
 
-        private bool HasThreadReplies(ConversationHistoryResponse.SingleMessage slackThreadMessage)
+        private static bool HasThreadReplies(ConversationHistoryResponse.SingleMessage slackThreadMessage)
             => slackThreadMessage.ReplyCount != 0;
     }
 }
