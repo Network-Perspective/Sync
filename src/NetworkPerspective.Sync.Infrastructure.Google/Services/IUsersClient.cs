@@ -21,7 +21,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
     internal interface IUsersClient
     {
         Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, GoogleCredential credentials, CancellationToken stoppingToken = default);
-        Task<bool> CanGetUsersAsync(Network<GoogleNetworkProperties> network, GoogleCredential credentials, CancellationToken stoppingToken = default);
     }
 
     internal sealed class UsersClient : IUsersClient
@@ -58,26 +57,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 _logger.LogDebug("Fetching employees for network '{networkId}' completed. '{count}' employees found", network.NetworkId, filteredUsers.Count());
 
             return filteredUsers;
-        }
-
-        public async Task<bool> CanGetUsersAsync(Network<GoogleNetworkProperties> network, GoogleCredential credentials, CancellationToken stoppingToken = default)
-        {
-            var userCredentials = credentials
-                .CreateWithUser(network.Properties.AdminEmail)
-                .UnderlyingCredential as ServiceAccountCredential;
-
-            var service = new DirectoryService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = userCredentials,
-                ApplicationName = _config.ApplicationName,
-            });
-
-            var request = service.Users.List();
-            request.MaxResults = 10;
-            request.Domain = network.Properties.Domain;
-            request.OrderBy = UsersResource.ListRequest.OrderByEnum.Email;
-            var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);
-            return response.UsersValue != null;
         }
 
         private async Task<IList<User>> GetAllGoogleUsers(Network<GoogleNetworkProperties> network, GoogleCredential credentials, CancellationToken stoppingToken)

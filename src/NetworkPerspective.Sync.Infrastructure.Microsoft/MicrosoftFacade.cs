@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -52,14 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 
         }
 
-        public Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)
-        {
-            _logger.LogInformation("Checking if network '{networkId}' is authorized", networkId);
-
-            return Task.FromResult(true);
-        }
-
-        public async Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
+        public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);
 
@@ -76,10 +68,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
                 .GetAllInternal()
                 .Select(x => x.Id.PrimaryId);
 
-            await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, emailInteractionfactory, stoppingToken);
-            await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, meetingInteractionfactory, stoppingToken);
+            var resultEmails = await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, emailInteractionfactory, stoppingToken);
+            var resultCalendar = await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, meetingInteractionfactory, stoppingToken);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
+
+            return SyncResult.Combine(resultEmails, resultCalendar);
         }
     }
 }

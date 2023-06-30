@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Controllers;
+using NetworkPerspective.Sync.Infrastructure.Slack;
 using NetworkPerspective.Sync.Infrastructure.Slack.Models;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
 
@@ -48,8 +49,9 @@ namespace NetworkPerspective.Sync.Slack.Controllers
             var tokenValidationResponse = await ValidateTokenAsync(stoppingToken);
             await _networkService.ValidateExists(tokenValidationResponse.NetworkId, stoppingToken);
 
+            var network = await _networkService.GetAsync<SlackNetworkProperties>(tokenValidationResponse.NetworkId, stoppingToken);
             var callbackUri = callbackUrl == null ? CreateCallbackUri() : new Uri(callbackUrl);
-            var authProcess = new AuthProcess(tokenValidationResponse.NetworkId, callbackUri);
+            var authProcess = new AuthProcess(tokenValidationResponse.NetworkId, callbackUri, network.Properties.UsesAdminPrivileges);
 
             var result = await _authService.StartAuthProcessAsync(authProcess, stoppingToken);
 

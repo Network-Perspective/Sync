@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Domain;
+using NetworkPerspective.Sync.Application.Domain.Batching;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
@@ -46,13 +46,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
             _disposed = true;
         }
 
-        public async Task SendAsync(IEnumerable<Interaction> interactions)
+        public async Task<int> SendAsync(IEnumerable<Interaction> interactions)
         {
             var interactionsToPush = interactions
                 .Select(x => InteractionMapper.DomainIntractionToDto(x, _npCoreConfig.DataSourceIdName))
                 .ToList();
 
             await _batcher.AddRangeAsync(interactionsToPush, _stoppingToken);
+
+            return interactions.Count();
         }
 
         public Task FlushAsync()

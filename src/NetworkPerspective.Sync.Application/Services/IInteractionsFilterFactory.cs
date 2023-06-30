@@ -3,7 +3,7 @@
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Domain.Interactions.Criterias;
 
 namespace NetworkPerspective.Sync.Application.Services
 {

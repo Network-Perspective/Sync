@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
@@ -9,6 +8,7 @@ using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Infrastructure.Slack;
+using NetworkPerspective.Sync.Slack.Dtos;
 
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -23,9 +23,7 @@ namespace NetworkPerspective.Sync.Slack.Controllers
         /// <summary>
         /// Initializes network
         /// </summary>
-        /// <param name="autoJoinChannels">Enable/disable automatic channel join</param>
-        /// <param name="syncChannelsNames">Enable/disable channels names synchronization</param>
-        /// <param name="externalKeyVaultUri">External Key Vault Uri (optional)</param>
+        /// <param name="config">Network configuration</param>
         /// <param name="stoppingToken">Stopping token</param>
         /// <returns>Result</returns>
         [HttpPost]
@@ -33,9 +31,9 @@ namespace NetworkPerspective.Sync.Slack.Controllers
         [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Network doesn't exist")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
-        public async Task<IActionResult> Add(bool autoJoinChannels = true, bool syncChannelsNames = false, Uri externalKeyVaultUri = null, CancellationToken stoppingToken = default)
+        public async Task<IActionResult> AddAsync([FromBody] NetworkConfigDto config, CancellationToken stoppingToken = default)
         {
-            var properties = new SlackNetworkProperties(autoJoinChannels, syncChannelsNames, externalKeyVaultUri);
+            var properties = new SlackNetworkProperties(config.AutoJoinChannels, config.UsesAdminPrivileges, config.SyncChannelsNames, config.ExternalKeyVaultUri);
 
             var networkId = await InitializeAsync(properties, stoppingToken);
 

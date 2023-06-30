@@ -137,13 +137,13 @@ namespace NetworkPerspective.Sync.Application.Services
             var stream = _networkPerspectiveCore.OpenInteractionsStream(context.AccessToken, stoppingToken);
             await using var filteredStream = new FilteredInteractionStreamDecorator(stream, filter);
 
-            await _dataSource.SyncInteractionsAsync(filteredStream, context, stoppingToken);
+            var result = await _dataSource.SyncInteractionsAsync(filteredStream, context, stoppingToken);
 
-            var syncHistoryEntry = new SyncHistoryEntry(context.NetworkId, _clock.UtcNow(), context.TimeRange);
+            var syncHistoryEntry = SyncHistoryEntry.CreateWithResult(context.NetworkId, _clock.UtcNow(), context.TimeRange, result);
             await _syncHistoryService.SaveLogAsync(syncHistoryEntry, stoppingToken);
 
             await context.StatusLogger.LogInfoAsync($"Synchronization of interactions for period '{context.TimeRange}' completed", stoppingToken);
-            _logger.LogInformation("Synchronization of interactions for network '{networkId}' for {period} completed", context.NetworkId, context.TimeRange);
+            _logger.LogInformation("Synchronization of interactions for network '{networkId}' for {period} completed{newLine}{result}", context.NetworkId, context.TimeRange, Environment.NewLine, result);
         }
     }
 }

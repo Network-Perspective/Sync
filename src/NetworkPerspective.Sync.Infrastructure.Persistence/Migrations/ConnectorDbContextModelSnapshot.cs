@@ -102,14 +102,23 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
 
+                    b.Property<long>("InteractionsCount")
+                        .HasColumnType("bigint");
+
                     b.Property<Guid>("NetworkId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<double?>("SuccessRate")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("SyncPeriodEnd")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("SyncPeriodStart")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("TasksCount")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("TimeStamp")
                         .HasColumnType("datetime2");
