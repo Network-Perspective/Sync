@@ -12,7 +12,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Aggregation;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Extensions;
@@ -77,17 +76,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 _logger.LogDebug("Evaluating interactions based on mailbox for user ***...");
 
                 using var gmailService = InitializeGmailService(userEmail, credentials);
-                var actionsAggregator = new ActionsAggregator(userEmail);
                 var mailboxTraverser = new MailboxTraverser(userEmail, maxMessagesCount, gmailService, _retryHandler, _loggerFactory.CreateLogger<MailboxTraverser>());
                 var message = await mailboxTraverser.GetNextMessageAsync(stoppingToken);
 
                 var periodStart = context.TimeRange.Start.AddMinutes(-_config.SyncOverlapInMinutes);
                 _logger.LogDebug("To not miss any email interactions period start is extended by {minutes}min. As result mailbox interactions are eveluated starting from {start}", _config.SyncOverlapInMinutes, periodStart);
 
-
                 while (!stoppingToken.IsCancellationRequested && message != null && message?.GetDateTime(_clock) > periodStart)
                 {
-                    actionsAggregator.Add(message.GetDateTime(_clock));
                     var interactions = interactionFactory.CreateForUser(message, userEmail);
                     var sentInteractionsCount = await stream.SendAsync(interactions);
                     interactionsCount += sentInteractionsCount;
@@ -96,8 +92,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
                 _logger.LogDebug("Evaluation interactions based on mailbox for user '{user}' completed. Processed {mailsCount} email/s", "***", mailboxTraverser.FetchedMessagesCount);
                 _logger.LogTrace("Evaluation interactions based on mailbox for user '{user}' completed. Processed {mailsCount} email/s", userEmail, mailboxTraverser.FetchedMessagesCount);
-
-                _logger.LogTrace(new DefaultActionsAggregatorPrinter().Print(actionsAggregator));
 
                 return new SingleTaskResult(interactionsCount);
             }

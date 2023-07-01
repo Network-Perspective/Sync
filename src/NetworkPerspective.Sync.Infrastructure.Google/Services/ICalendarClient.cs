@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -13,7 +12,6 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain.Aggregation;
 using NetworkPerspective.Sync.Application.Domain.Meetings;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Domain.Sync;
@@ -91,11 +89,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 _logger.LogDebug("Found '{count}' events in callendar for user '{email}' for period {timeRange}", response.Items.Count, "***", context.TimeRange);
                 _logger.LogTrace("Found '{count}' events in callendar for user '{email}' for period {timeRange}", response.Items.Count, userEmail, context.TimeRange);
 
-                var actionsAggregator = new ActionsAggregator(userEmail);
                 foreach (var meeting in response.Items)
                 {
                     var recurrence = await GetRecurrenceAsync(calendarService, userEmail, meeting.RecurringEventId, stoppingToken);
-                    actionsAggregator.Add(meeting.GetStart());
                     var interactions = interactionFactory.CreateForUser(meeting, userEmail, recurrence);
                     var sentInteractionsCount = await stream.SendAsync(interactions);
                     interactionsCount += sentInteractionsCount;
@@ -103,7 +99,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
                 _logger.LogDebug("Evaluation of interactions based on callendar for user '{email}' completed", "***");
                 _logger.LogTrace("Evaluation of interactions based on callendar for user '{email}' completed", userEmail);
-                _logger.LogTrace(new DefaultActionsAggregatorPrinter().Print(actionsAggregator));
                 return new SingleTaskResult(interactionsCount);
             }
             catch (GoogleApiException gaex) when (IndicatesIsNotACalendarUser(gaex))

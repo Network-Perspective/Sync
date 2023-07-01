@@ -47,6 +47,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos
             [JsonProperty("reply_count")]
             public int ReplyCount { get; set; }
 
+            [JsonProperty("room")]
+            public Room VoiceChat { get; set; }
+
             [JsonProperty("reactions")]
             public IReadOnlyCollection<ReactionToMessage> Reactions { get; set; } = Array.Empty<ReactionToMessage>();
 
@@ -54,6 +57,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos
             {
                 [JsonProperty("users")]
                 public IReadOnlyCollection<string> Users { get; set; } = Array.Empty<string>();
+            }
+
+            internal class Room
+            {
+                [JsonProperty("date_start")]
+                public long Start { get; set; }
+
+                [JsonProperty("date_end")]
+                public long End { get; set; }
+
+                [JsonProperty("participant_history")]
+                public IReadOnlyCollection<string> Participants { get; set; } = Array.Empty<string>();
             }
         }
     }
