@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.Mappers
 
         [Theory]
         [MemberData(nameof(SlackTimeStampAndDateTime))]
-        public void ShouldReturnExpectedDateTime(string slackTimeStamp, DateTime dateTime)
+        public void ShouldReturnExpectedDateTimeFromString(string slackTimeStamp, DateTime dateTime)
         {
             // Act
             var result = TimeStampMapper.SlackTimeStampToDateTime(slackTimeStamp);
@@ -38,6 +38,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.Mappers
 
             // Assert
             result.Should().Be(slackTimeStamp);
+        }
+
+        [Fact]
+        public void ShouldReturnExpectedDateTimeFromLong()
+        {
+            // Arrange
+            const long input = 1684493853;
+
+            // Act
+            var result = TimeStampMapper.SlackTimeStampToDateTime(input);
+
+            // Assert
+            result.Should().Be(new DateTime(638200906530000000));
         }
     }
 }
