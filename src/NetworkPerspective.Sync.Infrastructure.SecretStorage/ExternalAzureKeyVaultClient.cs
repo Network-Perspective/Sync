@@ -38,10 +38,14 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             var clientId = await _internalSecretRepository.GetSecretAsync(AppClientIdKeyName);
             var clientSecret = await _internalSecretRepository.GetSecretAsync(AppClientSecretKeyName);
 
+            var clientSecretCredentialOptions = new ClientSecretCredentialOptions();
+            clientSecretCredentialOptions.AdditionallyAllowedTenants.Add("*");
+
             return new ClientSecretCredential(
                 tenantId.ToSystemString(),
                 clientId.ToSystemString(),
-                clientSecret.ToSystemString());
+                clientSecret.ToSystemString(),
+                clientSecretCredentialOptions);
         }
 
         public async Task<SecureString> GetSecretAsync(string key, CancellationToken stoppingToken = default)
