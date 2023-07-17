@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -162,7 +162,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
                 return new TokenValidationResponse(result.NetworkId.Value, result.ConnectorId.Value);
             }
-            catch (ApiException aex) when (aex.StatusCode == StatusCodes.Status403Forbidden)
+            catch (ApiException aex) when (aex.StatusCode == (int)HttpStatusCode.Forbidden)
             {
                 throw new InvalidTokenException(_npCoreConfig.BaseUrl);
             }

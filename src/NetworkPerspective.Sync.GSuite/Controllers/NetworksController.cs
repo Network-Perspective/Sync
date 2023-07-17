@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Controllers;
+using NetworkPerspective.Sync.GSuite.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Google;
 
 using Swashbuckle.AspNetCore.Annotations;
@@ -22,17 +23,16 @@ namespace NetworkPerspective.Sync.GSuite.Controllers
         /// <summary>
         /// Initializes network
         /// </summary>
-        /// <param name="adminEmail">GSuite admin email address</param>
-        /// <param name="externalKeyVaultUri">External Key Vault Uri (optional)</param>
+        /// <param name="config">Network configuration</param>
         /// <param name="stoppingToken">Stopping token</param>
         /// <returns>Result</returns>
         [HttpPost]
         [SwaggerResponse(StatusCodes.Status200OK, "Network added", typeof(string))]
         [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
-        public async Task<IActionResult> Add(string adminEmail, Uri externalKeyVaultUri = null, CancellationToken stoppingToken = default)
+        public async Task<IActionResult> AddAsync([FromBody] NetworkConfigDto config, CancellationToken stoppingToken = default)
         {
-            var properties = new GoogleNetworkProperties(adminEmail, externalKeyVaultUri);
+            var properties = new GoogleNetworkProperties(config.AdminEmail, config.ExternalKeyVaultUri);
 
             var networkId = await InitializeAsync(properties, stoppingToken);
 

@@ -7,21 +7,19 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Aggregation;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
-using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
-using NetworkPerspective.Sync.Infrastructure.Slack.Models;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Mappers;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
     internal interface IChatClient
     {
-        Task SyncInteractionsAsync(IInteractionsStream stream, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
+        Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
     }
 
     internal class ChatClient : IChatClient
@@ -38,13 +36,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _logger = logger;
         }
 
-        public async Task SyncInteractionsAsync(IInteractionsStream stream, ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
+        public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
         {
-            var channels = await GetChannels(slackClientFacade, network, stoppingToken);
+            var teams = await slackClientFacade.GetTeamsListAsync(stoppingToken);
 
-            if (network.Properties.AutoJoinChannels)
-                await JoinPublicChannelsAsync(slackClientFacade, channels, stoppingToken);
-
+            var result = SyncResult.Empty;
 
             async Task ReportProgressCallbackAsync(double progressRate)
             {
@@ -52,126 +48,112 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 await _tasksStatusesCache.SetStatusAsync(network.NetworkId, taskStatus, stoppingToken);
             }
 
-            Task SingleTaskAsync(string channelId)
+            Task<SingleTaskResult> SingleTaskAsync(string channelId)
                 => SyncSingleChannnelInteractionsAsync(stream, slackClientFacade, interactionFactory, timeRange, channelId, stoppingToken);
 
-            _logger.LogInformation("Evaluating interactions based on chat for timerange {timerange} for {count} channels...", timeRange, channels.Count());
+            foreach (var team in teams)
+            {
+                var channelsIds = (await slackClientFacade.GetCurrentUserChannelsAsync(team.Id, stoppingToken))
+                    .Select(x => x.Id);
 
-            var channelsIds = channels.Select(channel => channel.Id);
-            await ParallelTask.RunAsync(channelsIds, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+                _logger.LogInformation("Evaluating interactions based on chat for timerange {timerange} for {count} channels in team '{team}'...", timeRange, channelsIds.Count(), team.Name);
 
-            _logger.LogInformation("Evaluation of interactions based on chat for timerange '{timerange}' completed", timeRange);
+                var partialResult = await ParallelSyncTask.RunAsync(channelsIds, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+                result = SyncResult.Combine(result, partialResult);
+
+                _logger.LogInformation("Evaluation of interactions based on chat for timerange '{timerange}' for team '{team}' completed", timeRange, team.Name);
+            }
+
+            return result;
         }
 
-        private async Task JoinPublicChannelsAsync(ISlackClientFacade slackClientFacade, IEnumerable<Channel> slackChannels, CancellationToken stoppingToken)
+        private async Task<SingleTaskResult> SyncSingleChannnelInteractionsAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, InteractionFactory interactionFactory, TimeRange timeRange, string slackChannelId, CancellationToken stoppingToken)
         {
-            _logger.LogDebug("Joining public channels...");
+            _logger.LogDebug("Getting interactions from channel...");
+            var interactionsCount = 0;
 
-            foreach (var slackChannel in slackChannels.Where(x => !x.IsPrivate))
-                await slackClientFacade.JoinChannelAsync(slackChannel.Id, stoppingToken);
+            var channelMembers = await GetChannelMembers(slackClientFacade, slackChannelId, stoppingToken);
+            var slackThreadsTimeRange = GetExtendedTimeRangeForSynchronization(timeRange);
 
-            _logger.LogDebug("Joining public channels completed");
+            _logger.LogDebug("Getting slack theads that started in range: {timeRange}", slackThreadsTimeRange);
+            var slackThreadsMessages = await slackClientFacade.GetSlackThreadsAsync(slackChannelId, slackThreadsTimeRange, stoppingToken);
+
+            _logger.LogDebug("There are {count} threads in the channel started within {timeRange}", slackThreadsMessages.Count, slackThreadsTimeRange);
+
+            foreach (var slackThreadMessage in slackThreadsMessages)
+            {
+                int sentInteractionsCount = await SyncSingleThreadAsync(stream, slackClientFacade, interactionFactory, timeRange, slackChannelId, channelMembers, slackThreadMessage, stoppingToken);
+                interactionsCount += sentInteractionsCount;
+            }
+
+            _logger.LogDebug("Getting interactions from channel completed");
+            return new SingleTaskResult(interactionsCount);
         }
 
-        private async Task SyncSingleChannnelInteractionsAsync(IInteractionsStream stream, ISlackClientFacade slackClientFacade, InteractionFactory interactionFactory, TimeRange timeRange, string slackChannelId, CancellationToken stoppingToken)
+        private async Task<int> SyncSingleThreadAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, InteractionFactory interactionFactory, TimeRange timeRange, string slackChannelId, ISet<string> channelMembers, ConversationHistoryResponse.SingleMessage slackThreadMessage, CancellationToken stoppingToken)
         {
-            try
+            _logger.LogTrace("Synchronizing thread...");
+            var interactionsCount = 0;
+
+            if (GetLastUpdateOfThread(slackThreadMessage) <= timeRange.Start)
             {
-                _logger.LogDebug("Getting interactions from channel...");
-                var actionsAggregator = new ActionsAggregator(slackChannelId);
-
-                var channelMembers = await slackClientFacade.GetAllSlackChannelMembers(slackChannelId, stoppingToken);
-
-                _logger.LogDebug("There are {count} users in the channel", channelMembers.Count);
-
-                channelMembers = channelMembers
-                    .Where(x => !string.IsNullOrEmpty(x))
-                    .ToHashSet();
-
-                _logger.LogDebug("There are {count} not null users in the channel", channelMembers.Count);
-
-                var slackThreadsTimeRange = new TimeRange(timeRange.Start.AddDays(-30), timeRange.End);
-                _logger.LogDebug("Getting slack theads that started in range: {timeRange}", slackThreadsTimeRange);
-
-                var slackThreadsMessages = await slackClientFacade.GetSlackThreads(slackChannelId, slackThreadsTimeRange, stoppingToken);
-
-                _logger.LogDebug("There are {count} threads in the channel started within {timeRange}", slackThreadsMessages.Count, slackThreadsTimeRange);
-
-                foreach (var slackThreadMessage in slackThreadsMessages)
-                {
-                    var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
-
-                    if (GetLastUpdateOfThread(slackThreadMessage) > timeRange.Start)
-                    {
-                        _logger.LogDebug("Synchonizing thread...");
-
-                        actionsAggregator.Add(TimeStampMapper.SlackTimeStampToDateTime(slackThreadMessage.TimeStamp));
-
-                        interactions.UnionWith(interactionFactory.CreateFromThreadMessage(slackThreadMessage, slackChannelId, channelMembers));
-
-                        if (HasThreadReplies(slackThreadMessage))
-                        {
-                            _logger.LogDebug("Getting interactions from the thread replies...");
-
-                            var slackThreadReplies = await slackClientFacade.GetAllSlackThreadReplies(slackChannelId, slackThreadMessage.TimeStamp, stoppingToken);
-
-                            foreach (var slackThreadReply in slackThreadReplies)
-                                actionsAggregator.Add(TimeStampMapper.SlackTimeStampToDateTime(slackThreadReply.TimeStamp));
-
-                            var repliesInteractions = interactionFactory.CreateFromThreadReplies(slackThreadReplies, slackChannelId, slackChannelId + slackThreadMessage.TimeStamp, slackThreadMessage.User, timeRange);
-
-                            if (slackThreadReplies.Any())
-                            {
-                                var threadStart = TimeStampMapper.SlackTimeStampToDateTime(slackThreadMessage.TimeStamp);
-                                var threadEnd = TimeStampMapper.SlackTimeStampToDateTime(slackThreadReplies.Last().TimeStamp);
-                                var threadLifetime = threadEnd - threadStart;
-                                _logger.LogInformation("Thread lifetime: {lifetime}", threadLifetime);
-
-                                if (threadLifetime.TotalDays > 30)
-                                    _logger.LogWarning("Thread lifetime longer than 30 days: {lifetime}", threadLifetime);
-                            }
-
-                            _logger.LogDebug("There are {count} interactions from the thread replies", repliesInteractions.Count);
-
-                            interactions.UnionWith(repliesInteractions);
-
-                            _logger.LogDebug("Getting interactions from the thread replies completed");
-                        }
-                        else
-                        {
-                            _logger.LogDebug("The thread has no replies");
-                        }
-
-                        _logger.LogDebug("Thread synchronization completed");
-                    }
-                    await stream.SendAsync(interactions);
-                }
-
-                _logger.LogTrace(new DefaultActionsAggregatorPrinter().Print(actionsAggregator));
-
-                _logger.LogDebug("Getting interactions from channel completed");
+                _logger.LogTrace("The thread has no updates within synchronization period");
+                return 0;
             }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Couldn't get interactions from channel. Please see inner exception");
-            }
+
+            var interactions = interactionFactory.CreateFromThreadMessage(slackThreadMessage, slackChannelId, channelMembers);
+            interactionsCount += await stream.SendAsync(interactions);
+
+            interactionsCount += await SyncThreadRepliesAsync(stream, slackClientFacade, interactionFactory, timeRange, slackChannelId, slackThreadMessage, stoppingToken);
+
+            _logger.LogDebug("Thread synchronization completed");
+            return interactionsCount;
         }
 
-        private async Task<IEnumerable<Channel>> GetChannels(ISlackClientFacade slackClientFacade, Network<SlackNetworkProperties> network, CancellationToken stoppingToken = default)
+        private async Task<int> SyncThreadRepliesAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, InteractionFactory interactionFactory, TimeRange timeRange, string slackChannelId, ConversationHistoryResponse.SingleMessage slackThreadMessage, CancellationToken stoppingToken)
         {
-            if (network.Properties.AutoJoinChannels)
+            if (!HasThreadReplies(slackThreadMessage))
             {
-                _logger.LogDebug("Getting list of all channels for network '{networkId}'...", network.NetworkId);
-                return (await slackClientFacade.GetAllSlackChannels(stoppingToken)).Select(x => new Channel(x.Id, x.Name, x.IsPrivate));
+                _logger.LogDebug("The thread has no replies");
+                return 0;
             }
-            else
-            {
-                _logger.LogDebug("Getting list of channels, the application has been added to, for network '{networkId}'...", network.NetworkId);
-                return (await slackClientFacade.GetCurrentUserChannels(stoppingToken)).Select(x => new Channel(x.Id, x.Name, x.IsPrivate));
-            }
+
+            _logger.LogDebug("Getting interactions from the thread replies...");
+            var slackThreadReplies = await slackClientFacade.GetAllSlackThreadRepliesAsync(slackChannelId, slackThreadMessage.TimeStamp, stoppingToken);
+
+            var repliesInteractions = interactionFactory.CreateFromThreadReplies(slackThreadReplies, slackChannelId, slackChannelId + slackThreadMessage.TimeStamp, slackThreadMessage.User, timeRange);
+            _logger.LogDebug("There are {count} interactions from the thread replies", repliesInteractions.Count);
+
+            LogThreadLifetime(slackThreadMessage, slackThreadReplies);
+
+            var sentInteractionsCount = await stream.SendAsync(repliesInteractions);
+
+            _logger.LogDebug("Getting interactions from the thread replies completed");
+
+            return sentInteractionsCount;
         }
 
-        private DateTime GetLastUpdateOfThread(ConversationHistoryResponse.SingleMessage slackThreadMessage)
+        private async Task<ISet<string>> GetChannelMembers(ISlackClientBotScopeFacade slackClientFacade, string slackChannelId, CancellationToken stoppingToken)
+        {
+            var channelMembers = await slackClientFacade.GetAllSlackChannelMembersAsync(slackChannelId, stoppingToken);
+            _logger.LogDebug("There are {count} users in the channel", channelMembers.Count);
+
+            channelMembers = channelMembers
+                .Where(x => !string.IsNullOrEmpty(x))
+                .ToHashSet();
+
+            _logger.LogDebug("There are {count} not null users in the channel", channelMembers.Count);
+            return channelMembers;
+        }
+
+        private TimeRange GetExtendedTimeRangeForSynchronization(TimeRange timeRange)
+        {
+            var result = new TimeRange(timeRange.Start.AddDays(-30), timeRange.End);
+            _logger.LogDebug("Extending the sync timerange '{initial}' to not miss interactions from threads started in the past - extended timerange '{extended}'", timeRange, result);
+            return result;
+        }
+
+        private static DateTime GetLastUpdateOfThread(ConversationHistoryResponse.SingleMessage slackThreadMessage)
         {
             if (HasThreadReplies(slackThreadMessage))
                 return TimeStampMapper.SlackTimeStampToDateTime(slackThreadMessage.LatestReplyTimeStamp);
@@ -179,7 +161,27 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 return TimeStampMapper.SlackTimeStampToDateTime(slackThreadMessage.TimeStamp);
         }
 
-        private bool HasThreadReplies(ConversationHistoryResponse.SingleMessage slackThreadMessage)
+        private static bool HasThreadReplies(ConversationHistoryResponse.SingleMessage slackThreadMessage)
             => slackThreadMessage.ReplyCount != 0;
+
+        private void LogThreadLifetime(ConversationHistoryResponse.SingleMessage slackThreadMessage, IEnumerable<ConversationRepliesResponse.SingleMessage> slackThreadReplies)
+        {
+            if (slackThreadReplies.Any())
+            {
+                var threadLifetime = GetThreadLifetime(slackThreadMessage, slackThreadReplies);
+                _logger.LogTrace("Thread lifetime: {lifetime}", threadLifetime);
+
+                if (threadLifetime.TotalDays > 30)
+                    _logger.LogWarning("Thread lifetime longer than 30 days: {lifetime}", threadLifetime);
+            }
+        }
+
+        private static TimeSpan GetThreadLifetime(ConversationHistoryResponse.SingleMessage slackThreadMessage, IEnumerable<ConversationRepliesResponse.SingleMessage> slackThreadReplies)
+        {
+            var threadStart = TimeStampMapper.SlackTimeStampToDateTime(slackThreadMessage.TimeStamp);
+            var threadEnd = TimeStampMapper.SlackTimeStampToDateTime(slackThreadReplies.Last().TimeStamp);
+            var threadLifetime = threadEnd - threadStart;
+            return threadLifetime;
+        }
     }
 }

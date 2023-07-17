@@ -36,6 +36,7 @@ namespace NetworkPerspective.Sync.Office365.Tests
         public async Task ShouldSetupNetworkProperly()
         {
             // Arrange
+            var syncMsTeams = true;
             var networkId = Guid.NewGuid();
             var httpClient = _service.CreateDefaultClient();
 
@@ -43,9 +44,14 @@ namespace NetworkPerspective.Sync.Office365.Tests
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
+            var networkConfig = new NetworkConfigDto
+            {
+                SyncMsTeams = syncMsTeams
+            };
+
             // Act
             var result = await new NetworksClient(httpClient)
-                .NetworksPostAsync(null);
+                .NetworksPostAsync(networkConfig);
 
             // Assert
             _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-Office365-{networkId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
@@ -54,6 +60,7 @@ namespace NetworkPerspective.Sync.Office365.Tests
             var networksRepository = unitOfWork.GetNetworkRepository<MicrosoftNetworkProperties>();
             var network = await networksRepository.FindAsync(networkId);
             network.Properties.ExternalKeyVaultUri.Should().BeNull();
+            network.Properties.SyncMsTeams.Should().Be(syncMsTeams);
         }
 
         [Fact]
@@ -71,8 +78,13 @@ namespace NetworkPerspective.Sync.Office365.Tests
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
+            var networkConfig = new NetworkConfigDto
+            {
+                SyncMsTeams = false
+            };
+
             await new NetworksClient(httpClient)
-                .NetworksPostAsync(null);
+                .NetworksPostAsync(networkConfig);
 
             // Act
             var result = await new SchedulesClient(httpClient)
@@ -95,8 +107,13 @@ namespace NetworkPerspective.Sync.Office365.Tests
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidTokenException("https://networkperspective.io/"));
 
+            var networkConfig = new NetworkConfigDto
+            {
+                SyncMsTeams = false
+            };
+
             // Act
-            var exception = await Record.ExceptionAsync(() => client.NetworksPostAsync(null));
+            var exception = await Record.ExceptionAsync(() => client.NetworksPostAsync(networkConfig));
 
             // Assert
             (exception as Office365ClientException).StatusCode.Should().Be(StatusCodes.Status401Unauthorized);

@@ -41,14 +41,22 @@ namespace NetworkPerspective.Sync.Slack.Tests
 
             const bool autoJoinChannels = true;
             const bool syncChannelsNames = true;
+            const bool usesAdminPrivileges = true;
 
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
+            var networkConfig = new NetworkConfigDto
+            {
+                AutoJoinChannels = autoJoinChannels,
+                SyncChannelsNames = syncChannelsNames,
+                UsesAdminPrivileges = usesAdminPrivileges
+            };
+
             // Act
             var result = await new NetworksClient(httpClient)
-                .NetworksPostAsync(autoJoinChannels, syncChannelsNames, null);
+                .NetworksPostAsync(networkConfig);
 
             // Assert
             _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-Slack-{networkId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
@@ -59,6 +67,7 @@ namespace NetworkPerspective.Sync.Slack.Tests
             network.Properties.AutoJoinChannels.Should().Be(autoJoinChannels);
             network.Properties.SyncGroups.Should().Be(syncChannelsNames);
             network.Properties.ExternalKeyVaultUri.Should().BeNull();
+            network.Properties.UsesAdminPrivileges.Should().Be(usesAdminPrivileges);
         }
 
         [Fact]
@@ -75,8 +84,14 @@ namespace NetworkPerspective.Sync.Slack.Tests
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
+            var networkConfig = new NetworkConfigDto
+            {
+                AutoJoinChannels = autoJoinChannels,
+                SyncChannelsNames = syncChannelsNames
+            };
+
             await new NetworksClient(httpClient)
-                .NetworksPostAsync(autoJoinChannels, syncChannelsNames, null);
+                .NetworksPostAsync(networkConfig);
 
             // Act
             var result = await new SchedulesClient(httpClient)
@@ -99,8 +114,14 @@ namespace NetworkPerspective.Sync.Slack.Tests
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidTokenException("https://networkperspective.io/"));
 
+            var networkConfig = new NetworkConfigDto
+            {
+                AutoJoinChannels = true,
+                SyncChannelsNames = true
+            };
+
             // Act
-            var exception = await Record.ExceptionAsync(() => client.NetworksPostAsync(true, true, null));
+            var exception = await Record.ExceptionAsync(() => client.NetworksPostAsync(networkConfig));
 
             // Assert
             (exception as SlackClientException).StatusCode.Should().Be(StatusCodes.Status401Unauthorized);

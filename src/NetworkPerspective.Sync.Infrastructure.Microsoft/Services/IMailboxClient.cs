@@ -16,7 +16,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
     internal interface IMailboxClient
     {
-        Task SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, IEmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, IEmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class MailboxClient : IMailboxClient
@@ -34,7 +34,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             _logger = logger;
         }
 
-        public async Task SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, IEmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, IEmailInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             async Task ReportProgressCallbackAsync(double progressRate)
             {
@@ -42,18 +42,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 await _tasksStatusesCache.SetStatusAsync(context.NetworkId, taskStatus, stoppingToken);
             }
 
-            Task SingleTaskAsync(string userEmail)
+            Task<SingleTaskResult> SingleTaskAsync(string userEmail)
                 => GetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on mailbox for timerange {timerange} for {count} users...", context.TimeRange, usersEmails.Count());
-
-            await ParallelTask.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
-
+            var result = await ParallelSyncTask.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
             _logger.LogInformation("Evaluation of interactions based on mailbox for timerange '{timerange}' completed", context.TimeRange);
+
+            return result;
         }
 
-        private async Task GetSingleUserInteractionsAsync(SyncContext context, IInteractionsStream stream, string userEmail, IEmailInteractionFactory interactionFactory, CancellationToken stoppingToken)
+        private async Task<SingleTaskResult> GetSingleUserInteractionsAsync(SyncContext context, IInteractionsStream stream, string userEmail, IEmailInteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
+            var interactionsCount = 0;
             var filterString = $"receivedDateTime ge {context.TimeRange.Start:s}Z and receivedDateTime lt {context.TimeRange.End:s}Z";
 
             var mailsResponse = await _graphClient
@@ -72,7 +73,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 async mail =>
                 {
                     var interactions = interactionFactory.CreateForUser(mail, userEmail);
-                    await stream.SendAsync(interactions);
+                    var sentInteractionsCount = await stream.SendAsync(interactions);
+                    interactionsCount += sentInteractionsCount;
                     return true;
                 },
                 request =>
@@ -81,6 +83,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 });
 
             await pageIterator.IterateAsync(stoppingToken);
+            return new SingleTaskResult(interactionsCount);
         }
     }
 }

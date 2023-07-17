@@ -6,5 +6,5 @@ using NetworkPerspective.Sync.Application.Domain.Interactions;
 
 public interface IInteractionsStream : IAsyncDisposable
 {
-    Task SendAsync(IEnumerable<Interaction> interactions);
+    Task<int> SendAsync(IEnumerable<Interaction> interactions);
 }

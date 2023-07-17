@@ -19,11 +19,11 @@ namespace NetworkPerspective.Sync.Application.Services
         public ValueTask DisposeAsync()
             => _innerStream.DisposeAsync();
 
-        public async Task SendAsync(IEnumerable<Interaction> interactions)
+        public async Task<int> SendAsync(IEnumerable<Interaction> interactions)
         {
             var filteredInteractions = _filter.Filter(interactions);
 
-            await _innerStream.SendAsync(filteredInteractions);
+            return await _innerStream.SendAsync(filteredInteractions);
         }
     }
 }

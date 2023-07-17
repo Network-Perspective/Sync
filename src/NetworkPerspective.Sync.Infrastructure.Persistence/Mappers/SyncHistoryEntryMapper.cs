@@ -7,7 +7,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Mappers
     internal static class SyncHistoryEntryMapper
     {
         public static SyncHistoryEntry EntityToDomainModel(SyncHistoryEntryEntity entity)
-            => new SyncHistoryEntry(entity.NetworkId, entity.TimeStamp, new TimeRange(entity.SyncPeriodStart, entity.SyncPeriodEnd));
+        {
+            return SyncHistoryEntry.Create(entity.NetworkId, entity.TimeStamp, new TimeRange(entity.SyncPeriodStart, entity.SyncPeriodEnd));
+        }
 
         public static SyncHistoryEntryEntity DomainModelToEntity(SyncHistoryEntry syncHistoryEntry)
         {
@@ -17,6 +19,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Mappers
                 TimeStamp = syncHistoryEntry.TimeStamp,
                 SyncPeriodStart = syncHistoryEntry.SyncPeriod.Start,
                 SyncPeriodEnd = syncHistoryEntry.SyncPeriod.End,
+                SuccessRate = syncHistoryEntry.Result.SuccessRate,
+                TasksCount = syncHistoryEntry.Result.TasksCount,
+                InteractionsCount = syncHistoryEntry.Result.TotalInteractionsCount,
             };
         }
     }

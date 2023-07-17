@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
@@ -9,9 +8,8 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.DataSources
 {
     public interface IDataSource
     {
-        Task SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default);
+        Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default);
         Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default);
         Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default);
-        Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default);
     }
 }

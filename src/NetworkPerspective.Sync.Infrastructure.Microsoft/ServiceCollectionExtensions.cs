@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Configs;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
 
@@ -16,6 +17,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             services.AddTransient<IMicrosoftAuthService, MicrosoftAuthService>();
             services.AddTransient<IMicrosoftClientFactory, MicrosoftClientFactory>();
             services.AddTransient<IDataSourceFactory, MicrosoftFacadeFactory>();
+            services.AddTransient<IAuthTester, AuthTester>();
 
             services.AddMemoryCache();
 

@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 using NetworkPerspective.Sync.Application.Domain;
+using NetworkPerspective.Sync.Application.Domain.Combinations;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
-using NetworkPerspective.Sync.Infrastructure.Slack.Mappers;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Mappers;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
@@ -22,17 +25,57 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _employeeLookupTable = employeeLookupTable;
         }
 
-        public ISet<Interaction> CreateFromThreadMessage(ConversationHistoryResponse.SingleMessage threadMessage, string channelId, ISet<string> channelMembers)
+        public ISet<Interaction> CreateFromThreadMessage(ConversationHistoryResponse.SingleMessage thread, string channelId, ISet<string> channelMembers)
+        {
+            if (thread.Subtype == "huddle_thread")
+                return CreateFromHuddles(thread, channelId);
+            else
+                return CreateFromRegularThreadMessage(thread, channelId, channelMembers);
+        }
+
+        private ISet<Interaction> CreateFromHuddles(ConversationHistoryResponse.SingleMessage thread, string channelId)
         {
             var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
-            var threadId = channelId + threadMessage.TimeStamp;
-            var timeStamp = TimeStampMapper.SlackTimeStampToDateTime(threadMessage.TimeStamp);
+            var huddlesId = channelId + thread.TimeStamp;
+            var participants = thread.VoiceChat.Participants
+                .Where(x => !string.IsNullOrEmpty(x));
+
+            var participantsCombinations = CombinationFactory<string>.CreateCombinations(participants);
+
+            var start = TimeStampMapper.SlackTimeStampToDateTime(thread.VoiceChat.Start);
+            var end = TimeStampMapper.SlackTimeStampToDateTime(thread.VoiceChat.End);
+            var duration = (end - start).TotalMinutes;
+
+            foreach (var combination in participantsCombinations)
+            {
+                var interaction = Interaction.CreateMeeting(
+                    timestamp: start,
+                    source: _employeeLookupTable.Find(combination.Source),
+                    target: _employeeLookupTable.Find(combination.Target),
+                    eventId: huddlesId,
+                    recurring: null,
+                    duration: (int)duration);
+
+                interactions.Add(interaction.Hash(_hash));
+            }
+
+            return interactions;
+        }
+
+        private ISet<Interaction> CreateFromRegularThreadMessage(ConversationHistoryResponse.SingleMessage thread, string channelId, ISet<string> channelMembers)
+        {
+            if (thread.User is null)
+                return ImmutableHashSet<Interaction>.Empty;
+
+            var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
+            var threadId = channelId + thread.TimeStamp;
+            var timeStamp = TimeStampMapper.SlackTimeStampToDateTime(thread.TimeStamp);
 
             foreach (var channelMember in channelMembers)
             {
                 var interaction = Interaction.CreateChatThread(
                     timestamp: timeStamp,
-                    source: _employeeLookupTable.Find(threadMessage.User),
+                    source: _employeeLookupTable.Find(thread.User),
                     target: _employeeLookupTable.Find(channelMember),
                     channelId: channelId,
                     eventId: threadId);
@@ -40,7 +83,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 interactions.Add(interaction.Hash(_hash));
             }
 
-            var reactingUsers = threadMessage.Reactions.SelectMany(x => x.Users);
+            var reactingUsers = thread.Reactions
+                .SelectMany(x => x.Users)
+                .Where(x => !string.IsNullOrEmpty(x));
+
             foreach (var reactingUser in reactingUsers)
             {
                 var reactionHash = $"{timeStamp.Ticks}{reactingUser.GetStableHashCode()}{channelId.GetStableHashCode()}";
@@ -48,7 +94,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 var interaction = Interaction.CreateChatReaction(
                     timestamp: timeStamp,
                     source: _employeeLookupTable.Find(reactingUser),
-                    target: _employeeLookupTable.Find(threadMessage.User),
+                    target: _employeeLookupTable.Find(thread.User),
                     channelId: channelId,
                     eventId: threadId + reactionHash.ToString(),
                     parentEventId: threadId);
@@ -61,10 +107,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
         public ISet<Interaction> CreateFromThreadReplies(IEnumerable<ConversationRepliesResponse.SingleMessage> replies, string channelId, string threadId, string threadCreator, TimeRange timeRange)
         {
+            if (threadCreator is null)
+                return ImmutableHashSet<Interaction>.Empty;
+
             var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
             var activeUsers = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) { threadCreator };
 
-            foreach (var reply in replies)
+            foreach (var reply in replies.Where(x => !string.IsNullOrEmpty(x.User)))
             {
                 var replyId = threadId + reply.TimeStamp;
                 var timeStamp = TimeStampMapper.SlackTimeStampToDateTime(reply.TimeStamp);

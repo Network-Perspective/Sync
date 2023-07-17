@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using DotNet.Testcontainers.Containers.Builders;
-using DotNet.Testcontainers.Containers.Configurations.Databases;
-using DotNet.Testcontainers.Containers.Modules.Databases;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.Persistence.Init;
+
+using Testcontainers.MsSql;
 
 using Xunit;
 
@@ -23,11 +21,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Tests
         public async Task ShoudInitialize()
         {
             // Arrange
-            var testcontainersBuilder = new TestcontainersBuilder<MsSqlTestcontainer>()
-                .WithDatabase(new MsSqlTestcontainerConfiguration
-                {
-                    Password = "Pa$$w0rd",
-                });
+            var testcontainersBuilder = new MsSqlBuilder()
+                .WithPassword("Pa$$w0rd");
 
             await using var testcontainer = testcontainersBuilder.Build();
 
@@ -44,7 +39,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Tests
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
-                    { "ConnectionStrings:Database", testcontainer.ConnectionString + " TrustServerCertificate = True" }
+                    { "ConnectionStrings:Database", testcontainer.GetConnectionString() }
                 })
                 .Build();
 

@@ -40,7 +40,7 @@ namespace NetworkPerspective.Sync.Application.Services
                 .FindLastLogAsync(networkId, stoppingToken);
             var lastSyncPeriodEnd = lastSyncHistoryEntry?.SyncPeriod.End;
 
-            _logger.LogDebug("Last syncronization of network '{networkId}' {lastSync}", networkId, lastSyncPeriodEnd?.ToString(Consts.DefaultDateTimeFormat) ?? "not found");
+            _logger.LogDebug("Last synchronization of network '{networkId}' {lastSync}", networkId, lastSyncPeriodEnd?.ToString(Consts.DefaultDateTimeFormat) ?? "not found");
 
             return lastSyncPeriodEnd ?? _clock.UtcNow().AddDays(-_config.DefaultSyncLookbackInDays);
         }
@@ -64,7 +64,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             var repository = _unitOfWork.GetSyncHistoryRepository();
 
-            var initLogEntry = new SyncHistoryEntry(networkId, _clock.UtcNow(), new TimeRange(syncStart, syncStart));
+            var initLogEntry = SyncHistoryEntry.Create(networkId, _clock.UtcNow(), new TimeRange(syncStart, syncStart));
             await repository.AddAsync(initLogEntry, stoppingToken);
 
             await _unitOfWork.CommitAsync(stoppingToken);

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain.Statuses;
-using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 
 namespace NetworkPerspective.Sync.Application.Services
@@ -19,18 +18,18 @@ namespace NetworkPerspective.Sync.Application.Services
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly ITokenService _tokenService;
-        private readonly IDataSourceFactory _dataSourceFactory;
         private readonly ISyncScheduler _scheduler;
         private readonly ITasksStatusesCache _tasksStatusesCache;
+        private readonly IAuthTester _authTester;
         private readonly ILogger<StatusService> _logger;
 
-        public StatusService(IUnitOfWorkFactory unitOfWorkFactory, ITokenService tokenService, IDataSourceFactory dataSourceFactory, ISyncScheduler scheduler, ITasksStatusesCache tasksStatusesCache, ILogger<StatusService> logger)
+        public StatusService(IUnitOfWorkFactory unitOfWorkFactory, ITokenService tokenService, ISyncScheduler scheduler, ITasksStatusesCache tasksStatusesCache, IAuthTester authTester, ILogger<StatusService> logger)
         {
             _unitOfWorkFactory = unitOfWorkFactory;
             _tokenService = tokenService;
-            _dataSourceFactory = dataSourceFactory;
             _scheduler = scheduler;
             _tasksStatusesCache = tasksStatusesCache;
+            _authTester = authTester;
             _logger = logger;
         }
 
@@ -50,8 +49,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             _logger.LogDebug("Network '{networkId}' authorization status to Core app is '{status}'", networkId, isAuthorizedToCoreApp);
 
-            var dataSource = await _dataSourceFactory.CreateAsync(networkId, stoppingToken);
-            var isAuthorizedToDataSource = await dataSource.IsAuthorizedAsync(networkId, stoppingToken);
+            var isAuthorizedToDataSource = await _authTester.IsAuthorizedAsync(networkId, stoppingToken);
             var isRunning = await _scheduler.IsRunningAsync(networkId, stoppingToken);
 
             _logger.LogDebug("Network '{networkId}' authorization status to data source is '{status}'", networkId, isAuthorizedToDataSource);
