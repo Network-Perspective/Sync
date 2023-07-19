@@ -4,7 +4,7 @@
     "title": "Network Perspective",
     "version": "v1"
   },
-  "host": "app.networkperspective.io",
+  "host": "localhost:5001",
   "schemes": [
     "https"
   ],
@@ -696,6 +696,266 @@
         }
       }
     },
+    "/api/ai/prompt/expand": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Expand prompt",
+        "operationId": "AI_ExpandPrompt",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/TeamInsightsGPTPromptQuery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/ai/team/insights": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Team insights",
+        "operationId": "AI_TeamInsights",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "maxTokens",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "networkId",
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Refresh team insights",
+        "operationId": "AI_RefreshTeamInsights",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "maxTokens",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "networkId",
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/ai/team/mock": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Mock endpoint that returns the prompt",
+        "operationId": "AI_MockInsights",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "maxTokens",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "networkId",
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Mock endpoint that returns the prompt",
+        "operationId": "AI_RefreshMockInsights",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "maxTokens",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "networkId",
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
     "/api/assets": {
       "get": {
         "tags": [
@@ -821,6 +1081,12 @@
             "required": true,
             "type": "string",
             "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "parentId",
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
@@ -892,6 +1158,12 @@
             "required": true,
             "type": "string",
             "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "deleteChildPerspectives",
+            "type": "boolean",
+            "default": false
           }
         ],
         "responses": {
@@ -2084,6 +2356,50 @@
         }
       }
     },
+    "/api/file/{networkId}/logo": {
+      "post": {
+        "tags": [
+          "File"
+        ],
+        "summary": "Upload company logo",
+        "operationId": "File_UploadLogo",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "formData",
+            "name": "file",
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
     "/api/file/{networkId}/{fileId}.{ext}": {
       "get": {
         "tags": [
@@ -2096,8 +2412,7 @@
             "in": "path",
             "name": "networkId",
             "required": true,
-            "type": "string",
-            "format": "uuid"
+            "type": "string"
           },
           {
             "in": "path",
@@ -2207,7 +2522,7 @@
           "Graph"
         ],
         "summary": "Query",
-        "description": "Select whole graph:\r\n<code>SELECT *</code>\r\n            \r\nSelect a particular vertex:\r\n<code>\r\nSELECT * WHERE id = '396d78df-a6bf-40cf-812e-6537cd1ff5de'\r\n</code>\r\n            \r\nSelect one department:\r\n<code>SELECT * WHERE department = \"Marketing\"</code>\r\n            \r\nSelect all directors (director, director of operations, etc.):\r\n<code>SELECT * WHERE position LIKE '%director%'</code>\r\n            \r\nLimit result to specyfic vertex props, and only two types of edges:\r\n<code>\r\nSELECT name, position AS description, department, <br />\r\nedge.cooperation, edge.[knowledge sharing]<br />\r\nWHERE department = \"Marketing\"\r\n</code>\r\n            \r\nConditions can be combined with AND and OR operators.\r\nThis query will return specific vertex props props and only two types of edges\r\nlimiting results to only directors from two departments (IT or Marketing)\r\n<code>\r\nSELECT name, position, department, <br />\r\nedge.cooperation, edge.[knowledge sharing]<br />\r\nWHERE (department = \"IT\" OR department = \"Marketing\")<br />\r\n   AND position LIKE '%directors%'\r\n</code>\r\n            \r\nIt is possible to query nodes according to their connectivity.\r\n            \r\nFor instance you can query all neighbours of some vertex (including the vertex itself)\r\n<code>\r\nSELECT * WHERE edge(source.id = '396d78df-a6bf-40cf-812e-6537cd1ff5de')\r\n</code>\r\n            \r\nThe query below will return all employees that are cooperating with \"Marketing\" department.\r\nThe keyword <samp>edge</samp> matches all incoming and outgoing edges so this will include\r\nnodes on both ends of the replationships.\r\n<code>\r\nSELECT * WHERE edge(Name=\"Cooperation\" AND Source.Dept = \"Marketing\")\r\n</code>\r\n            \r\nOn the other hand keyword <samp>in_edge</samp> matches only incoming edges. So\r\nHence the query below will return only people connected to Marketing department\r\nbut without the Marketing department itself\r\n(unless the Marketing department is internaly connected what is usually the case)\r\n<code>\r\nSELECT * WHERE in_edge(Source.Dept = 'Marketing')\r\n</code>\r\n            \r\nIf we'd like to explicitly exclude the Marketing department by adding an extra condition.\r\n<code>\r\nSELECT * WHERE in_edge(Source.Dept = 'Marketing') AND Dept != 'Marketing'\r\n</code>\r\n            \r\nWe can also limit results to people that often reach out for knowledge witn <samp>out_edge</samp> keyword,\r\nthat matches only outgoing relationships\r\n<code>\r\nSELECT * WHERE out_edge(Name = 'Knowledge' AND Frequency > 3)\r\n</code>\r\n            \r\nThe last edge traversal operator is <samp>mutual_edge</samp> and it matches nodes connected with\r\nmutual relationship.\r\n<code>\r\nSELECT * WHERE mutual_edge(name='Cooperation')\r\n</code>\r\n            \r\nQuery language supports calculating basic graph metrics such as:\r\n<ul><li>degree[(edge_condition)]</li><li>in_degree[(edge_condition)]</li><li>out_degree[(edge_condition)]</li><li>eigenvector[(edge_condition, edge_dist_prop)]</li><li>betweeness[(edge_condition, edge_dist_prop)]</li><li>path_length(target_condition, [edge_condition], [path_dist_prop])</li><li>shortest_path(source_condition, target_condition)</li></ul>\r\n            \r\nA simple query that will calculate indegree looks as follows\r\n<code>\r\nSELECT * CALCULATE indegree\r\n</code>\r\n            \r\nA query that will calculate degree for a particular edge and out_degree for all edges\r\n<code>\r\nSELECT * CALCULATE degree(Name = \"Cooperation\"), out_degree\r\n</code>\r\n            \r\nThis query will return a shortest path between two nodes a and b\r\nthe result will contain all vertices and edges along the path sorted accoring to order in the path\r\n<code>\r\nSELECT * CALCULATE shortest_path(Id='a', Id='b')\r\n</code>",
+        "description": "    Select whole graph:\r\n    <code>SELECT *</code>\r\n    Select a particular vertex:\r\n    <code>\r\nSELECT * WHERE id = '396d78df-a6bf-40cf-812e-6537cd1ff5de'\r\n</code>\r\n    Select one department:\r\n    <code>SELECT * WHERE department = \"Marketing\"</code>\r\n    Select all directors (director, director of operations, etc.):\r\n    <code>SELECT * WHERE position LIKE '%director%'</code>\r\n    Limit result to specyfic vertex props, and only two types of edges:\r\n    <code>\r\nSELECT name, position AS description, department, <br />\r\nedge.cooperation, edge.[knowledge sharing]<br />\r\nWHERE department = \"Marketing\"\r\n</code>\r\n    Conditions can be combined with AND and OR operators.\r\n    This query will return specific vertex props props and only two types of edges\r\n    limiting results to only directors from two departments (IT or Marketing)\r\n    <code>\r\nSELECT name, position, department, <br />\r\nedge.cooperation, edge.[knowledge sharing]<br />\r\nWHERE (department = \"IT\" OR department = \"Marketing\")<br />\r\n   AND position LIKE '%directors%'\r\n</code>\r\n    It is possible to query nodes according to their connectivity.\r\n    For instance you can query all neighbours of some vertex (including the vertex itself)\r\n    <code>\r\nSELECT * WHERE edge(source.id = '396d78df-a6bf-40cf-812e-6537cd1ff5de')\r\n</code>\r\n    The query below will return all employees that are cooperating with \"Marketing\" department.\r\n    The keyword <samp>edge</samp> matches all incoming and outgoing edges so this will include\r\n    nodes on both ends of the replationships.\r\n    <code>\r\nSELECT * WHERE edge(Name=\"Cooperation\" AND Source.Dept = \"Marketing\")\r\n</code>\r\n    On the other hand keyword <samp>in_edge</samp> matches only incoming edges. So\r\n    Hence the query below will return only people connected to Marketing department\r\n    but without the Marketing department itself\r\n    (unless the Marketing department is internaly connected what is usually the case)\r\n    <code>\r\nSELECT * WHERE in_edge(Source.Dept = 'Marketing')\r\n</code>\r\n    If we'd like to explicitly exclude the Marketing department by adding an extra condition.\r\n    <code>\r\nSELECT * WHERE in_edge(Source.Dept = 'Marketing') AND Dept != 'Marketing'\r\n</code>\r\n    We can also limit results to people that often reach out for knowledge witn <samp>out_edge</samp> keyword,\r\n    that matches only outgoing relationships\r\n    <code>\r\nSELECT * WHERE out_edge(Name = 'Knowledge' AND Frequency > 3)\r\n</code>\r\n    The last edge traversal operator is <samp>mutual_edge</samp> and it matches nodes connected with\r\n    mutual relationship.\r\n    <code>\r\nSELECT * WHERE mutual_edge(name='Cooperation')\r\n</code>\r\n    Query language supports calculating basic graph metrics such as:\r\n    <ul><li>degree[(edge_condition)]</li><li>in_degree[(edge_condition)]</li><li>out_degree[(edge_condition)]</li><li>eigenvector[(edge_condition, edge_dist_prop)]</li><li>betweeness[(edge_condition, edge_dist_prop)]</li><li>path_length(target_condition, [edge_condition], [path_dist_prop])</li><li>shortest_path(source_condition, target_condition)</li></ul>\r\n    A simple query that will calculate indegree looks as follows\r\n    <code>\r\nSELECT * CALCULATE indegree\r\n</code>\r\n    A query that will calculate degree for a particular edge and out_degree for all edges\r\n    <code>\r\nSELECT * CALCULATE degree(Name = \"Cooperation\"), out_degree\r\n</code>\r\n    This query will return a shortest path between two nodes a and b\r\n    the result will contain all vertices and edges along the path sorted accoring to order in the path\r\n    <code>\r\nSELECT * CALCULATE shortest_path(Id='a', Id='b')\r\n</code>",
         "operationId": "Graph_Query",
         "consumes": [
           "application/json-patch+json",
@@ -2343,7 +2658,7 @@
             "name": "body",
             "schema": {
               "type": "object",
-              "additionalProperties": {}
+              "additionalProperties": { }
             }
           }
         ],
@@ -2600,6 +2915,40 @@
             "required": true,
             "type": "string",
             "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/graph/{networkId}/sanitize": {
+      "post": {
+        "tags": [
+          "Graph"
+        ],
+        "summary": "Sanitize",
+        "operationId": "Graph_Sanitize",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "dryRun",
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -3524,7 +3873,7 @@
             "name": "body",
             "schema": {
               "type": "object",
-              "additionalProperties": {}
+              "additionalProperties": { }
             }
           }
         ],
@@ -3568,7 +3917,7 @@
             "description": "Success",
             "schema": {
               "type": "object",
-              "additionalProperties": {}
+              "additionalProperties": { }
             }
           },
           "400": {
@@ -3603,7 +3952,7 @@
           {
             "in": "body",
             "name": "body",
-            "schema": {}
+            "schema": { }
           }
         ],
         "responses": {
@@ -3904,7 +4253,7 @@
           {
             "in": "body",
             "name": "body",
-            "schema": {}
+            "schema": { }
           }
         ],
         "responses": {
@@ -4259,6 +4608,138 @@
                 "items": {
                   "$ref": "#/definitions/MetricRelatedValueResult"
                 }
+              }
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/report/export/related": {
+      "post": {
+        "tags": [
+          "Report"
+        ],
+        "summary": "Export related metrics",
+        "operationId": "Report_ExportMetricRelatedValues",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/MetricRelatedExportQuery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MetricRelatedExportValueResult"
+              }
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/report/export/params": {
+      "post": {
+        "tags": [
+          "Report"
+        ],
+        "summary": "Export metric params",
+        "operationId": "Report_ExportMetricParams",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/MetricsExportParamsQuery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/MetricsExportParamsResult"
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/report/export/values": {
+      "post": {
+        "tags": [
+          "Report"
+        ],
+        "summary": "Export direct metrics",
+        "operationId": "Report_ExportMetricValues",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/MetricsExportQuery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MetricsExportValueResult"
               }
             }
           },
@@ -6039,6 +6520,326 @@
         }
       }
     },
+    "/api/tasks/{networkId}": {
+      "get": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Return team tasks",
+        "operationId": "Tasks_List",
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "reportId",
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "groupId",
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamTaskResult"
+              }
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/tasks/{networkId}/{actionId}": {
+      "post": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Add or update a task",
+        "operationId": "Tasks_AddOrUpdate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "groupId",
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "reportId",
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "path",
+            "name": "actionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "type": "number",
+            "format": "double"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/tasks/board/{networkId}": {
+      "get": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Return team board",
+        "operationId": "Tasks_Board",
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "groupId",
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "reportId",
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "sectionId",
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/KanbanCard"
+              }
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/tasks/mailing/{networkId}": {
+      "get": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Task mailing recommendations",
+        "operationId": "Tasks_GetPreparedMailing",
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "memberProps",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TaskEmailResult"
+              }
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Prepare tasks mailing",
+        "operationId": "Tasks_PrepareMailing",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/tasks/send-mailing": {
+      "post": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Send tasks mailing",
+        "description": "Sends emails",
+        "operationId": "Tasks_SendEmails",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/SendTasksMailingCommand"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Success",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/tasks/test-mailing": {
+      "post": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Test tasks mailing",
+        "description": "Sends emails",
+        "operationId": "Tasks_TestMailing",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/TestTaskMailingCommand"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
     "/token": {
       "post": {
         "tags": [
@@ -6109,6 +6910,11 @@
           {
             "in": "query",
             "name": "networkId",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "returnUrl",
             "type": "string"
           }
         ],
@@ -6393,7 +7199,8 @@
         "Month",
         "Weekday",
         "Hour",
-        "Custom"
+        "Custom",
+        "Sandbox"
       ],
       "type": "string"
     },
@@ -6454,7 +7261,7 @@
         "name": {
           "type": "string"
         },
-        "value": {}
+        "value": { }
       }
     },
     "AuthenticationModeResult": {
@@ -6477,6 +7284,18 @@
       "properties": {
         "authority": {
           "type": "string"
+        },
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -6717,8 +7536,8 @@
     "ConditionalSchema": {
       "type": "object",
       "properties": {
-        "left": {},
-        "right": {},
+        "left": { },
+        "right": { },
         "condidtion": {
           "$ref": "#/definitions/ConditionalSchemaConditionEnum"
         }
@@ -7020,8 +7839,18 @@
         },
         "locale": {
           "type": "string"
+        },
+        "templateType": {
+          "$ref": "#/definitions/EmailTemplateTypeEnum"
         }
       }
+    },
+    "EmailTemplateTypeEnum": {
+      "enum": [
+        "Default",
+        "ActionEmail"
+      ],
+      "type": "string"
     },
     "FacetSearchResult": {
       "type": "object",
@@ -7133,6 +7962,13 @@
           "additionalProperties": {
             "$ref": "#/definitions/GraphPerspectiveResult"
           }
+        },
+        "emails": {
+          "description": "Email perspectives",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GraphPerspectiveResult"
+          }
         }
       }
     },
@@ -7230,7 +8066,7 @@
         },
         "props": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         },
         "relationships": {
           "type": "array",
@@ -7471,7 +8307,7 @@
         },
         "props": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         },
         "relationships": {
           "type": "array",
@@ -7495,7 +8331,46 @@
         },
         "targetProps": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
+        }
+      }
+    },
+    "KanbanCard": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "sectionName": {
+          "type": "string"
+        },
+        "sectionId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "perspectiveId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "actionEmailPerspectiveId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "order": {
+          "format": "double",
+          "type": "number"
         }
       }
     },
@@ -7584,6 +8459,24 @@
         },
         "conditionMet": {
           "type": "boolean"
+        },
+        "perspectiveId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "actionEmailPerspectiveId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "order": {
+          "format": "int32",
+          "type": "integer"
         }
       }
     },
@@ -7617,6 +8510,54 @@
         },
         "aggregate": {
           "$ref": "#/definitions/AggregateEnum"
+        }
+      }
+    },
+    "MetricRelatedExportQuery": {
+      "type": "object",
+      "properties": {
+        "metric": {
+          "type": "string"
+        },
+        "networkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "aggregate": {
+          "$ref": "#/definitions/AggregateEnum"
+        },
+        "top": {
+          "format": "int32",
+          "type": "integer"
+        }
+      }
+    },
+    "MetricRelatedExportValueResult": {
+      "type": "object",
+      "properties": {
+        "period": {
+          "type": "string"
+        },
+        "value": {
+          "format": "double",
+          "type": "number"
+        },
+        "groupId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "groupName": {
+          "type": "string"
+        },
+        "relatedGroupId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "relatedGroupName": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
         }
       }
     },
@@ -7676,6 +8617,96 @@
         },
         "hasAccess": {
           "type": "boolean"
+        }
+      }
+    },
+    "MetricsExportParamsQuery": {
+      "type": "object",
+      "properties": {
+        "networkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "aggregate": {
+          "$ref": "#/definitions/AggregateEnum"
+        }
+      }
+    },
+    "MetricsExportParamsResult": {
+      "type": "object",
+      "properties": {
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "relatedMetrics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "MetricsExportQuery": {
+      "type": "object",
+      "properties": {
+        "networkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "aggregate": {
+          "$ref": "#/definitions/AggregateEnum"
+        },
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "MetricsExportValueResult": {
+      "type": "object",
+      "properties": {
+        "metric": {
+          "type": "string"
+        },
+        "period": {
+          "type": "string"
+        },
+        "value": {
+          "format": "double",
+          "type": "number"
+        },
+        "groupId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "groupName": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
         }
       }
     },
@@ -7821,7 +8852,7 @@
         },
         "props": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         }
       }
     },
@@ -7899,7 +8930,7 @@
         },
         "props": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         },
         "roles": {
           "type": "array",
@@ -7981,6 +9012,9 @@
           "items": {
             "$ref": "#/definitions/ProcessingCacheElement"
           }
+        },
+        "sandbox": {
+          "type": "boolean"
         }
       }
     },
@@ -8065,6 +9099,9 @@
         },
         "connectors": {
           "$ref": "#/definitions/ConnectorsSettings"
+        },
+        "tasks": {
+          "$ref": "#/definitions/TasksSettings"
         }
       }
     },
@@ -8092,7 +9129,7 @@
         },
         "props": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         }
       }
     },
@@ -8280,7 +9317,7 @@
         },
         "substitutions": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         }
       }
     },
@@ -8386,7 +9423,7 @@
         },
         "props": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         }
       }
     },
@@ -8407,7 +9444,7 @@
         },
         "data": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         }
       }
     },
@@ -8420,7 +9457,7 @@
         },
         "props": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         }
       }
     },
@@ -8451,7 +9488,8 @@
         "ExcludeWeekdays",
         "ExcludeRelated",
         "ExcludeCompany",
-        "ExcludeRoles"
+        "ExcludeRoles",
+        "Sandbox"
       ],
       "type": "string"
     },
@@ -8532,7 +9570,7 @@
         },
         "props": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         }
       }
     },
@@ -8733,6 +9771,10 @@
         },
         "name": {
           "type": "string"
+        },
+        "parentId": {
+          "format": "uuid",
+          "type": "string"
         }
       }
     },
@@ -8863,6 +9905,21 @@
         }
       }
     },
+    "SendTasksMailingCommand": {
+      "type": "object",
+      "properties": {
+        "networkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "userNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "ServiceFlags": {
       "enum": [
         "None",
@@ -8901,7 +9958,7 @@
         },
         "props": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         }
       }
     },
@@ -8922,7 +9979,7 @@
         },
         "data": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         }
       }
     },
@@ -8959,7 +10016,7 @@
         },
         "props": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
         }
       }
     },
@@ -9253,7 +10310,7 @@
         "runInTransaction": {
           "type": "boolean"
         },
-        "context": {},
+        "context": { },
         "keyProps": {
           "type": "array",
           "items": {
@@ -9309,7 +10366,7 @@
           "format": "uuid",
           "type": "string"
         },
-        "context": {},
+        "context": { },
         "keyProps": {
           "type": "array",
           "items": {
@@ -9431,6 +10488,114 @@
           "items": {
             "$ref": "#/definitions/UserEntity"
           }
+        },
+        "instant": {
+          "type": "boolean"
+        }
+      }
+    },
+    "TaskEmailResult": {
+      "type": "object",
+      "properties": {
+        "member": {
+          "$ref": "#/definitions/NetworkMemberResult"
+        },
+        "actionEmailTemplateId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "actionId": {
+          "type": "string"
+        },
+        "actionName": {
+          "type": "string"
+        },
+        "actionUrl": {
+          "type": "string"
+        },
+        "groupId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "groupName": {
+          "type": "string"
+        },
+        "reportId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "sectionId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "TasksSettings": {
+      "type": "object",
+      "properties": {
+        "teamCategories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "TeamInsightsGPTPromptQuery": {
+      "type": "object",
+      "properties": {
+        "networkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "groupId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "reportId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "sectionId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "template": {
+          "type": "string"
+        }
+      }
+    },
+    "TeamTaskResult": {
+      "type": "object",
+      "properties": {
+        "actionId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "order": {
+          "format": "double",
+          "type": "number"
+        }
+      }
+    },
+    "TestTaskMailingCommand": {
+      "type": "object",
+      "properties": {
+        "networkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "userNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "templateId": {
+          "format": "uuid",
+          "type": "string"
         }
       }
     },
@@ -9532,7 +10697,13 @@
         },
         "props": {
           "type": "object",
-          "additionalProperties": {}
+          "additionalProperties": { }
+        },
+        "groupAccess": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -9580,6 +10751,9 @@
         },
         "connectedAppsAvailable": {
           "type": "boolean"
+        },
+        "authAuthority": {
+          "type": "string"
         }
       }
     },

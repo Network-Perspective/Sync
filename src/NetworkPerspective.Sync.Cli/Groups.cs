@@ -136,10 +136,10 @@ namespace NetworkPerspective.Sync.Cli
 
                 csv.Read();
 
-                string value;
+                string? value;
                 for (int i = 0; csv.TryGetField<string>(i, out value); i++)
                 {
-                    header.Add(value.AsColumnDescriptor());
+                    header.Add((value ?? "").AsColumnDescriptor());
                 }
                 ColoredConsole.WriteLine("Found fields: " + String.Join(", ", header.Select(h => h.Header.Cyan())));
 
