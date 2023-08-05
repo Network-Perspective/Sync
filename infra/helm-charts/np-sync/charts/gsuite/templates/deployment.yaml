@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gsuite.fullname" . }}
+  labels:
+    {{- include "gsuite.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "gsuite.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "gsuite.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "gsuite.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: ConnectionStrings__Database
+              value: {{ .Values.appSettings.connectionString }}
+            - name: Infrastructure__NetworkPerspectiveCore__BaseUrl
+              value: {{ .Values.appSettings.networkPerspectiveCoreBaseUrl }}
+            - name: NLog__variables__minLevel
+              value: {{ .Values.appSettings.logLevel }}
+            - name: Infrastructure__AzureKeyVault__BaseUrl
+              value: {{ .Values.appSettings.azureKeyVaultBaseUrl }}
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+            - name: rsa-keys
+              mountPath: "/app/keys"              
+            - name: secrets
+              mountPath: "/app/secrets"              
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: logs
+      {{- if .Values.logVolume.enabled }}
+        persistentVolumeClaim:
+          {{- if .Values.logVolume.existingDataClaim }}
+          claimName: {{ .Values.logVolume.existingDataClaim }}
+          {{- else }}
+          claimName: {{ template "gsuite.fullname" . }}-logs
+          {{- end -}}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}           
+      - name: rsa-keys
+        secret:
+          secretName: np-sync-rsa
+      - name: secrets
+        secret:
+          secretName: np-sync-gsuite-secrets

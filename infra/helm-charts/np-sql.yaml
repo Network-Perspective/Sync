@@ -1,0 +1,133 @@
+---
+# Source: mssqlserver-2022/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: release-name-mssqlserver-2022-secret
+  labels:
+    app: release-name-mssqlserver-2022
+    chart: mssqlserver-2022-1.2.3
+    release: release-name
+    heritage: Helm
+type: Opaque
+data:
+  
+  sapassword: "eGw2bDVpdGt6bVYxVGFmdzFreXQ="
+---
+# Source: mssqlserver-2022/templates/pvc-data.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: release-name-mssqlserver-2022-data
+  labels:
+    app: release-name-mssqlserver-2022
+    chart: "mssqlserver-2022-1.2.3"
+    release: "release-name"
+    heritage: "Helm"
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "1Gi"
+---
+# Source: mssqlserver-2022/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-mssqlserver-2022
+  labels:
+    app: release-name-mssqlserver-2022
+    chart: mssqlserver-2022-1.2.3
+    release: release-name
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+  - name: mssql
+    port: 1433
+    targetPort: mssql
+    protocol: TCP
+  selector:
+    app: release-name-mssqlserver-2022
+    release: release-name
+---
+# Source: mssqlserver-2022/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-mssqlserver-2022
+  labels:
+    app: release-name-mssqlserver-2022
+    chart: mssqlserver-2022-1.2.3
+    release: release-name
+    heritage: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: release-name-mssqlserver-2022
+      release: release-name
+  template:
+    metadata:
+      labels:
+        app: release-name-mssqlserver-2022
+        release: release-name
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: 10001
+      containers:
+        - name: mssqlserver-2022
+          image: "mcr.microsoft.com/mssql/server:2022-latest"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_PID
+              value: "Express"
+            - name: SA_PASSWORD
+              valueFrom:
+               secretKeyRef:
+                 name: release-name-mssqlserver-2022-secret
+                 key: sapassword
+            - name: MSSQL_DATA_DIR
+              value: /var/opt/mssql
+            - name: MSSQL_TCP_PORT
+              value: "1433"
+            - name: MSSQL_COLLATION
+              value: "SQL_Latin1_General_CP1_CI_AS"
+            - name: MSSQL_LCID
+              value: "1033"
+            - name: MSSQL_ENABLE_HADR
+              value: "0"
+            
+            - name: MSSQL_MEMORY_LIMIT_MB
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: 1Mi
+            
+          ports:
+            - name: mssql
+              containerPort: 1433
+          volumeMounts:
+            - name: data
+              mountPath: /var/opt/mssql
+          livenessProbe:
+             tcpSocket:
+               port: mssql
+             initialDelaySeconds: 15
+             periodSeconds: 20
+          readinessProbe:
+             tcpSocket:
+               port: mssql
+             initialDelaySeconds: 5
+             periodSeconds: 10
+          resources:
+            limits:
+              memory: 2Gi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: release-name-mssqlserver-2022-data
