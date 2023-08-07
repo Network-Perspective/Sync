@@ -14,5 +14,6 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Persistence
         INetworkRepository<TProperties> GetNetworkRepository<TProperties>() where TProperties : NetworkProperties, new();
         IStatusLogRepository GetStatusLogRepository();
         Task CommitAsync(CancellationToken stoppingToken = default);
+        IDbSecretRepository GetDbSecretRepository();
     }
 }

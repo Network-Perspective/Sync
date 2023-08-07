@@ -9,6 +9,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence
         public DbSet<SyncHistoryEntryEntity> SyncHistoryEntities { get; set; }
         public DbSet<NetworkEntity> NetworkEntities { get; set; }
         public DbSet<StatusLogEntity> StatusLogEntities { get; set; }
+        public DbSet<SecretEntity> SecretEntities { get; set; }
 
         public ConnectorDbContext(DbContextOptions<ConnectorDbContext> options) : base(options)
         { }

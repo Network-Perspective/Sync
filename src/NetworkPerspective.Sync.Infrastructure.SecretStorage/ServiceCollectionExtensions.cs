@@ -13,6 +13,12 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
 {
     public static class ServiceCollectionExtensions
     {
+        public static IServiceCollection AddDbDataProtection(this IServiceCollection services, IConfigurationSection configurationSection)
+        {
+            services.Configure<DbDataProtectionConfig>(configurationSection);
+            return services;
+        }
+
         public static IServiceCollection AddSecretStorage(this IServiceCollection services, IConfigurationSection configurationSection, IHealthChecksBuilder healthCheckBuilder)
         {
             services.Configure<AzureKeyVaultConfig>(configurationSection);
@@ -24,6 +30,7 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
 
             services.AddSingleton(TokenCredentialFactory.Create());
             services.AddTransient<ISecretRepositoryFactory, AzureKeyVaultClientFactory>();
+            services.AddTransient<DbSecretRepositoryClient>();
 
             return services;
         }
