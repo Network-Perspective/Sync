@@ -89,10 +89,18 @@ spec:
              periodSeconds: {{ .Values.readinessprobe.periodSeconds }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-    {{- if .Values.nodeSelector }}
+      {{- with .Values.global.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
-    {{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}    
       volumes:
       - name: data
       {{- if .Values.persistence.enabled }}

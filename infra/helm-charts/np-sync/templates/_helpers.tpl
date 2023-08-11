@@ -61,3 +61,7 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
+
+{{- define "appsettings.config" -}}
+{{- printf "%s-appsettings" .Release.Name -}}
+{{- end -}}

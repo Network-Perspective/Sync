@@ -5,9 +5,6 @@ metadata:
   labels:
     {{- include "gsuite.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "gsuite.selectorLabels" . | nindent 6 }}
@@ -20,7 +17,7 @@ spec:
       labels:
         {{- include "gsuite.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
+      {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -33,15 +30,29 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
+          env:            
+            {{- if and .Values.appSettings .Values.appSettings.connectionString }}
             - name: ConnectionStrings__Database
               value: {{ .Values.appSettings.connectionString }}
+            {{- else }}
+            - name: MSSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "mssql.fullname" $ }}-secret
+                  key: sapassword
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: ConnectionStrings__Database
+              value: Server=tcp:{{ template "mssql.fullname" . }}.$(NAMESPACE).svc.cluster.local,1433;Initial Catalog=gsuite-db;Persist Security Info=False;User ID=sa;Password=$(MSSQL_PASSWORD);MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;
+            {{- end }}
             - name: Infrastructure__NetworkPerspectiveCore__BaseUrl
-              value: {{ .Values.appSettings.networkPerspectiveCoreBaseUrl }}
+              value: {{ .Values.global.appSettings.networkPerspectiveApi }}
             - name: NLog__variables__minLevel
               value: {{ .Values.appSettings.logLevel }}
-            - name: Infrastructure__AzureKeyVault__BaseUrl
-              value: {{ .Values.appSettings.azureKeyVaultBaseUrl }}
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              value: {{ .Values.global.appSettings.applicationInsightsConnectionString }}
           volumeMounts:
             - name: logs
               mountPath: /app/logs
@@ -49,6 +60,9 @@ spec:
               mountPath: "/app/keys"              
             - name: secrets
               mountPath: "/app/secrets"              
+            - name: config-volume
+              mountPath: /app/appsettings.Production.json
+              subPath: appsettings.Production.json
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -63,7 +77,7 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
+      {{- with .Values.global.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -71,7 +85,7 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- with .Values.global.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -89,7 +103,10 @@ spec:
       {{- end }}           
       - name: rsa-keys
         secret:
-          secretName: np-sync-rsa
+          secretName: {{ .Values.global.secrets.rsaKeys }} 
       - name: secrets
         secret:
-          secretName: np-sync-gsuite-secrets
+          secretName: {{ .Values.secrets.googleKeys }}
+      - name: config-volume
+        configMap:
+          name: {{ include "appsettings.config" . }}

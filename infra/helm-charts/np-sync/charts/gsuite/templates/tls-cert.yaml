@@ -1,0 +1,44 @@
+{{- if .Values.domainValidation.enabled }}
+{{- $fullName := include "gsuite.fullname" . -}}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ $fullName }}-azure-dns-issuer
+spec:
+  acme:
+    {{- if eq .Values.global.domainValidation.environment "staging" }}
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+        name: letsencrypt-staging
+    {{- else if eq .Values.global.domainValidation.environment "production" }}
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+        name: letsencrypt-production
+    {{- end }}
+    email: {{ .Values.global.domainValidation.email }}
+    solvers:    
+    - dns01:
+        azureDNS:
+          clientID: {{ .Values.global.domainValidation.clientID}}
+          clientSecretSecretRef:
+            name: {{ .Values.global.domainValidation.clientSecretRef }}
+            key: clientSecret
+          subscriptionID: {{ .Values.global.domainValidation.subscriptionID }}
+          tenantID: {{ .Values.global.domainValidation.tenantID }}
+          resourceGroupName: {{ .Values.global.domainValidation.resourceGroupName }}
+          hostedZoneName: {{ .Values.domainValidation.hostedZoneName }}
+          environment: AzurePublicCloud
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $fullName }}-certificate
+spec:
+  secretName: {{ $fullName }}-tls
+  issuerRef:
+    name: {{ $fullName }}-azure-dns-issuer
+    kind: Issuer
+  commonName: {{ .Values.domainValidation.hostedZoneName }}
+  dnsNames:
+    - {{ .Values.domainValidation.hostedZoneName }}
+{{- end }}

@@ -1,101 +1,103 @@
 # Default values for np-sync.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-replicaCount: 1
-
-image:
-  repository: nginx
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
-
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""  
-
-podAnnotations: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-service:
-  type: ClusterIP
-  port: 80
-
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+networkPolicy:
+  enabled: true
+  ipWhitelist:
+    - 127.0.0.1/32  # First whitelisted IP
+    - 192.168.1.2/32  # Second whitelisted IP
 
 mssql:
+  enabled: true
   edition: 
     value: Express
+
   # Override sapassword in templates/secret.yaml
   # sapassword: "MyStrongPassword1234"
+  # existingDataClaim: np-sync-mssql-data
 
 gsuite:
+  enabled: true
+  googleKeys: "np-sync-gsuite-secrets"
+  domainValidation:
+    enabled: true
+    hostedZoneName: gsuite-01.test.networkperspective.io
+
+# shared between all connectors subcharts
+global:
+  imagePullSecrets: 
+    - name: np-acr-secret
+
+  secrets:
+    rsaKeys: "np-sync-rsa"
+
   appSettings:
-    connectionString: Server=tcp:chart-mssql.default.svc.cluster.local,1433;Initial Catalog=gsuite-db;Persist Security Info=False;User ID=sa;Password=DAS2339dasjkl!##;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;
-    Infrastructure__Google__ApplicationName: gmail_app
-    Infrastructure__NetworkPerspectiveCore__BaseUrl: https://localhost:5001
-    Infrastructure__NetworkPerspectiveCore__DataSourceIdName: GSuiteId
-    Connector__Scheduler__CronExpression: 0 0 0 * * ?
-    Connector__Sync__DefaultSyncLookbackInDays: 1
-    Infrastructure__Google__SyncOverlapInMinutes: 4320
-    Infrastructure__Google__MaxMessagesPerUserDaily: 3000
-    NLog__variables__minLevel: Debug
-    APPLICATIONINSIGHTS_CONNECTION_STRING: ''
+    networkPerspectiveApi: http://host.docker.internal:5000/
+    applicationInsightsConnectionString: "InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/"
+
+  domainValidation:
+    clientID: a555ea3f-092e-4cea-a5a9-e47151489a7b
+    clientSecretRef: domain-validation
+    subscriptionID: f1249bd2-7e57-4a25-b4f0-c1baabdb3c99
+    tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
+    resourceGroupName: RG-Test-Connectors
+    email: blazej@networkperspective.io
+    environment: staging
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+nLogSettings:
+  content: |
+    {
+      "Logging": {
+        "NLog": {
+          "IncludeScopes": true
+        }
+      },
+      "NLog": {
+        "throwConfigExceptions": true,
+        "extensions": [
+          { "assembly": "NLog.Web.AspNetCore" },
+          { "assembly": "NLog.Extensions.Logging" },
+          { "assembly": "Microsoft.ApplicationInsights.NLogTarget" }
+        ],
+        "variables": {
+          "layoutHeader": "${date:universalTime=true:format=yyyy-MM-dd HH\\:mm\\:ss.fff}|${level:truncate=4:uppercase=true}|${logger}",
+          "layoutBody": "${message}${exception:format=tostring}",
+          "minLevel": "Info"
+        },
+        "targets": {
+          "ai": {
+            "type": "ApplicationInsightsTarget"
+          },      
+          "console": {
+            "type": "ColoredConsole",
+            "layout": "${layoutHeader}|${layoutBody}"
+          }
+        },
+        "rules": [
+          {
+            "logger": "Quartz.*",
+            "maxLevel": "Info",
+            "final": true
+          },
+          {
+            "logger": "Microsoft.*",
+            "maxLevel": "Info",
+            "final": true
+          },
+          {
+            "logger": "*",
+            "minLevel": "${minLevel}",
+            "writeTo": "console"
+          },      
+          {
+            "logger": "*",
+            "minLevel": "${minLevel}",
+            "writeTo": "ai"
+          }
+        ]
+      }
+    }
+
+

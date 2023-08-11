@@ -60,3 +60,12 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+
+{{- define "mssql.fullname" -}}
+{{- printf "%s-mssql" .Release.Name -}}
+{{- end -}}
+
+{{- define "appsettings.config" -}}
+{{- printf "%s-appsettings" .Release.Name -}}
+{{- end -}}
