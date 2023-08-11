@@ -40,7 +40,8 @@ global:
     tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
     resourceGroupName: RG-Test-Connectors
     email: blazej@networkperspective.io
-    environment: staging
+    #environment: staging
+    environment: production
 
   nodeSelector: {}
   tolerations: []

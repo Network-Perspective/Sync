@@ -1,6 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "gsuite.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
+{{- $tlsSecretName := printf "%s-%s-tls" $fullName .Values.global.domainValidation.environment -}}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
   {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
@@ -31,7 +32,7 @@ spec:
     {{- if .Values.domainValidation.enabled }}
     - hosts:
         - {{ .Values.domainValidation.hostedZoneName }}
-      secretName: {{ $fullName }}-tls
+      secretName: {{ $tlsSecretName }}
     {{- else }}
     {{- range .Values.ingress.tls }}
     - hosts:

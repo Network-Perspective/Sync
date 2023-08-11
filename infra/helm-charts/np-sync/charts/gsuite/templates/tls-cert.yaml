@@ -29,12 +29,13 @@ spec:
           hostedZoneName: {{ .Values.domainValidation.hostedZoneName }}
           environment: AzurePublicCloud
 ---
+{{-  $tlsSecretName := printf "%s-%s-tls" $fullName .Values.global.domainValidation.environment -}}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ $fullName }}-certificate
 spec:
-  secretName: {{ $fullName }}-tls
+  secretName: {{ $tlsSecretName }}
   issuerRef:
     name: {{ $fullName }}-azure-dns-issuer
     kind: Issuer
