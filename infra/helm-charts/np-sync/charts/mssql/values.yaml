@@ -32,6 +32,10 @@ persistence:
   storageClass: ""
   dataAccessMode: ReadWriteOnce
   dataSize: 1Gi
+  annotations: {
+    helm.sh/resource-policy: keep,
+    tilt.dev/down-policy: keep
+  }
 livenessprobe:
   initialDelaySeconds: 15
   periodSeconds: 20

@@ -1,1 +1,2 @@
 kubectl create secret generic np-sync-gsuite-secrets --from-file=secrets/hashing-key --from-file=secrets/google-key
+kubectl create secret generic np-sync-slack-secrets --from-file=secrets/hashing-key --from-file=secrets/slack-client-id  --from-file=secrets/slack-client-secret

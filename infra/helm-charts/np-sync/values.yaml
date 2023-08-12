@@ -19,7 +19,14 @@ gsuite:
   googleKeys: "np-sync-gsuite-secrets"
   domainValidation:
     enabled: true
-    hostedZoneName: gsuite-01.test.networkperspective.io
+    hostedZoneName: gsuite-c1.test.networkperspective.io
+
+slack:
+  enabled: false
+  slackSecrets: "np-sync-slack-secrets"
+  domainValidation:
+    enabled: true
+    hostedZoneName: slack-c1.test.networkperspective.io
 
 # shared between all connectors subcharts
 global:
@@ -34,14 +41,14 @@ global:
     applicationInsightsConnectionString: "InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/"
 
   domainValidation:
-    clientID: a555ea3f-092e-4cea-a5a9-e47151489a7b
+    clientID: 73a53227-3200-4c93-8582-e654830b4833
     clientSecretRef: domain-validation
     subscriptionID: f1249bd2-7e57-4a25-b4f0-c1baabdb3c99
     tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
     resourceGroupName: RG-Test-Connectors
     email: blazej@networkperspective.io
-    #environment: staging
-    environment: production
+    environment: staging
+    # environment: production
 
   nodeSelector: {}
   tolerations: []

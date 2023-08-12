@@ -1,5 +1,5 @@
 {{- if .Values.domainValidation.enabled }}
-{{- $fullName := include "gsuite.fullname" . -}}
+{{- $fullName := include "slack.fullname" . -}}
 {{- $issuerName := printf "%s-%s-azure-dns-issuer" $fullName .Values.global.domainValidation.environment -}}
 apiVersion: cert-manager.io/v1
 kind: Issuer
@@ -38,7 +38,7 @@ metadata:
 spec:
   secretName: {{ $tlsSecretName }}
   issuerRef:
-    name: {{ $issuerName }}
+    name: {{ $issuerName  }}
     kind: Issuer
   commonName: {{ .Values.domainValidation.hostedZoneName }}
   dnsNames:
