@@ -22,15 +22,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             healthChecksBuilder
                 .AddCheck<NetworkPerspectiveCoreHealthCheck>("Network-Perspective-Core", HealthStatus.Unhealthy, Array.Empty<string>());
 
-            var httpClientBuilder = services
-                .AddHttpClient<ISyncHashedClient, SyncHashedClient>()
-                .ConfigureHttpClient(client => client.BaseAddress = new Uri(config.BaseUrl));
-
-            if (config.Resiliency != null)
+            Action<IHttpClientBuilder> configureHttpClient = httpClientBuilder =>
             {
-                httpClientBuilder
-                    .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(config.Resiliency.Retries));
+                httpClientBuilder.ConfigureHttpClient(client => client.BaseAddress = new Uri(config.BaseUrl));
+
+                if (config.Resiliency != null)
+                {
+                    httpClientBuilder.AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(config.Resiliency.Retries));
+                }
             };
+
+            configureHttpClient(services.AddHttpClient<ISyncHashedClient, SyncHashedClient>());
+            configureHttpClient(services.AddHttpClient<ISettingsClient, SettingsClient>());
 
             services.AddTransient<INetworkPerspectiveCore, NetworkPerspectiveCoreFacade>();
 
