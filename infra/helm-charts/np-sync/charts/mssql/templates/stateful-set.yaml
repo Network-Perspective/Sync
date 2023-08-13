@@ -38,12 +38,12 @@ spec:
       securityContext:
         fsGroup: 10001
         runAsUser: 10001
-        allowPrivilegeEscalation: false      
 
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             runAsNonRoot: true
+            allowPrivilegeEscalation: false
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           {{- if .Values.image.pullSecrets }}
           imagePullSecrets:
