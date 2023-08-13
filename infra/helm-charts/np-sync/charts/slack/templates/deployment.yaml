@@ -5,15 +5,19 @@ metadata:
   labels:
     {{- include "slack.labels" . | nindent 4 }}
 spec:
+  strategy:
+    type: Recreate
+  replicas: 1
   selector:
     matchLabels:
       {{- include "slack.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+      {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- end }}      
       labels:
         {{- include "slack.selectorLabels" . | nindent 8 }}
     spec:
@@ -53,6 +57,8 @@ spec:
               value: {{ .Values.appSettings.logLevel }}
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               value: {{ .Values.global.appSettings.applicationInsightsConnectionString }}
+            - name: ASPNETCORE_URLS
+              value: http://+:{{ .Values.service.port }}
           volumeMounts:
             - name: logs
               mountPath: /app/logs

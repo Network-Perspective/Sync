@@ -1,10 +1,4 @@
 # Default values for np-sync.
-networkPolicy:
-  enabled: true
-  ipWhitelist:
-    - 127.0.0.1/32  # First whitelisted IP
-    - 192.168.1.2/32  # Second whitelisted IP
-
 mssql:
   enabled: true
   edition: 
@@ -27,6 +21,10 @@ slack:
   domainValidation:
     enabled: true
     hostedZoneName: slack-c1.test.networkperspective.io
+
+networkPolicy:
+  # forbid traffic from other namespaces
+  enabled: true
 
 # shared between all connectors subcharts
 global:

@@ -23,12 +23,16 @@ serviceAccount:
   name: ""
 
 podAnnotations: {}
-podSecurityContext: {}
-securityContext: {}
+podSecurityContext: 
+  runAsNonRoot: true
+
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsUser: 1000
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8080
 
 domainValidation:
   enabled: true
@@ -49,10 +53,10 @@ ingress:
 
 resources: 
   limits:
-    cpu: 500m
+    cpu: 1
     memory: 4G
   requests:
-    cpu: 500m
+    cpu: 400m
     memory: 0.5G
 
 nodeSelector: {}

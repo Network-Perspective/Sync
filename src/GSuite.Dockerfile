@@ -13,5 +13,7 @@ RUN dotnet publish "NetworkPerspective.Sync.GSuite/NetworkPerspective.Sync.GSuit
 # copy artefacts to final image
 FROM base AS final
 WORKDIR /app
-COPY --from=build /app/publish .
+RUN useradd -m connector -u 1000
+COPY --from=build --chown=connector:connector /app/publish .
+USER connector
 ENTRYPOINT ["dotnet", "NetworkPerspective.Sync.GSuite.dll"]

@@ -28,16 +28,22 @@ spec:
 {{- if .Values.pod.labels }}
 {{ toYaml .Values.pod.labels | indent 8 }}
 {{- end }}
-{{- if .Values.pod.annotations }}
       annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+{{- if .Values.pod.annotations }}
 {{ toYaml .Values.pod.annotations | indent 8 }}
 {{- end }}
     spec:
       terminationGracePeriodSeconds: 30
       securityContext:
         fsGroup: 10001
+        runAsUser: 10001
+        allowPrivilegeEscalation: false      
+
       containers:
         - name: {{ .Chart.Name }}
+          securityContext:
+            runAsNonRoot: true
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           {{- if .Values.image.pullSecrets }}
           imagePullSecrets:

@@ -5,13 +5,17 @@ metadata:
   labels:
     {{- include "gsuite.labels" . | nindent 4 }}
 spec:
+  strategy:
+    type: Recreate
+  replicas: 1
   selector:
     matchLabels:
       {{- include "gsuite.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+      {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -53,6 +57,8 @@ spec:
               value: {{ .Values.appSettings.logLevel }}
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               value: {{ .Values.global.appSettings.applicationInsightsConnectionString }}
+            - name: ASPNETCORE_URLS
+              value: http://+:{{ .Values.service.port }}              
           volumeMounts:
             - name: logs
               mountPath: /app/logs

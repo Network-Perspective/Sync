@@ -10,9 +10,8 @@ spec:
   - Ingress
   ingress:
   - from:
+    - podSelector: {}
     - ipBlock:
-        cidr: 0.0.0.0/0
-        except:
         - 127.0.0.1/32
         - 192.168.1.2/32
 ---
@@ -29,7 +28,7 @@ metadata:
 type: Opaque
 data:
   
-  sapassword: "QXFFcnNzcndKcmtkSnRFOFZWZUE="
+  sapassword: "SkIySVhvZGxFNENaN0NKRmZaVjU="
 ---
 # Source: np-sync/templates/appsettings-configmap.yaml
 apiVersion: v1
@@ -102,6 +101,7 @@ metadata:
     heritage: "Helm"
   annotations:
     helm.sh/resource-policy: keep
+    tilt.dev/down-policy: keep
 spec:
   accessModes:
     - "ReadWriteOnce"
@@ -115,10 +115,10 @@ kind: Service
 metadata:
   name: np-sync-gsuite
   labels:
-    helm.sh/chart: gsuite-0.1.0
+    helm.sh/chart: gsuite-2.1.2896
     app.kubernetes.io/name: gsuite
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2850"
+    app.kubernetes.io/version: "2.1.2896"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -158,10 +158,10 @@ kind: Service
 metadata:
   name: np-sync-slack
   labels:
-    helm.sh/chart: slack-0.1.0
+    helm.sh/chart: slack-2.1.2896
     app.kubernetes.io/name: slack
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2850"
+    app.kubernetes.io/version: "2.1.2896"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -180,10 +180,10 @@ kind: Deployment
 metadata:
   name: np-sync-gsuite
   labels:
-    helm.sh/chart: gsuite-0.1.0
+    helm.sh/chart: gsuite-2.1.2896
     app.kubernetes.io/name: gsuite
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2850"
+    app.kubernetes.io/version: "2.1.2896"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -205,7 +205,7 @@ spec:
         - name: gsuite
           securityContext:
             {}
-          image: "networkperspective.azurecr.io/connectors/gsuite:2.1.2850"
+          image: "networkperspective.azurecr.io/connectors/gsuite:2.1.2896"
           imagePullPolicy: IfNotPresent
           env:
             - name: MSSQL_PASSWORD
@@ -249,10 +249,10 @@ spec:
               port: http
           resources:
             limits:
-              cpu: 500m
+              cpu: 1
               memory: 4G
             requests:
-              cpu: 500m
+              cpu: 400m
               memory: 0.5G
       volumes:
       - name: logs
@@ -273,10 +273,10 @@ kind: Deployment
 metadata:
   name: np-sync-slack
   labels:
-    helm.sh/chart: slack-0.1.0
+    helm.sh/chart: slack-2.1.2896
     app.kubernetes.io/name: slack
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2850"
+    app.kubernetes.io/version: "2.1.2896"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -298,7 +298,7 @@ spec:
         - name: slack
           securityContext:
             {}
-          image: "networkperspective.azurecr.io/connectors/slack:2.1.2850"
+          image: "networkperspective.azurecr.io/connectors/slack:2.1.2896"
           imagePullPolicy: IfNotPresent
           env:
             - name: MSSQL_PASSWORD
@@ -342,10 +342,10 @@ spec:
               port: http
           resources:
             limits:
-              cpu: 500m
+              cpu: 1
               memory: 4G
             requests:
-              cpu: 500m
+              cpu: 400m
               memory: 0.5G
       volumes:
       - name: logs
@@ -434,10 +434,10 @@ spec:
              periodSeconds: 10
           resources:
             limits:
-              cpu: 500m
+              cpu: 800m
               memory: 2Gi
             requests:
-              cpu: 500m
+              cpu: 200m
               memory: 1Gi    
       volumes:
       - name: data
@@ -450,17 +450,17 @@ kind: Ingress
 metadata:
   name: np-sync-gsuite
   labels:
-    helm.sh/chart: gsuite-0.1.0
+    helm.sh/chart: gsuite-2.1.2896
     app.kubernetes.io/name: gsuite
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2850"
+    app.kubernetes.io/version: "2.1.2896"
     app.kubernetes.io/managed-by: Helm
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
         - gsuite-c1.test.networkperspective.io
-      secretName: np-sync-gsuite-staging-tls
+      secretName: np-sync-gsuite-production-tls
   rules:
     - host: "gsuite-c1.test.networkperspective.io"
       http:
@@ -479,17 +479,17 @@ kind: Ingress
 metadata:
   name: np-sync-slack
   labels:
-    helm.sh/chart: slack-0.1.0
+    helm.sh/chart: slack-2.1.2896
     app.kubernetes.io/name: slack
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2850"
+    app.kubernetes.io/version: "2.1.2896"
     app.kubernetes.io/managed-by: Helm
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
         - slack-c1.test.networkperspective.io
-      secretName: np-sync-slack-staging-tls
+      secretName: np-sync-slack-production-tls
   rules:
     - host: "slack-c1.test.networkperspective.io"
       http:
@@ -508,9 +508,9 @@ kind: Certificate
 metadata:
   name: np-sync-gsuite-certificate
 spec:
-  secretName: np-sync-gsuite-staging-tls
+  secretName: np-sync-gsuite-production-tls
   issuerRef:
-    name: np-sync-gsuite-staging-azure-dns-issuer
+    name: np-sync-gsuite-production-azure-dns-issuer
     kind: Issuer
   commonName: gsuite-c1.test.networkperspective.io
   dnsNames:
@@ -522,9 +522,9 @@ kind: Certificate
 metadata:
   name: np-sync-slack-certificate
 spec:
-  secretName: np-sync-slack-staging-tls
+  secretName: np-sync-slack-production-tls
   issuerRef:
-    name: np-sync-slack-staging-azure-dns-issuer
+    name: np-sync-slack-production-azure-dns-issuer
     kind: Issuer
   commonName: slack-c1.test.networkperspective.io
   dnsNames:
@@ -534,12 +534,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: np-sync-gsuite-staging-azure-dns-issuer
+  name: np-sync-gsuite-production-azure-dns-issuer
 spec:
   acme:
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
-        name: letsencrypt-staging
+        name: letsencrypt-production
     email: blazej@networkperspective.io
     solvers:    
     - dns01:
@@ -558,12 +558,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: np-sync-slack-staging-azure-dns-issuer
+  name: np-sync-slack-production-azure-dns-issuer
 spec:
   acme:
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
-        name: letsencrypt-staging
+        name: letsencrypt-production
     email: blazej@networkperspective.io
     solvers:    
     - dns01:
@@ -584,10 +584,10 @@ kind: Pod
 metadata:
   name: "np-sync-gsuite-test-connection"
   labels:
-    helm.sh/chart: gsuite-0.1.0
+    helm.sh/chart: gsuite-2.1.2896
     app.kubernetes.io/name: gsuite
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2850"
+    app.kubernetes.io/version: "2.1.2896"
     app.kubernetes.io/managed-by: Helm
   annotations:
     "helm.sh/hook": test
@@ -605,10 +605,10 @@ kind: Pod
 metadata:
   name: "np-sync-slack-test-connection"
   labels:
-    helm.sh/chart: slack-0.1.0
+    helm.sh/chart: slack-2.1.2896
     app.kubernetes.io/name: slack
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2850"
+    app.kubernetes.io/version: "2.1.2896"
     app.kubernetes.io/managed-by: Helm
   annotations:
     "helm.sh/hook": test
