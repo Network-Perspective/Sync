@@ -33,7 +33,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             };
 
             configureHttpClient(services.AddHttpClient<ISyncHashedClient, SyncHashedClient>());
-            configureHttpClient(services.AddHttpClient<ISettingsClient, SettingsClient>());
 
             services.AddTransient<INetworkPerspectiveCore, NetworkPerspectiveCoreFacade>();
 

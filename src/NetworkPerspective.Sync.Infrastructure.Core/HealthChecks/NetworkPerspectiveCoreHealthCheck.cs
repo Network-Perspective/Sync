@@ -10,19 +10,23 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.HealthChecks
     internal class NetworkPerspectiveCoreHealthCheck : IHealthCheck
     {
         private readonly NetworkPerspectiveCoreConfig _config;
-        private readonly ISettingsClient _coreClient;
 
-        public NetworkPerspectiveCoreHealthCheck(IOptions<NetworkPerspectiveCoreConfig> config, ISettingsClient coreClient)
+        public NetworkPerspectiveCoreHealthCheck(IOptions<NetworkPerspectiveCoreConfig> config)
         {
             _config = config.Value;
-            _coreClient = coreClient;
         }
 
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
             try
             {
-                var coreHealth = await _coreClient.HealthAsync();
+                // configure client
+                using var http = new System.Net.Http.HttpClient();
+                http.BaseAddress = new Uri(_config.BaseUrl);
+                var client = new SettingsClient(http);
+
+                // heath check core
+                var coreHealth = await client.HealthAsync();
                 if (coreHealth.Healthy == true)
                     return HealthCheckResult.Healthy($"Healthy at {_config.BaseUrl}");
                 else
