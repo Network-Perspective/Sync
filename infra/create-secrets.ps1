@@ -10,5 +10,5 @@ $acrPassword = Get-Content -Path "./secrets/acr-password"
 kubectl create secret docker-registry np-acr-secret --docker-server=networkperspective.azurecr.io --docker-username=$acrLogin --docker-password=$acrPassword
 
 # Read values from files
-$clientSecret = Get-Content -Path "./secrets/domain-validation.txt"
+$clientSecret = Get-Content -Path "./secrets/domain-validation"
 kubectl create secret generic "domain-validation" --namespace $namespace --from-literal=clientSecret=$clientSecret 

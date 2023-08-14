@@ -1,5 +1,5 @@
-# helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-# helm repo update
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
 
 Write-Host "Creating static IP Address for Ingress"
 gcloud compute addresses create np-sync-ip --region europe-west4
@@ -15,8 +15,4 @@ helm install nginx-ingress ingress-nginx/ingress-nginx `
     --set controller.service.loadBalancerIP=$ipAddress `
     --set controller.service.externalTrafficPolicy=Local `
     --set controller.image.allowPrivilegeEscalation=false
-
-# helm install nginx-ingress ingress-nginx/ingress-nginx `
-#     --set controller.service.loadBalancerIP=$ipAddress `
-#     --set controller.service.externalTrafficPolicy=Local 
 
