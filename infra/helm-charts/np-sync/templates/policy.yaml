@@ -12,6 +12,9 @@ spec:
   ingress:
   - from:
     - podSelector: {} # Allows traffic from all Pods in the namespace
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
   egress:
   - to:
     - podSelector: {} # Allows traffic to all Pods in the namespace

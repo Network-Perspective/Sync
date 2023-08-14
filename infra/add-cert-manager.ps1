@@ -6,4 +6,4 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.12.0  -f ./secrets/cert-manager-values.yaml
 
 # gke autopilot
-#helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.12.0 --set global.leaderElection.namespace=cert-manager --set global.resources.requests.cpu=10m --set global.resources.requests.memory=32Mi
+#helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.12.0 --set installCRDs=true --set global.leaderElection.namespace=cert-manager --set resources.requests.cpu=10m --set resources.requests.memory=32Mi

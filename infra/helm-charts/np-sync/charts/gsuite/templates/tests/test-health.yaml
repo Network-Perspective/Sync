@@ -13,9 +13,6 @@ spec:
       command: ['wget']
       args: [
         '-qO-',
-{{- if eq .Values.global.domainValidation.environment "staging" }}
-        '--no-check-certificate',
-{{- end }}
         '{{ include "gsuite.fullname" . }}:{{ .Values.service.port }}/health'
       ]
   restartPolicy: Never
