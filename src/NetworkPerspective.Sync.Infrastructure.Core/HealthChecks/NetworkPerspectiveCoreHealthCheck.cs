@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -15,9 +16,26 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.HealthChecks
             _config = config.Value;
         }
 
-        public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(HealthCheckResult.Healthy($"At {_config.BaseUrl}. Not implemented yet..."));
+            try
+            {
+                // configure client
+                using var http = new System.Net.Http.HttpClient();
+                http.BaseAddress = new Uri(_config.BaseUrl);
+                var client = new SettingsClient(http);
+
+                // heath check core
+                var coreHealth = await client.HealthAsync();
+                if (coreHealth.Healthy == true)
+                    return HealthCheckResult.Healthy($"Healthy at {_config.BaseUrl}");
+                else
+                    return HealthCheckResult.Unhealthy($"Core connected but unhealthy at {_config.BaseUrl}");
+            }
+            catch (Exception ex)
+            {
+                return HealthCheckResult.Unhealthy($"Error establishing connection to core at {_config.BaseUrl}: {ex.Message}");
+            }
         }
     }
 }

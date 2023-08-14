@@ -23,6 +23,7 @@ namespace NetworkPerspective.Sync.Office365
     {
         private const string NetworkPerspectiveCoreConfigSection = "Infrastructure:NetworkPerspectiveCore";
         private const string AzureKeyVaultConfigSection = "Infrastructure:AzureKeyVault";
+        private const string DataProtectionConfigSection = "Infrastructure:DataProtection";
         private const string MicrosoftConfigSection = "Infrastructure:Microsoft";
         private const string SchedulerConfigSection = "Connector:Scheduler";
         private const string ConnectorConfigSection = "Connector";
@@ -56,6 +57,7 @@ namespace NetworkPerspective.Sync.Office365
                 .AddApplication(_config.GetSection(ConnectorConfigSection))
                 .AddMicrosoft(_config.GetSection(MicrosoftConfigSection))
                 .AddSecretStorage(_config.GetSection(AzureKeyVaultConfigSection), healthChecksBuilder)
+                .AddDbDataProtection(_config.GetSection(DataProtectionConfigSection))
                 .AddNetworkPerspectiveCore(_config.GetSection(NetworkPerspectiveCoreConfigSection), healthChecksBuilder)
                 .AddScheduler(_config.GetSection(SchedulerConfigSection), _dbConnectionString)
                 .AddPersistence(healthChecksBuilder)

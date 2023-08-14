@@ -1,0 +1,109 @@
+# Default values for np-sync.
+mssql:
+  enabled: true
+  edition: 
+    value: Express
+
+  # Override sapassword in templates/secret.yaml
+  # sapassword: "MyStrongPassword1234"
+  # existingDataClaim: np-sync-mssql-data
+
+gsuite:
+  enabled: true
+  googleKeys: "np-sync-gsuite-secrets"
+  domainValidation:
+    enabled: true
+    hostedZoneName: gsuite-c1.test.networkperspective.io
+
+slack:
+  enabled: false
+  slackSecrets: "np-sync-slack-secrets"
+  domainValidation:
+    enabled: true
+    hostedZoneName: slack-c1.test.networkperspective.io
+
+networkPolicy:
+  # forbid traffic from other namespaces
+  enabled: true
+
+# shared between all connectors subcharts
+global:
+  imagePullSecrets: 
+    - name: np-acr-secret
+
+  secrets:
+    rsaKeys: "np-sync-rsa"
+
+  appSettings:
+    networkPerspectiveApi: http://host.docker.internal:5000/
+    applicationInsightsConnectionString: "InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/"
+
+  domainValidation:
+    clientID: 73a53227-3200-4c93-8582-e654830b4833
+    clientSecretRef: domain-validation
+    subscriptionID: f1249bd2-7e57-4a25-b4f0-c1baabdb3c99
+    tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
+    resourceGroupName: RG-Test-Connectors
+    email: blazej@networkperspective.io
+    environment: staging
+    # environment: production
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+nLogSettings:
+  content: |
+    {
+      "Logging": {
+        "NLog": {
+          "IncludeScopes": true
+        }
+      },
+      "NLog": {
+        "throwConfigExceptions": true,
+        "extensions": [
+          { "assembly": "NLog.Web.AspNetCore" },
+          { "assembly": "NLog.Extensions.Logging" },
+          { "assembly": "Microsoft.ApplicationInsights.NLogTarget" }
+        ],
+        "variables": {
+          "layoutHeader": "${date:universalTime=true:format=yyyy-MM-dd HH\\:mm\\:ss.fff}|${level:truncate=4:uppercase=true}|${logger}",
+          "layoutBody": "${message}${exception:format=tostring}",
+          "minLevel": "Info"
+        },
+        "targets": {
+          "ai": {
+            "type": "ApplicationInsightsTarget"
+          },      
+          "console": {
+            "type": "ColoredConsole",
+            "layout": "${layoutHeader}|${layoutBody}"
+          }
+        },
+        "rules": [
+          {
+            "logger": "Quartz.*",
+            "maxLevel": "Info",
+            "final": true
+          },
+          {
+            "logger": "Microsoft.*",
+            "maxLevel": "Info",
+            "final": true
+          },
+          {
+            "logger": "*",
+            "minLevel": "${minLevel}",
+            "writeTo": "console"
+          },      
+          {
+            "logger": "*",
+            "minLevel": "${minLevel}",
+            "writeTo": "ai"
+          }
+        ]
+      }
+    }
+
+

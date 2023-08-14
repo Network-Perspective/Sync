@@ -1,0 +1,621 @@
+---
+# Source: np-sync/templates/policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ip-whitelist
+spec:
+  podSelector: {}  # Apply to all pods in the namespace
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector: {}
+    - ipBlock:
+        - 127.0.0.1/32
+        - 192.168.1.2/32
+---
+# Source: np-sync/charts/mssql/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: np-sync-mssql-secret
+  labels:
+    app: np-sync-mssql
+    chart: mssql-1.2.3
+    release: np-sync
+    heritage: Helm
+type: Opaque
+data:
+  
+  sapassword: "SkIySVhvZGxFNENaN0NKRmZaVjU="
+---
+# Source: np-sync/templates/appsettings-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: np-sync-appsettings
+data:
+  appsettings.Production.json: |
+    {
+      "Logging": {
+        "NLog": {
+          "IncludeScopes": true
+        }
+      },
+      "NLog": {
+        "throwConfigExceptions": true,
+        "extensions": [
+          { "assembly": "NLog.Web.AspNetCore" },
+          { "assembly": "NLog.Extensions.Logging" },
+          { "assembly": "Microsoft.ApplicationInsights.NLogTarget" }
+        ],
+        "variables": {
+          "layoutHeader": "${date:universalTime=true:format=yyyy-MM-dd HH\\:mm\\:ss.fff}|${level:truncate=4:uppercase=true}|${logger}",
+          "layoutBody": "${message}${exception:format=tostring}",
+          "minLevel": "Info"
+        },
+        "targets": {
+          "ai": {
+            "type": "ApplicationInsightsTarget"
+          },      
+          "console": {
+            "type": "ColoredConsole",
+            "layout": "${layoutHeader}|${layoutBody}"
+          }
+        },
+        "rules": [
+          {
+            "logger": "Quartz.*",
+            "maxLevel": "Info",
+            "final": true
+          },
+          {
+            "logger": "Microsoft.*",
+            "maxLevel": "Info",
+            "final": true
+          },
+          {
+            "logger": "*",
+            "minLevel": "${minLevel}",
+            "writeTo": "console"
+          },      
+          {
+            "logger": "*",
+            "minLevel": "${minLevel}",
+            "writeTo": "ai"
+          }
+        ]
+      }
+    }
+---
+# Source: np-sync/charts/mssql/templates/pvc-data.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: np-sync-mssql-data
+  labels:
+    app: np-sync-mssql
+    chart: "mssql-1.2.3"
+    release: "np-sync"
+    heritage: "Helm"
+  annotations:
+    helm.sh/resource-policy: keep
+    tilt.dev/down-policy: keep
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "1Gi"
+---
+# Source: np-sync/charts/gsuite/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-sync-gsuite
+  labels:
+    helm.sh/chart: gsuite-2.1.2896
+    app.kubernetes.io/name: gsuite
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: gsuite
+    app.kubernetes.io/instance: np-sync
+---
+# Source: np-sync/charts/mssql/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-sync-mssql
+  labels:
+    app: np-sync-mssql
+    chart: mssql-1.2.3
+    release: np-sync
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+  - name: mssql
+    port: 1433
+    targetPort: mssql
+    protocol: TCP
+  selector:
+    app: np-sync-mssql
+    release: np-sync
+---
+# Source: np-sync/charts/slack/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-sync-slack
+  labels:
+    helm.sh/chart: slack-2.1.2896
+    app.kubernetes.io/name: slack
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: slack
+    app.kubernetes.io/instance: np-sync
+---
+# Source: np-sync/charts/gsuite/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: np-sync-gsuite
+  labels:
+    helm.sh/chart: gsuite-2.1.2896
+    app.kubernetes.io/name: gsuite
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gsuite
+      app.kubernetes.io/instance: np-sync
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gsuite
+        app.kubernetes.io/instance: np-sync
+    spec:
+      imagePullSecrets:
+        - name: np-acr-secret
+      serviceAccountName: default
+      securityContext:
+        {}
+      containers:
+        - name: gsuite
+          securityContext:
+            {}
+          image: "networkperspective.azurecr.io/connectors/gsuite:2.1.2896"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MSSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: np-sync-mssql-secret
+                  key: sapassword
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: ConnectionStrings__Database
+              value: Server=tcp:np-sync-mssql.$(NAMESPACE).svc.cluster.local,1433;Initial Catalog=gsuite-db;Persist Security Info=False;User ID=sa;Password=$(MSSQL_PASSWORD);MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;
+            - name: Infrastructure__NetworkPerspectiveCore__BaseUrl
+              value: http://host.docker.internal:5000/
+            - name: NLog__variables__minLevel
+              value: info
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              value: InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+            - name: rsa-keys
+              mountPath: "/app/keys"              
+            - name: secrets
+              mountPath: "/app/secrets"              
+            - name: config-volume
+              mountPath: /app/appsettings.Production.json
+              subPath: appsettings.Production.json
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            limits:
+              cpu: 1
+              memory: 4G
+            requests:
+              cpu: 400m
+              memory: 0.5G
+      volumes:
+      - name: logs
+        emptyDir: {}           
+      - name: rsa-keys
+        secret:
+          secretName: np-sync-rsa 
+      - name: secrets
+        secret:
+          secretName: np-sync-gsuite-secrets
+      - name: config-volume
+        configMap:
+          name: np-sync-appsettings
+---
+# Source: np-sync/charts/slack/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: np-sync-slack
+  labels:
+    helm.sh/chart: slack-2.1.2896
+    app.kubernetes.io/name: slack
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: slack
+      app.kubernetes.io/instance: np-sync
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: slack
+        app.kubernetes.io/instance: np-sync
+    spec:
+      imagePullSecrets:
+        - name: np-acr-secret
+      serviceAccountName: default
+      securityContext:
+        {}
+      containers:
+        - name: slack
+          securityContext:
+            {}
+          image: "networkperspective.azurecr.io/connectors/slack:2.1.2896"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MSSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: np-sync-mssql-secret
+                  key: sapassword
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: ConnectionStrings__Database
+              value: Server=tcp:np-sync-mssql.$(NAMESPACE).svc.cluster.local,1433;Initial Catalog=slack-db;Persist Security Info=False;User ID=sa;Password=$(MSSQL_PASSWORD);MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;
+            - name: Infrastructure__NetworkPerspectiveCore__BaseUrl
+              value: http://host.docker.internal:5000/
+            - name: NLog__variables__minLevel
+              value: info
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              value: InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+            - name: rsa-keys
+              mountPath: "/app/keys"              
+            - name: secrets
+              mountPath: "/app/secrets"              
+            - name: config-volume
+              mountPath: /app/appsettings.Production.json
+              subPath: appsettings.Production.json
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            limits:
+              cpu: 1
+              memory: 4G
+            requests:
+              cpu: 400m
+              memory: 0.5G
+      volumes:
+      - name: logs
+        emptyDir: {}           
+      - name: rsa-keys
+        secret:
+          secretName: np-sync-rsa 
+      - name: secrets
+        secret:
+          secretName: np-sync-slack-secrets
+      - name: config-volume
+        configMap:
+          name: np-sync-appsettings
+---
+# Source: np-sync/charts/mssql/templates/stateful-set.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: np-sync-mssql
+  labels:
+    app: np-sync-mssql
+    chart: mssql-1.2.3
+    release: np-sync
+    heritage: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: np-sync-mssql
+      release: np-sync
+  template:
+    metadata:
+      labels:
+        app: np-sync-mssql
+        release: np-sync
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: 10001
+      containers:
+        - name: mssql
+          image: "mcr.microsoft.com/mssql/server:2022-latest"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_PID
+              value: "Express"
+            - name: SA_PASSWORD
+              valueFrom:
+               secretKeyRef:
+                 name: np-sync-mssql-secret
+                 key: sapassword
+            - name: MSSQL_DATA_DIR
+              value: /var/opt/mssql
+            - name: MSSQL_TCP_PORT
+              value: "1433"
+            - name: MSSQL_COLLATION
+              value: "SQL_Latin1_General_CP1_CI_AS"
+            - name: MSSQL_LCID
+              value: "1033"
+            - name: MSSQL_ENABLE_HADR
+              value: "0"
+            
+            - name: MSSQL_MEMORY_LIMIT_MB
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: 1Mi
+            
+          ports:
+            - name: mssql
+              containerPort: 1433
+          volumeMounts:
+            - name: data
+              mountPath: /var/opt/mssql
+          livenessProbe:
+             tcpSocket:
+               port: mssql
+             initialDelaySeconds: 15
+             periodSeconds: 20
+          readinessProbe:
+             tcpSocket:
+               port: mssql
+             initialDelaySeconds: 5
+             periodSeconds: 10
+          resources:
+            limits:
+              cpu: 800m
+              memory: 2Gi
+            requests:
+              cpu: 200m
+              memory: 1Gi    
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: np-sync-mssql-data
+---
+# Source: np-sync/charts/gsuite/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: np-sync-gsuite
+  labels:
+    helm.sh/chart: gsuite-2.1.2896
+    app.kubernetes.io/name: gsuite
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - gsuite-c1.test.networkperspective.io
+      secretName: np-sync-gsuite-production-tls
+  rules:
+    - host: "gsuite-c1.test.networkperspective.io"
+      http:
+        paths:
+          - path: /            
+            pathType: Prefix            
+            backend:
+              service:
+                name: np-sync-gsuite
+                port:
+                  number: 80
+---
+# Source: np-sync/charts/slack/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: np-sync-slack
+  labels:
+    helm.sh/chart: slack-2.1.2896
+    app.kubernetes.io/name: slack
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - slack-c1.test.networkperspective.io
+      secretName: np-sync-slack-production-tls
+  rules:
+    - host: "slack-c1.test.networkperspective.io"
+      http:
+        paths:
+          - path: /            
+            pathType: Prefix            
+            backend:
+              service:
+                name: np-sync-slack
+                port:
+                  number: 80
+---
+# Source: np-sync/charts/gsuite/templates/tls-cert.yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: np-sync-gsuite-certificate
+spec:
+  secretName: np-sync-gsuite-production-tls
+  issuerRef:
+    name: np-sync-gsuite-production-azure-dns-issuer
+    kind: Issuer
+  commonName: gsuite-c1.test.networkperspective.io
+  dnsNames:
+    - gsuite-c1.test.networkperspective.io
+---
+# Source: np-sync/charts/slack/templates/tls-cert.yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: np-sync-slack-certificate
+spec:
+  secretName: np-sync-slack-production-tls
+  issuerRef:
+    name: np-sync-slack-production-azure-dns-issuer
+    kind: Issuer
+  commonName: slack-c1.test.networkperspective.io
+  dnsNames:
+    - slack-c1.test.networkperspective.io
+---
+# Source: np-sync/charts/gsuite/templates/tls-cert.yaml
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: np-sync-gsuite-production-azure-dns-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+        name: letsencrypt-production
+    email: blazej@networkperspective.io
+    solvers:    
+    - dns01:
+        azureDNS:
+          clientID: 73a53227-3200-4c93-8582-e654830b4833
+          clientSecretSecretRef:
+            name: domain-validation
+            key: clientSecret
+          subscriptionID: f1249bd2-7e57-4a25-b4f0-c1baabdb3c99
+          tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
+          resourceGroupName: RG-Test-Connectors
+          hostedZoneName: gsuite-c1.test.networkperspective.io
+          environment: AzurePublicCloud
+---
+# Source: np-sync/charts/slack/templates/tls-cert.yaml
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: np-sync-slack-production-azure-dns-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+        name: letsencrypt-production
+    email: blazej@networkperspective.io
+    solvers:    
+    - dns01:
+        azureDNS:
+          clientID: 73a53227-3200-4c93-8582-e654830b4833
+          clientSecretSecretRef:
+            name: domain-validation
+            key: clientSecret
+          subscriptionID: f1249bd2-7e57-4a25-b4f0-c1baabdb3c99
+          tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
+          resourceGroupName: RG-Test-Connectors
+          hostedZoneName: slack-c1.test.networkperspective.io
+          environment: AzurePublicCloud
+---
+# Source: np-sync/charts/gsuite/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "np-sync-gsuite-test-connection"
+  labels:
+    helm.sh/chart: gsuite-2.1.2896
+    app.kubernetes.io/name: gsuite
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['np-sync-gsuite:80']
+  restartPolicy: Never
+---
+# Source: np-sync/charts/slack/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "np-sync-slack-test-connection"
+  labels:
+    helm.sh/chart: slack-2.1.2896
+    app.kubernetes.io/name: slack
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['np-sync-slack:80']
+  restartPolicy: Never

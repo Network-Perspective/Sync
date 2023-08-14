@@ -13,17 +13,25 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
 {
     public static class ServiceCollectionExtensions
     {
+        public static IServiceCollection AddDbDataProtection(this IServiceCollection services, IConfigurationSection configurationSection)
+        {
+            services.Configure<DbDataProtectionConfig>(configurationSection);
+            return services;
+        }
+
         public static IServiceCollection AddSecretStorage(this IServiceCollection services, IConfigurationSection configurationSection, IHealthChecksBuilder healthCheckBuilder)
         {
             services.Configure<AzureKeyVaultConfig>(configurationSection);
 
-            var azureCredentials = TokenCredentialFactory.Create();
-
-            healthCheckBuilder
-                .AddAzureKeyVault(KeyVaultServiceUriFactory, azureCredentials, SetupChecks, "Key-Vault", HealthStatus.Unhealthy, Array.Empty<string>(), TimeSpan.FromSeconds(10));
-
+            if (!string.IsNullOrEmpty(configurationSection.GetValue<string>("BaseUrl")))
+            {
+                var azureCredentials = TokenCredentialFactory.Create();
+                healthCheckBuilder
+                    .AddAzureKeyVault(KeyVaultServiceUriFactory, azureCredentials, SetupChecks, "Key-Vault", HealthStatus.Unhealthy, Array.Empty<string>(), TimeSpan.FromSeconds(10));
+            }
             services.AddSingleton(TokenCredentialFactory.Create());
             services.AddTransient<ISecretRepositoryFactory, AzureKeyVaultClientFactory>();
+            services.AddTransient<DbSecretRepositoryClient>();
 
             return services;
         }

@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "slack.fullname" . }}
+  labels:
+    {{- include "slack.labels" . | nindent 4 }}
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "slack.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}      
+      labels:
+        {{- include "slack.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "slack.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:            
+            {{- if and .Values.appSettings .Values.appSettings.connectionString }}
+            - name: ConnectionStrings__Database
+              value: {{ .Values.appSettings.connectionString }}
+            {{- else }}
+            - name: MSSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "mssql.fullname" $ }}-secret
+                  key: sapassword
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: ConnectionStrings__Database
+              value: Server=tcp:{{ template "mssql.fullname" . }}.$(NAMESPACE).svc.cluster.local,1433;Initial Catalog=slack-db;Persist Security Info=False;User ID=sa;Password=$(MSSQL_PASSWORD);MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;
+            {{- end }}
+            - name: Infrastructure__NetworkPerspectiveCore__BaseUrl
+              value: {{ .Values.global.appSettings.networkPerspectiveApi }}
+            - name: NLog__variables__minLevel
+              value: {{ .Values.appSettings.logLevel }}
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              value: {{ .Values.global.appSettings.applicationInsightsConnectionString }}
+            - name: ASPNETCORE_URLS
+              value: http://+:{{ .Values.service.port }}
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+            - name: rsa-keys
+              mountPath: "/app/keys"              
+            - name: secrets
+              mountPath: "/app/secrets"              
+            - name: config-volume
+              mountPath: /app/appsettings.Production.json
+              subPath: appsettings.Production.json
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.global.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: logs
+      {{- if .Values.logVolume.enabled }}
+        persistentVolumeClaim:
+          {{- if .Values.logVolume.existingDataClaim }}
+          claimName: {{ .Values.logVolume.existingDataClaim }}
+          {{- else }}
+          claimName: {{ template "slack.fullname" . }}-logs
+          {{- end -}}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}           
+      - name: rsa-keys
+        secret:
+          secretName: {{ .Values.global.secrets.rsaKeys }} 
+      - name: secrets
+        secret:
+          secretName: {{ .Values.secrets.slackSecrets }}
+      - name: config-volume
+        configMap:
+          name: {{ include "appsettings.config" . }}
