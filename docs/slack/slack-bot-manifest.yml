@@ -1,0 +1,29 @@
+display_information:
+  name: Network Perspective
+  description: A bot that syncs Slack data with Network Perspective
+  background_color: "#536fb0"
+features:
+  bot_user:
+    display_name: npbot
+    always_online: false
+oauth_config:
+  redirect_urls:
+    - https://app.networkperspective.io/sync/SlackSync/Callback
+  scopes:
+    user:
+      - identify
+    bot:
+      - channels:history
+      - channels:join
+      - channels:read
+      - groups:history
+      - reactions:read
+      - usergroups:read
+      - users.profile:read
+      - users:read
+      - users:read.email
+      - groups:read
+settings:
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false

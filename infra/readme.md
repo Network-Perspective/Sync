@@ -57,6 +57,15 @@ Connector use kubernetes secrets mechanism to keep sensitive information.
 
 Please inspect the secrets and update `hashing-key` to new random sequence of characters. You might also regenerate rsa key using openssl or `create-rsa-key.ps1` script. Probably also `google-key` and `slack-client-id` and `slack-client-id` need to be updated with keys and secrets specific for your deployment. 
 
+Please refer to seperate guides to create your secrets:
+
+
+<a href="docs/create-slack-bot.md">Create Slack bot</a>
+·
+<a href="docs/create-google-api-keys.md">Create Google API Keys</a>
+·
+<a href="docs/authorize-google-api-keys.md">Authorize Google API Key</a>    
+
 When your done, push the secrets to kubernetes.
 ```
 ./create-secrets.ps1

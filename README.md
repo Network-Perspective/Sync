@@ -1,27 +1,25 @@
 
 <div align="center">
   <a href="https://github.com/github_username/repo_name"
-    style="background-color:white; display:block; padding:20px">
-    <img src="docs/images/np-logo.svg" alt="Logo" width="280" height="60" ><br>
-    <img src="docs/images/google-gsuite.png" alt="Logo" width="50" height="50" ><img src="docs/images/slack.png" alt="Logo" width="50" height="50" >
-    <img src="docs/images/outlook.png" alt="Logo" width="50" height="50" >
-    <img src="docs/images/cli.png" alt="Logo" width="50" height="50" >
+    style="background-color:white; display:block; padding:20px">    
+    <img src="docs/images/np-logo.png" ><br>
+    <img src="docs/images/google-gsuite.png">
+    <img src="docs/images/slack.png">
+    <img src="docs/images/outlook.png">
+    <img src="docs/images/cli.png">
   </a>
 
 <h3 align="center">NetworkPerspective.Sync</h3>
   <p align="center">
-    This project contains connectors from that syncs anonymous metadata from various sources to Network Perspective API.
-    <!--
+    This project contains connectors from that syncs anonymous metadata from various sources to Network Perspective API.    
+    <br /><br/>
+    <a href="infa"><strong>Private cloud deployment »</strong></a>
     <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    <a href="docs/create-slack-bot.md">Create Slack bot</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
+    <a href="docs/create-google-api-keys.md">Create Google API Keys</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
-    -->
+    <a href="docs/authorize-google-api-keys.md">Authorize Google API Key</a>    
   </p>
 </div>
 
