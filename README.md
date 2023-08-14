@@ -13,7 +13,7 @@
   <p align="center">
     This project contains connectors from that syncs anonymous metadata from various sources to Network Perspective API.    
     <br /><br/>
-    <a href="infa/readme.md"><strong>Private cloud deployment »</strong></a>
+    <a href="infra"><strong>Private cloud deployment »</strong></a>
     <br />
     <a href="docs/create-slack-bot.md">Create Slack bot</a>
     ·
