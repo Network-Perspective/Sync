@@ -1,0 +1,41 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on: [push]
+
+jobs:
+  build_and_test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    env:
+      BUILD_CONFIGURATION: 'Release'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+        include-prerelease: true
+
+    # Format, Build, and Test
+    - name: Check code format
+      run: dotnet format src/NetworkPerspective.Sync.sln --verify-no-changes
+
+    - name: Build solution
+      run: dotnet build src/NetworkPerspective.Sync.sln --configuration ${{ env.BUILD_CONFIGURATION }}
+
+    - name: Test solution
+      run: |
+        dotnet test src/NetworkPerspective.Sync.sln --configuration ${{ env.BUILD_CONFIGURATION }} --filter SkipInCi!=true
+
+    # NuGet Audit
+    - name: Run NuGet audit
+      run: |
+        dotnet list ./src/NetworkPerspective.Sync.sln package --vulnerable --include-transitive 2>&1 | tee audit.log
+        grep -i -q -e critical -e high -e moderate audit.log && exit 1 || exit 0
