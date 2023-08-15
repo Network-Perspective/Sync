@@ -42,7 +42,11 @@ spec:
             - name: MSSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "mssql.fullname" $ }}-secret
+                {{- if .Values.global.mssql.saSecret }}
+                  name: {{ .Values.global.mssql.saSecret }}
+                {{- else }}
+                  name: {{ template "mssql.fullname" . }}-secret
+                {{- end }}                  
                   key: sapassword
             - name: NAMESPACE
               valueFrom:

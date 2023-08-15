@@ -34,6 +34,9 @@ global:
   secrets:
     rsaKeys: "np-sync-rsa"
 
+  mssql:
+    saSecret: np-sync-mssql-sapassword    
+
   appSettings:
     networkPerspectiveApi: http://host.docker.internal:5000/
     applicationInsightsConnectionString: "InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/"
