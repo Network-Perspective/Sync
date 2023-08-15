@@ -1,19 +1,11 @@
 
-<div align="center">
-  <a href="https://github.com/github_username/repo_name"
-    style="background-color:white; display:block; padding:20px">    
-    <img src="docs/images/np-logo.png" ><br>
-    <img src="docs/images/google-gsuite.png">
-    <img src="docs/images/slack.png">
-    <img src="docs/images/outlook.png">
-    <img src="docs/images/cli.png">
-  </a>
-
-<h3 align="center">NetworkPerspective.Sync</h3>
+<div align="center">  
+  <img src="docs/images/hero.png" ><br>
+  <h3 align="center">NetworkPerspective.Sync</h3>
   <p align="center">
     This project contains connectors from that syncs anonymous metadata from various sources to Network Perspective API.    
     <br /><br/>
-    <a href="infra"><strong>Private cloud deployment »</strong></a>
+    <a href="infra/readme.md"><strong>Private cloud deployment »</strong></a>
     <br />
     <a href="docs/create-slack-bot.md">Create Slack bot</a>
     ·
@@ -76,6 +68,7 @@ Network Perpsective hosts connectors within own Azure cloud infrastructure - the
 
 ### Private cloud
 However if your secuity requires having connectors within your infrastructure, we made easy to do it. All connectors are contenerized and helm chart is prepared for ease of deployement. That being said they main supported deployment platform is kubernetes. 
+[Read more](infra/readme.md)
 
 
 ## Privacy and security principles

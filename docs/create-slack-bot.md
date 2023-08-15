@@ -1,18 +1,20 @@
 # Creating a Slack bot
-Please refer to 
-[official documentation](https://api.slack.com/bot-users) for details concerning creating slack bot.
+For a comprehensive guide on creating Slack bots, refer to the
+[official documentation](https://api.slack.com/bot-users). This document provides a concise walkthrough on setting up a Slack bot.
 
 ## Create a Slack APP
-Go to url:
-https://api.slack.com/apps/new 
-
-Choose "From manifest" and use manifest file <a gref="slack/slack-bot-manifest.yml">slack-bot-manifest.yml</a> and image
-<a gref="slack/slack-np-bot-icon.png">slack-np-bot-icon.png</a> 
+* Navigate to Slack's [new app creation page](https://api.slack.com/apps/new).
+* Select the "From manifest" option.
+* Use the provided manifest file <a href="slack/slack-bot-manifest.yml">slack-bot-manifest.yml</a> and the bot icon <a href="slack/slack-np-bot-icon.png">slack-np-bot-icon.png</a>.
 
 ## Install app into your workspace:
+Click on the "Install to Workspace" button shown below:
+
 <img src="slack/add-to-workspace.png" />
 
 ## Gather client id and secret
+On the same page, scroll down to App Credentials.
+
 <img src="slack/slack-credentials.png" />
 
 You should find there two values that look like this:

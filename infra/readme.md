@@ -80,6 +80,8 @@ An install script that deploys helm chart is provided. It will install app in a 
 After all resources are created please run tests. This will deploy pods that validate health checks. The pods should end in a succeeded state.
 ```
 helm test np-sync
+kubectl logs np-sync-gsuite-test-health --namespace np-sync
+kubectl logs np-sync-slack-test-health --namespace np-sync
 ```
 
 ### Upgrade chart
