@@ -60,11 +60,11 @@ Please inspect the secrets and update `hashing-key` to new random sequence of ch
 Please refer to seperate guides to create your secrets:
 
 
-<a href="docs/create-slack-bot.md">Create Slack bot</a>
+<a href="../docs/create-slack-bot.md">Create Slack bot</a>
 ·
-<a href="docs/create-google-api-keys.md">Create Google API Keys</a>
+<a href="../docs/create-google-api-keys.md">Create Google API Keys</a>
 ·
-<a href="docs/authorize-google-api-keys.md">Authorize Google API Key</a>    
+<a href="../docs/authorize-google-api-keys.md">Authorize Google API Key</a>    
 
 When your done, push the secrets to kubernetes.
 ```
