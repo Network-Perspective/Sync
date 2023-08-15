@@ -10,11 +10,11 @@ spec:
     {{- if eq .Values.global.domainValidation.environment "staging" }}
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
-        name: letsencrypt-staging
+        name: {{ $issuerName }}
     {{- else if eq .Values.global.domainValidation.environment "production" }}
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
-        name: letsencrypt-production
+        name: {{ $issuerName }}
     {{- end }}
     email: {{ .Values.global.domainValidation.email }}
     solvers:    

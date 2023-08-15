@@ -58,7 +58,11 @@ spec:
             - name: SA_PASSWORD
               valueFrom:
                secretKeyRef:
+               {{- if .Values.global.mssql.saSecret }}
+                 name: {{ .Values.global.mssql.saSecret }}
+               {{- else }}
                  name: {{ template "mssql.fullname" . }}-secret
+               {{- end }}
                  key: sapassword
             - name: MSSQL_DATA_DIR
               value: {{ .Values.dataDir }}
