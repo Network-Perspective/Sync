@@ -13,6 +13,7 @@ k8s_yaml(helm('infra/helm-charts/np-sync', set=[
     #'mssql.edition.value=Express',
     'gsuite.image.repository=sync-gsuite',
     'slack.image.repository=sync-slack',
+    'global.redeployOnUpdate=false'
 ]))
 
 # Define resources

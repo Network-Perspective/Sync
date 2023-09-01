@@ -16,7 +16,7 @@ gsuite:
     hostedZoneName: gsuite-c1.test.networkperspective.io
 
 slack:
-  enabled: false
+  enabled: true
   slackSecrets: "np-sync-slack-secrets"
   domainValidation:
     enabled: true
@@ -29,7 +29,7 @@ networkPolicy:
 # shared between all connectors subcharts
 global:
   imagePullSecrets: 
-    - name: np-acr-secret
+    - name: np-sync-acr
 
   secrets:
     rsaKeys: "np-sync-rsa"
@@ -43,7 +43,7 @@ global:
 
   domainValidation:
     clientID: 73a53227-3200-4c93-8582-e654830b4833
-    clientSecretRef: domain-validation
+    clientSecretRef: np-sync-domain-validation
     subscriptionID: f1249bd2-7e57-4a25-b4f0-c1baabdb3c99
     tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
     resourceGroupName: RG-Test-Connectors
@@ -54,6 +54,7 @@ global:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  redeployOnUpdate: true
 
 nLogSettings:
   content: |
