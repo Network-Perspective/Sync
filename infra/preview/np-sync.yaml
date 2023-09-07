@@ -3,32 +3,60 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: ip-whitelist
+  name: allow-same-namespace
+  namespace: default
 spec:
-  podSelector: {}  # Apply to all pods in the namespace
+  podSelector: {} # Applies to all Pods in the namespace
   policyTypes:
   - Ingress
+  - Egress
   ingress:
   - from:
-    - podSelector: {}
+    - podSelector: {} # Allows traffic from all Pods in the namespace
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+  egress:
+  - to:
+    - podSelector: {} # Allows traffic to all Pods in the namespace
+  - to:
     - ipBlock:
-        - 127.0.0.1/32
-        - 192.168.1.2/32
+        cidr: 0.0.0.0/0 # Allows egress to the Internet
 ---
-# Source: np-sync/charts/mssql/templates/secret.yaml
+# Source: np-sync/charts/vault/templates/server-serviceaccount.yaml
 apiVersion: v1
-kind: Secret
+kind: ServiceAccount
 metadata:
-  name: np-sync-mssql-secret
+  name: np-sync-vault
+  namespace: default
   labels:
-    app: np-sync-mssql
-    chart: mssql-1.2.3
-    release: np-sync
-    heritage: Helm
-type: Opaque
+    helm.sh/chart: vault-0.25.0
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: np-sync/charts/vault/templates/server-config-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: np-sync-vault-config
+  namespace: default
+  labels:
+    helm.sh/chart: vault-0.25.0
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/managed-by: Helm
 data:
-  
-  sapassword: "SkIySVhvZGxFNENaN0NKRmZaVjU="
+  extraconfig-from-values.hcl: |-
+    disable_mlock = true
+    storage "file" {
+      path = "/vault/data"
+    }
+    listener "tcp" {
+      address = "0.0.0.0:8200"
+      tls_cert_file = "/vault/userconfig/vault-tls/tls.crt"
+      tls_key_file  = "/vault/userconfig/vault-tls/tls.key"
+    }
 ---
 # Source: np-sync/templates/appsettings-configmap.yaml
 apiVersion: v1
@@ -96,7 +124,7 @@ metadata:
   name: np-sync-mssql-data
   labels:
     app: np-sync-mssql
-    chart: "mssql-1.2.3"
+    chart: "mssql-2.1.2926"
     release: "np-sync"
     heritage: "Helm"
   annotations:
@@ -109,21 +137,40 @@ spec:
     requests:
       storage: "1Gi"
 ---
+# Source: np-sync/charts/vault/templates/server-clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: np-sync-vault-server-binding
+  labels:
+    helm.sh/chart: vault-0.25.0
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: np-sync-vault
+  namespace: default
+---
 # Source: np-sync/charts/gsuite/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: np-sync-gsuite
   labels:
-    helm.sh/chart: gsuite-2.1.2896
+    helm.sh/chart: gsuite-2.1.2926
     app.kubernetes.io/name: gsuite
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/version: "2.1.2926"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
   ports:
-    - port: 80
+    - port: 8080
       targetPort: http
       protocol: TCP
       name: http
@@ -138,7 +185,7 @@ metadata:
   name: np-sync-mssql
   labels:
     app: np-sync-mssql
-    chart: mssql-1.2.3
+    chart: mssql-2.1.2926
     release: np-sync
     heritage: Helm
 spec:
@@ -158,15 +205,15 @@ kind: Service
 metadata:
   name: np-sync-slack
   labels:
-    helm.sh/chart: slack-2.1.2896
+    helm.sh/chart: slack-2.1.2926
     app.kubernetes.io/name: slack
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/version: "2.1.2926"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
   ports:
-    - port: 80
+    - port: 8080
       targetPort: http
       protocol: TCP
       name: http
@@ -174,44 +221,112 @@ spec:
     app.kubernetes.io/name: slack
     app.kubernetes.io/instance: np-sync
 ---
+# Source: np-sync/charts/vault/templates/server-headless-service.yaml
+# Service for Vault cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-sync-vault-internal
+  namespace: default
+  labels:
+    helm.sh/chart: vault-0.25.0
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/managed-by: Helm
+    vault-internal: "true"
+  annotations:
+
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: "https"
+      port: 8200
+      targetPort: 8200
+    - name: https-internal
+      port: 8201
+      targetPort: 8201
+  selector:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: np-sync
+    component: server
+---
+# Source: np-sync/charts/vault/templates/server-service.yaml
+# Service for Vault cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-sync-vault
+  namespace: default
+  labels:
+    helm.sh/chart: vault-0.25.0
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  # We want the servers to become available even if they're not ready
+  # since this DNS is also used for join operations.
+  publishNotReadyAddresses: true
+  ports:
+    - name: https
+      port: 8200
+      targetPort: 8200
+    - name: https-internal
+      port: 8201
+      targetPort: 8201
+  selector:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: np-sync
+    component: server
+---
 # Source: np-sync/charts/gsuite/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: np-sync-gsuite
   labels:
-    helm.sh/chart: gsuite-2.1.2896
+    helm.sh/chart: gsuite-2.1.2926
     app.kubernetes.io/name: gsuite
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/version: "2.1.2926"
     app.kubernetes.io/managed-by: Helm
 spec:
+  strategy:
+    type: Recreate
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: gsuite
       app.kubernetes.io/instance: np-sync
   template:
     metadata:
+      annotations:
+        rollme: "uTzL8"
       labels:
         app.kubernetes.io/name: gsuite
         app.kubernetes.io/instance: np-sync
     spec:
       imagePullSecrets:
-        - name: np-acr-secret
+        - name: np-sync-acr
       serviceAccountName: default
       securityContext:
-        {}
+        runAsNonRoot: true
       containers:
         - name: gsuite
           securityContext:
-            {}
-          image: "networkperspective.azurecr.io/connectors/gsuite:2.1.2896"
+            allowPrivilegeEscalation: false
+            runAsUser: 1000
+          image: "networkperspective.azurecr.io/connectors/gsuite:2.1.2926"
           imagePullPolicy: IfNotPresent
           env:
             - name: MSSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: np-sync-mssql-secret
+                  name: np-sync-mssql-sapassword                  
                   key: sapassword
             - name: NAMESPACE
               valueFrom:
@@ -225,6 +340,8 @@ spec:
               value: info
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               value: InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/
+            - name: ASPNETCORE_URLS
+              value: http://+:8080              
           volumeMounts:
             - name: logs
               mountPath: /app/logs
@@ -237,7 +354,7 @@ spec:
               subPath: appsettings.Production.json
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -253,7 +370,7 @@ spec:
               memory: 4G
             requests:
               cpu: 400m
-              memory: 0.5G
+              memory: 2G
       volumes:
       - name: logs
         emptyDir: {}           
@@ -273,39 +390,45 @@ kind: Deployment
 metadata:
   name: np-sync-slack
   labels:
-    helm.sh/chart: slack-2.1.2896
+    helm.sh/chart: slack-2.1.2926
     app.kubernetes.io/name: slack
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/version: "2.1.2926"
     app.kubernetes.io/managed-by: Helm
 spec:
+  strategy:
+    type: Recreate
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: slack
       app.kubernetes.io/instance: np-sync
   template:
     metadata:
+      annotations:
+        rollme: "vbDTg"      
       labels:
         app.kubernetes.io/name: slack
         app.kubernetes.io/instance: np-sync
     spec:
       imagePullSecrets:
-        - name: np-acr-secret
+        - name: np-sync-acr
       serviceAccountName: default
       securityContext:
-        {}
+        runAsNonRoot: true
       containers:
         - name: slack
           securityContext:
-            {}
-          image: "networkperspective.azurecr.io/connectors/slack:2.1.2896"
+            allowPrivilegeEscalation: false
+            runAsUser: 1000
+          image: "networkperspective.azurecr.io/connectors/slack:2.1.2926"
           imagePullPolicy: IfNotPresent
           env:
             - name: MSSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: np-sync-mssql-secret
-                  key: sapassword
+                  name: np-sync-mssql-sapassword                  
+                  key: sapassword                  
             - name: NAMESPACE
               valueFrom:
                 fieldRef:
@@ -318,6 +441,8 @@ spec:
               value: info
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               value: InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
           volumeMounts:
             - name: logs
               mountPath: /app/logs
@@ -330,7 +455,7 @@ spec:
               subPath: appsettings.Production.json
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -346,7 +471,7 @@ spec:
               memory: 4G
             requests:
               cpu: 400m
-              memory: 0.5G
+              memory: 2G
       volumes:
       - name: logs
         emptyDir: {}           
@@ -367,7 +492,7 @@ metadata:
   name: np-sync-mssql
   labels:
     app: np-sync-mssql
-    chart: mssql-1.2.3
+    chart: mssql-2.1.2926
     release: np-sync
     heritage: Helm
 spec:
@@ -381,12 +506,19 @@ spec:
       labels:
         app: np-sync-mssql
         release: np-sync
+      annotations:
+        rollme: "0Ge5s"
     spec:
       terminationGracePeriodSeconds: 30
       securityContext:
         fsGroup: 10001
+        runAsUser: 10001
+
       containers:
         - name: mssql
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
           image: "mcr.microsoft.com/mssql/server:2022-latest"
           imagePullPolicy: IfNotPresent
           env:
@@ -397,7 +529,7 @@ spec:
             - name: SA_PASSWORD
               valueFrom:
                secretKeyRef:
-                 name: np-sync-mssql-secret
+                 name: np-sync-mssql-sapassword
                  key: sapassword
             - name: MSSQL_DATA_DIR
               value: /var/opt/mssql
@@ -444,25 +576,212 @@ spec:
         persistentVolumeClaim:
           claimName: np-sync-mssql-data
 ---
+# Source: np-sync/charts/vault/templates/server-statefulset.yaml
+# StatefulSet to run the actual vault server cluster.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: np-sync-vault
+  namespace: default
+  labels:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/managed-by: Helm
+spec:
+  serviceName: np-sync-vault-internal
+  podManagementPolicy: Parallel
+  replicas: 1
+  updateStrategy:
+    type: OnDelete
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vault
+      app.kubernetes.io/instance: np-sync
+      component: server
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: vault-0.25.0
+        app.kubernetes.io/name: vault
+        app.kubernetes.io/instance: np-sync
+        component: server
+    spec:
+      
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: vault
+                  app.kubernetes.io/instance: "np-sync"
+                  component: server
+              topologyKey: kubernetes.io/hostname
+  
+      
+      
+      
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: np-sync-vault
+      
+      securityContext:
+        runAsNonRoot: true
+        runAsGroup: 1000
+        runAsUser: 100
+        fsGroup: 1000
+      hostNetwork: false
+      volumes:
+        
+        - name: config
+          configMap:
+            name: np-sync-vault-config
+  
+        - name: vault-tls
+          secret:
+            defaultMode: 272
+            secretName: np-sync-tls-staging
+        - name: home
+          emptyDir: {}
+      containers:
+        - name: vault
+          
+          image: hashicorp/vault:1.14.0
+          imagePullPolicy: IfNotPresent
+          command:
+          - "/bin/sh"
+          - "-ec"
+          args: 
+          - |
+            cp /vault/config/extraconfig-from-values.hcl /tmp/storageconfig.hcl;
+            [ -n "${HOST_IP}" ] && sed -Ei "s|HOST_IP|${HOST_IP?}|g" /tmp/storageconfig.hcl;
+            [ -n "${POD_IP}" ] && sed -Ei "s|POD_IP|${POD_IP?}|g" /tmp/storageconfig.hcl;
+            [ -n "${HOSTNAME}" ] && sed -Ei "s|HOSTNAME|${HOSTNAME?}|g" /tmp/storageconfig.hcl;
+            [ -n "${API_ADDR}" ] && sed -Ei "s|API_ADDR|${API_ADDR?}|g" /tmp/storageconfig.hcl;
+            [ -n "${TRANSIT_ADDR}" ] && sed -Ei "s|TRANSIT_ADDR|${TRANSIT_ADDR?}|g" /tmp/storageconfig.hcl;
+            [ -n "${RAFT_ADDR}" ] && sed -Ei "s|RAFT_ADDR|${RAFT_ADDR?}|g" /tmp/storageconfig.hcl;
+            /usr/local/bin/docker-entrypoint.sh vault server -config=/tmp/storageconfig.hcl 
+   
+          securityContext:
+            allowPrivilegeEscalation: false
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: VAULT_K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: VAULT_K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: VAULT_ADDR
+              value: "https://127.0.0.1:8200"
+            - name: VAULT_API_ADDR
+              value: "https://$(POD_IP):8200"
+            - name: SKIP_CHOWN
+              value: "true"
+            - name: SKIP_SETCAP
+              value: "true"
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: VAULT_CLUSTER_ADDR
+              value: "https://$(HOSTNAME).np-sync-vault-internal:8201"
+            - name: HOME
+              value: "/home/vault"
+            
+            
+            
+          volumeMounts:
+          
+  
+    
+            - name: data
+              mountPath: /vault/data
+    
+  
+  
+            - name: config
+              mountPath: /vault/config
+  
+            - mountPath: /vault/userconfig/vault-tls
+              name: vault-tls
+              readOnly: true
+            - name: home
+              mountPath: /home/vault
+          ports:
+            - containerPort: 8200
+              name: https
+            - containerPort: 8201
+              name: https-internal
+            - containerPort: 8202
+              name: https-rep
+          readinessProbe:
+            # Check status; unsealed vault servers return 0
+            # The exit code reflects the seal status:
+            #   0 - unsealed
+            #   1 - error
+            #   2 - sealed
+            exec:
+              command: ["/bin/sh", "-ec", "vault status -tls-skip-verify"]
+            failureThreshold: 2
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          lifecycle:
+            # Vault container doesn't receive SIGTERM from Kubernetes
+            # and after the grace period ends, Kube sends SIGKILL.  This
+            # causes issues with graceful shutdowns such as deregistering itself
+            # from Consul (zombie services).
+            preStop:
+              exec:
+                command: [
+                  "/bin/sh", "-c",
+                  # Adding a sleep here to give the pod eviction a
+                  # chance to propagate, so requests will not be made
+                  # to this pod while it's terminating
+                  "sleep 5 && kill -SIGTERM $(pidof vault)",
+                ]
+      imagePullSecrets:
+        - name: np-sync-acr
+  
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+---
 # Source: np-sync/charts/gsuite/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: np-sync-gsuite
   labels:
-    helm.sh/chart: gsuite-2.1.2896
+    helm.sh/chart: gsuite-2.1.2926
     app.kubernetes.io/name: gsuite
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/version: "2.1.2926"
     app.kubernetes.io/managed-by: Helm
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - gsuite-c1.test.networkperspective.io
-      secretName: np-sync-gsuite-production-tls
+        - "gsuite.c1.test.networkperspective.io"
+      secretName: np-sync-tls-staging 
   rules:
-    - host: "gsuite-c1.test.networkperspective.io"
+    - host: "gsuite.c1.test.networkperspective.io"
       http:
         paths:
           - path: /            
@@ -471,7 +790,7 @@ spec:
               service:
                 name: np-sync-gsuite
                 port:
-                  number: 80
+                  number: 8080
 ---
 # Source: np-sync/charts/slack/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1
@@ -479,19 +798,19 @@ kind: Ingress
 metadata:
   name: np-sync-slack
   labels:
-    helm.sh/chart: slack-2.1.2896
+    helm.sh/chart: slack-2.1.2926
     app.kubernetes.io/name: slack
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/version: "2.1.2926"
     app.kubernetes.io/managed-by: Helm
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - slack-c1.test.networkperspective.io
-      secretName: np-sync-slack-production-tls
+        - "slack.c1.test.networkperspective.io"
+      secretName: np-sync-tls-staging 
   rules:
-    - host: "slack-c1.test.networkperspective.io"
+    - host: "slack.c1.test.networkperspective.io"
       http:
         paths:
           - path: /            
@@ -500,94 +819,57 @@ spec:
               service:
                 name: np-sync-slack
                 port:
-                  number: 80
+                  number: 8080
 ---
-# Source: np-sync/charts/gsuite/templates/tls-cert.yaml
+# Source: np-sync/templates/tls-cert.yaml
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: np-sync-gsuite-certificate
+  name: np-sync-tls-staging-certificate
 spec:
-  secretName: np-sync-gsuite-production-tls
+  secretName: np-sync-tls-staging
   issuerRef:
-    name: np-sync-gsuite-production-azure-dns-issuer
+    name: np-sync-tls-staging-staging-azure-dns-issuer
     kind: Issuer
-  commonName: gsuite-c1.test.networkperspective.io
+  commonName: c1.test.networkperspective.io
   dnsNames:
-    - gsuite-c1.test.networkperspective.io
+    - c1.test.networkperspective.io
+    - "gsuite.c1.test.networkperspective.io"
+    - "slack.c1.test.networkperspective.io"
 ---
-# Source: np-sync/charts/slack/templates/tls-cert.yaml
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: np-sync-slack-certificate
-spec:
-  secretName: np-sync-slack-production-tls
-  issuerRef:
-    name: np-sync-slack-production-azure-dns-issuer
-    kind: Issuer
-  commonName: slack-c1.test.networkperspective.io
-  dnsNames:
-    - slack-c1.test.networkperspective.io
----
-# Source: np-sync/charts/gsuite/templates/tls-cert.yaml
+# Source: np-sync/templates/tls-cert.yaml
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: np-sync-gsuite-production-azure-dns-issuer
+  name: np-sync-tls-staging-staging-azure-dns-issuer
 spec:
   acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
-        name: letsencrypt-production
+      name: np-sync-tls-staging-staging-azure-dns-issuer
     email: blazej@networkperspective.io
     solvers:    
     - dns01:
         azureDNS:
           clientID: 73a53227-3200-4c93-8582-e654830b4833
           clientSecretSecretRef:
-            name: domain-validation
+            name: np-sync-domain-validation
             key: clientSecret
           subscriptionID: f1249bd2-7e57-4a25-b4f0-c1baabdb3c99
           tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
           resourceGroupName: RG-Test-Connectors
-          hostedZoneName: gsuite-c1.test.networkperspective.io
           environment: AzurePublicCloud
 ---
-# Source: np-sync/charts/slack/templates/tls-cert.yaml
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: np-sync-slack-production-azure-dns-issuer
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    privateKeySecretRef:
-        name: letsencrypt-production
-    email: blazej@networkperspective.io
-    solvers:    
-    - dns01:
-        azureDNS:
-          clientID: 73a53227-3200-4c93-8582-e654830b4833
-          clientSecretSecretRef:
-            name: domain-validation
-            key: clientSecret
-          subscriptionID: f1249bd2-7e57-4a25-b4f0-c1baabdb3c99
-          tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
-          resourceGroupName: RG-Test-Connectors
-          hostedZoneName: slack-c1.test.networkperspective.io
-          environment: AzurePublicCloud
----
-# Source: np-sync/charts/gsuite/templates/tests/test-connection.yaml
+# Source: np-sync/charts/gsuite/templates/tests/test-health.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "np-sync-gsuite-test-connection"
+  name: "np-sync-gsuite-test-health"
   labels:
-    helm.sh/chart: gsuite-2.1.2896
+    helm.sh/chart: gsuite-2.1.2926
     app.kubernetes.io/name: gsuite
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/version: "2.1.2926"
     app.kubernetes.io/managed-by: Helm
   annotations:
     "helm.sh/hook": test
@@ -596,19 +878,22 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['np-sync-gsuite:80']
+      args: [
+        '-qO-',
+        'np-sync-gsuite:8080/health'
+      ]
   restartPolicy: Never
 ---
-# Source: np-sync/charts/slack/templates/tests/test-connection.yaml
+# Source: np-sync/charts/slack/templates/tests/test-health.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "np-sync-slack-test-connection"
+  name: "np-sync-slack-test-health"
   labels:
-    helm.sh/chart: slack-2.1.2896
+    helm.sh/chart: slack-2.1.2926
     app.kubernetes.io/name: slack
     app.kubernetes.io/instance: np-sync
-    app.kubernetes.io/version: "2.1.2896"
+    app.kubernetes.io/version: "2.1.2926"
     app.kubernetes.io/managed-by: Helm
   annotations:
     "helm.sh/hook": test
@@ -617,5 +902,58 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['np-sync-slack:80']
+      args: [
+        '-qO-',
+        'np-sync-slack:8080/health'
+      ]
+  restartPolicy: Never
+---
+# Source: np-sync/charts/vault/templates/tests/server-test.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "np-sync-server-test"
+  namespace: default
+  annotations:
+    "helm.sh/hook": test
+spec:
+  imagePullSecrets:
+    - name: np-sync-acr
+  containers:
+    - name: np-sync-server-test
+      image: hashicorp/vault:1.14.0
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: VAULT_ADDR
+          value: https://np-sync-vault.default.svc:8200
+        
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Checking for sealed info in 'vault status' output"
+          ATTEMPTS=10
+          n=0
+          until [ "$n" -ge $ATTEMPTS ]
+          do
+            echo "Attempt" $n...
+            vault status -format yaml | grep -E '^sealed: (true|false)' && break
+            n=$((n+1))
+            sleep 5
+          done
+          if [ $n -ge $ATTEMPTS ]; then
+            echo "timed out looking for sealed info in 'vault status' output"
+            exit 1
+          fi
+
+          exit 0
+      volumeMounts:
+        - mountPath: /vault/userconfig/vault-tls
+          name: vault-tls
+          readOnly: true
+  volumes:
+    - name: vault-tls
+      secret:
+        defaultMode: 272
+        secretName: np-sync-tls-staging
   restartPolicy: Never

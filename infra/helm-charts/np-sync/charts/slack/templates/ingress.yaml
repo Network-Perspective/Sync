@@ -27,40 +27,18 @@ spec:
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
-  {{- if or (.Values.ingress.tls) (.Values.domainValidation.enabled) }}
+  {{- if .Values.ingress.tls }}
   tls:
-    {{- if .Values.domainValidation.enabled }}
-    - hosts:
-        - {{ .Values.domainValidation.hostedZoneName }}
-      secretName: {{ $tlsSecretName }}
-    {{- else }}
+    {{- $root := . }}
     {{- range .Values.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
         {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}    
+      secretName: {{ default $root.Values.global.tlsSecret .secretName }}
     {{- end }}
-  {{- end }}
-  rules:
-    {{- if .Values.domainValidation.enabled }}
-    - host: {{ .Values.domainValidation.hostedZoneName | quote }}
-      http:
-        paths:
-          - path: /            
-            pathType: Prefix            
-            backend:
-              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
-              service:
-                name: {{ $fullName }}
-                port:
-                  number: {{ $svcPort }}
-              {{- else }}
-              serviceName: {{ $fullName }}
-              servicePort: {{ $svcPort }}
-              {{- end }}
-    {{- else }}
+  {{- end }} 
+  rules:    
     {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
@@ -76,7 +54,6 @@ spec:
               {{- else }}
               serviceName: {{ $fullName }}
               servicePort: {{ $svcPort }}
-              {{- end }}
-    {{- end }}
+              {{- end }}    
     {{- end }}
 {{- end }}

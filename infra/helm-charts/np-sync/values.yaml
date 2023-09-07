@@ -1,33 +1,7 @@
-# Default values for np-sync.
-mssql:
-  enabled: true
-  edition: 
-    value: Express
-
-  # Override sapassword in templates/secret.yaml
-  # sapassword: "MyStrongPassword1234"
-  # existingDataClaim: np-sync-mssql-data
-
-gsuite:
-  enabled: true
-  googleKeys: "np-sync-gsuite-secrets"
-  domainValidation:
-    enabled: true
-    hostedZoneName: gsuite-c1.test.networkperspective.io
-
-slack:
-  enabled: true
-  slackSecrets: "np-sync-slack-secrets"
-  domainValidation:
-    enabled: true
-    hostedZoneName: slack-c1.test.networkperspective.io
-
-networkPolicy:
-  # forbid traffic from other namespaces
-  enabled: true
-
 # shared between all connectors subcharts
 global:
+  tlsSecret: np-sync-tls-staging
+
   imagePullSecrets: 
     - name: np-sync-acr
 
@@ -42,6 +16,8 @@ global:
     applicationInsightsConnectionString: "InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/"
 
   domainValidation:
+    enabled: true
+    hostedZoneName: c1.test.networkperspective.io
     clientID: 73a53227-3200-4c93-8582-e654830b4833
     clientSecretRef: np-sync-domain-validation
     subscriptionID: f1249bd2-7e57-4a25-b4f0-c1baabdb3c99
@@ -55,6 +31,91 @@ global:
   tolerations: []
   affinity: {}
   redeployOnUpdate: true
+
+mssql:
+  enabled: true
+  edition: 
+    value: Express
+
+gsuite:
+  enabled: true
+  googleKeys: "np-sync-gsuite-secrets"
+  ingress:
+    hosts: 
+    - host: gsuite.c1.test.networkperspective.io
+    tls: 
+    - hosts:
+        - gsuite.c1.test.networkperspective.io
+
+slack:
+  enabled: true
+  slackSecrets: "np-sync-slack-secrets"
+  ingress:
+    hosts: 
+    - host: slack.c1.test.networkperspective.io
+    tls: 
+    - hosts:
+        - slack.c1.test.networkperspective.io
+
+vault:
+  global:
+    enabled: true
+    tlsDisable: false
+  injector:
+    enabled: false
+  server:
+    dev:
+      enabled: false  # Set to false if you are going production
+    standalone:
+      config: |
+        storage "file" {
+          path = "/vault/data"
+        }
+        listener "tcp" {
+          address = "0.0.0.0:8200"
+          tls_cert_file = "/vault/userconfig/vault-tls/tls.crt"
+          tls_key_file  = "/vault/userconfig/vault-tls/tls.key"
+        }
+    volumes:
+    - name: vault-tls
+      secret:
+        defaultMode: 0420
+        secretName: np-sync-tls-staging
+    volumeMounts:
+    - mountPath: "/vault/userconfig/vault-tls"
+      name: vault-tls
+      readOnly: true
+    service:
+      type: NodePort
+
+
+    # extraContainers:
+    # - name: cert-watcher
+    #   image: "alpine"
+    #   imagePullPolicy: IfNotPresent
+    #   command: ["/bin/sh", "-c"]
+    #   args:
+    #     - |
+    #       set -e
+    #       apk add --no-cache inotify-tools
+    #       while true; do
+    #         inotifywait -e modify,create,delete,move /vault/userconfig/vault-ha-tls/vault.crt /vault/userconfig/vault-ha-tls/vault.key /vault/userconfig/vault-ha-tls/vault.ca
+    #         VAULT_PID=$(pidof vault)
+    #         if [ -n "$VAULT_PID" ]; then
+    #           kill -HUP $VAULT_PID
+    #           echo "SIGHUP signal sent to Vault."
+    #         else
+    #           echo "Vault process not found. Cannot reload."
+    #         fi
+    #       done
+
+
+
+
+
+networkPolicy:
+  # forbid traffic from other namespaces
+  enabled: true
 
 nLogSettings:
   content: |

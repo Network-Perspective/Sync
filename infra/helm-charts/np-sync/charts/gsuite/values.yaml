@@ -34,10 +34,6 @@ service:
   type: ClusterIP
   port: 8080
 
-domainValidation:
-  enabled: true
-  hostedZoneName: gsuite-01.test.networkperspective.io
-
 ingress:
   enabled: true
   className: "nginx"
