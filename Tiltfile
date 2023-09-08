@@ -14,7 +14,7 @@ k8s_yaml(helm('infra/helm-charts/np-sync', set=[
     'gsuite.image.repository=sync-gsuite',
     'slack.image.repository=sync-slack',
     'global.redeployOnUpdate=false',
-    # 'vault.server.dev.enabled=true'
+    'vault.server.dev.enabled=true'
 ]))
 
 # Define resources

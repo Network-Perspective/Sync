@@ -86,7 +86,7 @@ vault:
       name: vault-tls
       readOnly: true
     service:
-      type: NodePort
+      type: ClusterIP
 
 
     # extraContainers:
