@@ -1,5 +1,5 @@
 {{- if .Values.global.domainValidation.enabled }}
-{{- $issuerName := printf "%s-%s-azure-dns-issuer" .Values.global.tlsSecret .Values.global.domainValidation.environment -}}
+{{- $issuerName := printf "%s-azure-dns-issuer" .Values.global.tlsSecret -}}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:

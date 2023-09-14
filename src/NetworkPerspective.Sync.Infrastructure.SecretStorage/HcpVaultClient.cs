@@ -62,6 +62,7 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             catch (Exception ex)
             {
                 var message = $"Unable to get '{key}' from internal key vault at '{_config.BaseUrl}'. Please see inner exception";
+                _logger.LogDebug(ex, message);
                 throw new SecretStorageException(message, ex);
             }
         }

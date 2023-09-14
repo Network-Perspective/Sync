@@ -14,10 +14,11 @@ k8s_yaml(helm('infra/helm-charts/np-sync', set=[
     'gsuite.image.repository=sync-gsuite',
     'slack.image.repository=sync-slack',
     'global.redeployOnUpdate=false',
-    'vault.server.dev.enabled=true'
+    # 'vault.server.dev.enabled=true'
 ]))
 
 # Define resources
 k8s_resource('chart-mssql', port_forwards='11433:1433')
 k8s_resource('chart-gsuite')
 k8s_resource('chart-slack')
+k8s_resource('chart-vault', port_forwards='8200:8200')

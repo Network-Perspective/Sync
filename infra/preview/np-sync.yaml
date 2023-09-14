@@ -23,6 +23,18 @@ spec:
     - ipBlock:
         cidr: 0.0.0.0/0 # Allows egress to the Internet
 ---
+# Source: np-sync/charts/gsuite/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: np-sync-gsuite
+  labels:
+    helm.sh/chart: gsuite-2.1.2926
+    app.kubernetes.io/name: gsuite
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/version: "2.1.2926"
+    app.kubernetes.io/managed-by: Helm
+---
 # Source: np-sync/charts/vault/templates/server-serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -49,6 +61,8 @@ metadata:
 data:
   extraconfig-from-values.hcl: |-
     disable_mlock = true
+    ui = true
+    
     storage "file" {
       path = "/vault/data"
     }
@@ -56,6 +70,10 @@ data:
       address = "0.0.0.0:8200"
       tls_cert_file = "/vault/userconfig/vault-tls/tls.crt"
       tls_key_file  = "/vault/userconfig/vault-tls/tls.key"
+    }
+    seal "awskms" {
+      region     = "us-east-1"
+      kms_key_id = "fb77baa6-40a2-4cb8-a47c-64e602122f5b"
     }
 ---
 # Source: np-sync/templates/appsettings-configmap.yaml
@@ -310,7 +328,7 @@ spec:
     spec:
       imagePullSecrets:
         - name: np-sync-acr
-      serviceAccountName: default
+      serviceAccountName: np-sync-gsuite
       securityContext:
         runAsNonRoot: true
       containers:
@@ -339,7 +357,9 @@ spec:
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               value: InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/
             - name: ASPNETCORE_URLS
-              value: http://+:8080              
+              value: http://+:8080            
+            - name: Infrastructure__HcpVault__BaseUrl
+              value: "https://c1.test.networkperspective.io:8200"
           volumeMounts:
             - name: logs
               mountPath: /app/logs
@@ -369,6 +389,17 @@ spec:
             requests:
               cpu: 400m
               memory: 2G
+        - name: vault-proxy
+          image: alpine/socat
+          command:
+          - /bin/sh
+          - -c
+          - socat TCP-LISTEN:8200,fork TCP:vault-service-name:8200
+          ports:
+          - containerPort: 8200
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 1000
       volumes:
       - name: logs
         emptyDir: {}           
@@ -634,7 +665,11 @@ spec:
         - name: vault-tls
           secret:
             defaultMode: 272
-            secretName: np-sync-tls-staging
+            secretName: np-sync-tls-prod
+        - name: aws-unseal
+          secret:
+            defaultMode: 272
+            secretName: np-sync-aws-unseal
         - name: home
           emptyDir: {}
       containers:
@@ -693,6 +728,8 @@ spec:
               value: "/home/vault"
             
             
+            - name: "AWS_SHARED_CREDENTIALS_FILE"
+              value: "/etc/aws/aws-unseal"
             
           volumeMounts:
           
@@ -708,6 +745,9 @@ spec:
   
             - mountPath: /vault/userconfig/vault-tls
               name: vault-tls
+              readOnly: true
+            - mountPath: /etc/aws
+              name: aws-unseal
               readOnly: true
             - name: home
               mountPath: /home/vault
@@ -775,7 +815,7 @@ spec:
   tls:
     - hosts:
         - "gsuite.c1.test.networkperspective.io"
-      secretName: np-sync-tls-staging 
+      secretName: np-sync-tls-prod 
   rules:
     - host: "gsuite.c1.test.networkperspective.io"
       http:
@@ -804,7 +844,7 @@ spec:
   tls:
     - hosts:
         - "slack.c1.test.networkperspective.io"
-      secretName: np-sync-tls-staging 
+      secretName: np-sync-tls-prod 
   rules:
     - host: "slack.c1.test.networkperspective.io"
       http:
@@ -821,11 +861,11 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: np-sync-tls-staging-certificate
+  name: np-sync-tls-prod-certificate
 spec:
-  secretName: np-sync-tls-staging
+  secretName: np-sync-tls-prod
   issuerRef:
-    name: np-sync-tls-staging-staging-azure-dns-issuer
+    name: np-sync-tls-prod-azure-dns-issuer
     kind: Issuer
   commonName: c1.test.networkperspective.io
   dnsNames:
@@ -837,12 +877,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: np-sync-tls-staging-staging-azure-dns-issuer
+  name: np-sync-tls-prod-azure-dns-issuer
 spec:
   acme:
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
-      name: np-sync-tls-staging-staging-azure-dns-issuer
+      name: np-sync-tls-prod-azure-dns-issuer
     email: blazej@networkperspective.io
     solvers:    
     - dns01:
@@ -923,6 +963,8 @@ spec:
         - name: VAULT_ADDR
           value: https://np-sync-vault.default.svc:8200
         
+        - name: "AWS_SHARED_CREDENTIALS_FILE"
+          value: "/etc/aws/aws-unseal"
       command:
         - /bin/sh
         - -c
@@ -947,9 +989,16 @@ spec:
         - mountPath: /vault/userconfig/vault-tls
           name: vault-tls
           readOnly: true
+        - mountPath: /etc/aws
+          name: aws-unseal
+          readOnly: true
   volumes:
     - name: vault-tls
       secret:
         defaultMode: 272
-        secretName: np-sync-tls-staging
+        secretName: np-sync-tls-prod
+    - name: aws-unseal
+      secret:
+        defaultMode: 272
+        secretName: np-sync-aws-unseal
   restartPolicy: Never

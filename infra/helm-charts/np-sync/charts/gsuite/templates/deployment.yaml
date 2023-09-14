@@ -65,6 +65,10 @@ spec:
               value: {{ .Values.global.appSettings.applicationInsightsConnectionString }}
             - name: ASPNETCORE_URLS
               value: http://+:{{ .Values.service.port }}              
+            {{- if .Values.global.appSettings.useLocalHcpVault }}            
+            - name: Infrastructure__HcpVault__BaseUrl
+              value: "https://{{ .Values.global.domainValidation.hostedZoneName }}:8200"
+            {{- end }}
           volumeMounts:
             - name: logs
               mountPath: /app/logs
@@ -89,6 +93,18 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+        {{- if .Values.global.appSettings.useLocalHcpVault }}
+        - name: vault-proxy
+          image: alpine/socat
+          command:
+          - /bin/sh
+          - -c
+          - socat TCP-LISTEN:8200,fork TCP:chart-vault:8200
+          ports:
+          - containerPort: 8200
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+        {{- end }}
       {{- with .Values.global.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -1,6 +1,6 @@
 # shared between all connectors subcharts
 global:
-  tlsSecret: np-sync-tls-staging
+  tlsSecret: np-sync-tls-prod
 
   imagePullSecrets: 
     - name: np-sync-acr
@@ -14,6 +14,8 @@ global:
   appSettings:
     networkPerspectiveApi: http://host.docker.internal:5000/
     applicationInsightsConnectionString: "InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/"
+    useLocalHcpVault: true
+    #hcpVaultUri: "https://c1.test.networkperspective.io:8200"
 
   domainValidation:
     enabled: true
@@ -24,8 +26,8 @@ global:
     tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
     resourceGroupName: RG-Test-Connectors
     email: blazej@networkperspective.io
-    environment: staging
-    # environment: production
+    #environment: staging
+    environment: production
 
   nodeSelector: {}
   tolerations: []
@@ -68,6 +70,8 @@ vault:
       enabled: false  # Set to false if you are going production
     standalone:
       config: |
+        ui = true
+        
         storage "file" {
           path = "/vault/data"
         }
@@ -76,15 +80,32 @@ vault:
           tls_cert_file = "/vault/userconfig/vault-tls/tls.crt"
           tls_key_file  = "/vault/userconfig/vault-tls/tls.key"
         }
+        seal "awskms" {
+          region     = "us-east-1"
+          kms_key_id = "fb77baa6-40a2-4cb8-a47c-64e602122f5b"
+        }
     volumes:
     - name: vault-tls
       secret:
         defaultMode: 0420
-        secretName: np-sync-tls-staging
+        secretName: np-sync-tls-prod
+    - name: aws-unseal
+      secret:
+        defaultMode: 0420
+        secretName: np-sync-aws-unseal      
     volumeMounts:
     - mountPath: "/vault/userconfig/vault-tls"
       name: vault-tls
       readOnly: true
+    - mountPath: "/etc/aws"
+      name: aws-unseal
+      readOnly: true
+    extraEnvironmentVars:
+      AWS_SHARED_CREDENTIALS_FILE: "/etc/aws/aws-unseal"
+    seal:
+      awskms:
+        region: "us-east-1"
+        kms_key_id: "arn:aws:kms:us-east-1:109245279356:key/fb77baa6-40a2-4cb8-a47c-64e602122f5b"
     service:
       type: ClusterIP
 
