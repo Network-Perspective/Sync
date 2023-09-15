@@ -108,31 +108,26 @@ vault:
         kms_key_id: "arn:aws:kms:us-east-1:109245279356:key/fb77baa6-40a2-4cb8-a47c-64e602122f5b"
     service:
       type: ClusterIP
-
-
-    # extraContainers:
-    # - name: cert-watcher
-    #   image: "alpine"
-    #   imagePullPolicy: IfNotPresent
-    #   command: ["/bin/sh", "-c"]
-    #   args:
-    #     - |
-    #       set -e
-    #       apk add --no-cache inotify-tools
-    #       while true; do
-    #         inotifywait -e modify,create,delete,move /vault/userconfig/vault-ha-tls/vault.crt /vault/userconfig/vault-ha-tls/vault.key /vault/userconfig/vault-ha-tls/vault.ca
-    #         VAULT_PID=$(pidof vault)
-    #         if [ -n "$VAULT_PID" ]; then
-    #           kill -HUP $VAULT_PID
-    #           echo "SIGHUP signal sent to Vault."
-    #         else
-    #           echo "Vault process not found. Cannot reload."
-    #         fi
-    #       done
-
-
-
-
+    auditStorage:
+      enabled: true
+    # a sidecar that will trigger reload of vault config including tls certificates every 24 hours
+    shareProcessNamespace: true
+    extraContainers:
+    - name: daily-reload
+      image: "alpine:latest"
+      imagePullPolicy: IfNotPresent
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          while true; do
+            sleep 86400            
+            VAULT_PID=$(pidof vault)            
+            if [ -n "$VAULT_PID" ]; then
+              kill -HUP $VAULT_PID
+            else
+              echo "Vault process not found. Cannot reload."
+            fi
+          done
 
 networkPolicy:
   # forbid traffic from other namespaces

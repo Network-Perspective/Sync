@@ -30,6 +30,7 @@ spec:
       serviceAccountName: {{ include "slack.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      automountServiceAccountToken: false
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -65,16 +66,24 @@ spec:
               value: {{ .Values.global.appSettings.applicationInsightsConnectionString }}
             - name: ASPNETCORE_URLS
               value: http://+:{{ .Values.service.port }}
+            {{- if .Values.global.appSettings.useLocalHcpVault }}            
+            - name: Infrastructure__HcpVault__BaseUrl
+              value: "https://{{ .Values.global.domainValidation.hostedZoneName }}:8200"
+            {{- end }}
           volumeMounts:
             - name: logs
               mountPath: /app/logs
+            {{- if not (.Values.global.appSettings.useLocalHcpVault) }}
             - name: rsa-keys
               mountPath: "/app/keys"              
             - name: secrets
               mountPath: "/app/secrets"              
+            {{- end }}
             - name: config-volume
               mountPath: /app/appsettings.Production.json
               subPath: appsettings.Production.json
+            - name: service-account-token
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -89,6 +98,18 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+        {{- if .Values.global.appSettings.useLocalHcpVault }}
+        - name: vault-proxy
+          image: alpine/socat
+          command:
+          - /bin/sh
+          - -c
+          - socat TCP-LISTEN:8200,fork TCP:chart-vault:8200
+          ports:
+          - containerPort: 8200
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+        {{- end }}
       {{- with .Values.global.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -112,13 +133,22 @@ spec:
           {{- end -}}
       {{- else }}
         emptyDir: {}
-      {{- end }}           
+      {{- end }}      
+      {{- if not (.Values.global.appSettings.useLocalHcpVault) }}     
       - name: rsa-keys
         secret:
           secretName: {{ .Values.global.secrets.rsaKeys }} 
       - name: secrets
         secret:
           secretName: {{ .Values.secrets.slackSecrets }}
+      {{- end }}
       - name: config-volume
         configMap:
           name: {{ include "appsettings.config" . }}
+      - name: service-account-token
+        projected:
+          defaultMode: 420
+          sources:
+          - serviceAccountToken:
+              path: token
+              expirationSeconds: 600 # 10 minutes is the minimum TTL              

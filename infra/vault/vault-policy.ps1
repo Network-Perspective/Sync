@@ -35,6 +35,12 @@ vault write auth/kubernetes/role/gsuite-sync `
     policies=test-policy `
     ttl=1h
 
+vault write auth/kubernetes/role/slack-sync `
+    bound_service_account_names=chart-slack `
+    bound_service_account_namespaces=default `
+    policies=test-policy `
+    ttl=1h
+
 # Clean up
 Remove-Item test-policy.hcl
 

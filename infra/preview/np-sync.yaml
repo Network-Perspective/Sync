@@ -35,6 +35,18 @@ metadata:
     app.kubernetes.io/version: "2.1.2926"
     app.kubernetes.io/managed-by: Helm
 ---
+# Source: np-sync/charts/slack/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: np-sync-slack
+  labels:
+    helm.sh/chart: slack-2.1.2926
+    app.kubernetes.io/name: slack
+    app.kubernetes.io/instance: np-sync
+    app.kubernetes.io/version: "2.1.2926"
+    app.kubernetes.io/managed-by: Helm
+---
 # Source: np-sync/charts/vault/templates/server-serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -331,6 +343,7 @@ spec:
       serviceAccountName: np-sync-gsuite
       securityContext:
         runAsNonRoot: true
+      automountServiceAccountToken: false
       containers:
         - name: gsuite
           securityContext:
@@ -363,13 +376,11 @@ spec:
           volumeMounts:
             - name: logs
               mountPath: /app/logs
-            - name: rsa-keys
-              mountPath: "/app/keys"              
-            - name: secrets
-              mountPath: "/app/secrets"              
             - name: config-volume
               mountPath: /app/appsettings.Production.json
               subPath: appsettings.Production.json
+            - name: service-account-token
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
           ports:
             - name: http
               containerPort: 8080
@@ -394,7 +405,7 @@ spec:
           command:
           - /bin/sh
           - -c
-          - socat TCP-LISTEN:8200,fork TCP:vault-service-name:8200
+          - socat TCP-LISTEN:8200,fork TCP:chart-vault:8200
           ports:
           - containerPort: 8200
           securityContext:
@@ -402,16 +413,17 @@ spec:
             runAsUser: 1000
       volumes:
       - name: logs
-        emptyDir: {}           
-      - name: rsa-keys
-        secret:
-          secretName: np-sync-rsa 
-      - name: secrets
-        secret:
-          secretName: np-sync-gsuite-secrets
+        emptyDir: {}
       - name: config-volume
         configMap:
           name: np-sync-appsettings
+      - name: service-account-token
+        projected:
+          defaultMode: 420
+          sources:
+          - serviceAccountToken:
+              path: token
+              expirationSeconds: 600 # 10 minutes is the minimum TTL
 ---
 # Source: np-sync/charts/slack/templates/deployment.yaml
 apiVersion: apps/v1
@@ -441,9 +453,10 @@ spec:
     spec:
       imagePullSecrets:
         - name: np-sync-acr
-      serviceAccountName: default
+      serviceAccountName: np-sync-slack
       securityContext:
         runAsNonRoot: true
+      automountServiceAccountToken: false
       containers:
         - name: slack
           securityContext:
@@ -470,17 +483,17 @@ spec:
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               value: InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/
             - name: ASPNETCORE_URLS
-              value: http://+:8080
+              value: http://+:8080            
+            - name: Infrastructure__HcpVault__BaseUrl
+              value: "https://c1.test.networkperspective.io:8200"
           volumeMounts:
             - name: logs
               mountPath: /app/logs
-            - name: rsa-keys
-              mountPath: "/app/keys"              
-            - name: secrets
-              mountPath: "/app/secrets"              
             - name: config-volume
               mountPath: /app/appsettings.Production.json
               subPath: appsettings.Production.json
+            - name: service-account-token
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
           ports:
             - name: http
               containerPort: 8080
@@ -500,18 +513,30 @@ spec:
             requests:
               cpu: 400m
               memory: 2G
+        - name: vault-proxy
+          image: alpine/socat
+          command:
+          - /bin/sh
+          - -c
+          - socat TCP-LISTEN:8200,fork TCP:chart-vault:8200
+          ports:
+          - containerPort: 8200
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 1000
       volumes:
       - name: logs
-        emptyDir: {}           
-      - name: rsa-keys
-        secret:
-          secretName: np-sync-rsa 
-      - name: secrets
-        secret:
-          secretName: np-sync-slack-secrets
+        emptyDir: {}
       - name: config-volume
         configMap:
           name: np-sync-appsettings
+      - name: service-account-token
+        projected:
+          defaultMode: 420
+          sources:
+          - serviceAccountToken:
+              path: token
+              expirationSeconds: 600 # 10 minutes is the minimum TTL
 ---
 # Source: np-sync/charts/mssql/templates/stateful-set.yaml
 apiVersion: apps/v1
@@ -650,6 +675,8 @@ spec:
       terminationGracePeriodSeconds: 10
       serviceAccountName: np-sync-vault
       
+      shareProcessNamespace: true
+      
       securityContext:
         runAsNonRoot: true
         runAsGroup: 1000
@@ -733,6 +760,9 @@ spec:
             
           volumeMounts:
           
+            - name: audit
+              mountPath: /vault/audit
+  
   
     
             - name: data
@@ -785,12 +815,33 @@ spec:
                   # to this pod while it's terminating
                   "sleep 5 && kill -SIGTERM $(pidof vault)",
                 ]
+          
+        - args:
+          - "while true; do\n  sleep 86400            \n  VAULT_PID=$(pidof vault)            \n
+            \ if [ -n \"$VAULT_PID\" ]; then\n    kill -HUP $VAULT_PID\n  else\n    echo \"Vault
+            process not found. Cannot reload.\"\n  fi\ndone\n"
+          command:
+          - /bin/sh
+          - -c
+          image: alpine:latest
+          imagePullPolicy: IfNotPresent
+          name: daily-reload
       imagePullSecrets:
         - name: np-sync-acr
   
   volumeClaimTemplates:
     - metadata:
         name: data
+      
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+      
+    - metadata:
+        name: audit
       
       spec:
         accessModes:
