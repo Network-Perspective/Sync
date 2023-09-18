@@ -5,6 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
         <PackageReference Include="Quartz.Extensions.Hosting" Version="3.6.2" />
         <PackageReference Include="Quartz.Serialization.Json" Version="3.6.2" />
         <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />

@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Application;
 using NetworkPerspective.Sync.Application.Scheduler;
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework;
 using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Framework.Docs;
@@ -25,6 +26,7 @@ namespace NetworkPerspective.Sync.GSuite
         private const string NetworkPerspectiveCoreConfigSection = "Infrastructure:NetworkPerspectiveCore";
         private const string SecretRepositoryClientBaseConfigSection = "Infrastructure";
         private const string SchedulerConfigSection = "Connector:Scheduler";
+        private const string SecretRotationConfigSection = "Connector:SecretRotation";
         private const string ConnectorConfigSection = "Connector";
 
         private readonly string _dbConnectionString;
@@ -58,6 +60,7 @@ namespace NetworkPerspective.Sync.GSuite
                 .AddSecretRepositoryClient(_config.GetSection(SecretRepositoryClientBaseConfigSection), healthChecksBuilder)
                 .AddNetworkPerspectiveCore(_config.GetSection(NetworkPerspectiveCoreConfigSection), healthChecksBuilder)
                 .AddScheduler(_config.GetSection(SchedulerConfigSection), _dbConnectionString)
+                .AddSecretRotationScheduler(_config.GetSection(SecretRotationConfigSection))
                 .AddPersistence(healthChecksBuilder)
                 .AddFramework(mvcBuilder);
 
@@ -86,6 +89,8 @@ namespace NetworkPerspective.Sync.GSuite
             {
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
+
+            app.UseSecretRotationScheduler();
         }
     }
 }
