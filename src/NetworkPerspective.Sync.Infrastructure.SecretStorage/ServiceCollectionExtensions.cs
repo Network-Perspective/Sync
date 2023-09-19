@@ -13,7 +13,7 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
         private const string AzureKeyVaultConfigSection = "AzureKeyVault";
         private const string HcpVaultConfigSection = "HcpVault";
         private const string DataProtectionConfigSection = "DataProtection";
-        
+
         public static IServiceCollection AddSecretRepositoryClient(this IServiceCollection services, IConfigurationSection configurationSection, IHealthChecksBuilder healthCheckBuilder)
         {
             services.Configure<AzureKeyVaultConfig>(configurationSection.GetSection(AzureKeyVaultConfigSection));

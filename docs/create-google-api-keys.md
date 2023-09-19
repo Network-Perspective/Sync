@@ -17,6 +17,9 @@ https://console.cloud.google.com/apis/library/gmail.googleapis.com
 https://console.cloud.google.com/apis/api/calendar-json.googleapis.com
 * Admin SDK<br/>
 https://console.cloud.google.com/apis/api/admin.googleapis.com
+* Identity and Access Management (IAM) API<br/>
+(optional) required for service account secret rotation<br/>
+https://console.cloud.google.com/apis/library/iam.googleapis.com
 
 ## Create Service Account Credentials
 For a detailed guide on creating service account credentials, you can refer to the [Google Developer's documentation](

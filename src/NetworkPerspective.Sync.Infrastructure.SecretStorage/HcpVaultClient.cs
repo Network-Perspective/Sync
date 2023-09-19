@@ -28,7 +28,7 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             _config = config.Value;
             _logger = logger;
         }
-        
+
         private VaultClient CreateVaultClient()
         {
             IAuthMethodInfo authMethod;
@@ -48,13 +48,13 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
 
             return new VaultClient(vaultClientSettings);
         }
-        
+
         public async Task<SecureString> GetSecretAsync(string key, CancellationToken stoppingToken = default)
         {
             try
             {
                 _logger.LogDebug("Getting key '{key}' from internal key vault at {url}", key, _config.BaseUrl);
-                var secret = await CreateVaultClient().V1.Secrets.KeyValue.V2.ReadSecretAsync(key, mountPoint:_config.MountPoint);
+                var secret = await CreateVaultClient().V1.Secrets.KeyValue.V2.ReadSecretAsync(key, mountPoint: _config.MountPoint);
                 var secureString = secret.Data.Data["secret"].ToString().ToSecureString();
                 _logger.LogDebug("Got key '{key}' from internal key vault at {url}", key, _config.BaseUrl);
                 return secureString;
@@ -72,7 +72,7 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             try
             {
                 _logger.LogDebug("Setting key '{key}' to internal key vault at {url}", key, _config.BaseUrl);
-                await CreateVaultClient().V1.Secrets.KeyValue.V2.WriteSecretAsync(key, new { secret = secret.ToSystemString() }, mountPoint:_config.MountPoint);
+                await CreateVaultClient().V1.Secrets.KeyValue.V2.WriteSecretAsync(key, new { secret = secret.ToSystemString() }, mountPoint: _config.MountPoint);
                 _logger.LogDebug("Set key '{key}' to internal key vault at {url}", key, _config.BaseUrl);
             }
             catch (Exception ex)
@@ -87,7 +87,7 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             try
             {
                 _logger.LogDebug("Removing key '{key}' from internal key vault at {url}", key, _config.BaseUrl);
-                await CreateVaultClient().V1.Secrets.KeyValue.V2.DeleteSecretAsync(key, mountPoint:_config.MountPoint);
+                await CreateVaultClient().V1.Secrets.KeyValue.V2.DeleteSecretAsync(key, mountPoint: _config.MountPoint);
                 _logger.LogDebug("Removed key '{key}' from internal key vault at {url}", key, _config.BaseUrl);
             }
             catch (Exception ex)

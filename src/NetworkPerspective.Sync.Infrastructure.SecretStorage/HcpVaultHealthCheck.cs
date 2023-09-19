@@ -21,7 +21,7 @@ public class HcpVaultHealthCheck : IHealthCheck
         _testSecretName = config.Value.TestSecretName;
         _url = config.Value.BaseUrl;
     }
-    
+
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = new CancellationToken())
     {
         try

@@ -6,7 +6,8 @@ using Quartz;
 
 namespace NetworkPerspective.Sync.Scheduler;
 
-public class SecretRotationJob  : IJob
+[DisallowConcurrentExecution]
+internal class SecretRotationJob : IJob
 {
     private readonly ISecretRotator _secretRotator;
 
@@ -14,9 +15,9 @@ public class SecretRotationJob  : IJob
     {
         _secretRotator = secretRotator;
     }
-    
+
     public async Task Execute(IJobExecutionContext context)
     {
-        _secretRotator.RotateSecrets();
+        await _secretRotator.RotateSecrets();
     }
 }

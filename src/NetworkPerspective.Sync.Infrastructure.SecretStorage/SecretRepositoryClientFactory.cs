@@ -21,7 +21,7 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
     {
         IHealthCheck CreateHealthCheck();
     }
-    
+
     internal class SecretRepositoryClientFactory : ISecretRepositoryFactory, ISecretRepositoryHealthCheckFactory
     {
         private readonly TokenCredential _tokenCredential;
@@ -67,7 +67,28 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
 
             return CreateDbSecretRepository();
         }
-        
+
+        /// <summary>
+        /// Returns default secret storage client
+        /// some networks might have external key vault configured
+        /// that overrides default secret storage
+        /// </summary>
+        /// <returns></returns>
+        public ISecretRepository CreateDefault()
+        {
+            if (!string.IsNullOrEmpty(_azureKvOptions.Value.BaseUrl))
+            {
+                return CreateInternalAzureKeyVaultClient();
+            }
+
+            if (!string.IsNullOrEmpty(_hcpVaultOptions.Value.BaseUrl))
+            {
+                return CreateHcpVaultClient();
+            }
+
+            return CreateDbSecretRepository();
+        }
+
         public IHealthCheck CreateHealthCheck()
         {
             if (!string.IsNullOrEmpty(_azureKvOptions.Value.BaseUrl))

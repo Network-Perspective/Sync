@@ -7,5 +7,6 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.SecretStorage
     public interface ISecretRepositoryFactory
     {
         Task<ISecretRepository> CreateAsync(Guid networkId, CancellationToken stoppingToken = default);
+        public ISecretRepository CreateDefault();
     }
 }

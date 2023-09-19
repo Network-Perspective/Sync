@@ -28,12 +28,12 @@ public class SecretRotationScheduler : ISecretRotationScheduler
         _config = config.Value;
         _logger = logger;
     }
-    
+
     public async Task ScheduleSecretsRotation()
     {
         var jobKey = new JobKey(SecretRotationConst.SecretRotationJobKey);
         var triggerKey = new TriggerKey(SecretRotationConst.SecretRotationTriggerKey);
-        
+
         var scheduler = await _schedulerFactory.GetScheduler();
 
         // is the job already scheduled?
@@ -43,7 +43,7 @@ public class SecretRotationScheduler : ISecretRotationScheduler
             _logger.LogInformation("Removing existing secret rotation job.");
             await scheduler.DeleteJob(jobKey);
         }
-        
+
         if (!_config.Enabled)
         {
             return;
@@ -66,5 +66,11 @@ public class SecretRotationScheduler : ISecretRotationScheduler
         await scheduler.ScheduleJob(job, trigger);
 
         _logger.LogInformation("Secret rotation job scheduled");
+
+        if (_config.RotateOnStartup)
+        {
+            _logger.LogInformation("Triggering secret rotation on startup");
+            await scheduler.TriggerJob(jobKey);
+        }
     }
 }

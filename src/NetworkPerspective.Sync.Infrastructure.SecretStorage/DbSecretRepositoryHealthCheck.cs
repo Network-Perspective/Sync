@@ -15,7 +15,7 @@ public class DbSecretRepositoryHealthCheck : IHealthCheck
     {
         _client = client;
     }
-    
+
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = new CancellationToken())
     {
         try
@@ -33,12 +33,12 @@ public class DbSecretRepositoryHealthCheck : IHealthCheck
             var value = await _client.GetSecretAsync("test", cancellationToken);
             if (value.ToSystemString() != "secret")
                 return HealthCheckResult.Unhealthy("DbSecretRepository unhealthy - secret value mismatch");
-            
+
             return HealthCheckResult.Healthy();
         }
         catch
         {
             return HealthCheckResult.Unhealthy("DbSecretRepository store unhealthy");
-        }        
+        }
     }
 }

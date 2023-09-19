@@ -1,6 +1,8 @@
+using System.Threading.Tasks;
+
 namespace NetworkPerspective.Sync.Application.Services;
 
 public interface ISecretRotator
 {
-    void RotateSecrets();
+    Task RotateSecrets();
 }
