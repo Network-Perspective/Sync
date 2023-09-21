@@ -4,8 +4,6 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-using Google.Api.Gax.ResourceNames;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Iam.Admin.V1;
 
@@ -41,7 +39,7 @@ public class GoogleSecretsRotator : ISecretRotator
 
             var googleKey = await secretRepository.GetSecretAsync(GoogleKeys.TokenKey);
             var credential = GoogleCredential
-                .FromJson(new NetworkCredential(string.Empty, googleKey).Password)
+                .FromJson(googleKey.ToSystemString())
                 .CreateScoped("https://www.googleapis.com/auth/cloud-platform");
 
             // Create the IAM service client
@@ -78,7 +76,7 @@ public class GoogleSecretsRotator : ISecretRotator
 
     private (string clientEmail, string privateKeyId) ReadEmailAndKeyId(SecureString googleKey)
     {
-        var jsonObject = JObject.Parse(new NetworkCredential(string.Empty, googleKey).Password);
+        var jsonObject = JObject.Parse(googleKey.ToSystemString());
 
         var clientEmail = jsonObject["client_email"]?.ToString();
         if (clientEmail == null)

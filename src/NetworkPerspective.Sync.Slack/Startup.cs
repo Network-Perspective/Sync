@@ -25,6 +25,7 @@ namespace NetworkPerspective.Sync.Slack
         private const string SecretRepositoryClientBaseConfigSection = "Infrastructure";
         private const string SlackConfigSection = "Infrastructure:Slack";
         private const string SchedulerConfigSection = "Connector:Scheduler";
+        private const string SecretRotationConfigSection = "Connector:SecretRotation";
         private const string ConnectorConfigSection = "Connector";
 
         private readonly string _dbConnectionString;
@@ -58,6 +59,7 @@ namespace NetworkPerspective.Sync.Slack
                 .AddSecretRepositoryClient(_config.GetSection(SecretRepositoryClientBaseConfigSection), healthChecksBuilder)
                 .AddNetworkPerspectiveCore(_config.GetSection(NetworkPerspectiveCoreConfigSection), healthChecksBuilder)
                 .AddScheduler(_config.GetSection(SchedulerConfigSection), _dbConnectionString)
+                .AddSecretRotationScheduler(_config.GetSection(SecretRotationConfigSection))
                 .AddPersistence(healthChecksBuilder)
                 .AddFramework(mvcBuilder);
 
@@ -85,6 +87,8 @@ namespace NetworkPerspective.Sync.Slack
             {
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
+
+            app.UseSecretRotationScheduler();
         }
     }
 }
