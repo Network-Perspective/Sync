@@ -1,0 +1,18 @@
+# shared between all connectors subcharts
+global:
+  tlsSecret: np-sync-tls-prod
+
+  domainValidation:
+    environment: production
+
+vault:  
+  server:    
+    volumes:
+    - name: vault-tls
+      secret:
+        defaultMode: 0420
+        secretName: np-sync-tls-prod
+    - name: aws-unseal
+      secret:
+        defaultMode: 0420
+        secretName: np-sync-aws-unseal     

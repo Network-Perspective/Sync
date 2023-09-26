@@ -43,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
             services.AddMemoryCache();
 
             services.AddSingleton<IDataSourceFactory, SlackFacadeFactory>();
-
+            services.AddTransient<ISecretRotator, SlackSecretsRotator>();
             return services;
         }
 

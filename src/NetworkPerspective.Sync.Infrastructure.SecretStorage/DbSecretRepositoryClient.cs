@@ -15,19 +15,19 @@ using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage.Exception
 
 namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
 {
-    public class DbDataProtectionConfig
+    public class DbSecretRepositoryConfig
     {
         public string PublicKeyPath { get; set; }
         public string PrivateKeyPath { get; set; }
         public string SecretsPath { get; set; }
     }
 
-    internal class DbSecretRepositoryClient : ISecretRepository
+    public class DbSecretRepositoryClient : ISecretRepository
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IOptions<DbDataProtectionConfig> _config;
+        private readonly IOptions<DbSecretRepositoryConfig> _config;
 
-        public DbSecretRepositoryClient(IUnitOfWorkFactory unitOfWorkFactory, IOptions<DbDataProtectionConfig> config)
+        public DbSecretRepositoryClient(IUnitOfWorkFactory unitOfWorkFactory, IOptions<DbSecretRepositoryConfig> config)
         {
             _unitOfWork = unitOfWorkFactory.Create();
             _config = config;
@@ -42,11 +42,11 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
                 var fn = Path.Join(_config.Value.SecretsPath, key);
                 if (File.Exists(fn))
                 {
-                    return File.ReadAllText(fn).ToSecureString();
+                    return (await File.ReadAllTextAsync(fn, stoppingToken)).ToSecureString();
                 }
 
                 // else try to lookup key in database
-                var secret = await _unitOfWork.GetDbSecretRepository().GetSecretAsync(key);
+                var secret = await _unitOfWork.GetDbSecretRepository().GetSecretAsync(key, stoppingToken);
 
                 return Decrypt(secret);
             }
@@ -62,7 +62,7 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             try
             {
                 await _unitOfWork.GetDbSecretRepository().RemoveSecretAsync(key, stoppingToken);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync(stoppingToken);
             }
             catch (Exception ex)
             {
@@ -76,8 +76,8 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             try
             {
                 var encrypted = Encrypt(secret);
-                await _unitOfWork.GetDbSecretRepository().SetSecretAsync(key, encrypted);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.GetDbSecretRepository().SetSecretAsync(key, encrypted, stoppingToken);
+                await _unitOfWork.CommitAsync(stoppingToken);
             }
             catch (Exception ex)
             {

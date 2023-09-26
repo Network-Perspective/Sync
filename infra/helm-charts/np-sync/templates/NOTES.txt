@@ -2,12 +2,16 @@
 $ helm test {{ .Release.Name }}
 
 2. GSuite connector URL:
-{{- if .Values.gsuite.domainValidation.enabled }}
-https://{{ .Values.gsuite.domainValidation.hostedZoneName }}
+{{- range .Values.gsuite.ingress.tls }}
+{{- range .hosts }}
+https://{{ . | quote }}
 {{- end }}
+{{- end }}        
 
 3. Slack connector URL:
-{{- if .Values.slack.domainValidation.enabled }}
-https://{{ .Values.slack.domainValidation.hostedZoneName }}
+{{- range .Values.slack.ingress.tls }}
+{{- range .hosts }}
+https://{{ . | quote }}
 {{- end }}
+{{- end }}        
 

@@ -9,4 +9,4 @@ maintainers:
 name: mssql
 sources:
 - https://hub.docker.com/_/microsoft-mssql-server
-version: "1.2.3"
+version: 2.1.2971
