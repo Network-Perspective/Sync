@@ -94,10 +94,12 @@ When your done, push the basic secrets to kubernetes acr-credentials and domain 
 ```
 
 ## Vault
-Google `service account keys`, `slack client id`, `slack client secret`, `hashing-key` should be stored securely in Vault. HCP Vault can be deployed as a subchart, if so first initialize Vault and configure autounseal. Then securely deposit secrets inside the Vault. 
-```
-./setup-hcpvault.ps1 (TODO: vault init automation script)
-```
+`Google service account keys`, `slack client id`, `slack client secret`, `hashing-key` should be stored securely in Vault. HCP Vault can be deployed as a subchart, if so first initialize Vault and configure autounseal. Then securely deposit secrets inside the Vault. Please refer to scripts in [./infra/valut](valut) folder for setting up Vault and creating secrets.
+
+* `vault-setup.ps1` - initialize & configure audit & mount points
+* `vault-secrets.ps1` - create secrets
+* `gsuite-sync-vault-policy.ps1` - add access policy for gsuite connector
+* `slack-sync-vault-policy.ps1` - add access policy for slack connector
 ## Installation
 ### Deploy chart
 An install script that deploys helm chart is provided. It will install app in a staging configuration.

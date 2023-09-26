@@ -1,10 +1,29 @@
-$env:VAULT_ADDR='https://127.0.0.1:8200'
-vault operator init  -tls-skip-verify
-vault login -tls-skip-verify
-vault secrets enable  -tls-skip-verify -path=secret kv-v2
-vault audit enable -tls-skip-verify file file_path=/vault/audit/vault_audit.log
-vault audit enable -tls-skip-verify -path=stdout file file_path=stdout
-vault kv put -tls-skip-verify secret/test-key secret=anything
-vault kv put -tls-skip-verify secret/np-sync-gsuite-secrets @secrets/gsuite-secrets.json
-vault kv put -tls-skip-verify secret/np-sync-slack-secrets @secrets/slack-secrets.json
+# $env:VAULT_ADDR='https://127.0.0.1:8200'
+$env:VAULT_ADDR="https://c1.test.networkperspective.io:8200"
 
+# use -tls-skip-verify in staging environment
+
+# init vault or login
+vault operator init 
+
+# if vault is already initialized, login
+# vault login 
+
+# enable audit
+vault audit enable file file_path=/vault/audit/vault_audit.log
+vault audit enable -path=stdout file file_path=stdout
+
+# gsuite mount-point
+vault secrets enable -path=np-sync-gsuite-secrets kv-v2
+
+# slack mount-point
+vault secrets enable -path=np-sync-slack-secrets kv-v2
+
+# Enable Kubernetes authentication if it hasn't been
+$vaultK8sAuthEnabled = vault auth list | Select-String "kubernetes/"
+if (-not $vaultK8sAuthEnabled) {
+    vault auth enable kubernetes
+}
+
+# Configure Kubernetes auth to communicate with the Kubernetes cluster
+vault write auth/kubernetes/config kubernetes_host=https://kubernetes.default.svc:443    
