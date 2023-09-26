@@ -101,6 +101,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             var tokenKey = string.Format(SlackKeys.TokenKeyPattern, authProcess.NetworkId);
             await secretRepository.SetSecretAsync(tokenKey, response.AccessToken.ToSecureString(), stoppingToken);
 
+            // save refresh token if token rotation is enabled
+            if (!string.IsNullOrEmpty(response.RefreshToken))
+            {
+                var refreshTokenKey = string.Format(SlackKeys.RefreshTokenPattern, authProcess.NetworkId);
+                await secretRepository.SetSecretAsync(refreshTokenKey, response.RefreshToken.ToSecureString(),
+                    stoppingToken);
+            }
+
             if (authProcess.RequireAdminPrivileges)
             {
                 var userTokenKey = string.Format(SlackKeys.UserTokenKeyPattern, authProcess.NetworkId);
