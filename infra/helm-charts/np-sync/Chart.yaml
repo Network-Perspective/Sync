@@ -25,8 +25,14 @@ appVersion: 2.1.2926
 
 dependencies:
   - name: mssql
+    version: 2.1.2926
     condition: mssql.enabled
   - name: gsuite
+    version: 2.1.2926
     condition: gsuite.enabled
   - name: slack
+    version: 2.1.2926
     condition: gsuite.enabled
+  - name: vault
+    version: "0.25.0"  
+    repository: "https://helm.releases.hashicorp.com"

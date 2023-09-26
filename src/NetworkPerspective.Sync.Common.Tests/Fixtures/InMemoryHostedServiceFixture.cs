@@ -35,7 +35,8 @@ namespace NetworkPerspective.Sync.Common.Tests.Fixtures
 
             var configOverride = new Dictionary<string, string>
             {
-                { "Connector:Scheduler:UsePersistentStore", "false" }
+                { "Connector:Scheduler:UsePersistentStore", "false" },
+                { "NLog:variables:minLevel", "FATAL"}
             };
 
             builder.ConfigureAppConfiguration(config =>

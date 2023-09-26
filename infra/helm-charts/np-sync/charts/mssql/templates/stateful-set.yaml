@@ -29,7 +29,9 @@ spec:
 {{ toYaml .Values.pod.labels | indent 8 }}
 {{- end }}
       annotations:
+      {{- if and .Values.global.redeployOnUpdate }}
         rollme: {{ randAlphaNum 5 | quote }}
+      {{- end }}
 {{- if .Values.pod.annotations }}
 {{ toYaml .Values.pod.annotations | indent 8 }}
 {{- end }}
