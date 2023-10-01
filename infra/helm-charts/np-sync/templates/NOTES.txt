@@ -4,14 +4,14 @@ $ helm test {{ .Release.Name }}
 2. GSuite connector URL:
 {{- range .Values.gsuite.ingress.tls }}
 {{- range .hosts }}
-https://{{ . | quote }}
+https://{{ . }}
 {{- end }}
 {{- end }}        
 
 3. Slack connector URL:
 {{- range .Values.slack.ingress.tls }}
 {{- range .hosts }}
-https://{{ . | quote }}
+https://{{ . }}
 {{- end }}
 {{- end }}        
 

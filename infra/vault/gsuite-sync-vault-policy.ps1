@@ -1,7 +1,7 @@
-$env:VAULT_ADDR='https://c1.test.networkperspective.io:8200'
+#$env:VAULT_ADDR='https://c1.test.networkperspective.io:8200'
 
 $namespace = 'default'
-$gsuiteServiceAccountName = 'chart-gsuite'
+$gsuiteServiceAccountName = 'np-sync-gsuite'
 $mountPoint = "np-sync-gsuite-secrets"
 
 # Assuming you've already authenticated with vault CLI 

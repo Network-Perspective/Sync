@@ -4,7 +4,7 @@ Follow these steps to set up your Google Workspace API keys:
 ## Create a new project
 https://console.cloud.google.com/projectcreate
 
-Name: "Network Perspective" (this exact name is reqiured)
+Choose name, e.g.: "network-perspective-sync" 
 
 ## Enable APIs
 Start by navigating to the API dashboard:

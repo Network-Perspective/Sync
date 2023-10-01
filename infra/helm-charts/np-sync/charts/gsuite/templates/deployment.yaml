@@ -70,6 +70,12 @@ spec:
             - name: Infrastructure__HcpVault__BaseUrl
               value: "https://{{ .Values.global.domainValidation.hostedZoneName }}:8200"
             {{- end }}
+            {{- if .Values.appSettings.secretRotationEnabled }}            
+            - name: Connector__SecretRotation__Enabled
+              value: "true"
+            - name: Connector__SecretRotation__RotateOnStartup
+              value: "true"              
+            {{- end}}
           volumeMounts:
             - name: logs
               mountPath: /app/logs
@@ -104,7 +110,7 @@ spec:
           command:
           - /bin/sh
           - -c
-          - socat TCP-LISTEN:8200,fork TCP:chart-vault:8200
+          - socat TCP-LISTEN:8200,fork TCP:np-sync-vault:8200
           ports:
           - containerPort: 8200
           securityContext:

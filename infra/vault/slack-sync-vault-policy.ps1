@@ -1,7 +1,7 @@
-$env:VAULT_ADDR='https://c1.test.networkperspective.io:8200'
+#$env:VAULT_ADDR='https://c1.test.networkperspective.io:8200'
 
 $namespace = 'default'
-$slackServiceAccountName = 'chart-slack'
+$slackServiceAccountName = 'np-sync-slack'
 $mountPoint = "np-sync-slack-secrets"
 
 # Assuming you've already authenticated with vault CLI 

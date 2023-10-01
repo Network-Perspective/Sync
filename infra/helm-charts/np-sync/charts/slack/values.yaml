@@ -10,6 +10,7 @@ image:
 appSettings:
   connectionString: ""
   logLevel: info
+  secretRotationEnabled: true
 
 secrets:
   slackSecrets: "np-sync-slack-secrets"

@@ -35,6 +35,9 @@ app.networkperspective.io
 ```
 Network Perspective uses a static ip that rarely changes that can be found with `nslookup app.networkperspective.io`. We'll notify all clients before making a change to dns records.
 
+If configured connecteros will also report to Application Insights at:
+`germanywestcentral-1.in.applicationinsights.azure.com`
+
 ####
 ## Prerequisites
 ### Kubernetes Cluster
@@ -96,6 +99,7 @@ When your done, push the basic secrets to kubernetes acr-credentials and domain 
 ## Vault
 `Google service account keys`, `slack client id`, `slack client secret`, `hashing-key` should be stored securely in Vault. HCP Vault can be deployed as a subchart, if so first initialize Vault and configure autounseal. Then securely deposit secrets inside the Vault. Please refer to scripts in [./infra/valut](valut) folder for setting up Vault and creating secrets.
 
+* `vault-connect.ps1` - port forward vault to localhost
 * `vault-setup.ps1` - initialize & configure audit & mount points
 * `vault-secrets.ps1` - create secrets
 * `gsuite-sync-vault-policy.ps1` - add access policy for gsuite connector
