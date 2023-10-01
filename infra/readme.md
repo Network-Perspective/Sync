@@ -2,7 +2,7 @@
 This guide provides step-by-step instructions to deploy connectors on a private cloud.
 
 ## Overview
-The diagram below illustrates cloud-agnostic deployment on a Kubernetes service. The deployment and updates are automated with a Helm chart that provisions all the connector’s components (Connector, MSSQL Express, Ingress) included in the diagram. Sensitive secrets such as Google API keys are managed with built-in Kubernetes Secrets mechanisms.
+The diagram below illustrates cloud-agnostic deployment on a Kubernetes service. The deployment and updates are automated with a Helm chart that provisions all the connector’s components (Connector, MSSQL Express, Ingress) included in the diagram. Sensitive secrets such as Google API keys can be stored securely HCP Vault, Azure KeyVault or with built-in Kubernetes Secrets mechanisms.
 
 <img src="../docs/images/k8s-deployment.png" alt="Kubernetes Deployment Diagram" >
 
@@ -12,6 +12,33 @@ The diagram below illustrates cloud-agnostic deployment on a Kubernetes service.
 3. Connector uploads anonymized interaction data to Network Perspective API. 
 4. Connector publishes logs & telemetry to Network Perspective Application Insights instance. This is optional but highly recommended for troubleshooting and detailed monitoring. 
 
+#### Egress Whitelist
+Google connector will access google apis at following domains:
+```
+www.googleapis.com
+gmail.googleapis.com
+oauth2.googleapis.com
+admin.googleapis.com
+```
+Google publishes a [range of IP addresses for Google APIs](https://support.google.com/a/answer/10026322?hl=en) and services' default domains.
+
+Slack connector will access slack apis at:
+```
+slack.com
+```
+Slack does not publish a list of it's api ip addresses. Hence only Domain-Based Whitelisting is possible. It is a good practice to allow slack token usage from only connector own ip address [as described here](https://api.slack.com/authentication/best-practices#configure-allowed-ip).
+
+
+All connecectors send data to Network Perspective API:
+```
+app.networkperspective.io
+```
+Network Perspective uses a static ip that rarely changes that can be found with `nslookup app.networkperspective.io`. We'll notify all clients before making a change to dns records.
+
+If configured connecteros will also report to Application Insights at:
+`germanywestcentral-1.in.applicationinsights.azure.com`
+
+####
 ## Prerequisites
 ### Kubernetes Cluster
 Connectors are delivered as a Helm chart that can be deployed natively on Kubernetes. To set up your Kubernetes cluster, please refer to your cloud provider documentation.
@@ -47,15 +74,13 @@ Connector use kubernetes secrets mechanism to keep sensitive information.
         ├── acr-password           <- and password
         ├── domain-validation      <- azure dns domain validation secret
         ├── hashing-key            <- hmac key used to psudonymise data
-        ├── key.pem                <- rsa private key used by connector
-        ├── public.pem             <- rsa public key
         ├── google-key             <- google service accountkey (json)
         ├── slack-client-id        <- slack client id
         ├── slack-client-secret    <- slack client secret
         ├── staging.yaml           <- staging configuration values
         └── production.yaml        <- production configuration values
 
-Please inspect the secrets and update `hashing-key` to new random sequence of characters. You might also regenerate rsa key using openssl or `create-rsa-key.ps1` script. Probably also `google-key` and `slack-client-id` and `slack-client-id` need to be updated with keys and secrets specific for your deployment. 
+Please inspect the secrets and update `hashing-key` to new random sequence of characters. You might also regenerate rsa key using openssl or `create-rsa-key.ps1` script if secrets are stored as k8s secrets. Probably also `google-key` and `slack-client-id` and `slack-client-id` need to be updated with keys and secrets specific for your deployment. 
 
 Please refer to seperate guides to create your secrets:
 
@@ -66,10 +91,19 @@ Please refer to seperate guides to create your secrets:
 ·
 <a href="../docs/authorize-google-api-keys.md">Authorize Google API Key</a>    
 
-When your done, push the secrets to kubernetes.
+When your done, push the basic secrets to kubernetes acr-credentials and domain validation secrets to k8s secrets.
 ```
 ./create-secrets.ps1
 ```
+
+## Vault
+`Google service account keys`, `slack client id`, `slack client secret`, `hashing-key` should be stored securely in Vault. HCP Vault can be deployed as a subchart, if so first initialize Vault and configure autounseal. Then securely deposit secrets inside the Vault. Please refer to scripts in [./infra/valut](valut) folder for setting up Vault and creating secrets.
+
+* `vault-connect.ps1` - port forward vault to localhost
+* `vault-setup.ps1` - initialize & configure audit & mount points
+* `vault-secrets.ps1` - create secrets
+* `gsuite-sync-vault-policy.ps1` - add access policy for gsuite connector
+* `slack-sync-vault-policy.ps1` - add access policy for slack connector
 ## Installation
 ### Deploy chart
 An install script that deploys helm chart is provided. It will install app in a staging configuration.

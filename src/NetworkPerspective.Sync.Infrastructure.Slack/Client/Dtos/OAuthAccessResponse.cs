@@ -21,6 +21,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos
         [JsonProperty("access_token")]
         public string AccessToken { get; set; }
 
+        [JsonProperty("refresh_token")]
+        public string RefreshToken { get; set; }
+
         [JsonProperty("authed_user")]
         public AuthedUser User { get; set; }
 

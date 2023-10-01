@@ -201,3 +201,5 @@ appsettings.development.json
 swagger.json
 src/NetworkPerspective.Sync.Cli/sample-data.bat
 src/NetworkPerspective.Sync.Cli/Properties/PublishProfiles/x64-ScriptedConnector.pubxml
+infra/helm-charts/np-sync/charts/*.tgz
+src/.idea/

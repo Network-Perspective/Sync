@@ -12,6 +12,13 @@
     <a href="docs/create-google-api-keys.md">Create Google API Keys</a>
     ·
     <a href="docs/authorize-google-api-keys.md">Authorize Google API Key</a>    
+    <br/><br/>
+    Technical reference for individual connectors<br/>
+    <a href="docs/google-connector.md">Google Workspace</a> 
+    ·
+    <a href="docs/google-connector.md">Slack</a> 
+    · Office365
+    · Cli
   </p>
 </div>
 
@@ -47,7 +54,7 @@ The above command will deploy connectors along Sql Server Developer edition to y
 ## Data flow
 Each connector is a small app that fetch data from some source and pushes it to Network Perspective API. All personal data is pseydonymized using HMAC algorithm, i.e. hashed with a secret key. 
 
-<img src="docs/images/dataflow.png" alt="Logo" width="100%">
+<img src="docs/images/dataflow.png"  width="100%">
 
 Connectors transform received data to interactions between employees - a temporal graph model that attempts to unify different types events. In general an interaction is directed edge - a triplet When (Timestamp), From (SourceVertex), To (TargetVertex) with optional additional Properties describing the event or particular interaction. 
 
