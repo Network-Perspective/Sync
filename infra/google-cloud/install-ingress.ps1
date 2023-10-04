@@ -2,9 +2,9 @@ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 
 Write-Host "Creating static IP Address for Ingress"
-gcloud compute addresses create np-sync-ip --region europe-west4
+gcloud compute addresses create np-sync-ip --region europe-west1
 
-$output = gcloud compute addresses describe np-sync-ip --region europe-west4 --format=json | ConvertFrom-Json
+$output = gcloud compute addresses describe np-sync-ip --region europe-west1 --format=json | ConvertFrom-Json
 $ipAddress = $output.address
 Write-Host "IP Address is: $ipAddress"
 

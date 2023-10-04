@@ -34,7 +34,7 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage.Tests
             serviceCollection.AddSingleton(Mock.Of<INetworkService>());
 
             // Act
-            serviceCollection.AddSecretStorage(config.GetSection("Infrastructure:AzureKeyVault"), healthCheckBuilder);
+            serviceCollection.AddSecretRepositoryClient(config.GetSection("Infrastructure"), healthCheckBuilder);
 
             // Assert
             var services = serviceCollection.BuildServiceProvider();
