@@ -10,6 +10,7 @@ image:
 appSettings:
   connectionString: ""
   logLevel: info
+  secretRotationEnabled: true
 
 secrets:
   googleKeys: "np-sync-gsuite-secrets"
@@ -18,7 +19,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  create: false
+  create: true
   annotations: {}
   name: ""
 
@@ -33,10 +34,6 @@ securityContext:
 service:
   type: ClusterIP
   port: 8080
-
-domainValidation:
-  enabled: true
-  hostedZoneName: gsuite-01.test.networkperspective.io
 
 ingress:
   enabled: true

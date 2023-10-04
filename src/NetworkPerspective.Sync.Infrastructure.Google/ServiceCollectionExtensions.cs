@@ -14,6 +14,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             services.Configure<GoogleConfig>(configurationSection);
             services.AddTransient<IAuthTester, AuthTester>();
             services.AddSingleton<IDataSourceFactory, GoogleFacadeFactory>();
+            services.AddTransient<ISecretRotator, GoogleSecretsRotator>();
             return services;
         }
     }

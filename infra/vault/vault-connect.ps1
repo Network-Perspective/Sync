@@ -1,0 +1,1 @@
+kubectl port-forward service/np-sync-vault 8200:8200

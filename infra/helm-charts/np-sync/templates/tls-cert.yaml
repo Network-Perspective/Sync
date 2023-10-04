@@ -1,21 +1,18 @@
-{{- if .Values.domainValidation.enabled }}
-{{- $fullName := include "gsuite.fullname" . -}}
-{{- $issuerName := printf "%s-%s-azure-dns-issuer" $fullName .Values.global.domainValidation.environment -}}
+{{- if .Values.global.domainValidation.enabled }}
+{{- $issuerName := printf "%s-azure-dns-issuer" .Values.global.tlsSecret -}}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ $issuerName }}
 spec:
   acme:
-    {{- if eq .Values.global.domainValidation.environment "staging" }}
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    privateKeySecretRef:
-        name: {{ $issuerName }}
-    {{- else if eq .Values.global.domainValidation.environment "production" }}
+    {{- if eq .Values.global.domainValidation.environment "production" }}
     server: https://acme-v02.api.letsencrypt.org/directory
-    privateKeySecretRef:
-        name: {{ $issuerName }}
+    {{- else }}
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
     {{- end }}
+    privateKeySecretRef:
+      name: {{ $issuerName }}
     email: {{ .Values.global.domainValidation.email }}
     solvers:    
     - dns01:
@@ -27,20 +24,28 @@ spec:
           subscriptionID: {{ .Values.global.domainValidation.subscriptionID }}
           tenantID: {{ .Values.global.domainValidation.tenantID }}
           resourceGroupName: {{ .Values.global.domainValidation.resourceGroupName }}
-          hostedZoneName: {{ .Values.domainValidation.hostedZoneName }}
           environment: AzurePublicCloud
 ---
-{{-  $tlsSecretName := printf "%s-%s-tls" $fullName .Values.global.domainValidation.environment -}}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ $fullName }}-certificate
+  name: {{ .Values.global.tlsSecret }}-certificate
 spec:
-  secretName: {{ $tlsSecretName }}
+  secretName: {{ .Values.global.tlsSecret }}
   issuerRef:
     name: {{ $issuerName }}
     kind: Issuer
-  commonName: {{ .Values.domainValidation.hostedZoneName }}
+  commonName: {{ .Values.global.domainValidation.hostedZoneName }}
   dnsNames:
-    - {{ .Values.domainValidation.hostedZoneName }}
+    - {{ .Values.global.domainValidation.hostedZoneName }}
+    {{- range .Values.gsuite.ingress.tls }}
+    {{- range .hosts }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- end }}        
+    {{- range .Values.slack.ingress.tls }}
+    {{- range .hosts }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- end }}        
 {{- end }}

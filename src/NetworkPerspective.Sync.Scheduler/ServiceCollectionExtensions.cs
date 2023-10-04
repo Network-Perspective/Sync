@@ -1,5 +1,6 @@
 ﻿using System;
 
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +13,19 @@ namespace NetworkPerspective.Sync.Application.Scheduler
 {
     public static class ServiceCollectionExtensions
     {
+        public static IServiceCollection AddSecretRotationScheduler(this IServiceCollection services, IConfigurationSection configurationSection)
+        {
+            services.Configure<SecretRotationConfig>(configurationSection);
+            services.AddTransient<ISecretRotationScheduler, SecretRotationScheduler>();
+            return services;
+        }
+
+        public static IApplicationBuilder UseSecretRotationScheduler(this IApplicationBuilder app)
+        {
+            app.ApplicationServices.GetService<ISecretRotationScheduler>().ScheduleSecretsRotation();
+            return app;
+        }
+
         public static IServiceCollection AddScheduler(this IServiceCollection services, IConfigurationSection configurationSection, string dbConnectionString)
         {
             var schedulerConfig = new SchedulerConfig();

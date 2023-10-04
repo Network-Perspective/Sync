@@ -18,5 +18,11 @@ namespace NetworkPerspective.Sync.Common.Tests.Factories
             var secretRepository = new InternalAzureKeyVaultClient(TokenCredentialFactory.Create(), secretRepositoryOptions, NullLogger<InternalAzureKeyVaultClient>.Instance);
             return Task.FromResult(secretRepository as ISecretRepository);
         }
+
+        public ISecretRepository CreateDefault()
+        {
+            var secretRepositoryOptions = Options.Create(new AzureKeyVaultConfig { BaseUrl = TestsConsts.InternalAzureKeyVaultBaseUrl });
+            return new InternalAzureKeyVaultClient(TokenCredentialFactory.Create(), secretRepositoryOptions, NullLogger<InternalAzureKeyVaultClient>.Instance);
+        }
     }
 }

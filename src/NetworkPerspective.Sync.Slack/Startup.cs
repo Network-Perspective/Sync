@@ -22,10 +22,10 @@ namespace NetworkPerspective.Sync.Slack
     public class Startup
     {
         private const string NetworkPerspectiveCoreConfigSection = "Infrastructure:NetworkPerspectiveCore";
-        private const string AzureKeyVaultConfigSection = "Infrastructure:AzureKeyVault";
-        private const string DataProtectionConfigSection = "Infrastructure:DataProtection";
+        private const string SecretRepositoryClientBaseConfigSection = "Infrastructure";
         private const string SlackConfigSection = "Infrastructure:Slack";
         private const string SchedulerConfigSection = "Connector:Scheduler";
+        private const string SecretRotationConfigSection = "Connector:SecretRotation";
         private const string ConnectorConfigSection = "Connector";
 
         private readonly string _dbConnectionString;
@@ -56,10 +56,10 @@ namespace NetworkPerspective.Sync.Slack
                 .AddDocumentation()
                 .AddApplication(_config.GetSection(ConnectorConfigSection))
                 .AddSlack(_config.GetSection(SlackConfigSection))
-                .AddSecretStorage(_config.GetSection(AzureKeyVaultConfigSection), healthChecksBuilder)
-                .AddDbDataProtection(_config.GetSection(DataProtectionConfigSection))
+                .AddSecretRepositoryClient(_config.GetSection(SecretRepositoryClientBaseConfigSection), healthChecksBuilder)
                 .AddNetworkPerspectiveCore(_config.GetSection(NetworkPerspectiveCoreConfigSection), healthChecksBuilder)
                 .AddScheduler(_config.GetSection(SchedulerConfigSection), _dbConnectionString)
+                .AddSecretRotationScheduler(_config.GetSection(SecretRotationConfigSection))
                 .AddPersistence(healthChecksBuilder)
                 .AddFramework(mvcBuilder);
 
@@ -87,6 +87,8 @@ namespace NetworkPerspective.Sync.Slack
             {
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
+
+            app.UseSecretRotationScheduler();
         }
     }
 }
