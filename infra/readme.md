@@ -96,7 +96,14 @@ When your done, push the basic secrets to kubernetes acr-credentials and domain 
 ./create-secrets.ps1
 ```
 
-## Vault
+## Installation
+### Deploy chart
+An install script that deploys helm chart is provided. It will install app in a staging configuration.
+```
+./install-np-sync.ps1
+```
+
+### Setup HCPVault
 `Google service account keys`, `slack client id`, `slack client secret`, `hashing-key` should be stored securely in Vault. HCP Vault can be deployed as a subchart, if so first initialize Vault and configure autounseal. Then securely deposit secrets inside the Vault. Please refer to scripts in [./infra/valut](valut) folder for setting up Vault and creating secrets.
 
 * `vault-connect.ps1` - port forward vault to localhost
@@ -104,12 +111,7 @@ When your done, push the basic secrets to kubernetes acr-credentials and domain 
 * `vault-secrets.ps1` - create secrets
 * `gsuite-sync-vault-policy.ps1` - add access policy for gsuite connector
 * `slack-sync-vault-policy.ps1` - add access policy for slack connector
-## Installation
-### Deploy chart
-An install script that deploys helm chart is provided. It will install app in a staging configuration.
-```
-./install-np-sync.ps1
-```
+
 ### Test chart
 After all resources are created please run tests. This will deploy pods that validate health checks. The pods should end in a succeeded state.
 ```
