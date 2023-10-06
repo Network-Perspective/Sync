@@ -36,7 +36,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             => _relations.Any(x => x.Name == relationName);
 
         public string GetTargetEmployeeEmail(string relationName)
-            => _relations.Single(x => x.Name == relationName).TargetEmployeeEmail;
+            => _relations.FirstOrDefault(x => x.Name == relationName)?.TargetEmployeeEmail;
 
         public IEnumerator<Relation> GetEnumerator()
         {
