@@ -15,6 +15,7 @@ metadata:
 {{ toYaml .Values.deployment.annotations | indent 4 }}
 {{- end }}
 spec:
+  serviceName: {{ template "mssql.fullname" . }}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:

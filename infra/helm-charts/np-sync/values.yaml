@@ -3,7 +3,7 @@ global:
   tlsSecret: np-sync-tls-prod
 
   imagePullSecrets: 
-    - name: np-sync-acr
+    - name: np-sync-np-acr
 
   secrets:
     rsaKeys: "np-sync-rsa"
@@ -26,8 +26,8 @@ global:
     tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
     resourceGroupName: RG-Test-Connectors
     email: blazej@networkperspective.io
-    #environment: staging
-    environment: production
+    environment: staging
+    # environment: production
 
   nodeSelector: {}
   tolerations: []
