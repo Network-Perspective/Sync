@@ -25,6 +25,7 @@ spec:
           tenantID: {{ .Values.global.domainValidation.tenantID }}
           resourceGroupName: {{ .Values.global.domainValidation.resourceGroupName }}
           environment: AzurePublicCloud
+          hostedZoneName: {{ .Values.global.domainValidation.hostedZoneName }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
