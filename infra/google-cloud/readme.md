@@ -6,6 +6,7 @@
     gcloud config set project network-perspective-sync
 
 </details>
+
 ## 2. Enable kubernetes API
 ## 3. Create cluster
 ### Standard cluster (with confidential nodes)
@@ -18,6 +19,23 @@ Use default configurate with the following changes:
   * Enable confidential GKE nodes  
 
 Estimated monthly cost	$192
+
+### Private cluster
+If the cluster is a "private cluster" it is necessary to enable connectivity to the internet. 
+
+* To do so first create a Cloud Router
+```
+gcloud compute routers create [ROUTER_NAME] --network [NETWORK_NAME] --region [REGION]
+```
+* Then create a Cloud NAT Gateway
+```
+gcloud compute routers nats create [NAT_NAME] \
+    --router=[ROUTER_NAME] \
+    --auto-allocate-nat-external-ips \
+    --nat-all-subnet-ip-ranges \
+    --enable-logging \
+    --region=[REGION]
+```
 
 <details>
   <summary>CLI command</summary>    
