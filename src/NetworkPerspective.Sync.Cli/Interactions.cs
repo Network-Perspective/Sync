@@ -121,7 +121,7 @@ namespace NetworkPerspective.Sync.Cli
             }
 
             // w don't want extra logging to appear on console
-            LogManager.DisableLogging();
+            LogManager.SuspendLogging();
 
             _fromCols = _options.FromCol.AsColumnDescriptorDictionary();
             _toCols = _options.ToCol.AsColumnDescriptorDictionary();
@@ -209,10 +209,10 @@ namespace NetworkPerspective.Sync.Cli
             {
                 csv.Read();
 
-                string value;
+                string? value;
                 for (int i = 0; csv.TryGetField<string>(i, out value); i++)
                 {
-                    header.Add(value.AsColumnDescriptor());
+                    header.Add((value ?? "").AsColumnDescriptor());
                 }
 
                 long lineCounter = 0;
