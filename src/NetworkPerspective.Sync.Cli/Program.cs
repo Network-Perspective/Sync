@@ -29,7 +29,6 @@ namespace NetworkPerspective.Sync.Cli
             await client!.Main();
         }
 
-
         [ArgActionMethod, ArgDescription("Add or update groups / reports in an existing network")]
         public async Task Groups(GroupsOpts args)
         {
@@ -48,6 +47,13 @@ namespace NetworkPerspective.Sync.Cli
         public async Task Signal(SignalOpts args)
         {
             var client = Program.Setup<SignalClient, SignalOpts>(args);
+            await client!.Main();
+        }
+
+        [ArgActionMethod, ArgDescription("Add or update user and user's group access")]
+        public async Task Users(UsersOpts args)
+        {
+            var client = Program.Setup<UsersClient, UsersOpts>(args);
             await client!.Main();
         }
     }
