@@ -4,7 +4,7 @@
     "title": "Network Perspective",
     "version": "v1"
   },
-  "host": "localhost:5001",
+  "host": "app.networkperspective.io",
   "schemes": [
     "https"
   ],
@@ -23,6 +23,34 @@
           },
           "401": {
             "description": "Logged out"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/account/is-logged-in-200": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Is logged in",
+        "description": "Validates provided access token",
+        "operationId": "Account_GetIsLoggedIn200",
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Logged in",
+            "schema": {
+              "type": "boolean"
+            }
           },
           "400": {
             "description": "Model validation error"
@@ -7071,6 +7099,10 @@
           "description": "DataSource or Service identifier",
           "type": "string"
         },
+        "apiBasePath": {
+          "description": "Connectors API base path for private cloud deployments",
+          "type": "string"
+        },
         "name": {
           "description": "Optional user given name for the connector",
           "type": "string"
@@ -7285,6 +7317,12 @@
         "authority": {
           "type": "string"
         },
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "include": {
           "type": "array",
           "items": {
@@ -7292,6 +7330,12 @@
           }
         },
         "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowedIpRanges": {
           "type": "array",
           "items": {
             "type": "string"
@@ -8950,6 +8994,13 @@
             "type": "string"
           },
           "readOnly": true
+        },
+        "groupsWithoutReports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "readOnly": true
         }
       }
     },
@@ -9248,6 +9299,17 @@
           "type": "string"
         },
         "groupName": {
+          "type": "string"
+        },
+        "parentGroupId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "parentGroupName": {
+          "type": "string"
+        },
+        "parentGroupReportId": {
+          "format": "uuid",
           "type": "string"
         },
         "reportOverview": {
@@ -10132,7 +10194,8 @@
         "Registered",
         "EmailUnconfimed",
         "Unknown",
-        "LicenseExpired"
+        "LicenseExpired",
+        "ForbiddenIp"
       ],
       "type": "string"
     },
