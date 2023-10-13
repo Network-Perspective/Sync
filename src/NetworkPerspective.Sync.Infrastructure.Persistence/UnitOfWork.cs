@@ -7,6 +7,7 @@ using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Repositories;
 using NetworkPerspective.Sync.Infrastructure.Persistence.Repositories;
+using NetworkPerspective.Sync.Infrastructure.SecretStorage;
 
 namespace NetworkPerspective.Sync.Infrastructure.Persistence
 {
@@ -31,10 +32,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence
         public IStatusLogRepository GetStatusLogRepository()
             => new StatusLogRepository(_dbContext.StatusLogEntities);
 
+        public IDbSecretRepository GetDbSecretRepository()
+            => new DbSecretRepository(_dbContext.SecretEntities);
+
         public Task MigrateAsync()
             => _dbContext.Database.MigrateAsync();
 
         public void Dispose()
             => _dbContext?.Dispose();
+
+
     }
 }

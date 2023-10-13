@@ -1,0 +1,190 @@
+# shared between all connectors subcharts
+global:
+  tlsSecret: np-sync-tls-prod
+
+  imagePullSecrets: 
+    - name: np-sync-np-acr
+
+  secrets:
+    rsaKeys: "np-sync-rsa"
+
+  mssql:
+    saSecret: np-sync-mssql-sapassword    
+
+  appSettings:
+    networkPerspectiveApi: http://host.docker.internal:5000/
+    applicationInsightsConnectionString: "InstrumentationKey=be1012fe-efad-4be4-ac74-cc7f47a39046;IngestionEndpoint=https://germanywestcentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://germanywestcentral.livediagnostics.monitor.azure.com/"
+    useLocalHcpVault: true
+    #hcpVaultUri: "https://c1.test.networkperspective.io:8200"
+
+  domainValidation:
+    enabled: true
+    hostedZoneName: c1.test.networkperspective.io
+    clientID: 73a53227-3200-4c93-8582-e654830b4833
+    clientSecretRef: np-sync-domain-validation
+    subscriptionID: f1249bd2-7e57-4a25-b4f0-c1baabdb3c99
+    tenantID: 1d930625-fab1-4dd2-8fc3-77066150120e
+    resourceGroupName: RG-Test-Connectors
+    email: blazej@networkperspective.io
+    environment: staging
+    # environment: production
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  redeployOnUpdate: true
+
+mssql:
+  enabled: true
+  edition: 
+    value: Express
+
+gsuite:
+  enabled: true
+  googleKeys: "np-sync-gsuite-secrets"
+  ingress:
+    hosts: 
+    - host: gsuite.c1.test.networkperspective.io
+    tls: 
+    - hosts:
+        - gsuite.c1.test.networkperspective.io
+
+slack:
+  enabled: true
+  slackSecrets: "np-sync-slack-secrets"
+  ingress:
+    hosts: 
+    - host: slack.c1.test.networkperspective.io
+    tls: 
+    - hosts:
+        - slack.c1.test.networkperspective.io
+
+vault:
+  global:
+    enabled: true
+    tlsDisable: false
+  injector:
+    enabled: false
+  server:
+    dev:
+      enabled: false  # Set to false if you are going production
+    standalone:
+      config: |
+        ui = true
+        
+        storage "file" {
+          path = "/vault/data"
+        }
+        listener "tcp" {
+          address = "0.0.0.0:8200"
+          tls_cert_file = "/vault/userconfig/vault-tls/tls.crt"
+          tls_key_file  = "/vault/userconfig/vault-tls/tls.key"
+        }
+        seal "awskms" {
+          region     = "us-east-1"
+          kms_key_id = "fb77baa6-40a2-4cb8-a47c-64e602122f5b"
+        }
+    volumes:
+    - name: vault-tls
+      secret:
+        defaultMode: 0420
+        secretName: np-sync-tls-prod
+    - name: aws-unseal
+      secret:
+        defaultMode: 0420
+        secretName: np-sync-aws-unseal      
+    volumeMounts:
+    - mountPath: "/vault/userconfig/vault-tls"
+      name: vault-tls
+      readOnly: true
+    - mountPath: "/etc/aws"
+      name: aws-unseal
+      readOnly: true
+    extraEnvironmentVars:
+      AWS_SHARED_CREDENTIALS_FILE: "/etc/aws/aws-unseal"
+    seal:
+      awskms:
+        region: "us-east-1"
+        kms_key_id: "arn:aws:kms:us-east-1:109245279356:key/fb77baa6-40a2-4cb8-a47c-64e602122f5b"
+    service:
+      type: ClusterIP
+    auditStorage:
+      enabled: true
+    # a sidecar that will trigger reload of vault config including tls certificates every 24 hours
+    shareProcessNamespace: true
+    extraContainers:
+    - name: daily-reload
+      image: "alpine:latest"
+      imagePullPolicy: IfNotPresent
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          while true; do
+            sleep 86400            
+            VAULT_PID=$(pidof vault)            
+            if [ -n "$VAULT_PID" ]; then
+              kill -HUP $VAULT_PID
+            else
+              echo "Vault process not found. Cannot reload."
+            fi
+          done
+
+networkPolicy:
+  # forbid traffic from other namespaces
+  enabled: true
+
+nLogSettings:
+  content: |
+    {
+      "Logging": {
+        "NLog": {
+          "IncludeScopes": true
+        }
+      },
+      "NLog": {
+        "throwConfigExceptions": true,
+        "extensions": [
+          { "assembly": "NLog.Web.AspNetCore" },
+          { "assembly": "NLog.Extensions.Logging" },
+          { "assembly": "Microsoft.ApplicationInsights.NLogTarget" }
+        ],
+        "variables": {
+          "layoutHeader": "${date:universalTime=true:format=yyyy-MM-dd HH\\:mm\\:ss.fff}|${level:truncate=4:uppercase=true}|${logger}",
+          "layoutBody": "${message}${exception:format=tostring}",
+          "minLevel": "Info"
+        },
+        "targets": {
+          "ai": {
+            "type": "ApplicationInsightsTarget"
+          },      
+          "console": {
+            "type": "ColoredConsole",
+            "layout": "${layoutHeader}|${layoutBody}"
+          }
+        },
+        "rules": [
+          {
+            "logger": "Quartz.*",
+            "maxLevel": "Info",
+            "final": true
+          },
+          {
+            "logger": "Microsoft.*",
+            "maxLevel": "Info",
+            "final": true
+          },
+          {
+            "logger": "*",
+            "minLevel": "${minLevel}",
+            "writeTo": "console"
+          },      
+          {
+            "logger": "*",
+            "minLevel": "${minLevel}",
+            "writeTo": "ai"
+          }
+        ]
+      }
+    }
+
+

@@ -128,7 +128,6 @@ namespace NetworkPerspective.Sync.Cli
                 reader = fileName != null ? _fileSystem.File.OpenText(fileName) : Console.In;
                 var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
                 {
-                    NewLine = Environment.NewLine,
                     HasHeaderRecord = true,
                     Delimiter = delimiter,
                 };

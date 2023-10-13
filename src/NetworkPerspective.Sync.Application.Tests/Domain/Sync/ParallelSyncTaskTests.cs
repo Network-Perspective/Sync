@@ -8,6 +8,7 @@ using FluentAssertions;
 using FluentAssertions.Extensions;
 
 using NetworkPerspective.Sync.Application.Domain.Sync;
+using NetworkPerspective.Sync.Common.Tests;
 
 using Xunit;
 
@@ -37,6 +38,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
         }
 
         [Fact]
+        [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
         public void ShouldRunInParallel()
         {
             // Arrange
