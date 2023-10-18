@@ -78,7 +78,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 {
                     await _slackClientUserScope.JoinChannelAsync(channel.Id, botId, stoppingToken);
                     successfulJoins++;
-                } 
+                }
                 catch (Exception)
                 {
                     failedJoins++;

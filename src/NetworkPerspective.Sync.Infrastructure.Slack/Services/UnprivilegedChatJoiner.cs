@@ -38,14 +38,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                     {
                         await _slackClientBotScope.JoinChannelAsync(channel.Id, stoppingToken);
                         successfulJoins++;
-                    } 
+                    }
                     catch (Exception)
                     {
                         failedJoins++;
                     }
                 }
             }
-            
+
             _logger.LogInformation("Successfully joined {0} channels", successfulJoins);
             if (failedJoins > 0) _logger.LogInformation("Failed to join {0} channels", failedJoins);
 
