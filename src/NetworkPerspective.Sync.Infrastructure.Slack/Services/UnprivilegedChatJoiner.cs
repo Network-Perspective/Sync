@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,13 +26,28 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
             var teams = await _slackClientBotScope.GetTeamsListAsync(stoppingToken);
 
+            var successfulJoins = 0;
+            var failedJoins = 0;
             foreach (var team in teams)
             {
                 var channels = await _slackClientBotScope.GetSlackChannelsAsync(team.Id, stoppingToken);
 
                 foreach (var channel in channels.Where(x => !x.IsPrivate))
-                    await _slackClientBotScope.JoinChannelAsync(channel.Id, stoppingToken);
+                {
+                    try
+                    {
+                        await _slackClientBotScope.JoinChannelAsync(channel.Id, stoppingToken);
+                        successfulJoins++;
+                    }
+                    catch (Exception)
+                    {
+                        failedJoins++;
+                    }
+                }
             }
+
+            _logger.LogInformation("Successfully joined {0} channels", successfulJoins);
+            if (failedJoins > 0) _logger.LogInformation("Failed to join {0} channels", failedJoins);
 
             _logger.LogDebug("Joining public channels completed");
         }
