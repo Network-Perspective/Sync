@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,17 +48,44 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
         private async Task JoinPublicChannelsAsync(IReadOnlyCollection<ConversationsListResponse.SingleConversation> botChannels, CancellationToken stoppingToken)
         {
+            var successfulJoins = 0;
+            var failedJoins = 0;
             foreach (var channel in botChannels.Where(x => !x.IsPrivate))
-                await _slackClientBotScope.JoinChannelAsync(channel.Id, stoppingToken);
+            {
+                try
+                {
+                    await _slackClientBotScope.JoinChannelAsync(channel.Id, stoppingToken);
+                    successfulJoins++;
+                }
+                catch (Exception)
+                {
+                    failedJoins++;
+                }
+            }
+            _logger.LogInformation("Successfully joined {0} public channels", successfulJoins);
+            if (failedJoins > 0) _logger.LogInformation("Failed to join {0} public channels", failedJoins);
         }
 
         private async Task JoinPrivateChannelsAsync(string botId, IReadOnlyCollection<ConversationsListResponse.SingleConversation> botChannels, IReadOnlyCollection<AdminConversationsListResponse.SingleConversation> adminChannels, CancellationToken stoppingToken)
         {
+            var successfulJoins = 0;
+            var failedJoins = 0;
             foreach (var channel in adminChannels)
             {
-                if (!IsAlreadyMemberOfChannel(botChannels, channel))
+                if (IsAlreadyMemberOfChannel(botChannels, channel)) continue;
+
+                try
+                {
                     await _slackClientUserScope.JoinChannelAsync(channel.Id, botId, stoppingToken);
+                    successfulJoins++;
+                } 
+                catch (Exception)
+                {
+                    failedJoins++;
+                }
             }
+            _logger.LogInformation("Successfully joined {0} private channels", successfulJoins);
+            if (failedJoins > 0) _logger.LogInformation("Failed to join {0} private channels", failedJoins);
         }
 
         private static bool IsAlreadyMemberOfChannel(IReadOnlyCollection<ConversationsListResponse.SingleConversation> botChannels, AdminConversationsListResponse.SingleConversation channel)
