@@ -1,0 +1,6 @@
+email;report_ids
+john.doe@example.com;['a9f6b2c1']
+anna.smith@example.com;['d3e4f5a6']
+mary.jones@example.com;['b7c8d9e0']
+paul.taylor@example.com;['e2d3f4a5', 'a2b3c4d5', 'c6d7e8f9']
+kate.wilson@example.com;['d4e5f6a7']

@@ -1,0 +1,8 @@
+id;name;category;parent_id
+a9f6b2c1;Devops Team;Team;444e5f6a
+d3e4f5a6;Compliance Department;Department;8deef6a7
+b7c8d9e0;Marketing Division;Division;c3e4f5a6
+e2d3f4a5;Engineering Team;Team;b7c8d9e0
+a2b3c4d5;Quality Assurance Team;Team;b7c8d9e0
+c6d7e8f9;Human Resources Department;Department;c3e4f5a6
+8d4e5f6a;Finance Department;Department;c3e4f5a6
