@@ -1,6 +1,25 @@
 # MS Exchange integration
 
-Network Perspective offers a way to handle interaction data extracted from on prem MS Exchange. This page describes briefly steps necessary to extract the metadata. Please note that all data should be anonymized using HMAC function such as below:
+Network Perspective offers a way to handle interaction data extracted from on prem MS Exchange. This page describes briefly steps necessary to extract the metadata. 
+
+
+## Overview
+<img src="custom-integration/ExchangeConnector.png">
+
+Components included on the diagram:
+
+1. **MS Exchange API** - the solution uses MS Exchange Transport Logs api to infer interactions between employees. How to extract them is in details described in further part of this document.
+2. **Employee interaction collector** - is a set of powershell scripts that extracts interactions from MS Exchange transport logs. The script loops over a list of employyes and downloads exchange email transport logs and calendar events diagnostic logs for each employee. It might use some form of backend storage (DB or flat file) to save temporary employee data. At the end of the process all employee data is hashed and merged into a few CSV files, and finally published on an SFTP server.
+3. **SFTP Server** - this is a secure point for data exchange between customer and Network Perspective. Access might be limited to single static ip address from which Network Perpsective is allowed to connect.
+4. **Batch processor** - a component in Network Perspective's infrastructure that securely downloads data from SFTP server, applies post processing if necessary and pushes data to Network Perspective API. Private key for SSH auth (and other credentials) is kept secure in Azure KeyVault.
+5. **Network Perspective API** - a generalized API shared by all different connectors. Accepts data, and forwards it to Analytical Module (not included in the diagram) for further processing. Provides endpoints necessary for functioning of Web User Interface.
+6. **Web user interface** - Network Perspective provides Web User Interface that makes it easy for users to acccess Work Smart Report and actions that drive work habits improvement. UI might be accessed over the internet, but there is also an option to limit access to whielisted set of ip addresses (or a subnet). There are multiple authentication options available including Azure AD Signle Sign On.
+
+
+# Implementation details
+
+## Hashing
+Please note that all data should be anonymized using HMAC function such as below:
 
 <details>
 <summary>HMAC code snippet</summary>
@@ -17,10 +36,13 @@ function Get-HMACSHA256 {
     }
     
     $hmacsha = New-Object System.Security.Cryptography.HMACSHA256
-    $hmacsha.key = [Text.Encoding]::ASCII.GetBytes($secret)
-    $signature = $hmacsha.ComputeHash([Text.Encoding]::ASCII.GetBytes($message))
+    $hmacsha.key = [System.Text.Encoding]::UTF8.GetBytes($secret)
     
-    $hashString = [BitConverter]::ToString($signature).Replace("-", "").ToLower();
+    $data = [System.Text.Encoding]::UTF8.GetBytes($message)
+    $hash = $hmacsha.ComputeHash($data)
+    
+    $hashString = [System.Convert]::ToBase64String($hash)
+
     return $hashString    
 }
 ```
