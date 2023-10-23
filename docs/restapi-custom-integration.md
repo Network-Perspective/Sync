@@ -12,7 +12,7 @@ Example payload to the [API endpoint](https://app.networkperspective.io/api/docs
   "serviceToken": "your_api_token",
   "entites": [
     {
-      "changeDate": "2023-05-30T00:00:00+02:00",
+      "changeDate": "2023-05-30TT00:00:00.000Z",
       "ids": {
         "employee_id": "39954af95558",
         "email": "a440e59f68fa"
@@ -43,7 +43,7 @@ Example payload to the [API endpoint](https://app.networkperspective.io/api/docs
 ```
 Fields of a single employee record:
 * changeDate 
-  * date when the row info gathered yyyy-MM-dd
+  * date when the row info gathered UTC ISO date format
 * ids  
   * list of employee unique identifiers - it is recommended to use at least two identifiers one of which is email address.
   * employee_id
@@ -153,3 +153,52 @@ Fields in the users record:
   * optional additional information that is displayed in the application admin panel next to the user that could help the admin manage user permissions manually 
   * "name"
     * employye first and last name
+
+
+## Signalling batch start / end 
+Custom connector should signal start and completion of synchronization. Signalling makes it possible to handle the synchronization in an transactional / atomic way. Either all data in the batch is processed or whole batch is discarded. This is especially important when implementing a connector that synchronized interactions or other data that have to be split into multiple requests. Anyways start / end signalling is a **requirement** and internal model will not be updated if batch start and completion isn't properly signalled.
+
+### Before sending data (SyncStart)
+Before sending actual data start of synchronization should be signalled. This is similar to "begin transaction" in sql.
+
+Example payload to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_ReportStart)
+```json
+{
+  "serviceToken": "your_api_token",
+  "syncPeriodStart": "2023-09-20T00:00:00.000Z",
+  "syncPeriodEnd": "2023-10-20T00:00:00.000Z",
+}
+```
+
+### After successful sync (SyncCompleted)
+When whole batch was sent successfully, connector should signal success. This is simillar to "commit transaction" in sql. All data that arrived since the SyncStart was signalled will be used to update internal model.
+
+Example payload to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_ReportCompleted)
+
+```json
+{
+  "serviceToken": "string",
+  "syncPeriodStart": "2023-09-20T00:00:00.000Z",
+  "syncPeriodEnd": "2023-10-20T00:00:00.000Z",
+  "success": true,
+  "message": "OK"
+}
+```
+
+### After error during sync (SyncError)
+If connector encounters any error that prevents it to complete the batch it should signal an error. This is simillar to "rollback transaction" in sql. All data coming from the batch will be discared.
+
+Example payload to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_ReportCompleted)
+
+```json
+{
+  "serviceToken": "string",
+  "syncPeriodStart": "2023-09-20T00:00:00.000Z",
+  "syncPeriodEnd": "2023-10-20T00:00:00.000Z",
+  "success": false,
+  "message": "Reason why sync failed"
+}
+```
+
+### Gotchas
+Connector might fail in unrecoverable way meaning it was unable to send SyncError signal. This is still fine, as the system assumes only one batch transaction per connector can be running at the same time. Hence next time SyncStart is signalled it will not only start a new batch but also discard any uncompleted batch for the perticular connector (identified with the token).
