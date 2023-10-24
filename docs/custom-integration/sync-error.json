@@ -1,0 +1,7 @@
+{
+    "serviceToken": "your_api_token",
+    "syncPeriodStart": "2023-09-20T00:00:00.000Z",
+    "syncPeriodEnd": "2023-10-20T00:00:00.000Z",
+    "success": false,
+    "message": "Reason why sync failed"
+}

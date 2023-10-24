@@ -6,13 +6,13 @@ This document describes json file format that is accepted by Network Perspective
 
 This api call shall contain list of employees and teams or groups they belong to.  It should be exported monthly or more often. 
 
-Example payload to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_SyncEntities)
+Example [payload](./custom-integration/employees.json) to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_SyncEntities)
 ```json
 {
   "serviceToken": "your_api_token",
   "entites": [
     {
-      "changeDate": "2023-05-30TT00:00:00.000Z",
+      "changeDate": "2023-05-30T00:00:00.000Z",
       "ids": {
         "employee_id": "39954af95558",
         "email": "a440e59f68fa"
@@ -75,7 +75,7 @@ All fields except dates (row_date & employment_date) shall be hashed with HMAC a
 
 This api call shall contain unhashed names of groups & teams within the company that will map to reports visible in Network Perspective UI. 
 
-Example payload to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_SyncGroups)
+Example [payload](./custom-integration/groups.json) to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_SyncGroups)
 ```json
 {
   "serviceToken": "your_api_token",
@@ -117,23 +117,24 @@ Fields id & parent_id shall be hashed with HMAC algorithm and customer key befor
 ## Users & permissions
 We might want to automate synchronization of application users and their permissions. This is optional as users can be also created and assigned permissions via admin UI. However, if there are more than dozens of users to be managed it is a good practice to automate this process in the long run.
 
-Example payload to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_SyncUsers)
+Example [payload](./custom-integration/users.json) to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_SyncUsers)
 ```json
 {
   "serviceToken": "your_api_token",
   "users": [
     {
-      "email": "john.doe@example.com",
+      "email": "john.doe@networkperspective.io",
       "groupAccess": [
         "a9f6b2c1"
       ],
       "ids": {
-        "email": "john.doe@example.com"
+        "email": "john.doe@networkperspective.io"
       },
       "props": {
         "name": "John Doe"
       }
     },
+    ...
   ]
 }
 ```
@@ -161,7 +162,7 @@ Custom connector should signal start and completion of synchronization. Signalli
 ### Before sending data (SyncStart)
 Before sending actual data start of synchronization should be signalled. This is similar to "begin transaction" in sql.
 
-Example payload to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_ReportStart)
+Examplep [payload](./custom-integration/sync-start.json) to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_ReportStart)
 ```json
 {
   "serviceToken": "your_api_token",
@@ -173,7 +174,7 @@ Example payload to the [API endpoint](https://app.networkperspective.io/api/docs
 ### After successful sync (SyncCompleted)
 When whole batch was sent successfully, connector should signal success. This is simillar to "commit transaction" in sql. All data that arrived since the SyncStart was signalled will be used to update internal model.
 
-Example payload to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_ReportCompleted)
+Example [payload](./custom-integration/sync-completed.json)  o the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_ReportCompleted)
 
 ```json
 {
@@ -188,7 +189,7 @@ Example payload to the [API endpoint](https://app.networkperspective.io/api/docs
 ### After error during sync (SyncError)
 If connector encounters any error that prevents it to complete the batch it should signal an error. This is simillar to "rollback transaction" in sql. All data coming from the batch will be discared.
 
-Example payload to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_ReportCompleted)
+Example [payload](./custom-integration/sync-error.json) to the [API endpoint](https://app.networkperspective.io/api/docs/#!/SyncHashed/SyncHashed_ReportCompleted)
 
 ```json
 {
