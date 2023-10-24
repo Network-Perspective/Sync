@@ -1,0 +1,31 @@
+{
+    "serviceToken": "your_api_token",
+    "entites": [
+      {
+        "changeDate": "2023-05-30T00:00:00.000Z",
+        "ids": {
+          "employee_id": "39954af95558",
+          "email": "a440e59f68fa"
+        },
+        "groups": [
+          "a9f6b2c1",
+          "d3e4f5a6",
+          "b7c8d9e0",
+          "f0a1b2c3"
+        ],
+        "props": {
+          "team_id": "a9f6b2c1",
+          "employment_date": "1998-10-01"
+        },
+        "relationships": [
+          {
+            "relationshipName": "Supervisor",
+            "targetIds": {
+              "employee_id": "fbc3e7b8e8d7",
+              "email": "a440e59f68fa"
+            }
+          }
+        ]
+      }
+    ]
+  }

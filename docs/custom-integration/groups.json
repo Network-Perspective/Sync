@@ -1,0 +1,16 @@
+{
+    "serviceToken": "your_api_token",
+    "groups": [
+      {
+        "id": "a9f6b2c1",
+        "name": "Devops Team",
+        "category": "Team",
+        "parentId": "e2d3f4a5"
+      },
+      {
+        "id": "e2d3f4a5",
+        "name": "Engineering Department",
+        "category": "Department"
+      }
+    ]
+  }
