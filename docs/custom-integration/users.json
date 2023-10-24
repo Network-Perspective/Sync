@@ -1,0 +1,17 @@
+{
+    "serviceToken": "your_api_token",
+    "users": [
+      {
+        "email": "john.doe@networkperspective.io",
+        "groupAccess": [
+          "a9f6b2c1"
+        ],
+        "ids": {
+          "email": "john.doe@networkperspective.io"
+        },
+        "props": {
+          "name": "John Doe"
+        }
+      }
+    ]
+  }
