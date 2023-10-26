@@ -16,9 +16,11 @@
     Technical reference for individual connectors<br/>
     <a href="docs/google-connector.md">Google Workspace</a> 
     ·
-    <a href="docs/google-connector.md">Slack</a> 
-    · Office365
-    · Cli
+    <a href="docs/slack-connector.md">Slack</a> 
+    · 
+    <a href="docs/office-connector.md">Office365</a>
+    · 
+    <a href="docs/custom-integration.md">Flat files (CSV)</a>
   </p>
 </div>
 
