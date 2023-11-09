@@ -7,11 +7,6 @@ For a comprehensive guide on creating Slack bots, refer to the
 * Select the "From manifest" option.
 * Use the provided manifest file <a href="slack/slack-bot-manifest.yml">slack-bot-manifest.yml</a> and the bot icon <a href="slack/slack-np-bot-icon.png">slack-np-bot-icon.png</a>.
 
-## Install app into your workspace:
-Click on the "Install to Workspace" button shown below:
-
-<img src="slack/add-to-workspace.png" />
-
 ## Gather client id and secret
 On the same page, scroll down to App Credentials.
 
