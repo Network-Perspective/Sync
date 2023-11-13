@@ -83,19 +83,8 @@ In this scenario, the customer doesn’t administer services and secrets on his 
 <img src="office365/office365-deployement-saas.png" />
 
 ### Private Azure Key Vault
-In this scenario Azure Key Vault is deployed in customer's infrastructure to hold all secrets securely in private infrastructure. 
+In this scenario Azure Key Vault is deployed in customer's infrastructure to hold all secrets securely within private Azure infrastructure. 
 <img src="office365/office365-private-key-vault-deployment.png" />
-
-### Kubernetes deployment 
-The deployment and updates are automated with a Helm chart provided that provisions all the connector’s components (Connector, MSSQL Express, Ingress) included  on the diagram. Sensitive secrets such us Office365 access token are managed securely with HCP Vault subchart.
-This model is described in depth on a [separate page](../infra/readme.md).
-
-<img src="office365/office365-k8s-deployment.png" alt="Kubernetes Deployment Diagram" >
-
-
-### Private Cloud (Azure)
-In this scenario, the customer has his own private cloud and wants to administer services and secrets on his own. Azure Key Vault and Office 365 Connector are hosted in the customer’s private cloud and the Network Perspective System is hosted in the public Cloud.
-<img src="office365/office365-deployement-azure.png" />
 
 ## Concepts
 ### Persistency
