@@ -56,6 +56,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Mappers
             var managerId = new Dictionary<string, string>
             {
                 { "Email", managerEmail },
+                { "Username", "baz" },
                 { dataSourceId, managerDataSourceId }
             };
             var expectedRelations = new[] { new HashedEntityRelationship { RelationshipName = Relation.SupervisorRelationName, TargetIds = managerId } };
