@@ -5,6 +5,7 @@ using System.Linq;
 using Google.Apis.Admin.Directory.directory_v1.Data;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Google.Services;
@@ -17,11 +18,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
     {
         private readonly ICompanyStructureService _companyStructureService;
         private readonly ICustomAttributesService _customAttributesService;
+        private readonly EmailFilter _emailFilter;
 
-        public EmployeesMapper(ICompanyStructureService companyStructureService, ICustomAttributesService customAttributesService)
+        public EmployeesMapper(ICompanyStructureService companyStructureService, ICustomAttributesService customAttributesService,
+            EmailFilter emailFilter)
         {
             _companyStructureService = companyStructureService;
             _customAttributesService = customAttributesService;
+            _emailFilter = emailFilter;
         }
 
         public EmployeeCollection ToEmployees(IEnumerable<User> users)
@@ -38,7 +42,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
                 var employeeRelations = GetEmployeeRelations(user);
 
                 var employeeAliases = user.Emails.Select(x => x.Address).ToHashSet();
-                var employeeId = EmployeeId.CreateWithAliases(user.PrimaryEmail, user.Id, employeeAliases);
+                var employeeId = EmployeeId.CreateWithAliases(user.PrimaryEmail, user.Id, employeeAliases, _emailFilter);
                 var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations);
 
                 employees.Add(employee);

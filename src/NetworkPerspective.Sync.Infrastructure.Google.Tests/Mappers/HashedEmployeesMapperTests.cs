@@ -51,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
             {
             };
             var exectedRelations1 = new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, manager_email) });
-            var expectedEmployeeId1 = EmployeeId.CreateWithAliases(user_1_email, user_1_id, new[] { user_1_email });
+            var expectedEmployeeId1 = EmployeeId.CreateWithAliases(user_1_email, user_1_id, new[] { user_1_email }, EmailFilter.Empty);
             var expectedEmployee1 = Employee.CreateInternal(expectedEmployeeId1, expectedGroups1, expectedProps1, exectedRelations1);
 
             var expectedGroups2 = new[]
@@ -66,7 +66,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
             {
             };
             var expectedRelations2 = new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, manager_email) });
-            var expectedEmployeeId2 = EmployeeId.CreateWithAliases(user_2_email, user_2_id, new[] { user_2_email });
+            var expectedEmployeeId2 = EmployeeId.CreateWithAliases(user_2_email, user_2_id, new[] { user_2_email }, EmailFilter.Empty);
             var expectedEmployee2 = Employee.CreateInternal(expectedEmployeeId2, expectedGroups2, expectedProps2, expectedRelations2);
 
             var expectedEmployees = new EmployeeCollection(new[] { expectedEmployee1, expectedEmployee2 }, x => $"{x}_hashed");
@@ -136,7 +136,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
                 }
             };
 
-            var mapper = new HashedEmployeesMapper(new CompanyStructureService(), new CustomAttributesService(CustomAttributesConfig.Empty), x => $"{x}_hashed");
+            var mapper = new HashedEmployeesMapper(new CompanyStructureService(), new CustomAttributesService(CustomAttributesConfig.Empty), x => $"{x}_hashed", EmailFilter.Empty);
 
             // Act
             var result = mapper.ToEmployees(users);

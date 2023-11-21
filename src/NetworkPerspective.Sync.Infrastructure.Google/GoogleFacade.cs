@@ -52,7 +52,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
 
-            var mapper = new EmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes));
+            var mapper = new EmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes),
+                context.NetworkConfig.EmailFilter);
 
             var employeesCollection = context.EnsureSet(() => mapper.ToEmployees(users));
 
@@ -80,7 +81,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
 
-            var mapper = new EmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes));
+            var mapper = new EmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes),
+                context.NetworkConfig.EmailFilter);
 
             var employeesCollection = context.EnsureSet(() => mapper.ToEmployees(users));
             return employeesCollection;
@@ -95,7 +97,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
 
-            var mapper = new HashedEmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes), context.HashFunction);
+            var mapper = new HashedEmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes), context.HashFunction, context.NetworkConfig.EmailFilter);
 
             return mapper.ToEmployees(users);
         }
