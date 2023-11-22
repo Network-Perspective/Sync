@@ -46,8 +46,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var callendarClient = new CalendarClient(_tasksStatusesCache, _googleConfig, _loggerFactory.CreateLogger<CalendarClient>());
             var employeeCriterias = new[] { new NonServiceUserCriteria(_loggerFactory.CreateLogger<NonServiceUserCriteria>()) };
             var usersClient = new UsersClient(_tasksStatusesCache, _googleConfig, employeeCriterias, _loggerFactory.CreateLogger<UsersClient>());
-
-            return new GoogleFacade(_networkService, credentialsProvider, mailboxClient, callendarClient, usersClient, _clock, _loggerFactory);
+            var userCalendarTimeZoneReader = new UserCalendarTimeZoneReader(_googleConfig, _loggerFactory.CreateLogger<UserCalendarTimeZoneReader>());
+            return new GoogleFacade(_networkService, credentialsProvider, mailboxClient, callendarClient, usersClient, userCalendarTimeZoneReader, _clock, _loggerFactory);
         }
     }
 }

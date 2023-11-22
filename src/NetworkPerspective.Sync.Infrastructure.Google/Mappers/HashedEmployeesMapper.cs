@@ -18,16 +18,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
     {
         private readonly ICompanyStructureService _companyStructureService;
         private readonly ICustomAttributesService _customAttributesService;
+        private readonly IEmployeePropsSource _employeePropsSource;
         private readonly HashFunction.Delegate _hashFunc;
         private readonly EmailFilter _emailFilter;
 
         public HashedEmployeesMapper(ICompanyStructureService companyStructureService,
             ICustomAttributesService customAttributesService,
+            IEmployeePropsSource employeePropsSource,
             HashFunction.Delegate hashFunc,
             EmailFilter emailFilter)
         {
             _companyStructureService = companyStructureService;
             _customAttributesService = customAttributesService;
+            _employeePropsSource = employeePropsSource;
             _hashFunc = hashFunc;
             _emailFilter = emailFilter;
         }
@@ -76,6 +79,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
         private IDictionary<string, object> GetEmployeeProps(User user)
         {
             var props = _customAttributesService.GetPropsForHashedEmployee(user.GetCustomAttrs());
+
+            props = _employeePropsSource.EnrichProps(user.PrimaryEmail, props);
 
             return props;
         }

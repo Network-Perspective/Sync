@@ -156,7 +156,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
                 propAttributes: Array.Empty<string>(),
                 relationships: Array.Empty<CustomAttributeRelationship>());
 
-            var mapper = new EmployeesMapper(new CompanyStructureService(), new CustomAttributesService(customAttributesConfig), EmailFilter.Empty);
+            var mapper = new EmployeesMapper(
+                new CompanyStructureService(),
+                new CustomAttributesService(customAttributesConfig),
+                EmployeePropsSource.Empty,
+                EmailFilter.Empty
+            );
 
             // Act
             var result = mapper.ToEmployees(users);

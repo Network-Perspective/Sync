@@ -18,13 +18,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
     {
         private readonly ICompanyStructureService _companyStructureService;
         private readonly ICustomAttributesService _customAttributesService;
+        private readonly IEmployeePropsSource _employeePropsSource;
         private readonly EmailFilter _emailFilter;
 
-        public EmployeesMapper(ICompanyStructureService companyStructureService, ICustomAttributesService customAttributesService,
+        public EmployeesMapper(
+            ICompanyStructureService companyStructureService,
+            ICustomAttributesService customAttributesService,
+            IEmployeePropsSource employeePropsSource,
             EmailFilter emailFilter)
         {
             _companyStructureService = companyStructureService;
             _customAttributesService = customAttributesService;
+            _employeePropsSource = employeePropsSource;
             _emailFilter = emailFilter;
         }
 
@@ -76,6 +81,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
                 var bucketAccCreationDate = new DateTime(accCreationDate.Value.Year, accCreationDate.Value.Month, 1);
                 props.Add(Employee.PropKeyCreationTime, bucketAccCreationDate);
             }
+
+            props = _employeePropsSource.EnrichProps(user.PrimaryEmail, props);
 
             return props;
         }

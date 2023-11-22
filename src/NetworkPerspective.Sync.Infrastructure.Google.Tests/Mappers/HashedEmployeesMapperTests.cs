@@ -136,7 +136,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
                 }
             };
 
-            var mapper = new HashedEmployeesMapper(new CompanyStructureService(), new CustomAttributesService(CustomAttributesConfig.Empty), x => $"{x}_hashed", EmailFilter.Empty);
+            var mapper = new HashedEmployeesMapper(
+                new CompanyStructureService(),
+                new CustomAttributesService(CustomAttributesConfig.Empty),
+                EmployeePropsSource.Empty,
+                x => $"{x}_hashed", EmailFilter.Empty
+            );
 
             // Act
             var result = mapper.ToEmployees(users);
