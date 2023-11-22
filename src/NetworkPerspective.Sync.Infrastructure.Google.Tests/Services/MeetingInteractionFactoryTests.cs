@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Google.Services;
 
@@ -29,7 +30,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             const string user3Email_alias = "user3_alias@networkperspective.io";
             const string externalUserEmail = "external@foo.com";
 
-            var user3Id = EmployeeId.CreateWithAliases(user3Email, "test", new[] { user3Email_alias });
+            var user3Id = EmployeeId.CreateWithAliases(user3Email, "test", new[] { user3Email_alias }, EmailFilter.Empty);
             var user3 = Employee.CreateInternal(user3Id, Enumerable.Empty<Group>());
 
             var meeting = new Event()

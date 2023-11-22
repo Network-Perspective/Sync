@@ -4,6 +4,7 @@ using Microsoft.Graph.Models;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Extensions;
 
 using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
@@ -12,7 +13,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 {
     public static class HashedEmployeesMapper
     {
-        public static EmployeeCollection ToEmployees(IEnumerable<User> users, HashFunction.Delegate hashFunc)
+        public static EmployeeCollection ToEmployees(IEnumerable<User> users, HashFunction.Delegate hashFunc,
+            EmailFilter emailFilter)
         {
             var employees = new List<Employee>();
 
@@ -22,7 +24,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
                 var employeeProps = GetEmployeeProps(user);
                 var employeeRelations = GetEmployeeRelations(user);
 
-                var employeeId = EmployeeId.CreateWithAliases(user.Mail, user.Id, user.OtherMails);
+                var employeeId = EmployeeId.CreateWithAliases(user.Mail, user.Id, user.OtherMails, emailFilter);
                 var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations);
 
                 employees.Add(employee);

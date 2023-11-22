@@ -5,6 +5,7 @@ using FluentAssertions;
 
 using Microsoft.Graph.Models;
 
+using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers;
 
 using Xunit;
@@ -34,7 +35,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Mappers
             };
 
             // Act
-            var employees = EmployeesMapper.ToEmployees(users);
+            var employees = EmployeesMapper.ToEmployees(users, EmailFilter.Empty);
 
             // Assert
             employees.GetAllInternal().Should().NotBeEmpty();

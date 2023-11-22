@@ -4,6 +4,7 @@ using FluentAssertions;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Application.Domain.Networks;
 
 using Xunit;
 
@@ -45,6 +46,64 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             hashedEmployee.Groups.Single().ParentId.Should().Be($"{groupParentId}_hashed");
 
             hashedEmployee.Relations.GetTargetEmployeeEmail(Relation.SupervisorRelationName).Should().Be($"{managerEmail}_hashed");
+        }
+
+        [Fact]
+        public void ShouldAddUsernameMatchingWhitelist()
+        {
+            // Arrange
+            const string email = "myemail@networkperspective.io";
+            const string sourceInternalId = "sourceInternalId";
+            string[] aliases = {
+                "test1@networkperspective.io", "test2@networkperspective.io", "test3@networkperspective.io"
+            };
+            string[] whitelist =
+            {
+                "test2@*"
+            };
+            var emailFilter = new EmailFilter(whitelist, new string[] { });
+
+            HashFunction.Delegate hashingFunction = (x) => $"{x}_hashed";
+
+            var employeeId = EmployeeId.CreateWithAliases(email, sourceInternalId, aliases, emailFilter);
+            var employee = Employee.CreateInternal(employeeId, new Group[] { }, null, null);
+
+            // Act
+            var hashedEmployee = employee.Hash(hashingFunction);
+
+            // Assert
+            hashedEmployee.Id.PrimaryId.Should().Be($"{email}_hashed");
+            hashedEmployee.Id.DataSourceId.Should().Be($"{sourceInternalId}_hashed");
+            hashedEmployee.Id.Username.Should().Be($"test2_hashed");
+        }
+
+        [Fact]
+        public void ShouldAddUsernameMatchingWhitelistFromPrimaryEmail()
+        {
+            // Arrange
+            const string email = "myemail@networkperspective.io";
+            const string sourceInternalId = "sourceInternalId";
+            string[] aliases = {
+                "test1@networkperspective.io", "test2@networkperspective.io", "test3@networkperspective.io"
+            };
+            string[] whitelist =
+            {
+                "*email@*"
+            };
+            var emailFilter = new EmailFilter(whitelist, new string[] { });
+
+            HashFunction.Delegate hashingFunction = (x) => $"{x}_hashed";
+
+            var employeeId = EmployeeId.CreateWithAliases(email, sourceInternalId, aliases, emailFilter);
+            var employee = Employee.CreateInternal(employeeId, new Group[] { }, null, null);
+
+            // Act
+            var hashedEmployee = employee.Hash(hashingFunction);
+
+            // Assert
+            hashedEmployee.Id.PrimaryId.Should().Be($"{email}_hashed");
+            hashedEmployee.Id.DataSourceId.Should().Be($"{sourceInternalId}_hashed");
+            hashedEmployee.Id.Username.Should().Be($"myemail_hashed");
         }
 
         [Fact]

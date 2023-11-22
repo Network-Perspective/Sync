@@ -21,6 +21,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         private readonly IMailboxClient _mailboxClient;
         private readonly ICalendarClient _calendarClient;
         private readonly IUsersClient _usersClient;
+        private readonly IUserCalendarTimeZoneReader _userCalendarTimeZoneReader;
         private readonly IClock _clock;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<GoogleFacade> _logger;
@@ -30,6 +31,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
                             IMailboxClient mailboxClient,
                             ICalendarClient calendarClient,
                             IUsersClient usersClient,
+                            IUserCalendarTimeZoneReader userCalendarTimeZoneReader,
                             IClock clock,
                             ILoggerFactory loggerFactory)
         {
@@ -38,6 +40,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _mailboxClient = mailboxClient;
             _calendarClient = calendarClient;
             _usersClient = usersClient;
+            _userCalendarTimeZoneReader = userCalendarTimeZoneReader;
             _clock = clock;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<GoogleFacade>();
@@ -52,7 +55,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
 
-            var mapper = new EmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes));
+            var mapper = new EmployeesMapper(
+                new CompanyStructureService(),
+                new CustomAttributesService(context.NetworkConfig.CustomAttributes),
+                EmployeePropsSource.Empty,
+                context.NetworkConfig.EmailFilter);
 
             var employeesCollection = context.EnsureSet(() => mapper.ToEmployees(users));
 
@@ -80,7 +87,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
 
-            var mapper = new EmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes));
+            var timezonesPropsSource =
+                await _userCalendarTimeZoneReader.FetchTimeZoneInformation(users, credentials, stoppingToken);
+
+            var mapper = new EmployeesMapper(
+                new CompanyStructureService(),
+                new CustomAttributesService(context.NetworkConfig.CustomAttributes),
+                timezonesPropsSource,
+                context.NetworkConfig.EmailFilter
+            );
 
             var employeesCollection = context.EnsureSet(() => mapper.ToEmployees(users));
             return employeesCollection;
@@ -90,14 +105,29 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         {
             _logger.LogInformation("Getting hashed employees for network '{networkId}'", context.NetworkId);
 
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
-            var credentials = await context.EnsureSetAsync(() => _credentialsProvider.GetCredentialsAsync(stoppingToken));
+            var network =
+                await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
 
-            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
+            var credentials =
+                await context.EnsureSetAsync(() => _credentialsProvider.GetCredentialsAsync(stoppingToken));
 
-            var mapper = new HashedEmployeesMapper(new CompanyStructureService(), new CustomAttributesService(context.NetworkConfig.CustomAttributes), context.HashFunction);
+            var users =
+                await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
 
-            return mapper.ToEmployees(users);
+            var timezonesPropsSource =
+                await _userCalendarTimeZoneReader.FetchTimeZoneInformation(users, credentials, stoppingToken);
+
+            var mapper = new HashedEmployeesMapper(
+                new CompanyStructureService(),
+                new CustomAttributesService(context.NetworkConfig.CustomAttributes),
+                timezonesPropsSource,
+                context.HashFunction,
+                context.NetworkConfig.EmailFilter
+            );
+
+            var employees = mapper.ToEmployees(users);
+
+            return employees;
         }
     }
 }

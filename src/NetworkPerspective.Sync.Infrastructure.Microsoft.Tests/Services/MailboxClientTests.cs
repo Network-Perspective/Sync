@@ -45,7 +45,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var timeRange = new TimeRange(new DateTime(2021, 12, 01), new DateTime(2021, 12, 02));
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
             var users = await usersClient.GetUsersAsync(syncContext);
-            var employees = EmployeesMapper.ToEmployees(users);
+            var employees = EmployeesMapper.ToEmployees(users, EmailFilter.Empty);
 
             var interactionFactory = new EmailInteractionFactory(HashFunction.Empty, employees, NullLogger<EmailInteractionFactory>.Instance);
             var mailboxClient = new MailboxClient(_microsoftClientFixture.GraphServiceClient, Mock.Of<ITasksStatusesCache>(), _mailboxClientlogger);
