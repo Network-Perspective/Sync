@@ -98,7 +98,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             foreach (var criteria in _criterias)
                 employeesProfiles = criteria.MeetCriteria(employeesProfiles);
 
-            var filteredProfiles = employeesProfiles.Where(x => emailFilter.IsInternalUser(x.PrimaryEmail));
+            var filteredProfiles = employeesProfiles
+                .Where(x => emailFilter.IsInternalUser(x.PrimaryEmail)
+                    || x.Aliases != null && x.Aliases.Any(emailFilter.IsInternalUser));
 
             return filteredProfiles;
         }

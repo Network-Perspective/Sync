@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Google.Services;
@@ -34,7 +35,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             const string user5Email = "user5@networkperspective.io";
             const string externalUserEmail = "external@foo.com";
 
-            var user2Id = EmployeeId.CreateWithAliases("user2@networkperspective.io", "test", new[] { user2Email_alias });
+            var user2Id = EmployeeId.CreateWithAliases("user2@networkperspective.io", "test", new[] { user2Email_alias }, EmailFilter.Empty);
             var user2 = Employee.CreateInternal(user2Id, Enumerable.Empty<Group>());
 
             var email = new Message()
