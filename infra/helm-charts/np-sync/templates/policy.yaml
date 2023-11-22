@@ -3,7 +3,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-same-namespace
-  namespace: default
 spec:
   podSelector: {} # Applies to all Pods in the namespace
   policyTypes:
