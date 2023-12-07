@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Remove="Samples\entites-expected.json" />
+        <None Remove="Samples\entites.csv" />
+        <None Remove="Samples\groups-expected.json" />
+        <None Remove="Samples\groups.csv" />
+        <None Remove="Samples\interactions-expected.json" />
+        <None Remove="Samples\interactions-with-id-expected.json" />
+        <None Remove="Samples\interactions-with-id.csv" />
+        <None Remove="Samples\interactions.csv" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Samples\entites-expected.json" />
+        <EmbeddedResource Include="Samples\entites.csv" />
+        <EmbeddedResource Include="Samples\groups-expected.json" />
+        <EmbeddedResource Include="Samples\groups.csv" />
+        <EmbeddedResource Include="Samples\interactions-with-id-expected.json" />
+        <EmbeddedResource Include="Samples\interactions-with-id.csv" />
+        <EmbeddedResource Include="Samples\interactions-expected.json" />
+        <EmbeddedResource Include="Samples\interactions.csv" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentAssertions" Version="6.11.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.2" />
+        <PackageReference Include="System.Net.Http" Version="4.3.4" />
+        <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+        <PackageReference Include="Moq" Version="4.18.4" />
+        <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="17.2.3" />
+        <PackageReference Include="xunit" Version="2.4.2" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector" Version="6.0.0">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Core\NetworkPerspective.Sync.Infrastructure.Core.csproj" />
+      <ProjectReference Include="..\NetworkPerspective.Sync.Cli\NetworkPerspective.Sync.Cli.csproj" />
+    </ItemGroup>
+</Project>
