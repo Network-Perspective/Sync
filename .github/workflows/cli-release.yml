@@ -1,0 +1,72 @@
+name: Cli Release
+on:
+  push:
+    tags:
+      - 'cli*'
+
+jobs:
+  build_cli:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+    - name: Build
+      run: dotnet build src/NetworkPerspective.Sync.Cli/NetworkPerspective.Sync.Cli.csproj --configuration Release
+    - name: Publish
+      run: dotnet publish "src/NetworkPerspective.Sync.Cli/NetworkPerspective.Sync.Cli.csproj" --configuration Release --output out --self-contained --arch x64 -p:PublishSingleFile=true
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.os }}-cli-binary
+        path: out/*
+
+  release_cli:
+    needs: build_cli
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download Artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: ubuntu-latest-cli-binary
+        path: binaries/ubuntu
+    - name: Download Artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: windows-latest-cli-binary
+        path: binaries/windows
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Upload Linux Binary
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: binaries/ubuntu/np-sync
+        asset_name: np-sync
+        asset_content_type: application/octet-stream
+    - name: Upload Windows Binary
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: binaries/windows/np-sync.exe
+        asset_name: np-sync.exe
+        asset_content_type: application/octet-stream
+
