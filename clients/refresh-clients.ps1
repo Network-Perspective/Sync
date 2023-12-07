@@ -10,7 +10,11 @@ dotnet swagger tofile --output gsuite.json ..\src\NetworkPerspective.Sync.GSuite
 Copy-Item ..\src\NetworkPerspective.Sync.Slack\bin\Debug\net6.0\NetworkPerspective.Sync.Slack.xml ..\src\NetworkPerspective.Sync.Slack\bin\Debug\net6.0\dotnet-swagger.xml
 dotnet swagger tofile --output slack.json ..\src\NetworkPerspective.Sync.Slack\bin\Debug\net6.0\NetworkPerspective.Sync.Slack.dll v1
 
+Copy-Item ..\src\NetworkPerspective.Sync.Office365\bin\Debug\net6.0\NetworkPerspective.Sync.Office365.xml ..\src\NetworkPerspective.Sync.Office365\bin\Debug\net6.0\dotnet-swagger.xml
+dotnet swagger tofile --output office365.json ..\src\NetworkPerspective.Sync.Office365\bin\Debug\net6.0\NetworkPerspective.Sync.Office365.dll v1
+
 # generate clients
 
 java -jar swagger-codegen-cli.jar generate -i .\gsuite.json -l typescript-fetch -o .\typescript\gsuite
 java -jar swagger-codegen-cli.jar generate -i .\slack.json -l typescript-fetch -o .\typescript\slack
+java -jar swagger-codegen-cli.jar generate -i .\office365.json -l typescript-fetch -o .\typescript\office365

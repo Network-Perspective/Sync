@@ -3,4 +3,5 @@ helm template helm-charts/np-sync `
     --set mssql.acceptEula.value=Y `
     --set global.redeployOnUpdate=false `
     --name-template=np-sync `
+    --namespace=np-sync `
     --debug > preview/np-sync.yaml
