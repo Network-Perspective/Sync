@@ -66,7 +66,7 @@ namespace NetworkPerspective.Sync.Slack
 #if !DEBUG
             services.RemoveHttpClientLogging(); // need to be one of the last statements so handlers are not added by any other method
 #else
-            // services.AddNetworkPerspectiveCoreStub(_config.GetSection(NetworkPerspectiveCoreConfigSection));
+            services.AddNetworkPerspectiveCoreStub(_config.GetSection(NetworkPerspectiveCoreConfigSection));
 #endif
         }
 

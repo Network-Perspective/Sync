@@ -68,7 +68,7 @@ namespace NetworkPerspective.Sync.GSuite
 #if !DEBUG
             services.RemoveHttpClientLogging();
 #else
-            // services.AddNetworkPerspectiveCoreStub(_config.GetSection(NetworkPerspectiveCoreConfigSection));
+            services.AddNetworkPerspectiveCoreStub(_config.GetSection(NetworkPerspectiveCoreConfigSection));
 #endif
         }
 
