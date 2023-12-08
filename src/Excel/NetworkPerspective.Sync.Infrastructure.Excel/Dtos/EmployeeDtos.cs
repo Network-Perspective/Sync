@@ -30,10 +30,4 @@ public class EmployeePropDto
 {
     public string Name { get; set; }
     public string Value { get; set; }
-    public EmployeePropTargetEnum TargetEnum { get; set; }
-}
-
-public enum EmployeePropTargetEnum
-{
-    Users, Entities, Both 
 }

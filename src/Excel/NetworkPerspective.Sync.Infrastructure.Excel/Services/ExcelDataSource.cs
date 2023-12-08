@@ -17,18 +17,26 @@ public class ExcelDataSource : IDataSource
 {
     public Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
     {
-        return Task.FromResult(new SyncResult(0,0, new List<Exception>()));
+        return Task.FromResult(new SyncResult(0, 0, new List<Exception>()));
     }
 
-    public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
+    public Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
     {
         var incoming = context.Get<List<EmployeeDto>>();
-        throw new NotImplementedException();
+        var metadata = context.Get<SyncMetadataDto>();
+        var emailFilter = context.NetworkConfig.EmailFilter;
+
+        var employees = incoming.ToDomainEmployees(metadata.Plain, emailFilter);
+        return Task.FromResult(new EmployeeCollection(employees, null));
     }
 
-    public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
+    public Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
     {
         var incoming = context.Get<List<EmployeeDto>>();
-        throw new NotImplementedException();
+        var metadata = context.Get<SyncMetadataDto>();
+        var emailFilter = context.NetworkConfig.EmailFilter;
+
+        var employees = incoming.ToDomainEmployees(metadata.Hashed, emailFilter);
+        return Task.FromResult(new EmployeeCollection(employees, context.HashFunction));
     }
 }

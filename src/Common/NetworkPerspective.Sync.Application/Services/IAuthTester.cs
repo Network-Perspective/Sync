@@ -8,7 +8,7 @@ namespace NetworkPerspective.Sync.Application.Services
     {
         Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default);
     }
-    
+
     public class DummyAuthTester : IAuthTester
     {
         public Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)

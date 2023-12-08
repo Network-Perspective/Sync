@@ -33,7 +33,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
             HashFunction = hashingService.Hash;
         }
 
-        
+
         public T EnsureSet<T>(Func<T> obj)
         {
             if (!_container.ContainsKey(typeof(T)))
@@ -41,12 +41,12 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
 
             return (T)_container[typeof(T)];
         }
-        
+
         public void Set<T>(T obj)
         {
             _container[typeof(T)] = obj;
         }
-        
+
         public T Get<T>()
         {
             return (T)_container[typeof(T)];

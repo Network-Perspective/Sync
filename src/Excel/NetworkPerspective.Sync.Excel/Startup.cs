@@ -26,7 +26,7 @@ namespace NetworkPerspective.Sync.Excel
         private const string NetworkPerspectiveCoreConfigSection = "Infrastructure:NetworkPerspectiveCore";
         private const string SecretRepositoryClientBaseConfigSection = "Infrastructure";
         private const string ConnectorConfigSection = "Connector";
-        
+
         private readonly IConfiguration _config;
 
         public Startup(IConfiguration config)
@@ -56,7 +56,7 @@ namespace NetworkPerspective.Sync.Excel
                 .AddNetworkPerspectiveCore(_config.GetSection(NetworkPerspectiveCoreConfigSection), healthChecksBuilder)
                 .AddPersistence(healthChecksBuilder)
                 .AddFramework(mvcBuilder);
-            
+
 
 #if !DEBUG
             services.RemoveHttpClientLogging(); // need to be one of the last statements so handlers are not added by any other method

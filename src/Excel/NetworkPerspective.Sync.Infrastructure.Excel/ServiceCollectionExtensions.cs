@@ -12,7 +12,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Excel
         {
             // scope data source to single request
             services.AddScoped<IDataSourceFactory, ExcelDataSourceFactory>();
-            
+
             // dummy scheduler and auth tester
             services.AddTransient<ISyncScheduler, DummySyncScheduler>();
             services.AddTransient<IAuthTester, DummyAuthTester>();

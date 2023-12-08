@@ -29,7 +29,7 @@ try
                 })
                 .UseNLog();
     var app = builder.Build();
-    
+
     app.Run();
 }
 catch (Exception exception)
