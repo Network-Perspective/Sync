@@ -32,14 +32,41 @@ namespace NetworkPerspective.Sync.Cli.Tests
                 ParentCol = "ParentCode"
             };
 
-            var entitiesClient = new GroupsClient(_coreClient.Object, _fileSystem, options);
-
+            var groupsClient = new GroupsClient(_coreClient.Object, _fileSystem, options);
 
             // Act
-            await entitiesClient.Main();
+            await groupsClient.Main();
 
             // Assert
             var expected = JsonConvert.DeserializeObject<SyncHashedGroupStructureCommand>(_fileSystem.File.ReadAllText(@"groups-expected.json"));
+            _interceptedCommand.Should().BeEquivalentTo(expected);
+        }
+        
+        
+        [Fact]
+        public async Task ItShouldReadAndProcessGroupsWithClientId()
+        {
+            // Arrange
+            var options = new GroupsOpts()
+            {
+                Csv = @"groups-with-clientid.csv",
+                BaseUrl = "http://localhost",
+                Token = "sample_token",
+                CsvDelimiter = "\t",
+                IdCol = "Code",
+                NameCol = "Name",
+                CategoryCol = "Category",
+                ParentCol = "ParentCode",
+                ClientGroupIdCol = "ClientGroupId"
+            };
+
+            var groupsClient = new GroupsClient(_coreClient.Object, _fileSystem, options);
+
+            // Act
+            await groupsClient.Main();
+
+            // Assert
+            var expected = JsonConvert.DeserializeObject<SyncHashedGroupStructureCommand>(_fileSystem.File.ReadAllText(@"groups-with-clientid-expected.json"));
             _interceptedCommand.Should().BeEquivalentTo(expected);
         }
     }
