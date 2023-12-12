@@ -26,7 +26,7 @@ public class SyncController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> SyncAsync(List<EmployeeDto> employees, SyncMetadataDto metadata, CancellationToken stoppingToken = default)
+    public async Task<IActionResult> SyncAsync(SyncRequestDto syncRequest, CancellationToken stoppingToken = default)
     {
         // validate token
         var tokenValidationResult = await ValidateTokenAsync(stoppingToken);
@@ -36,8 +36,8 @@ public class SyncController : ApiControllerBase
             await _syncContextFactory.CreateForNetworkAsync(tokenValidationResult.NetworkId, stoppingToken);
 
         // add employees & metadata to sync context
-        syncContext.Set(employees);
-        syncContext.Set(metadata);
+        syncContext.Set(syncRequest.Employees);
+        syncContext.Set(syncRequest.Metadata);
 
         // create sync service & sync data
         var syncService = await _syncServiceFactory.CreateAsync(syncContext.NetworkId, stoppingToken);

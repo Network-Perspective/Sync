@@ -1,0 +1,470 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "REST API Connector",
+    "description": "Network Perspective REST API Connector",
+    "contact": {
+      "name": "Network Perspective Team",
+      "url": "https://www.networkperspective.io/contact",
+      "email": ""
+    },
+    "version": "v1"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Alive"
+        ],
+        "summary": "Alive endpoint",
+        "operationId": "GetAlive",
+        "responses": {
+          "200": {
+            "description": "Alive"
+          }
+        }
+      }
+    },
+    "/schedules": {
+      "post": {
+        "tags": [
+          "Schedules"
+        ],
+        "summary": "Schedules synchronization job for given network to run at midnight, and also triggers the synchronization to run now",
+        "operationId": "Start",
+        "requestBody": {
+          "description": "Scheduler properties",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulerStartDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulerStartDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulerStartDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulerStartDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Synchronization scheduled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authorization token"
+          },
+          "404": {
+            "description": "Network doesn't exist"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Schedules"
+        ],
+        "summary": "Unschedules synchronization job for given network",
+        "operationId": "Stop",
+        "responses": {
+          "200": {
+            "description": "Synchronization unscheduled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authorization token"
+          },
+          "404": {
+            "description": "Network doesn't exist"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/status": {
+      "get": {
+        "tags": [
+          "Status"
+        ],
+        "summary": "Current network status",
+        "operationId": "GetStatus",
+        "responses": {
+          "200": {
+            "description": "Status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authorization token"
+          },
+          "400": {
+            "description": "Request cancelled"
+          },
+          "404": {
+            "description": "Network doesn't exist"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/sync": {
+      "post": {
+        "tags": [
+          "Sync"
+        ],
+        "operationId": "Sync",
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EmployeeDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "employeeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "employmentDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "props": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmployeePropDto"
+            },
+            "nullable": true
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmployeeGroupDto"
+            },
+            "nullable": true
+          },
+          "relationships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmployeeRelationshipDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EmployeeGroupDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EmployeePropDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EmployeeRelationshipDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "employeeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "relationshipName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SchedulerStartDto": {
+        "type": "object",
+        "properties": {
+          "overrideSyncPeriodStart": {
+            "type": "string",
+            "description": "Overrides when synchronization should start (optional)",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Scheduler start request properties"
+      },
+      "StatusDto": {
+        "type": "object",
+        "properties": {
+          "authorized": {
+            "type": "boolean",
+            "description": "Define if network is authorized in Network Perspective Core and Data Source",
+            "example": true
+          },
+          "scheduled": {
+            "type": "boolean",
+            "description": "Define if network has active scheduler",
+            "example": true
+          },
+          "running": {
+            "type": "boolean",
+            "description": "Define if synchronization is currently running",
+            "example": false
+          },
+          "currentTask": {
+            "$ref": "#/components/schemas/SynchronizationTaskStatusDto"
+          },
+          "logs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusLogDto"
+            },
+            "description": "List of recent logs",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Network status"
+      },
+      "StatusLogDto": {
+        "type": "object",
+        "properties": {
+          "timeStamp": {
+            "type": "string",
+            "description": "Timestamp of the event",
+            "format": "date-time",
+            "example": "2020-01-01T10:00:00"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message",
+            "nullable": true,
+            "example": "Sync completed"
+          },
+          "level": {
+            "$ref": "#/components/schemas/StatusLogLevelDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Single event log entry"
+      },
+      "StatusLogLevelDto": {
+        "enum": [
+          "Info",
+          "Warning",
+          "Error"
+        ],
+        "type": "string"
+      },
+      "SyncMetadataDto": {
+        "type": "object",
+        "properties": {
+          "plain": {
+            "$ref": "#/components/schemas/SyncMetadataIncludesDto"
+          },
+          "hashed": {
+            "$ref": "#/components/schemas/SyncMetadataIncludesDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SyncMetadataIncludesDto": {
+        "type": "object",
+        "properties": {
+          "props": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "relationships": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "groups": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SyncRequestDto": {
+        "type": "object",
+        "properties": {
+          "employees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmployeeDto"
+            },
+            "nullable": true
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/SyncMetadataDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SynchronizationTaskStatusDto": {
+        "type": "object",
+        "properties": {
+          "caption": {
+            "type": "string",
+            "description": "Task Caption",
+            "nullable": true,
+            "example": "Synchronizing entities"
+          },
+          "description": {
+            "type": "string",
+            "description": "Task description",
+            "nullable": true,
+            "example": "Fetching users data from Google API"
+          },
+          "completionRate": {
+            "type": "number",
+            "description": "Completion rate [0-100]%",
+            "format": "double",
+            "nullable": true,
+            "example": 33.4
+          }
+        },
+        "additionalProperties": false,
+        "description": "Single synchronization task status"
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}
