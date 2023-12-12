@@ -1,0 +1,25 @@
+{
+  "serviceToken": "sample_token",
+  "groups": [
+    {
+      "id": "hash1",
+      "name": "Pion CEO",
+      "category": "Division",
+      "clientGroupId": "group1"
+    },
+    {
+      "id": "hash2",
+      "name": "Biuro Analiz",
+      "category": "Unit",
+      "parentId": "hash1",
+      "clientGroupId": "group2"
+    },
+    {
+      "id": "hash3",
+      "name": "Biuro Zarządu",
+      "category": "Unit",
+      "parentId": "hash1",
+      "clientGroupId": "group3"
+    }
+  ]
+}

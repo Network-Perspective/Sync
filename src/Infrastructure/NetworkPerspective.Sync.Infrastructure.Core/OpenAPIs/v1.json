@@ -1418,6 +1418,12 @@
         ],
         "summary": "Update settings",
         "operationId": "Assets_UpdateNetworkSettingsCode",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -1427,9 +1433,11 @@
             "format": "uuid"
           },
           {
-            "in": "query",
-            "name": "code",
-            "type": "string"
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2977,6 +2985,55 @@
             "in": "query",
             "name": "dryRun",
             "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/groups/{networkId}/{groupId}": {
+      "post": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Update group name",
+        "operationId": "Groups_UpdateGroup",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -4637,6 +4694,48 @@
                   "$ref": "#/definitions/MetricRelatedValueResult"
                 }
               }
+            }
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/report/compare": {
+      "post": {
+        "tags": [
+          "Report"
+        ],
+        "summary": "Compare groups",
+        "operationId": "Report_CompareGroups",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/CompareGroupsQuery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ComparedGroupsModel"
             }
           },
           "400": {
@@ -6315,6 +6414,35 @@
         }
       }
     },
+    "/api/sync/status/{networkId}/incoming/users/process": {
+      "post": {
+        "tags": [
+          "SyncStatus"
+        ],
+        "summary": "Process incoming users",
+        "operationId": "SyncStatus_ProcessIncomingUsers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "networkId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Model validation error"
+          },
+          "429": {
+            "description": "API calls quota exceeded"
+          }
+        }
+      }
+    },
     "/api/sync/status/{networkId}/incoming/discard": {
       "post": {
         "tags": [
@@ -7563,6 +7691,95 @@
         }
       }
     },
+    "ComparedGroupFilter": {
+      "type": "object",
+      "properties": {
+        "parentId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "ComparedGroupMetricValue": {
+      "type": "object",
+      "properties": {
+        "groupId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "groupName": {
+          "type": "string"
+        },
+        "parentGroupId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "value": {
+          "format": "double",
+          "type": "number"
+        },
+        "prevValue": {
+          "format": "double",
+          "type": "number"
+        },
+        "hasAccess": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ComparedGroupsModel": {
+      "type": "object",
+      "properties": {
+        "filters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ComparedGroupFilter"
+          }
+        },
+        "groupValues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ComparedGroupMetricValue"
+          }
+        }
+      }
+    },
+    "CompareGroupsQuery": {
+      "type": "object",
+      "properties": {
+        "sectionId": {
+          "format": "uuid",
+          "description": "Perspective that represent report section",
+          "type": "string"
+        },
+        "reportId": {
+          "format": "uuid",
+          "description": "Originating perspective to validate permissions to query report with the group provided",
+          "type": "string"
+        },
+        "reportGroupId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "filterByParentId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "networkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "aggregate": {
+          "$ref": "#/definitions/AggregateEnum"
+        }
+      }
+    },
     "ComponentSchema": {
       "type": "object",
       "properties": {
@@ -8138,6 +8355,10 @@
       "type": "object",
       "properties": {
         "id": {
+          "type": "string"
+        },
+        "clientGroupId": {
+          "description": "Id available in data export",
           "type": "string"
         },
         "name": {
@@ -9301,6 +9522,9 @@
         "groupName": {
           "type": "string"
         },
+        "groupDisplayName": {
+          "type": "string"
+        },
         "parentGroupId": {
           "format": "uuid",
           "type": "string"
@@ -9465,6 +9689,9 @@
           "type": "string"
         },
         "detailsProp": {
+          "type": "string"
+        },
+        "timezoneProp": {
           "type": "string"
         }
       }
@@ -9896,6 +10123,9 @@
         "typeaheadChars": {
           "format": "int32",
           "type": "integer"
+        },
+        "searchAvailable": {
+          "type": "boolean"
         }
       }
     },
@@ -10167,7 +10397,8 @@
     "SnapshotDataFolder": {
       "enum": [
         "Sending",
-        "Incoming"
+        "Incoming",
+        "Users"
       ],
       "type": "string"
     },
@@ -10517,6 +10748,12 @@
           }
         },
         "sending": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SyncConnectorStatus"
+          }
+        },
+        "users": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/SyncConnectorStatus"
