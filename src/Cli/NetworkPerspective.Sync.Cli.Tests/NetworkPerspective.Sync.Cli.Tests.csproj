@@ -23,6 +23,8 @@
         <EmbeddedResource Include="Samples\entites-expected.json" />
         <EmbeddedResource Include="Samples\entites.csv" />
         <EmbeddedResource Include="Samples\groups-expected.json" />
+        <EmbeddedResource Include="Samples\groups-with-clientid-expected.json" />
+        <EmbeddedResource Include="Samples\groups-with-clientid.csv" />
         <EmbeddedResource Include="Samples\groups.csv" />
         <EmbeddedResource Include="Samples\interactions-with-id-expected.json" />
         <EmbeddedResource Include="Samples\interactions-with-id.csv" />
