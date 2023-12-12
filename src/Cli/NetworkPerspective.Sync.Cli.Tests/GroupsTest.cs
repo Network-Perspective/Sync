@@ -41,8 +41,8 @@ namespace NetworkPerspective.Sync.Cli.Tests
             var expected = JsonConvert.DeserializeObject<SyncHashedGroupStructureCommand>(_fileSystem.File.ReadAllText(@"groups-expected.json"));
             _interceptedCommand.Should().BeEquivalentTo(expected);
         }
-        
-        
+
+
         [Fact]
         public async Task ItShouldReadAndProcessGroupsWithClientId()
         {
