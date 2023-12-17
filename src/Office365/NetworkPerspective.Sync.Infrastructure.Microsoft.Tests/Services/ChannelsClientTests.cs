@@ -22,13 +22,13 @@ using NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
 {
-    public class ChannelsClientTests : IClassFixture<MicrosoftClientFixture>
+    public class ChannelsClientTests : IClassFixture<MicrosoftClientWithTeamsFixture>
     {
-        private readonly MicrosoftClientFixture _microsoftClientFixture;
+        private readonly MicrosoftClientWithTeamsFixture _microsoftClientFixture;
         private readonly ILogger<UsersClient> _usersClientlogger = NullLogger<UsersClient>.Instance;
         private readonly ILogger<ChannelsClient> _channelsClientLogger = NullLogger<ChannelsClient>.Instance;
 
-        public ChannelsClientTests(MicrosoftClientFixture microsoftClientFixture)
+        public ChannelsClientTests(MicrosoftClientWithTeamsFixture microsoftClientFixture)
         {
             _microsoftClientFixture = microsoftClientFixture;
         }
@@ -39,14 +39,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
         {
             // Arrange
             var stream = new TestableInteractionStream();
-            var usersClient = new UsersClient(_microsoftClientFixture.GraphServiceClient, _usersClientlogger);
+            var usersClient = new UsersClient(_microsoftClientFixture.Client, _usersClientlogger);
 
-            var timeRange = new TimeRange(new DateTime(2023, 04, 10), new DateTime(2023, 04, 11));
+            var timeRange = new TimeRange(new DateTime(2023, 01, 10), new DateTime(2023, 12, 11));
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
             var users = await usersClient.GetUsersAsync(syncContext);
             var employees = EmployeesMapper.ToEmployees(users, EmailFilter.Empty);
 
-            var channelsClient = new ChannelsClient(_microsoftClientFixture.GraphServiceClient, Mock.Of<ITasksStatusesCache>(), _channelsClientLogger);
+            var channelsClient = new ChannelsClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _channelsClientLogger);
 
             // Act
             await channelsClient.SyncInteractionsAsync(syncContext, stream, users.Select(x => x.Mail));

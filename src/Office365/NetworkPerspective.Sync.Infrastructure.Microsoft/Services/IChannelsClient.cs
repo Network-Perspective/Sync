@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using Microsoft.Graph.Teams.Item.Channels.Item.Messages.Delta;
 
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Domain.Sync;
@@ -137,7 +139,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         {
             var channelMembersIds = await GetChannelMembersIdsAsync(channel, stoppingToken);
 
-            var threads = await GetThreadsAsync(channel, stoppingToken);
+            var threads = await GetThreadsAsync(channel, context.TimeRange.Start, stoppingToken);
 
             foreach (var thread in threads)
             {
@@ -182,11 +184,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             return result;
         }
-        private async Task<List<ChatMessage>> GetThreadsAsync(ChannelIdentifier channel, CancellationToken stoppingToken)
+        private async Task<List<ChatMessage>> GetThreadsAsync(ChannelIdentifier channel, DateTime from, CancellationToken stoppingToken)
         {
+            var filterString = $"lastModifiedDateTime gt {from:s}Z";
             var result = new List<ChatMessage>();
 
-            var threadsResponse = await _graphClient
+            DeltaGetResponse threadsResponse = await _graphClient
                 .Teams[channel.TeamId]
                 .Channels[channel.ChannelId]
                 .Messages
@@ -195,17 +198,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 {
                     x.QueryParameters = new()
                     {
-                        Select = new[]
-                        {
-                            nameof(ChatMessage.From),
-                            nameof(ChatMessage.MessageType),
-                            nameof(ChatMessage.CreatedDateTime),
-                            nameof(ChatMessage.Reactions)
-                        }
+                        Filter = filterString
                     };
                 }, stoppingToken);
 
-            var pageIterator = PageIterator<ChatMessage, ChatMessageCollectionResponse>
+
+
+            var pageIterator = PageIterator<ChatMessage, DeltaGetResponse>
                 .CreatePageIterator(_graphClient, threadsResponse,
                 thread =>
                 {
@@ -232,16 +231,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 .Replies
                 .GetAsync(x =>
                 {
-                    x.QueryParameters = new()
-                    {
-                        Select = new[]
-                        {
-                            nameof(ChatMessage.From),
-                            nameof(ChatMessage.MessageType),
-                            nameof(ChatMessage.CreatedDateTime),
-                            nameof(ChatMessage.Reactions)
-                        }
-                    };
+
                 }, stoppingToken);
 
             var pageIterator = PageIterator<ChatMessage, ChatMessageCollectionResponse>
