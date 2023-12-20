@@ -75,21 +75,22 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
                 return EmployeesMapper.ToEmployees(users, context.NetworkConfig.EmailFilter);
             });
 
-            var emailInteractionfactory = new EmailInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<EmailInteractionFactory>());
-            var meetingInteractionfactory = new MeetingInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<MeetingInteractionFactory>());
+            var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<EmailInteractionFactory>());
+            var meetingInteractionFactory = new MeetingInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<MeetingInteractionFactory>());
+            var channelInteractionFactory = new ChannelInteractionFactory(context.HashFunction, employees);
 
             var usersEmails = employees
                 .GetAllInternal()
                 .Select(x => x.Id.PrimaryId);
 
-            var resultEmails = await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, emailInteractionfactory, stoppingToken);
-            var resultCalendar = await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, meetingInteractionfactory, stoppingToken);
+            var resultEmails = await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, emailInteractionFactory, stoppingToken);
+            var resultCalendar = await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, meetingInteractionFactory, stoppingToken);
 
             var result = SyncResult.Combine(resultEmails, resultCalendar);
 
             if (network.Properties.SyncMsTeams)
             {
-                var resultChannels = await _channelsClient.SyncInteractionsAsync(context, stream, usersEmails, stoppingToken);
+                var resultChannels = await _channelsClient.SyncInteractionsAsync(context, stream, channelInteractionFactory, stoppingToken);
                 var resultChat = await _chatClient.SyncInteractionsAsync(context, stream, usersEmails, stoppingToken);
                 result = SyncResult.Combine(result, resultChannels, resultChat);
             }

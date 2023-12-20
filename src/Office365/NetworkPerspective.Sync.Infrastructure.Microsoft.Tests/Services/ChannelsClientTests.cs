@@ -45,11 +45,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
             var users = await usersClient.GetUsersAsync(syncContext);
             var employees = EmployeesMapper.ToEmployees(users, EmailFilter.Empty);
+            var interactionsFactory = new ChannelInteractionFactory(x => $"{x}_hashed", employees);
 
             var channelsClient = new ChannelsClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _channelsClientLogger);
 
             // Act
-            await channelsClient.SyncInteractionsAsync(syncContext, stream, users.Select(x => x.Mail));
+            await channelsClient.SyncInteractionsAsync(syncContext, stream, interactionsFactory);
         }
     }
 }

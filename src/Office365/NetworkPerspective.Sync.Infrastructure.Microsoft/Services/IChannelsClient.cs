@@ -17,7 +17,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
     internal interface IChannelsClient
     {
-        Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, CancellationToken stoppingToken = default);
+        Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IChannelsInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal class ChannelsClient : IChannelsClient
@@ -36,7 +36,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             _logger = logger;
         }
 
-        public async Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, CancellationToken stoppingToken = default)
+        public async Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IChannelsInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             async Task ReportProgressCallbackAsync(double progressRate)
             {
@@ -45,13 +45,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             }
 
             Task<SingleTaskResult> SingleTaskAsync(ChannelIdentifier channel)
-                => GetSingleChannelInteractionsAsync(context, stream, channel, stoppingToken);
+                => GetSingleChannelInteractionsAsync(context, stream, channel, interactionFactory, context.TimeRange, stoppingToken);
 
             var channels = await GetAllChannelsIdentifiersAsync(stoppingToken);
 
-            _logger.LogInformation("Evaluating interactions based on chat for '{timerange}' for {count} users...", context.TimeRange, usersEmails.Count());
+            _logger.LogInformation("Evaluating interactions based on channels for '{timerange}'...", context.TimeRange);
             var result = await ParallelSyncTask<ChannelIdentifier>.RunAsync(channels, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
-            _logger.LogInformation("Evaluation of interactions based on chat for '{timerange}' completed", context.TimeRange);
+            _logger.LogInformation("Evaluation of interactions based on channels for '{timerange}' completed", context.TimeRange);
 
             return result;
         }
@@ -135,24 +135,37 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return result;
         }
 
-        private async Task<SingleTaskResult> GetSingleChannelInteractionsAsync(SyncContext context, IInteractionsStream stream, ChannelIdentifier channel, CancellationToken stoppingToken)
+        private async Task<SingleTaskResult> GetSingleChannelInteractionsAsync(SyncContext context, IInteractionsStream stream, ChannelIdentifier channel, IChannelsInteractionFactory interactionFactory, Application.Domain.TimeRange timeRange, CancellationToken stoppingToken)
         {
+            _logger.LogDebug("Getting interactions from channel...");
+
+            var interactionsCount = 0;
+
             var channelMembersIds = await GetChannelMembersIdsAsync(channel, stoppingToken);
 
             var threads = await GetThreadsAsync(channel, context.TimeRange.Start, stoppingToken);
 
             foreach (var thread in threads)
             {
+                var threadInteractions = interactionFactory.CreateFromThreadMessage(thread, channel.ChannelId, channelMembersIds);
+                var sentThreadInteractionsCount = await stream.SendAsync(threadInteractions);
+                interactionsCount += sentThreadInteractionsCount;
+
                 var replies = await GetThreadsRepliesAsync(channel, thread, stoppingToken);
+                var repliesInteractions = interactionFactory.CreateFromThreadRepliesMessage(replies, channel.ChannelId, thread.Id, thread.From.User.Id, timeRange);
+                var sentRepliesInteractionsCount = await stream.SendAsync(repliesInteractions);
+                interactionsCount += sentRepliesInteractionsCount;
             }
 
+            _logger.LogDebug("Getting interactions from channel completed");
 
-            return new SingleTaskResult(0);
+
+            return new SingleTaskResult(interactionsCount);
         }
 
-        private async Task<List<string>> GetChannelMembersIdsAsync(ChannelIdentifier channel, CancellationToken stoppingToken)
+        private async Task<ISet<string>> GetChannelMembersIdsAsync(ChannelIdentifier channel, CancellationToken stoppingToken)
         {
-            var result = new List<string>();
+            var result = new HashSet<string>();
 
             var membersResponse = await _graphClient
                 .Teams[channel.TeamId]
@@ -203,7 +216,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 }, stoppingToken);
 
 
-
             var pageIterator = PageIterator<ChatMessage, DeltaGetResponse>
                 .CreatePageIterator(_graphClient, threadsResponse,
                 thread =>
@@ -217,7 +229,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 });
             await pageIterator.IterateAsync(stoppingToken);
 
-            return result;
+            return result
+                .Where(x => x.MessageType == ChatMessageType.Message)
+                .ToList();
         }
 
         private async Task<List<ChatMessage>> GetThreadsRepliesAsync(ChannelIdentifier channel, ChatMessage thread, CancellationToken stoppingToken)
@@ -247,7 +261,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 });
             await pageIterator.IterateAsync(stoppingToken);
 
-            return result;
+            return result
+                .Where(x => x.MessageType == ChatMessageType.Message)
+                .ToList();
         }
     }
 
