@@ -18,7 +18,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         ISet<Interaction> CreateFromThreadRepliesMessage(IEnumerable<ChatMessage> replies, string channelId, string threadId, string threadCreator, Application.Domain.TimeRange timeRange);
     }
 
-    public class ChannelInteractionFactory : IChannelsInteractionFactory
+    internal class ChannelInteractionFactory : IChannelsInteractionFactory
     {
         private readonly HashFunction.Delegate _hash;
         private readonly EmployeeCollection _employees;
@@ -33,7 +33,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         {
             var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
 
-            foreach ( var channelMember in channelMembers)
+            foreach (var channelMember in channelMembers)
             {
                 var interaction = Interaction.CreateChatThread(
                     timestamp: thread.CreatedDateTime.Value.UtcDateTime,
@@ -78,7 +78,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             foreach (var reply in replies)
             {
-                foreach(var user in activeUsers)
+                foreach (var user in activeUsers)
                 {
                     var interaction = Interaction.CreateChatReply(
                         timestamp: reply.CreatedDateTime.Value.UtcDateTime,

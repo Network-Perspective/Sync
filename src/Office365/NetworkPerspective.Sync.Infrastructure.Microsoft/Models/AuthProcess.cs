@@ -2,7 +2,7 @@
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Models
 {
-    public class AuthProcess
+    internal class AuthProcess
     {
         public Guid NetworkId { get; }
         public Uri CallbackUri { get; }

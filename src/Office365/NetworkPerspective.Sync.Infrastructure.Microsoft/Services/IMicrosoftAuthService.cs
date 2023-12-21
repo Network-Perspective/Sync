@@ -14,7 +14,7 @@ using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
-    public interface IMicrosoftAuthService
+    internal interface IMicrosoftAuthService
     {
         Task<AuthStartProcessResult> StartAuthProcessAsync(AuthProcess authProcess, CancellationToken stoppingToken = default);
         Task HandleCallbackAsync(Guid tenant, string state, CancellationToken stoppingToken = default);
@@ -78,7 +78,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             await secretRepository.SetSecretAsync(tenantIdKey, tenant.ToString().ToSecureString(), stoppingToken);
         }
 
-        private async Task<SecureString> GetClientIdAsync(Guid networkId, CancellationToken stoppingToken) 
+        private async Task<SecureString> GetClientIdAsync(Guid networkId, CancellationToken stoppingToken)
         {
             var network = await _networkService.GetAsync<MicrosoftNetworkProperties>(networkId, stoppingToken);
 

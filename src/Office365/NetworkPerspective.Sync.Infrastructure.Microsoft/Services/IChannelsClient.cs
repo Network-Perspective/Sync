@@ -12,6 +12,7 @@ using Microsoft.Graph.Teams.Item.Channels.Item.Messages.Delta;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
@@ -65,7 +66,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             foreach (var teamId in teamsIds)
             {
                 var channelsIds = await GetAllChannelsIdsInSingleTeamAsync(teamId, stoppingToken);
-                result.AddRange(channelsIds.Select(x => new ChannelIdentifier { ChannelId = x, TeamId = teamId }));
+                result.AddRange(channelsIds.Select(x => ChannelIdentifier.Create(teamId, x)));
             }
 
             return result;
@@ -265,11 +266,5 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 .Where(x => x.MessageType == ChatMessageType.Message)
                 .ToList();
         }
-    }
-
-    class ChannelIdentifier
-    {
-        public string ChannelId { get; set; }
-        public string TeamId { get; set; }
     }
 }

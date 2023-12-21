@@ -21,7 +21,7 @@ using Polly.Extensions.Http;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
-    public interface IMicrosoftClientFactory
+    internal interface IMicrosoftClientFactory
     {
         Task<GraphServiceClient> GetMicrosoftClientAsync(Guid networkId, CancellationToken stoppingToken = default);
     }
