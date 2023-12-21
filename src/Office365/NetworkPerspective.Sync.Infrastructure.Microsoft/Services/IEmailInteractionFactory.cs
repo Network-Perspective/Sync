@@ -12,7 +12,7 @@ using NetworkPerspective.Sync.Application.Domain.Interactions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
-    public interface IEmailInteractionFactory
+    internal interface IEmailInteractionFactory
     {
         ISet<Interaction> CreateForUser(Message message, string userEmail);
     }

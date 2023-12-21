@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -15,6 +12,7 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
+using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Exceptions;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
@@ -31,6 +29,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
         private readonly Mock<IAuthStateKeyFactory> _authStateKeyFactory = new Mock<IAuthStateKeyFactory>();
         private readonly Mock<ISecretRepositoryFactory> _secretRepositoryFactoryMock = new Mock<ISecretRepositoryFactory>();
         private readonly Mock<ISecretRepository> _secretRepositoryMock = new Mock<ISecretRepository>();
+        private readonly Mock<INetworkService> _networkServiceMock = new Mock<INetworkService>();
         private readonly Mock<IStatusLoggerFactory> _statusLoggerFactoryMock = new Mock<IStatusLoggerFactory>();
         private readonly Mock<IStatusLogger> _statusLoggerMock = new Mock<IStatusLogger>();
         private readonly ILogger<MicrosoftAuthService> _logger = NullLogger<MicrosoftAuthService>.Instance;
@@ -40,6 +39,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             _authStateKeyFactory.Reset();
             _secretRepositoryFactoryMock.Reset();
             _secretRepositoryMock.Reset();
+            _networkServiceMock.Reset();
             _statusLoggerFactoryMock.Reset();
             _statusLoggerMock.Reset();
 
@@ -59,6 +59,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             {
                 // Arrange
                 const string redirectUrl = "https://networkperspective.io:5001/callback";
+                var networkId = Guid.NewGuid();
                 var clientId = Guid.NewGuid().ToString();
                 var state = Guid.NewGuid().ToString();
 
@@ -67,8 +68,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
                     .Returns(state);
 
                 _secretRepositoryMock
-                    .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientIdKey, It.IsAny<CancellationToken>()))
+                    .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, It.IsAny<CancellationToken>()))
                     .ReturnsAsync(clientId.ToSecureString());
+
+                var networkProperties = new MicrosoftNetworkProperties(false, null);
+                var network = Network<MicrosoftNetworkProperties>.Create(networkId, networkProperties, DateTime.UtcNow);
+                _networkServiceMock
+                    .Setup(x => x.GetAsync<MicrosoftNetworkProperties>(networkId, It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(network);
 
                 var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
                 var service = new MicrosoftAuthService(
@@ -76,10 +83,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
                     _secretRepositoryFactoryMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
+                    _networkServiceMock.Object,
                     _logger);
 
                 // Act
-                var result = await service.StartAuthProcessAsync(new AuthProcess(Guid.NewGuid(), new Uri(redirectUrl)));
+                var result = await service.StartAuthProcessAsync(new AuthProcess(networkId, new Uri(redirectUrl)));
 
                 // Assert
                 var resultUri = new Uri(result.MicrosoftAuthUri);
@@ -111,6 +119,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
                     _secretRepositoryFactoryMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
+                    _networkServiceMock.Object,
                     _logger);
 
                 // Act
@@ -136,6 +145,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
                     _secretRepositoryFactoryMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
+                    _networkServiceMock.Object,
                     _logger);
 
                 // Act
