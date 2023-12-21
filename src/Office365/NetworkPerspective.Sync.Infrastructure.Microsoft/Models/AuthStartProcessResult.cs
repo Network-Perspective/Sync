@@ -1,6 +1,6 @@
 ﻿namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Models
 {
-    internal class AuthStartProcessResult
+    public class AuthStartProcessResult
     {
         public string MicrosoftAuthUri { get; }
 

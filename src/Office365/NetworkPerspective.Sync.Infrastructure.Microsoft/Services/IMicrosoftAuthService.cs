@@ -14,7 +14,7 @@ using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
-    internal interface IMicrosoftAuthService
+    public interface IMicrosoftAuthService
     {
         Task<AuthStartProcessResult> StartAuthProcessAsync(AuthProcess authProcess, CancellationToken stoppingToken = default);
         Task HandleCallbackAsync(Guid tenant, string state, CancellationToken stoppingToken = default);
