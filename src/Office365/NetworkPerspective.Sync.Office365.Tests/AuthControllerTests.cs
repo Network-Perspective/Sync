@@ -47,7 +47,7 @@ namespace NetworkPerspective.Sync.Office365.Tests
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
             _service.SecretRepositoryMock
-                .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientIdKey, It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(clientId.ToSecureString());
 
             var networkConfig = new NetworkConfigDto
@@ -87,7 +87,7 @@ namespace NetworkPerspective.Sync.Office365.Tests
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
             _service.SecretRepositoryMock
-                .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientIdKey, It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(clientId.ToSecureString());
 
             var networkConfig = new NetworkConfigDto
@@ -128,7 +128,7 @@ namespace NetworkPerspective.Sync.Office365.Tests
                 .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
 
             _service.SecretRepositoryMock
-                .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientIdKey, It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(clientId.ToSecureString());
 
             var networkConfig = new NetworkConfigDto

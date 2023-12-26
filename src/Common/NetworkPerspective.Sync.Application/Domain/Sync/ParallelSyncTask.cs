@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace NetworkPerspective.Sync.Application.Domain.Sync
 {
-    public class ParallelSyncTask
+    public class ParallelSyncTask<T>
     {
-        public delegate Task<SingleTaskResult> SingleSyncTask(string userId);
+        public delegate Task<SingleTaskResult> SingleSyncTask(T userId);
 
-        private readonly int _usersCount;
-        private int _usersProcessedCount = 0;
+        private readonly int _tasksCount;
+        private int _tasksProcessedCount = 0;
 
         private readonly List<Exception> _exceptions = new List<Exception>();
         private long _totalInteractionsCount = 0;
-        private readonly IEnumerable<string> _userIds;
+        private readonly IEnumerable<T> _ids;
 
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         private readonly Func<double, Task> _updateStatus;
@@ -24,19 +24,19 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
         private readonly ParallelOptions _parallelOptions;
         private readonly CancellationToken _stoppingToken;
 
-        private ParallelSyncTask(IEnumerable<string> userIds, Func<double, Task> updateStatus, SingleSyncTask singleTask, CancellationToken stoppingToken = default)
+        private ParallelSyncTask(IEnumerable<T> ids, Func<double, Task> updateStatus, SingleSyncTask singleTask, CancellationToken stoppingToken = default)
         {
-            _usersCount = userIds.Count();
-            _userIds = userIds;
+            _tasksCount = ids.Count();
+            _ids = ids;
             _updateStatus = updateStatus;
             _singleTask = singleTask;
             _stoppingToken = stoppingToken;
             _parallelOptions = new ParallelOptions { CancellationToken = stoppingToken };
         }
 
-        public static async Task<SyncResult> RunAsync(IEnumerable<string> userIds, Func<double, Task> updateStatus, SingleSyncTask singleTask, CancellationToken stoppingToken = default)
+        public static async Task<SyncResult> RunAsync(IEnumerable<T> ids, Func<double, Task> updateStatus, SingleSyncTask singleTask, CancellationToken stoppingToken = default)
         {
-            var fetcher = new ParallelSyncTask(userIds, updateStatus, singleTask, stoppingToken);
+            var fetcher = new ParallelSyncTask<T>(ids, updateStatus, singleTask, stoppingToken);
             return await fetcher.RunAsync();
         }
 
@@ -44,20 +44,20 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
         {
             await _updateStatus(0.0);
 
-            await Parallel.ForEachAsync(_userIds, _parallelOptions, async (userId, stoppingToken) =>
+            await Parallel.ForEachAsync(_ids, _parallelOptions, async (id, stoppingToken) =>
             {
-                await RunSingleTask(userId);
+                await RunSingleTask(id);
                 await TryReportProgress();
             });
 
-            return new SyncResult(_usersCount, _totalInteractionsCount, _exceptions);
+            return new SyncResult(_tasksCount, _totalInteractionsCount, _exceptions);
         }
 
-        private async Task RunSingleTask(string userId)
+        private async Task RunSingleTask(T id)
         {
             try
             {
-                var result = await _singleTask(userId);
+                var result = await _singleTask(id);
                 await TryAddInteractionsCount(result.InteractionsCount);
 
             }
@@ -101,8 +101,8 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
 
             try
             {
-                _usersProcessedCount++;
-                var completionRate = 100.0 * _usersProcessedCount / _usersCount;
+                _tasksProcessedCount++;
+                var completionRate = 100.0 * _tasksProcessedCount / _tasksCount;
                 await _updateStatus(completionRate);
             }
             finally
