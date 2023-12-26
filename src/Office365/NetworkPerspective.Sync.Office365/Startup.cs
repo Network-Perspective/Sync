@@ -64,7 +64,10 @@ namespace NetworkPerspective.Sync.Office365
 #if !DEBUG
             services.RemoveHttpClientLogging(); // need to be one of the last statements so handlers are not added by any other method
 #else
-            services.AddNetworkPerspectiveCoreStub(_config.GetSection(NetworkPerspectiveCoreConfigSection));
+            if (_config.GetValue<bool?>("Infrastructure:NetworkPerspectiveCore:UseStub") != false)
+            {
+                services.AddNetworkPerspectiveCoreStub(_config.GetSection(NetworkPerspectiveCoreConfigSection));
+            }
 #endif
         }
 

@@ -54,7 +54,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 => GetSingleUserInteractionsAsync(context, stream, userEmail, credentials, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on callendar for '{timerange}' for {count} users...", context.TimeRange, usersEmails.Count());
-            var result = await ParallelSyncTask.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+            var result = await ParallelSyncTask<string>.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
             _logger.LogInformation("Evaluation of interactions based on callendar for '{timerange}' completed", context.TimeRange);
 
             return result;

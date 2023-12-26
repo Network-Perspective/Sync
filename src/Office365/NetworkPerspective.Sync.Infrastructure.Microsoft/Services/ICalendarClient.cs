@@ -17,7 +17,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
     internal interface ICalendarClient
     {
-        public Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, IMeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, IMeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal class CalendarClient : ICalendarClient
@@ -48,7 +48,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 => GetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on callendar for '{timerange}' for {count} users...", context.TimeRange, usersEmails.Count());
-            var result = await ParallelSyncTask.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+            var result = await ParallelSyncTask<string>.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
             _logger.LogInformation("Evaluation of interactions based on callendar for '{timerange}' completed", context.TimeRange);
 
             return result;

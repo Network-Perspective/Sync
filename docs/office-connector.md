@@ -115,7 +115,7 @@ To authenticate to Network Perspective System Office 365 Connector uses service 
 
 All communication with external systems is done via encrypted communication channels (TLS).
 
-### Google Api Client
+### Microsoft Graph Api Client
 To communicate with Office 365 API Office 365 Connector uses public Microsoft libraries:
 
 * Azure.Identity
@@ -125,7 +125,7 @@ For Outlook integration the Office Connector needs to be privileged to use the f
 
 * https://graph.microsoft.com/User.Read.All
 * https://graph.microsoft.com/Mail.ReadBasic.All
-* https://graph.microsoft.com/Calendars.Read
+* https://graph.microsoft.com/Calendars.ReadBasic.All
 
 For MS Teams integration:
 * https://graph.microsoft.com/Team.ReadBasic.All

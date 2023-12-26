@@ -24,8 +24,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
     internal class ChatClient : IChatClient
     {
-        private const string TaskCaption = "Synchronizing chat interactions";
-        private const string TaskDescription = "Fetching chats metadata from Slack API";
+        private const string TaskCaption = "Synchronizing channels interactions";
+        private const string TaskDescription = "Fetching channels metadata from Slack API";
 
         private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ILogger<ChatClient> _logger;
@@ -58,7 +58,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
                 _logger.LogInformation("Evaluating interactions based on chat for timerange {timerange} for {count} channels in team '{team}'...", timeRange, channelsIds.Count(), team.Name);
 
-                var partialResult = await ParallelSyncTask.RunAsync(channelsIds, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+                var partialResult = await ParallelSyncTask<string>.RunAsync(channelsIds, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
                 result = SyncResult.Combine(result, partialResult);
 
                 _logger.LogInformation("Evaluation of interactions based on chat for timerange '{timerange}' for team '{team}' completed", timeRange, team.Name);

@@ -28,6 +28,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
         private readonly IMemoryCache _cache;
         private readonly IStatusLoggerFactory _statusLoggerFactory;
+        private readonly INetworkService _networkService;
         private readonly ILogger<MicrosoftAuthService> _logger;
 
         public MicrosoftAuthService(
@@ -35,12 +36,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             ISecretRepositoryFactory secretRepositoryFactory,
             IMemoryCache cache,
             IStatusLoggerFactory statusLoggerFactory,
+            INetworkService networkService,
             ILogger<MicrosoftAuthService> logger)
         {
             _stateKeyFactory = stateKeyFactory;
             _secretRepositoryFactory = secretRepositoryFactory;
             _cache = cache;
             _statusLoggerFactory = statusLoggerFactory;
+            _networkService = networkService;
             _logger = logger;
         }
 
@@ -52,12 +55,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 .CreateForNetwork(authProcess.NetworkId)
                 .LogInfoAsync("Admin consent process started", stoppingToken);
 
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.NetworkId, stoppingToken);
-            var clientId = await secretRepository.GetSecretAsync(MicrosoftKeys.MicrosoftClientIdKey, stoppingToken);
-
             var stateKey = _stateKeyFactory.Create();
             _cache.Set(stateKey, authProcess, DateTimeOffset.UtcNow.AddMinutes(AuthorizationStateExpirationTimeInMinutes));
 
+            var clientId = await GetClientIdAsync(authProcess.NetworkId, stoppingToken);
             var authUri = BuildMicrosoftAuthUri(clientId, stateKey, authProcess.CallbackUri);
 
             _logger.LogInformation("Micorosoft admin consent process started. Unique state id: '{state}'", stateKey);
@@ -75,6 +76,26 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.NetworkId, stoppingToken);
             var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, authProcess.NetworkId);
             await secretRepository.SetSecretAsync(tenantIdKey, tenant.ToString().ToSecureString(), stoppingToken);
+        }
+
+        private async Task<SecureString> GetClientIdAsync(Guid networkId, CancellationToken stoppingToken)
+        {
+            var network = await _networkService.GetAsync<MicrosoftNetworkProperties>(networkId, stoppingToken);
+
+            var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId, stoppingToken);
+
+            if (network.Properties.SyncMsTeams == true)
+            {
+                _logger.LogInformation("Network property '{PropertyName}' is set to '{Value}'. Using Teams Microsoft Enterprise Application for authorization",
+                    nameof(MicrosoftNetworkProperties.SyncMsTeams), network.Properties.SyncMsTeams);
+                return await secretRepository.GetSecretAsync(MicrosoftKeys.MicrosoftClientTeamsIdKey, stoppingToken);
+            }
+            else
+            {
+                _logger.LogInformation("Network property '{PropertyName}' is set to '{Value}'. Using Basic Microsoft Enterprise Application for authorization",
+                    nameof(MicrosoftNetworkProperties.SyncMsTeams), network.Properties.SyncMsTeams);
+                return await secretRepository.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, stoppingToken);
+            }
         }
 
         private string BuildMicrosoftAuthUri(SecureString microsoftClientId, string state, Uri callbackUrl)
