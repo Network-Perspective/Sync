@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using Microsoft.Graph.Models;
 
@@ -7,7 +6,7 @@ using DomainGroup = NetworkPerspective.Sync.Application.Domain.Employees.Group;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Extensions
 {
-    public static class UserExtensions
+    internal static class UserExtensions
     {
         public static IList<DomainGroup> GetDepartmentGroups(this User user)
         {
