@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
             foreach (var user in users)
             {
                 if (user.Mail is null) continue;
-                
+
                 var employeeGroups = GetEmployeeGroups(user);
                 var employeeProps = GetEmployeeProps(user);
                 var employeeRelations = GetEmployeeRelations(user);
