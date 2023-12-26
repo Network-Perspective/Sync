@@ -23,13 +23,13 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
 {
-    public class MailboxClientTests : IClassFixture<MicrosoftClientFixture>
+    public class MailboxClientTests : IClassFixture<MicrosoftClientBasicFixture>
     {
-        private readonly MicrosoftClientFixture _microsoftClientFixture;
+        private readonly MicrosoftClientBasicFixture _microsoftClientFixture;
         private readonly ILogger<UsersClient> _usersClientlogger = NullLogger<UsersClient>.Instance;
         private readonly ILogger<MailboxClient> _mailboxClientlogger = NullLogger<MailboxClient>.Instance;
 
-        public MailboxClientTests(MicrosoftClientFixture microsoftClientFixture)
+        public MailboxClientTests(MicrosoftClientBasicFixture microsoftClientFixture)
         {
             _microsoftClientFixture = microsoftClientFixture;
         }
@@ -40,7 +40,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
         {
             // Arrange
             var stream = new TestableInteractionStream();
-            var usersClient = new UsersClient(_microsoftClientFixture.GraphServiceClient, _usersClientlogger);
+            var usersClient = new UsersClient(_microsoftClientFixture.Client, _usersClientlogger);
 
             var timeRange = new TimeRange(new DateTime(2021, 12, 01), new DateTime(2021, 12, 02));
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
@@ -48,7 +48,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var employees = EmployeesMapper.ToEmployees(users, EmailFilter.Empty);
 
             var interactionFactory = new EmailInteractionFactory(HashFunction.Empty, employees, NullLogger<EmailInteractionFactory>.Instance);
-            var mailboxClient = new MailboxClient(_microsoftClientFixture.GraphServiceClient, Mock.Of<ITasksStatusesCache>(), _mailboxClientlogger);
+            var mailboxClient = new MailboxClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _mailboxClientlogger);
 
             // Act
             await mailboxClient.SyncInteractionsAsync(syncContext, stream, users.Select(x => x.Mail), interactionFactory);

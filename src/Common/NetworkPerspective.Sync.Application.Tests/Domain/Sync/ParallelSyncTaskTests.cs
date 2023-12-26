@@ -31,7 +31,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
             }
 
             // Act
-            await ParallelSyncTask.RunAsync(userIds, StatusReportCallback, EmptySingleFetchTask);
+            await ParallelSyncTask<string>.RunAsync(userIds, StatusReportCallback, EmptySingleFetchTask);
 
             // Assert
             completionRateReports.Should().BeEquivalentTo(new[] { 0.0, 20.0, 40.0, 60.0, 80.0, 100.0 });
@@ -53,7 +53,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
             }
 
             // Act
-            Func<Task> func = () => ParallelSyncTask.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
+            Func<Task> func = () => ParallelSyncTask<string>.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
 
             // Assert
             func.ExecutionTime().Should().BeLessThan(150.Milliseconds());
@@ -76,7 +76,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
             }
 
             // Act
-            await ParallelSyncTask.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
+            await ParallelSyncTask<string>.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
 
             // Assert
             invocationCount.Should().Be(userIds.Count());
@@ -105,7 +105,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
             }
 
             // Act
-            var result = await ParallelSyncTask.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
+            var result = await ParallelSyncTask<string>.RunAsync(userIds, EmptyStatusReportCallback, SingleFetchTask);
 
             // Assert
             result.Should().BeEquivalentTo(expectedResult);

@@ -21,12 +21,12 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
 {
-    public class UsersClientTests : IClassFixture<MicrosoftClientFixture>
+    public class UsersClientTests : IClassFixture<MicrosoftClientBasicFixture>
     {
-        private readonly MicrosoftClientFixture _microsoftClientFixture;
+        private readonly MicrosoftClientBasicFixture _microsoftClientFixture;
         private readonly ILogger<UsersClient> _logger = NullLogger<UsersClient>.Instance;
 
-        public UsersClientTests(MicrosoftClientFixture microsoftClientFixture)
+        public UsersClientTests(MicrosoftClientBasicFixture microsoftClientFixture)
         {
             _microsoftClientFixture = microsoftClientFixture;
         }
@@ -36,7 +36,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
         public async Task ShouldBeAbleToGetUsers()
         {
             // Arrange
-            var client = new UsersClient(_microsoftClientFixture.GraphServiceClient, _logger);
+            var client = new UsersClient(_microsoftClientFixture.Client, _logger);
             var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 

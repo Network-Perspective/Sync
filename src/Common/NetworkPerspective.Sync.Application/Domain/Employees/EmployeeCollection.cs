@@ -34,8 +34,8 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
         private void AddIfNotExists(string alias, Employee employee)
         {
-            if (!_emailLookupTable.ContainsKey(alias) && !string.IsNullOrEmpty(alias))
-                _emailLookupTable.Add(alias, employee);
+            if (!string.IsNullOrEmpty(alias))
+                _emailLookupTable.TryAdd(alias, employee);
         }
 
         public IEnumerable<Employee> GetAllInternal()

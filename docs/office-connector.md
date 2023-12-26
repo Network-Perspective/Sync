@@ -125,7 +125,7 @@ For Outlook integration the Office Connector needs to be privileged to use the f
 
 * https://graph.microsoft.com/User.Read.All
 * https://graph.microsoft.com/Mail.ReadBasic.All
-* https://graph.microsoft.com/Calendars.Read
+* https://graph.microsoft.com/Calendars.ReadBasic.All
 
 For MS Teams integration:
 * https://graph.microsoft.com/Team.ReadBasic.All

@@ -11,7 +11,7 @@ using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 {
-    public static class HashedEmployeesMapper
+    internal static class HashedEmployeesMapper
     {
         public static EmployeeCollection ToEmployees(IEnumerable<User> users, HashFunction.Delegate hashFunc,
             EmailFilter emailFilter)
@@ -20,6 +20,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 
             foreach (var user in users)
             {
+                if (user.Mail is null) continue;
+                
                 var employeeGroups = GetEmployeeGroups(user);
                 var employeeProps = GetEmployeeProps(user);
                 var employeeRelations = GetEmployeeRelations(user);
