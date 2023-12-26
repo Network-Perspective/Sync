@@ -115,7 +115,7 @@ To authenticate to Network Perspective System Office 365 Connector uses service 
 
 All communication with external systems is done via encrypted communication channels (TLS).
 
-### Google Api Client
+### Microsoft Graph Api Client
 To communicate with Office 365 API Office 365 Connector uses public Microsoft libraries:
 
 * Azure.Identity
