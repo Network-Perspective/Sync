@@ -36,7 +36,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             var usersClient = new UsersClient(microsoftClient, _loggerFactory.CreateLogger<UsersClient>());
             var mailboxClient = new MailboxClient(microsoftClient, _tasksStatusesCache, _loggerFactory.CreateLogger<MailboxClient>());
             var calendarClient = new CalendarClient(microsoftClient, _tasksStatusesCache, _loggerFactory.CreateLogger<CalendarClient>());
-            var channelsClient = new ChannelsClient(microsoftClient, _tasksStatusesCache, _loggerFactory.CreateLogger<ChannelsClient>());
+            var channelsClient = new ChannelsClient(microsoftClient, _tasksStatusesCache, _loggerFactory);
             var chatClient = new ChatClient(microsoftClient, _tasksStatusesCache, _loggerFactory.CreateLogger<ChatClient>());
             return new MicrosoftFacade(_networkService, usersClient, mailboxClient, calendarClient, channelsClient, chatClient, _loggerFactory);
         }

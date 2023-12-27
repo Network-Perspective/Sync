@@ -24,7 +24,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
     {
         private readonly MicrosoftClientWithTeamsFixture _microsoftClientFixture;
         private readonly ILogger<UsersClient> _usersClientlogger = NullLogger<UsersClient>.Instance;
-        private readonly ILogger<ChannelsClient> _channelsClientLogger = NullLogger<ChannelsClient>.Instance;
+        private readonly ILoggerFactory _loggerFactory= NullLoggerFactory.Instance;
 
         public ChannelsClientTests(MicrosoftClientWithTeamsFixture microsoftClientFixture)
         {
@@ -45,7 +45,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var employees = EmployeesMapper.ToEmployees(users, EmailFilter.Empty);
             var interactionsFactory = new ChannelInteractionFactory(x => $"{x}_hashed", employees);
 
-            var channelsClient = new ChannelsClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _channelsClientLogger);
+            var channelsClient = new ChannelsClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _loggerFactory);
 
             // Act
             await channelsClient.SyncInteractionsAsync(syncContext, stream, interactionsFactory);
