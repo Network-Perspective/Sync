@@ -46,10 +46,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                             nameof(User.Id),
                             nameof(User.Mail),
                             nameof(User.OtherMails),
+                            nameof(User.EmployeeId),
                             nameof(User.DisplayName),
                             nameof(User.Department),
                             nameof(User.CreatedDateTime)
                         },
+                        Filter = "userType eq 'Member'",
                         Top = MaxPageSize,
                         Expand = new[]
                         {
