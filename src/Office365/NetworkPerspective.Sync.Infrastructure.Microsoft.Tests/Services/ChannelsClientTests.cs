@@ -24,7 +24,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
     {
         private readonly MicrosoftClientWithTeamsFixture _microsoftClientFixture;
         private readonly ILogger<UsersClient> _usersClientlogger = NullLogger<UsersClient>.Instance;
-        private readonly ILoggerFactory _loggerFactory= NullLoggerFactory.Instance;
+        private readonly ILoggerFactory _loggerFactory = NullLoggerFactory.Instance;
 
         public ChannelsClientTests(MicrosoftClientWithTeamsFixture microsoftClientFixture)
         {
