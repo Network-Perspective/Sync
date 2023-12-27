@@ -51,6 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                             nameof(User.Department),
                             nameof(User.CreatedDateTime)
                         },
+                        Filter = "userType eq 'Member'",
                         Top = MaxPageSize,
                         Expand = new[]
                         {
