@@ -14,7 +14,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
     internal interface IChannelsInteractionFactory
     {
-        ISet<Interaction> CreateFromThreadMessage(ChatMessage thread, string channelId, ISet<string> channelMembers);
+        ISet<Interaction> CreateFromThreadMessage(ChatMessage thread, Models.Channel channel);
         ISet<Interaction> CreateFromThreadRepliesMessage(IEnumerable<ChatMessage> replies, string channelId, string threadId, string threadCreator, Application.Domain.TimeRange timeRange);
     }
 
@@ -29,17 +29,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             _employees = employees;
         }
 
-        public ISet<Interaction> CreateFromThreadMessage(ChatMessage thread, string channelId, ISet<string> channelMembers)
+        public ISet<Interaction> CreateFromThreadMessage(ChatMessage thread, Models.Channel channel)
         {
             var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
 
-            foreach (var channelMember in channelMembers)
+            foreach (var channelMember in channel.UserIds)
             {
                 var interaction = Interaction.CreateChatThread(
                     timestamp: thread.CreatedDateTime.Value.UtcDateTime,
                     source: _employees.Find(thread.From.User.Id),
                     target: _employees.Find(channelMember),
-                    channelId: channelId,
+                    channelId: channel.Id.ChannelId,
                     eventId: thread.Id);
 
                 interactions.Add(interaction.Hash(_hash));
@@ -52,13 +52,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             foreach (var reaction in thread.Reactions)
             {
-                var reactionHash = $"{reaction.CreatedDateTime.Value.Ticks}{reaction.User.User.Id.GetStableHashCode()}{channelId.GetStableHashCode()}";
+                var reactionHash = $"{reaction.CreatedDateTime.Value.Ticks}{reaction.User.User.Id.GetStableHashCode()}{channel.Id.ChannelId.GetStableHashCode()}";
 
                 var interaction = Interaction.CreateChatReaction(
                     timestamp: reaction.CreatedDateTime.Value.UtcDateTime,
                     source: _employees.Find(reaction.User.User.Id),
                     target: _employees.Find(thread.From.User.Id),
-                    channelId: channelId,
+                    channelId: channel.Id.ChannelId,
                     eventId: thread.Id + reactionHash.ToString(),
                     parentEventId: thread.Id);
 
