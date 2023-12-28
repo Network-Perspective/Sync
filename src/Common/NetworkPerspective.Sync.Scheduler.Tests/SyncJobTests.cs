@@ -21,7 +21,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
 {
     public class SyncJobTests
     {
-        private readonly Mock<ISyncContextFactory> _syncContextFactory = new Mock<ISyncContextFactory>();
+        private readonly Mock<ISyncContextProvider> _syncContextFactory = new Mock<ISyncContextProvider>();
         private readonly Mock<ISyncServiceFactory> _syncServiceFactoryMock = new Mock<ISyncServiceFactory>();
         private readonly Mock<ISyncService> _syncServiceMock = new Mock<ISyncService>();
         private readonly ILogger<SyncJob> _logger = NullLogger<SyncJob>.Instance;
@@ -47,7 +47,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
                 .Setup(x => x.SyncAsync(It.IsAny<SyncContext>(), It.IsAny<CancellationToken>()))
                 .Throws(new Exception());
 
-            var syncJob = new SyncJob(_syncContextFactory.Object, _syncServiceFactoryMock.Object, _logger);
+            var syncJob = new SyncJob(_syncServiceFactoryMock.Object, _syncContextFactory.Object, _logger);
 
             // Act
             Func<Task> func = async () => await syncJob.Execute(jobContextMock);
