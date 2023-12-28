@@ -1,0 +1,4 @@
+Code	Name	Category	ParentCode	ClientGroupId
+hash1	Pion CEO	Division		group1
+hash2	Biuro Analiz	Unit	hash1	group2
+hash3	Biuro Zarządu	Unit	hash1	group3

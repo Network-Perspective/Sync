@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
-
-using FluentAssertions;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -23,13 +20,13 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
 {
-    public class CalendarClientTests : IClassFixture<MicrosoftClientBasicFixture>
+    public class ChannelsClientTests : IClassFixture<MicrosoftClientWithTeamsFixture>
     {
-        private readonly MicrosoftClientBasicFixture _microsoftClientFixture;
+        private readonly MicrosoftClientWithTeamsFixture _microsoftClientFixture;
         private readonly ILogger<UsersClient> _usersClientlogger = NullLogger<UsersClient>.Instance;
-        private readonly ILogger<CalendarClient> _calendarClientlogger = NullLogger<CalendarClient>.Instance;
+        private readonly ILoggerFactory _loggerFactory = NullLoggerFactory.Instance;
 
-        public CalendarClientTests(MicrosoftClientBasicFixture microsoftClientFixture)
+        public ChannelsClientTests(MicrosoftClientWithTeamsFixture microsoftClientFixture)
         {
             _microsoftClientFixture = microsoftClientFixture;
         }
@@ -42,24 +39,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var stream = new TestableInteractionStream();
             var usersClient = new UsersClient(_microsoftClientFixture.Client, _usersClientlogger);
 
-            var timeRange = new TimeRange(new DateTime(2023, 04, 10), new DateTime(2023, 04, 11));
+            var timeRange = new TimeRange(new DateTime(2023, 01, 10), new DateTime(2023, 12, 11));
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
             var users = await usersClient.GetUsersAsync(syncContext);
             var employees = EmployeesMapper.ToEmployees(users, EmailFilter.Empty);
+            var interactionsFactory = new ChannelInteractionFactory(x => $"{x}_hashed", employees);
 
-            var interactionFactory = new MeetingInteractionFactory(HashFunction.Empty, employees, NullLogger<MeetingInteractionFactory>.Instance);
-            var calednarClient = new CalendarClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _calendarClientlogger);
+            var channelsClient = new ChannelsClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _loggerFactory);
 
             // Act
-            await calednarClient.SyncInteractionsAsync(syncContext, stream, users.Select(x => x.Mail), interactionFactory);
-
-            var interactions_1 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2023, 04, 10, 06, 00, 00));
-            interactions_1.Should().HaveCount(2);
-
-            var interactions_2 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2023, 04, 10, 07, 00, 00));
-            interactions_2.Should().HaveCount(2);
-
-            stream.SentInteractions.Should().HaveCount(55);
+            await channelsClient.SyncInteractionsAsync(syncContext, stream, interactionsFactory);
         }
     }
 }

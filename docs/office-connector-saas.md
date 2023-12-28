@@ -86,6 +86,8 @@ In this scenario, the customer doesn’t administer services and secrets on his 
 In this scenario Azure Key Vault is deployed in customer's infrastructure to hold all secrets securely within private Azure infrastructure. 
 <img src="office365/office365-private-key-vault-deployment.png" />
 
+The process of deploying Private Key Vault is automated and [described on a separate page](./office-private-kv-deployment.md).
+
 ## Concepts
 ### Persistency
 Office 365 Connector stores only configurations such as, for example, scheduled synchronization jobs.
@@ -104,7 +106,7 @@ To authenticate to Network Perspective System Office 365 Connector uses service 
 
 All communication with external systems is done via encrypted communication channels (TLS).
 
-### Google Api Client
+### Microsoft Graph Api Client
 To communicate with Office 365 API Office 365 Connector uses public Microsoft libraries:
 
 * Azure.Identity

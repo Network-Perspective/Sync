@@ -36,6 +36,9 @@ namespace NetworkPerspective.Sync.Cli
         [ArgDescription("Identifier column (Default Id or Code)"), ArgRequired, DefaultValue("Id,Code")]
         public string IdCol { get; set; }
 
+        [ArgDescription("ClientGroupId identifier column (Id for data export)"), ArgRequired, DefaultValue("ClientGroupId")]
+        public string ClientGroupIdCol { get; set; }
+
         [ArgDescription("Name column (Default Id or Code)"), ArgRequired, DefaultValue("Name")]
         public string NameCol { get; set; }
 
@@ -56,6 +59,7 @@ namespace NetworkPerspective.Sync.Cli
         private Dictionary<string, ColumnDescriptor> _nameCols = new Dictionary<string, ColumnDescriptor>();
         private Dictionary<string, ColumnDescriptor> _categoryCols = new Dictionary<string, ColumnDescriptor>();
         private Dictionary<string, ColumnDescriptor> _parentCols = new Dictionary<string, ColumnDescriptor>();
+        private Dictionary<string, ColumnDescriptor> _clientGroupIdCols = new Dictionary<string, ColumnDescriptor>();
 
         private readonly ISyncHashedClient _client;
         private readonly IFileSystem _fileSystem;
@@ -81,6 +85,7 @@ namespace NetworkPerspective.Sync.Cli
             }
 
             _idCols = _options.IdCol.AsColumnDescriptorDictionary();
+            _clientGroupIdCols = _options.ClientGroupIdCol.AsColumnDescriptorDictionary();
             _nameCols = _options.NameCol.AsColumnDescriptorDictionary();
             _categoryCols = _options.CategoryCol.AsColumnDescriptorDictionary();
             _parentCols = _options.ParentCol.AsColumnDescriptorDictionary();
@@ -167,6 +172,10 @@ namespace NetworkPerspective.Sync.Cli
                         else if (_parentCols.ContainsKey(fieldName))
                         {
                             group.ParentId = value;
+                        }
+                        else if (_clientGroupIdCols.ContainsKey(fieldName))
+                        {
+                            group.ClientGroupId = value;
                         }
                     }
                     result.Add(group);
