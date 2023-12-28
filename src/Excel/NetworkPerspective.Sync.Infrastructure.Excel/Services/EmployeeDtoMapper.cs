@@ -8,17 +8,9 @@ public static class EmployeeDtoMapper
 {
     public static List<Employee> ToDomainEmployees(
         this List<EmployeeDto> dtos,
-        SyncMetadataIncludesDto metadata,
         EmailFilter emailFilter
     )
     {
-        var employeeIdEmailDict = new Dictionary<string, string>();
-        foreach (EmployeeDto dto in dtos)
-        {
-            if (employeeIdEmailDict.ContainsKey(dto.EmployeeId)) continue;
-            employeeIdEmailDict.Add(dto.EmployeeId, dto.Email);
-        }
-
         var result = new List<Employee>();
         foreach (EmployeeDto dto in dtos)
         {
@@ -36,23 +28,17 @@ public static class EmployeeDtoMapper
             {
                 foreach (var prop in dto.Props)
                 {
-                    if (!metadata.Props.Contains(prop.Name)) continue;
-                    if (props.ContainsKey(prop.Name)) continue;
-                    props.Add(prop.Name, prop.Value);
+                    props.TryAdd(prop.Name, prop.Value);
                 }
             }
-            if (dto.EmploymentDate != default)
-            {
-                props.Add("EmploymentDate", dto.EmploymentDate);
-            }
+            props.TryAdd(Employee.PropKeyName, dto.Name);
 
-            // construct groups
+            // construct groups from permissions
             var groups = new List<Group>();
-            if (dto.Groups != null)
+            if (dto.Permissions != null)
             {
-                foreach (var g in dto.Groups)
+                foreach (var g in dto.Permissions)
                 {
-                    if (!metadata.Groups.Contains(g.Category)) continue;
                     groups.Add(Group.CreateWithParentId(
                         id: g.Id,
                         name: g.Name,
@@ -63,36 +49,101 @@ public static class EmployeeDtoMapper
             }
 
             // construct relations
-            var relations = new List<Relation>();
-            if (dto.Relationships != null)
-            {
-                foreach (EmployeeRelationshipDto rel in dto.Relationships)
-                {
-                    if (!metadata.Relationships.Contains(rel.RelationshipName)) continue;
-
-                    var email = rel.Email;
-                    if (string.IsNullOrWhiteSpace(email))
-                    {
-                        if (string.IsNullOrWhiteSpace(rel.EmployeeId)) continue;
-                        if (!employeeIdEmailDict.ContainsKey(rel.EmployeeId)) continue;
-                        email = employeeIdEmailDict[rel.EmployeeId];
-                    }
-                    relations.Add(Relation.Create(
-                        name: rel.RelationshipName ?? Relation.SupervisorRelationName,
-                        targetEmployeeEmail: email
-                    ));
-                }
-            }
+            var relations = GetRelations(dto, dtos);
 
             var employee = Employee.CreateInternal(
                 id: EmployeeId.Create(dto.Email, dto.EmployeeId),
                 groups: groups,
                 props: props,
-                relations: new RelationsCollection(relations)
+                relations: relations
             );
             result.Add(employee);
         }
 
         return result;
+    }
+
+    public static List<Employee> ToDomainEmployeesHashed(
+        this List<EmployeeDto> dtos,
+        EmailFilter emailFilter
+    )
+    {
+        var result = new List<Employee>();
+        foreach (EmployeeDto dto in dtos)
+        {
+            var isInternal = emailFilter.IsInternalUser(dto.Email);
+
+            if (!isInternal)
+            {
+                result.Add(Employee.CreateExternal(dto.Email));
+                continue;
+            }
+
+            // construct props
+            var props = new Dictionary<string, object>();
+            if (dto.EmploymentDate != default)
+            {
+                props.TryAdd(Employee.PropKeyEmploymentDate, dto.EmploymentDate);
+            }
+
+            // construct groups
+            var groups = new List<Group>();
+            if (dto.Groups != null)
+            {
+                foreach (var g in dto.Groups)
+                {
+                    groups.Add(Group.CreateWithParentId(
+                        id: g.Id,
+                        name: g.Name,
+                        category: g.Category,
+                        parentId: g.ParentId
+                    ));
+                }
+            }
+
+            // construct relations
+            var relations = GetRelations(dto, dtos);
+
+            var employee = Employee.CreateInternal(
+                id: EmployeeId.Create(dto.Email, dto.EmployeeId),
+                groups: groups,
+                props: props,
+                relations: relations
+            );
+            result.Add(employee);
+        }
+
+        return result;
+    }
+
+    private static RelationsCollection GetRelations(EmployeeDto dto, List<EmployeeDto> all)
+    {
+        var employeeIdEmailDict = new Dictionary<string, string>();
+        foreach (EmployeeDto e in all)
+        {
+            if (employeeIdEmailDict.ContainsKey(e.EmployeeId)) continue;
+            employeeIdEmailDict.Add(e.EmployeeId, e.Email);
+        }
+
+        var relations = new List<Relation>();
+        if (dto.Relationships != null)
+        {
+            foreach (EmployeeRelationshipDto rel in dto.Relationships)
+            {
+                var email = rel.Email;
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    if (string.IsNullOrWhiteSpace(rel.EmployeeId)) continue;
+                    if (!employeeIdEmailDict.ContainsKey(rel.EmployeeId)) continue;
+                    email = employeeIdEmailDict[rel.EmployeeId];
+                }
+                relations.Add(Relation.Create(
+                    name: rel.RelationshipName ?? Relation.SupervisorRelationName,
+                    targetEmployeeEmail: email
+                ));
+            }
+        }
+
+        return new RelationsCollection(relations);
     }
 }

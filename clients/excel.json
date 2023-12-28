@@ -25,6 +25,93 @@
         }
       }
     },
+    "/networks": {
+      "post": {
+        "tags": [
+          "Networks"
+        ],
+        "summary": "Initializes network",
+        "operationId": "Add",
+        "requestBody": {
+          "description": "Network configuration",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/NetworkConfigDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NetworkConfigDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NetworkConfigDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/NetworkConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Network added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authorization token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Networks"
+        ],
+        "summary": "Removes network and all it's related data - synchronization history, scheduled jobs, Network Perspective Token, Data source keys",
+        "operationId": "Remove",
+        "responses": {
+          "200": {
+            "description": "Network removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authorization token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/schedules": {
       "post": {
         "tags": [
@@ -229,6 +316,13 @@
             },
             "nullable": true
           },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmployeeGroupDto"
+            },
+            "nullable": true
+          },
           "relationships": {
             "type": "array",
             "items": {
@@ -292,6 +386,19 @@
           }
         },
         "additionalProperties": false
+      },
+      "NetworkConfigDto": {
+        "type": "object",
+        "properties": {
+          "externalKeyVaultUri": {
+            "type": "string",
+            "description": "External Key Vault Uri (optional) in case it's not provided the internal key vault is used",
+            "format": "uri",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Network configuration"
       },
       "SchedulerStartDto": {
         "type": "object",
@@ -369,48 +476,6 @@
         ],
         "type": "string"
       },
-      "SyncMetadataDto": {
-        "type": "object",
-        "properties": {
-          "plain": {
-            "$ref": "#/components/schemas/SyncMetadataIncludesDto"
-          },
-          "hashed": {
-            "$ref": "#/components/schemas/SyncMetadataIncludesDto"
-          }
-        },
-        "additionalProperties": false
-      },
-      "SyncMetadataIncludesDto": {
-        "type": "object",
-        "properties": {
-          "props": {
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "relationships": {
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "groups": {
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "SyncRequestDto": {
         "type": "object",
         "properties": {
@@ -420,9 +485,6 @@
               "$ref": "#/components/schemas/EmployeeDto"
             },
             "nullable": true
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/SyncMetadataDto"
           }
         },
         "additionalProperties": false

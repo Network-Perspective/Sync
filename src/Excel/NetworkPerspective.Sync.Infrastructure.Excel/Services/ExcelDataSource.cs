@@ -23,20 +23,20 @@ public class ExcelDataSource : IDataSource
     public Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
     {
         var incoming = context.Get<List<EmployeeDto>>();
-        var metadata = context.Get<SyncMetadataDto>();
         var emailFilter = context.NetworkConfig.EmailFilter;
 
-        var employees = incoming.ToDomainEmployees(metadata.Plain, emailFilter);
+        var employees = incoming.ToDomainEmployees(emailFilter);
+        employees.ForEach(e => e.EvaluateGroupAccess(context.HashFunction));
+
         return Task.FromResult(new EmployeeCollection(employees, null));
     }
 
     public Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
     {
         var incoming = context.Get<List<EmployeeDto>>();
-        var metadata = context.Get<SyncMetadataDto>();
         var emailFilter = context.NetworkConfig.EmailFilter;
 
-        var employees = incoming.ToDomainEmployees(metadata.Hashed, emailFilter);
+        var employees = incoming.ToDomainEmployeesHashed(emailFilter);
         return Task.FromResult(new EmployeeCollection(employees, context.HashFunction));
     }
 }

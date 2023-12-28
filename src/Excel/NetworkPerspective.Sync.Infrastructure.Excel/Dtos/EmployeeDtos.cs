@@ -8,6 +8,7 @@ public class EmployeeDto
     public DateTime EmploymentDate { get; set; }
     public List<EmployeePropDto> Props { get; set; }
     public List<EmployeeGroupDto> Groups { get; set; }
+    public List<EmployeeGroupDto> Permissions { get; set; }
     public List<EmployeeRelationshipDto> Relationships { get; set; }
 }
 

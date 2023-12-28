@@ -14,11 +14,10 @@ public class EmployeeDtoMapperTests
     {
         // Arrange
         var dtos = new List<EmployeeDto>();
-        var metadata = new SyncMetadataIncludesDto();
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(metadata, emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter);
 
         // Assert
         Assert.Empty(result);
@@ -33,11 +32,10 @@ public class EmployeeDtoMapperTests
             new EmployeeDto { Email = "external1@example.com", EmployeeId = "1" },
             new EmployeeDto { Email = "external2@example.com", EmployeeId = "2" }
         };
-        var metadata = new SyncMetadataIncludesDto();
         var emailFilter = new EmailFilter(new[] { "internal@example.com" }, new List<string>());
 
         // Act
-        var result = dtos.ToDomainEmployees(metadata, emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter);
 
         // Assert
         Assert.All(result, employee => Assert.True(employee.IsExternal));
@@ -52,19 +50,18 @@ public class EmployeeDtoMapperTests
             new EmployeeDto { Email = "internal1@example.com", EmployeeId = "1" },
             new EmployeeDto { Email = "internal2@example.com", EmployeeId = "2" }
         };
-        var metadata = new SyncMetadataIncludesDto();
         var emailFilter =
             new EmailFilter(new[] { "internal1@example.com", "internal2@example.com" }, new List<string>());
 
         // Act
-        var result = dtos.ToDomainEmployees(metadata, emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter);
 
         // Assert
         Assert.All(result, employee => Assert.False(employee.IsExternal));
     }
 
     [Fact]
-    public void ToDomainEmployees_ShouldIgnorePropsNotIncludedInMetadata()
+    public void ToDomainEmployees_ShouldIgnorePropsWhenHashedMapping()
     {
         // Arrange
         var dtos = new List<EmployeeDto>
@@ -76,11 +73,10 @@ public class EmployeeDtoMapperTests
                 Props = new List<EmployeePropDto> { new EmployeePropDto { Name = "Prop1", Value = "Value1" } }
             }
         };
-        var metadata = new SyncMetadataIncludesDto { Props = new HashSet<string> { "Prop2" } };
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(metadata, emailFilter);
+        var result = dtos.ToDomainEmployeesHashed(emailFilter);
 
         // Assert
         Assert.All(result, employee => Assert.Empty(employee.Props));
@@ -99,18 +95,17 @@ public class EmployeeDtoMapperTests
                 Props = new List<EmployeePropDto> { new EmployeePropDto { Name = "Prop1", Value = "Value1" } }
             }
         };
-        var metadata = new SyncMetadataIncludesDto { Props = new HashSet<string> { "Prop1" } };
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(metadata, emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter);
 
         // Assert
         Assert.All(result, employee => Assert.Contains("Prop1", employee.Props.Keys));
     }
 
     [Fact]
-    public void ToDomainEmployees_ShouldIgnoreGroupsNotIncludedInMetadata()
+    public void ToDomainEmployees_ShouldIgnoreGroupsWhenNonHashedTarget()
     {
         // Arrange
         var dtos = new List<EmployeeDto>
@@ -122,18 +117,39 @@ public class EmployeeDtoMapperTests
                 Groups = new List<EmployeeGroupDto> { new EmployeeGroupDto { Category = "Group1", Name = "Name1" } }
             }
         };
-        var metadata = new SyncMetadataIncludesDto { Groups = new HashSet<string> { "Group2" } };
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(metadata, emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter);
 
         // Assert
-        Assert.All(result, employee => Assert.Empty(employee.Groups));
+        Assert.True(result.First().Groups == null || !result.First().Groups.Any());
     }
 
     [Fact]
-    public void ToDomainEmployees_ShouldIncludeGroupsIncludedInMetadata()
+    public void ToDomainEmployees_ShouldIncludePermissionsWhenNonHashedTarget()
+    {
+        // Arrange
+        var dtos = new List<EmployeeDto>
+        {
+            new EmployeeDto
+            {
+                Email = "internal1@example.com",
+                EmployeeId = "1",
+                Permissions = new List<EmployeeGroupDto> { new EmployeeGroupDto { Category = "Group1", Name = "Name1", Id = "GroupId1"} }
+            }
+        };
+        var emailFilter = EmailFilter.Empty;
+
+        // Act
+        var result = dtos.ToDomainEmployees(emailFilter);
+
+        // Assert
+        Assert.Equal("GroupId1", result.First().Groups.First().Id);
+    }
+
+    [Fact]
+    public void ToDomainEmployees_ShouldIncludeGroupsIfHashedTarget()
     {
         // Arrange
         var dtos = new List<EmployeeDto>
@@ -145,11 +161,10 @@ public class EmployeeDtoMapperTests
                 Groups = new List<EmployeeGroupDto> { new EmployeeGroupDto { Category = "Group1", Name = "Name1" } }
             }
         };
-        var metadata = new SyncMetadataIncludesDto { Groups = new HashSet<string> { "Group1" } };
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(metadata, emailFilter);
+        var result = dtos.ToDomainEmployeesHashed(emailFilter);
 
         // Assert
         Assert.All(result, employee => Assert.Contains(employee.Groups, group => group.Category == "Group1"));
@@ -169,18 +184,17 @@ public class EmployeeDtoMapperTests
                 Relationships = new List<EmployeeRelationshipDto> { new EmployeeRelationshipDto { RelationshipName = "Relationship1" } }
             }
         };
-        var metadata = new SyncMetadataIncludesDto { Relationships = new HashSet<string> { "Relationship2" } };
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(metadata, emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter);
 
         // Assert
         Assert.All(result, employee => Assert.Empty(employee.Relations));
     }
 
     [Fact]
-    public void ToDomainEmployees_ShouldIncludeRelationshipsIncludedInMetadata()
+    public void ToDomainEmployees_ShouldIncludeRelationshipsinHashedTarget()
     {
         // Arrange
         var dtos = new List<EmployeeDto>
@@ -197,11 +211,10 @@ public class EmployeeDtoMapperTests
                 }
             }
         };
-        var metadata = new SyncMetadataIncludesDto { Relationships = new HashSet<string> { "Relationship1" } };
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(metadata, emailFilter);
+        var result = dtos.ToDomainEmployeesHashed(emailFilter);
 
         // Assert
         Assert.All(result, employee => Assert.Contains(employee.Relations, relation => relation.Name == "Relationship1"));
@@ -231,11 +244,10 @@ public class EmployeeDtoMapperTests
                 EmployeeId = "2"
             }
         };
-        var metadata = new SyncMetadataIncludesDto { Relationships = new HashSet<string> { "Relationship1" } };
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(metadata, emailFilter);
+        var result = dtos.ToDomainEmployeesHashed(emailFilter);
 
         // Assert
         var employee = result.Single(employee => employee.Id.PrimaryId == "internal1@example.com");

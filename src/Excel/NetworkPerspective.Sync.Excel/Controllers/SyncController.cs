@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Controllers;
-using NetworkPerspective.Sync.Infrastructure.Excel.Dtos;
 
 namespace NetworkPerspective.Sync.Excel.Controllers;
 
@@ -37,7 +35,6 @@ public class SyncController : ApiControllerBase
 
         // add employees & metadata to sync context
         syncContext.Set(syncRequest.Employees);
-        syncContext.Set(syncRequest.Metadata);
 
         // create sync service & sync data
         var syncService = await _syncServiceFactory.CreateAsync(syncContext.NetworkId, stoppingToken);

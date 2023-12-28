@@ -14,6 +14,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public const string PropKeyDepartment = "Department";
         public const string PropKeyHierarchy = "Hierarchy";
         public const string PropKeyCreationTime = "CreationTime";
+        public const string PropKeyEmploymentDate = "EmploymentDate";
         public const string PropKeyName = "Name";
 
         public static readonly IEqualityComparer<Employee> EqualityComparer = new EmployeeEqualityComparer();
@@ -42,10 +43,13 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             Relations = relations;
             _groups = groups.ToList();
 
-            if (groups.Any())
+            if (_groups.Any())
             {
-                _props[PropKeyTeam] = GetTeam();
-                _props[PropKeyDepartment] = GetDepartments();
+                var team = GetTeam();
+                if (team != null) _props[PropKeyTeam] = team;
+                
+                var departments = GetDepartments();
+                if (departments.Any()) _props[PropKeyDepartment] = departments;
             }
         }
 
