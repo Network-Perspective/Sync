@@ -1,0 +1,13 @@
+﻿{
+  "profiles": {
+    "NetworkPerspective.Sync.Excel": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "https://localhost:6021;http://localhost:6022",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
