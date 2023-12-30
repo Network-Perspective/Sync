@@ -11,6 +11,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
     public class Employee
     {
         public const string PropKeyTeam = "Team";
+        public const string PropKeyTeamCode = "TeamCode";
         public const string PropKeyDepartment = "Department";
         public const string PropKeyHierarchy = "Hierarchy";
         public const string PropKeyCreationTime = "CreationTime";
@@ -20,6 +21,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public static readonly IEqualityComparer<Employee> EqualityComparer = new EmployeeEqualityComparer();
 
         private readonly IList<Group> _groups;
+        private IList<string> _groupAccess;
         private readonly IDictionary<string, object> _props;
 
         public EmployeeId Id { get; }
@@ -31,6 +33,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
         public IReadOnlyDictionary<string, object> Props => _props.ToImmutableDictionary();
         public IReadOnlyCollection<Group> Groups => new ReadOnlyCollection<Group>(_groups);
+        public IReadOnlyCollection<string> GroupAccess => new ReadOnlyCollection<string>(_groupAccess);
         public RelationsCollection Relations { get; }
 
         private Employee(EmployeeId id, IEnumerable<Group> groups, bool isExternal, bool isBot, bool isHashed, IDictionary<string, object> props, RelationsCollection relations)
@@ -42,12 +45,13 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             _props = props;
             Relations = relations;
             _groups = groups.ToList();
+            _groupAccess = new List<string>();
 
             if (_groups.Any())
             {
                 var team = GetTeam();
-                if (team != null) _props[PropKeyTeam] = team;
-                
+                if (!string.IsNullOrEmpty(team)) _props[PropKeyTeam] = team;
+
                 var departments = GetDepartments();
                 if (departments.Any()) _props[PropKeyDepartment] = departments;
             }
@@ -71,7 +75,28 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             var hashedGroups = Groups.Select(x => x.Hash(hashFunc));
             var hashedRelations = Relations.Hash(hashFunc);
 
-            return new Employee(hashedId, hashedGroups, IsExternal, IsBot, true, Props.ToDictionary(x => x.Key, y => y.Value), hashedRelations);
+            var hashedProps = Props.ToDictionary(x => x.Key, y => y.Value);
+
+            // set team code
+            var team = GetTeamGroup();
+            if (team != null)
+            {
+                hashedProps[PropKeyTeamCode] = hashFunc(team.Id);
+            }
+
+            return new Employee(hashedId, hashedGroups, IsExternal, IsBot, true, hashedProps, hashedRelations);
+        }
+
+        /// <summary>
+        /// Use groups to populate group access
+        /// </summary>
+        /// <param name="hashFunc"></param>
+        public void EvaluateGroupAccess(HashFunction.Delegate hashFunc)
+        {
+            if (!Groups.Any()) return;
+            if (IsHashed) throw new DoubleHashingException(nameof(GroupAccess));
+
+            _groupAccess = Groups.Select(g => hashFunc(g.Id)).ToList();
         }
 
         public void SetHierarchy(EmployeeHierarchy hierarchy)
@@ -87,9 +112,12 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             => GetDepartmentGroups().Select(x => x.Name);
 
         private Group GetTeamGroup()
-            => Groups.SingleOrDefault(x => string.Equals(x.Category, Group.TeamCatergory, StringComparison.InvariantCultureIgnoreCase));
+         => Groups.SingleOrDefault(x => string.Equals(x.Category, Group.TeamCatergory, StringComparison.InvariantCultureIgnoreCase));
 
-        private IEnumerable<Group> GetDepartmentGroups()
-            => Groups.Where(x => string.Equals(x.Category, Group.DepartmentCatergory, StringComparison.InvariantCultureIgnoreCase));
+
+        private IEnumerable<Group> GetDepartmentGroups() =>
+            Groups.Where(x =>
+                string.Equals(x.Category, Group.DepartmentCatergory, StringComparison.InvariantCultureIgnoreCase));
+
     }
 }
