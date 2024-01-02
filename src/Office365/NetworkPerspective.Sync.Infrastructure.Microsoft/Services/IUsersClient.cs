@@ -8,6 +8,7 @@ using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Users;
 
+using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
@@ -32,7 +33,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         public async Task<IEnumerable<User>> GetUsersAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogDebug("Fetching users for network '{networkId}'...", context.NetworkId);
-
             var result = new List<User>();
 
             var usersResponse = await _graphClient
@@ -74,12 +74,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             await pageIterator.IterateAsync(stoppingToken);
 
+            var filteredResult = FilterUsers(context.NetworkConfig.EmailFilter, result);
+
             if (!result.Any())
                 _logger.LogWarning("No users found in network '{networkId}'", context.NetworkId);
             else
                 _logger.LogDebug("Fetching employees for network '{networkId}' completed. '{count}' employees found", context.NetworkId, usersResponse.Value.Count);
 
             return result;
+        }
+
+        private IEnumerable<User> FilterUsers(EmailFilter filter, IEnumerable<User> users)
+        {
+            return users
+                .Where(x => filter.IsInternalUser(x.Mail) || x.OtherMails.Any(filter.IsInternalUser))
+                .ToList();
         }
     }
 }
