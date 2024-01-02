@@ -38,7 +38,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             // Arrange
             var client = new UsersClient(_microsoftClientFixture.Client, _logger);
             var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
-            var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+            var filter = new EmailFilter(new[] { "*.onmicrosoft.com" }, Array.Empty<string>());
+            var networkConfig = new NetworkConfig(filter, CustomAttributesConfig.Empty);
+            var syncContext = new SyncContext(Guid.NewGuid(), networkConfig, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
             // Act
             var result = await client.GetUsersAsync(syncContext);
