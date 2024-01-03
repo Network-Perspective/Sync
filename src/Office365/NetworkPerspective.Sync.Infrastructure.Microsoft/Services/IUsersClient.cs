@@ -76,19 +76,22 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             var filteredResult = FilterUsers(context.NetworkConfig.EmailFilter, result);
 
-            if (!result.Any())
+            if (!filteredResult.Any())
                 _logger.LogWarning("No users found in network '{networkId}'", context.NetworkId);
             else
-                _logger.LogDebug("Fetching employees for network '{networkId}' completed. '{count}' employees found", context.NetworkId, usersResponse.Value.Count);
+                _logger.LogDebug("Fetching employees for network '{networkId}' completed. '{count}' employees found", context.NetworkId, filteredResult.Count);
 
-            return result;
+            return filteredResult;
         }
 
-        private IEnumerable<User> FilterUsers(EmailFilter filter, IEnumerable<User> users)
+        private List<User> FilterUsers(EmailFilter filter, List<User> users)
         {
-            return users
+            _logger.LogTrace("Filtering users based on network configuration. Input contains {count} users", users.Count);
+            var result = users
                 .Where(x => filter.IsInternalUser(x.Mail) || x.OtherMails.Any(filter.IsInternalUser))
                 .ToList();
+
+            return result;
         }
     }
 }
