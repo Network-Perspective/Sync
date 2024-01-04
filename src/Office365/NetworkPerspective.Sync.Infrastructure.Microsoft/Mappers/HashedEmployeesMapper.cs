@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using Microsoft.Graph.Models;
 
@@ -7,14 +8,14 @@ using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Extensions;
 
+using DomainChannel = NetworkPerspective.Sync.Infrastructure.Microsoft.Models.Channel;
 using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 {
     internal static class HashedEmployeesMapper
     {
-        public static EmployeeCollection ToEmployees(IEnumerable<User> users, HashFunction.Delegate hashFunc,
-            EmailFilter emailFilter)
+        public static EmployeeCollection ToEmployees(IEnumerable<User> users, IEnumerable<DomainChannel> channels, HashFunction.Delegate hashFunc, EmailFilter emailFilter)
         {
             var employees = new List<Employee>();
 
@@ -22,7 +23,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
             {
                 if (user.Mail is null) continue;
 
-                var employeeGroups = GetEmployeeGroups(user);
+                var employeeGroups = GetEmployeeGroups(user, channels);
                 var employeeProps = GetEmployeeProps(user);
                 var employeeRelations = GetEmployeeRelations(user);
 
@@ -35,9 +36,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
             return new EmployeeCollection(employees, hashFunc);
         }
 
-        private static IEnumerable<Group> GetEmployeeGroups(User user)
+        private static IEnumerable<Group> GetEmployeeGroups(User user, IEnumerable<DomainChannel> channels)
         {
-            return user.GetDepartmentGroups();
+            var result = new List<Group>();
+
+            var userDepartmentsGroups = user.GetDepartmentGroups();
+            result.AddRange(userDepartmentsGroups);
+
+            var useersChannels = channels.Where(x => x.UserIds.Contains(user.Mail));
+            var usersProjectGroups = useersChannels.Select(x => Group.Create(x.Id.ChannelId, x.Name, "Project"));
+            result.AddRange(usersProjectGroups);
+
+            return result;
         }
 
         private static IDictionary<string, object> GetEmployeeProps(User user)
