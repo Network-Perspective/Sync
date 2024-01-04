@@ -65,7 +65,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 }
             }
 
-
             var timeRange = new TimeRange(context.TimeRange.Start.AddDays(-30), _clock.UtcNow());
 
             return await _chatClient.SyncInteractionsAsync(stream, slackClientBotFacade, network, interactionFactory, timeRange, stoppingToken);
