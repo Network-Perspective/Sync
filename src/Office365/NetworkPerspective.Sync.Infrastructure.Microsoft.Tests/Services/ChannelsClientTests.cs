@@ -48,7 +48,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var channelsClient = new ChannelsClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _loggerFactory);
 
             // Act
-            await channelsClient.SyncInteractionsAsync(syncContext, stream, interactionsFactory);
+            var channels = await channelsClient.GetAllChannelsAsync();
+            await channelsClient.SyncInteractionsAsync(syncContext, channels, stream, interactionsFactory);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -60,15 +61,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         {
             _logger.LogInformation("Getting hashed employees for network '{networkId}'", context.NetworkId);
 
-            var users = await _usersClient.GetUsersAsync(context, stoppingToken);
-            return HashedEmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter);
+            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.NetworkId, stoppingToken));
 
+            IEnumerable<Models.Channel> channels = network.Properties.SyncMsTeams == true
+                ? await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken))
+                : Enumerable.Empty<Models.Channel>();
+
+            var users = await _usersClient.GetUsersAsync(context, stoppingToken);
+            return HashedEmployeesMapper.ToEmployees(users, channels, context.HashFunction, context.NetworkConfig.EmailFilter);
         }
 
         public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);
             var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.NetworkId, stoppingToken));
+
             var employees = await context.EnsureSetAsync(async () =>
             {
                 var users = await _usersClient.GetUsersAsync(context, stoppingToken);
@@ -90,7 +97,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 
             if (network.Properties.SyncMsTeams)
             {
-                var resultChannels = await _channelsClient.SyncInteractionsAsync(context, stream, channelInteractionFactory, stoppingToken);
+                var channels = await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken));
+
+                var resultChannels = await _channelsClient.SyncInteractionsAsync(context, channels, stream, channelInteractionFactory, stoppingToken);
                 var resultChat = await _chatClient.SyncInteractionsAsync(context, stream, usersEmails, stoppingToken);
                 result = SyncResult.Combine(result, resultChannels, resultChat);
             }
