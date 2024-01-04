@@ -48,8 +48,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         {
             _logger.LogInformation("Getting employees for network '{networkId}'", context.NetworkId);
 
-            var channels = await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken));
-
             var employees = await context.EnsureSetAsync(async () =>
             {
                 var users = await _usersClient.GetUsersAsync(context, stoppingToken);
