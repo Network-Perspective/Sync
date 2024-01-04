@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using Microsoft.Graph.Models;
 
@@ -7,9 +8,8 @@ using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Extensions;
 
-using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
 using DomainChannel = NetworkPerspective.Sync.Infrastructure.Microsoft.Models.Channel;
-using System.Linq;
+using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 {
