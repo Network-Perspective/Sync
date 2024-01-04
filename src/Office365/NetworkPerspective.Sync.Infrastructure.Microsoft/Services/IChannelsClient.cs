@@ -22,7 +22,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
     internal interface IChannelsClient
     {
         Task<SyncResult> SyncInteractionsAsync(SyncContext context, IEnumerable<InternalChannel> channels, IInteractionsStream stream, IChannelsInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
-        Task<List<InternalChannel>> GetAllChannelsAsync(CancellationToken stoppingToken);
+        Task<List<InternalChannel>> GetAllChannelsAsync(CancellationToken stoppingToken = default);
     }
 
     internal class ChannelsClient : IChannelsClient
@@ -64,7 +64,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return result;
         }
 
-        public async Task<List<InternalChannel>> GetAllChannelsAsync(CancellationToken stoppingToken)
+        public async Task<List<InternalChannel>> GetAllChannelsAsync(CancellationToken stoppingToken = default)
         {
             _logger.LogDebug("Getting all Channels in all Teams...");
 
