@@ -28,7 +28,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
             {
                 Email = employee.Id.PrimaryId,
                 Ids = IdsMapper.ToIds(employee, dataSourceIdName),
-                Props = props
+                Props = props,
+                GroupAccess = employee.GroupAccess?.ToList()
             };
 
             return user;
