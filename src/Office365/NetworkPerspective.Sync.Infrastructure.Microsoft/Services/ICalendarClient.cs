@@ -65,7 +65,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 {
                     x.QueryParameters = new CalendarViewRequestBuilder.CalendarViewRequestBuilderGetQueryParameters()
                     {
-                        Select = new[] 
+                        Select = new[]
                         {
                             nameof(Event.ICalUId),
                             nameof(Event.Attendees),
