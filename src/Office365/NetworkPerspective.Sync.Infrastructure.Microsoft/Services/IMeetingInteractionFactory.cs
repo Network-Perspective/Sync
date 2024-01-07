@@ -45,9 +45,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             var recurrence = GetRecurrence(@event.Recurrence);
 
             if (IsSmallMeeting(participants.Count()))
-                return CreateForSmallMeeting(@event.Id, user, participants, timestamp, (int)duration, recurrence);
+                return CreateForSmallMeeting(@event.ICalUId, user, participants, timestamp, (int)duration, recurrence);
             else
-                return CreateForBigMeeting(@event.Id, user, participants, timestamp, (int)duration, recurrence);
+                return CreateForBigMeeting(@event.ICalUId, user, participants, timestamp, (int)duration, recurrence);
         }
 
         private static RecurrenceType? GetRecurrence(PatternedRecurrence recurrence)

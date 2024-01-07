@@ -65,7 +65,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 {
                     x.QueryParameters = new CalendarViewRequestBuilder.CalendarViewRequestBuilderGetQueryParameters()
                     {
-                        Select = new[] { "attendees", "start", "end", "seriesMasterId" },
+                        Select = new[] 
+                        {
+                            nameof(Event.ICalUId),
+                            nameof(Event.Attendees),
+                            nameof(Event.Start),
+                            nameof(Event.End),
+                            nameof(Event.SeriesMasterId),
+                        },
                         StartDateTime = context.TimeRange.Start.ToString("s"),
                         EndDateTime = context.TimeRange.End.ToString("s")
                     };
@@ -79,16 +86,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                     if (!string.IsNullOrEmpty(@event.SeriesMasterId))
                     {
                         var recurrenceSerie = await _graphClient
-                        .Users[userEmail]
-                        .Calendar
-                        .Events[@event.SeriesMasterId]
-                        .GetAsync(x =>
-                        {
-                            x.QueryParameters = new EventItemRequestBuilder.EventItemRequestBuilderGetQueryParameters()
+                            .Users[userEmail]
+                            .Calendar
+                            .Events[@event.SeriesMasterId]
+                            .GetAsync(x =>
                             {
-                                Select = new[] { "recurrence" }
-                            };
-                        });
+                                x.QueryParameters = new EventItemRequestBuilder.EventItemRequestBuilderGetQueryParameters()
+                                {
+                                    Select = new[] { "recurrence" }
+                                };
+                            });
+
                         @event.Recurrence = recurrenceSerie.Recurrence;
                     }
 
