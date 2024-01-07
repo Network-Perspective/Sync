@@ -1,3 +1,4 @@
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Infrastructure.Excel.Dtos;
@@ -8,7 +9,8 @@ public static class EmployeeDtoMapper
 {
     public static List<Employee> ToDomainEmployees(
         this List<EmployeeDto> dtos,
-        EmailFilter emailFilter
+        EmailFilter emailFilter,
+        HashFunction.Delegate hash // Required to provide already hashed groupAccess
     )
     {
         var result = new List<Employee>();
@@ -33,29 +35,20 @@ public static class EmployeeDtoMapper
             }
             props.TryAdd(Employee.PropKeyName, dto.Name);
 
-            // construct groups from permissions
-            var groups = new List<Group>();
-            if (dto.Permissions != null)
-            {
-                foreach (var g in dto.Permissions)
-                {
-                    groups.Add(Group.CreateWithParentId(
-                        id: g.Id,
-                        name: g.Name,
-                        category: g.Category,
-                        parentId: g.ParentId
-                    ));
-                }
-            }
+            // construct groupsAccess from permissions
+            var groupAccess = dto.Permissions == null
+                ? new List<string>()
+                : dto.Permissions.Select(x => hash(x.Id)).ToList();
 
             // construct relations
             var relations = GetRelations(dto, dtos);
 
             var employee = Employee.CreateInternal(
                 id: EmployeeId.Create(dto.Email, dto.EmployeeId),
-                groups: groups,
+                groups: Enumerable.Empty<Group>(),
                 props: props,
-                relations: relations
+                relations: relations,
+                groupAccess: groupAccess
             );
             result.Add(employee);
         }
