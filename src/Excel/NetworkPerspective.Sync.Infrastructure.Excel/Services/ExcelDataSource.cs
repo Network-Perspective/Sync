@@ -25,8 +25,7 @@ public class ExcelDataSource : IDataSource
         var incoming = context.Get<List<EmployeeDto>>();
         var emailFilter = context.NetworkConfig.EmailFilter;
 
-        var employees = incoming.ToDomainEmployees(emailFilter);
-        employees.ForEach(e => e.EvaluateGroupAccess(context.HashFunction));
+        var employees = incoming.ToDomainEmployees(emailFilter, context.HashFunction);
 
         return Task.FromResult(new EmployeeCollection(employees, null));
     }
