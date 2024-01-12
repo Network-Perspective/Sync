@@ -122,7 +122,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
         }
 
         [Fact]
-        public void ShouldHaveEmptyTeamOnNotAssigned()
+        public void ShouldNotOutputTeamWhenNotAssigned()
         {
             // Arrange
             var group = Group.CreateWithParentId("Marketing", "foo", Group.CompanyCatergory, "/");
@@ -131,7 +131,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             var employee = Employee.CreateInternal(EmployeeId.Create("bar", "baz"), new[] { group });
 
             // Assert
-            ((string)employee.Props["Team"]).Should().BeEmpty();
+            employee.Props.Keys.Should().NotContain("Team");
         }
 
         [Fact]
