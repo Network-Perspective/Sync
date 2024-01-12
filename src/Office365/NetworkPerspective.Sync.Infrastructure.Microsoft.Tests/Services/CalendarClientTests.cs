@@ -55,11 +55,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
 
             var interactions_1 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2023, 04, 10, 06, 00, 00));
             interactions_1.Should().HaveCount(2);
+            interactions_1.Should().OnlyContain(x => x.EventId == interactions_1.First().EventId);
 
             var interactions_2 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2023, 04, 10, 07, 00, 00));
             interactions_2.Should().HaveCount(2);
+            interactions_2.Should().OnlyContain(x => x.EventId == interactions_2.First().EventId);
 
-            stream.SentInteractions.Should().HaveCount(55);
+            stream.SentInteractions.Should().HaveCount(4);
         }
     }
 }

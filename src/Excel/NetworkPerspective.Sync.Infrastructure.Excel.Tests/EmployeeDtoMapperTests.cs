@@ -1,3 +1,6 @@
+using FluentAssertions;
+
+using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Infrastructure.Excel.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Excel.Services;
@@ -17,7 +20,7 @@ public class EmployeeDtoMapperTests
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
 
         // Assert
         Assert.Empty(result);
@@ -35,7 +38,7 @@ public class EmployeeDtoMapperTests
         var emailFilter = new EmailFilter(new[] { "internal@example.com" }, new List<string>());
 
         // Act
-        var result = dtos.ToDomainEmployees(emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
 
         // Assert
         Assert.All(result, employee => Assert.True(employee.IsExternal));
@@ -54,7 +57,7 @@ public class EmployeeDtoMapperTests
             new EmailFilter(new[] { "internal1@example.com", "internal2@example.com" }, new List<string>());
 
         // Act
-        var result = dtos.ToDomainEmployees(emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
 
         // Assert
         Assert.All(result, employee => Assert.False(employee.IsExternal));
@@ -98,7 +101,7 @@ public class EmployeeDtoMapperTests
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
 
         // Assert
         Assert.All(result, employee => Assert.Contains("Prop1", employee.Props.Keys));
@@ -120,7 +123,7 @@ public class EmployeeDtoMapperTests
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
 
         // Assert
         Assert.True(result.First().Groups == null || !result.First().Groups.Any());
@@ -142,10 +145,10 @@ public class EmployeeDtoMapperTests
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter, x => $"{x}_hashed");
 
         // Assert
-        Assert.Equal("GroupId1", result.First().Groups.First().Id);
+        result.Single().GroupAccess.Should().BeEquivalentTo(new[] { "GroupId1_hashed" });
     }
 
     [Fact]
@@ -187,7 +190,7 @@ public class EmployeeDtoMapperTests
         var emailFilter = EmailFilter.Empty;
 
         // Act
-        var result = dtos.ToDomainEmployees(emailFilter);
+        var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
 
         // Assert
         Assert.All(result, employee => Assert.Empty(employee.Relations));

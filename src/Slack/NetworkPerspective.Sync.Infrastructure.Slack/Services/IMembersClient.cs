@@ -76,7 +76,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 foreach (var slackUser in slackUsers)
                 {
                     var usersChannels = await slackClientFacade.GetAllUsersChannelsAsync(team.Id, slackUser.Id, stoppingToken);
-                    var groups = usersChannels.Select(x => Group.Create(x.Id, x.Name, "Project"));
+                    var groups = usersChannels.Select(x => Group.Create(x.Id, x.Name, "Channel"));
                     var employeeId = EmployeeId.Create(slackUser.Profile.Email, slackUser.Id);
                     var employee = Employee.CreateInternal(employeeId, groups);
                     employees.Add(employee);
