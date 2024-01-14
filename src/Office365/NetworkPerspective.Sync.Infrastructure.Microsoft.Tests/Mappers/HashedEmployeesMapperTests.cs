@@ -6,7 +6,7 @@ using FluentAssertions;
 using Microsoft.Graph.Models;
 
 using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 
@@ -48,7 +48,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Mappers
             };
 
             // Act
-            var employees = HashedEmployeesMapper.ToEmployees(users, channels, HashFunction.Empty, EmailFilter.Empty);
+            var employees = HashedEmployeesMapper.ToEmployees(users, channels, HashFunction.Empty, EmployeeFilter.Empty);
 
             // Assert
             employees.GetAllInternal().Should().NotBeEmpty();

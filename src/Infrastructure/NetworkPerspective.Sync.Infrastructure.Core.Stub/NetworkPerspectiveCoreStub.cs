@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
@@ -39,7 +40,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
                 propAttributes: new[] { "NP-Test.Employment_Date" },
                 relationships: new[] { new CustomAttributeRelationship("NP-Test.FormalSupervisor", "Boss") });
 
-            return Task.FromResult(new NetworkConfig(EmailFilter.Empty, customAttributes));
+            return Task.FromResult(new NetworkConfig(EmployeeFilter.Empty, customAttributes));
         }
 
         public async Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, DateTime changeDate, CancellationToken stoppingToken = default)

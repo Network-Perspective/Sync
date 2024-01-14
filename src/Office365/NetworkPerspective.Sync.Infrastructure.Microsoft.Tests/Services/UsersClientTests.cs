@@ -11,6 +11,7 @@ using Moq;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
@@ -38,7 +39,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             // Arrange
             var client = new UsersClient(_microsoftClientFixture.Client, _logger);
             var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
-            var filter = new EmailFilter(new[] { "*.onmicrosoft.com" }, Array.Empty<string>());
+            var filter = new EmployeeFilter(new[] { "*.onmicrosoft.com" }, Array.Empty<string>());
             var networkConfig = new NetworkConfig(filter, CustomAttributesConfig.Empty);
             var syncContext = new SyncContext(Guid.NewGuid(), networkConfig, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
