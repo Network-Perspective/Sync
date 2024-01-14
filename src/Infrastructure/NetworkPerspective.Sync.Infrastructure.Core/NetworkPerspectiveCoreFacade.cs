@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
@@ -131,7 +132,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
                 _logger.LogDebug("Getting network settings from Core app...");
                 var response = await _client.SettingsAsync(accessToken.ToSystemString(), stoppingToken);
 
-                var emailFilter = new EmailFilter(response.Whitelist, response.Blacklist);
+                var emailFilter = new EmployeeFilter(response.Whitelist, response.Blacklist);
                 _logger.LogDebug("Email filter: {emailFilter}", emailFilter.ToString());
 
                 var customAttributeRelationships = response.CustomAttributes?.Relationship == null

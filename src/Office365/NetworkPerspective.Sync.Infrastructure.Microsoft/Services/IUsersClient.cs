@@ -8,7 +8,7 @@ using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Users;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
@@ -84,11 +84,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return filteredResult;
         }
 
-        private List<User> FilterUsers(EmailFilter filter, List<User> users)
+        private List<User> FilterUsers(EmployeeFilter filter, List<User> users)
         {
             _logger.LogTrace("Filtering users based on network configuration. Input contains {count} users", users.Count);
             var result = users
-                .Where(x => filter.IsInternalUser(x.Mail) || x.OtherMails.Any(filter.IsInternalUser))
+                .Where(x => filter.IsInternal(x.Mail) || x.OtherMails.Any(filter.IsInternal))
                 .ToList();
 
             return result;

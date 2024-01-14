@@ -18,6 +18,7 @@ using Moq;
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Common.Tests.Factories;
@@ -115,7 +116,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var result = await facade.GetNetworkConfigAsync("foo".ToSecureString());
 
                 // Assert
-                var expectedResult = new NetworkConfig(EmailFilter.Empty, CustomAttributesConfig.Empty);
+                var expectedResult = new NetworkConfig(EmployeeFilter.Empty, CustomAttributesConfig.Empty);
 
             }
         }
