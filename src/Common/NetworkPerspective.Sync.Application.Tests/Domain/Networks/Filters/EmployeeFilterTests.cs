@@ -19,7 +19,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Networks.Filters
             {
                 // Arrange
                 var filter = new EmployeeFilter(whitelist, blacklist);
-            
+
                 // Act
                 var result = filter.IsInternal(email, group);
 
@@ -76,7 +76,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Networks.Filters
                         group: "networkperspective");
 
                     AddTyped(
-                        whitelist: new[] { "email: *@networkperspective.io", "group: networkperspective"},
+                        whitelist: new[] { "email: *@networkperspective.io", "group: networkperspective" },
                         blacklist: Array.Empty<string>(),
                         email: "john.doe@networkperspective.io",
                         group: "networkperspective");
