@@ -51,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             var employees = await context.EnsureSetAsync(async () =>
             {
                 var users = await _usersClient.GetUsersAsync(context, stoppingToken);
-                return EmployeesMapper.ToEmployees(users, context.NetworkConfig.EmailFilter);
+                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter);
             });
 
             return employees;
@@ -76,10 +76,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);
             var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.NetworkId, stoppingToken));
 
+            IEnumerable<Models.Channel> channels = network.Properties.SyncMsTeams == true
+                ? await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken))
+                : Enumerable.Empty<Models.Channel>();
+
             var employees = await context.EnsureSetAsync(async () =>
             {
                 var users = await _usersClient.GetUsersAsync(context, stoppingToken);
-                return EmployeesMapper.ToEmployees(users, context.NetworkConfig.EmailFilter);
+                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter);
             });
 
             var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<EmailInteractionFactory>());
@@ -97,8 +101,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 
             if (network.Properties.SyncMsTeams)
             {
-                var channels = await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken));
-
                 var resultChannels = await _channelsClient.SyncInteractionsAsync(context, channels, stream, channelInteractionFactory, stoppingToken);
                 var resultChat = await _chatClient.SyncInteractionsAsync(context, stream, usersEmails, stoppingToken);
                 result = SyncResult.Combine(result, resultChannels, resultChat);
