@@ -42,7 +42,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var timeRange = new TimeRange(new DateTime(2023, 01, 10), new DateTime(2023, 12, 11));
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
             var users = await usersClient.GetUsersAsync(syncContext);
-            var employees = EmployeesMapper.ToEmployees(users, EmailFilter.Empty);
+            var employees = EmployeesMapper.ToEmployees(users, x => $"{x}_hashed", EmailFilter.Empty);
             var interactionsFactory = new ChannelInteractionFactory(x => $"{x}_hashed", employees);
 
             var channelsClient = new ChannelsClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _loggerFactory);
