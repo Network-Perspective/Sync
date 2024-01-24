@@ -4,7 +4,7 @@ using System.Linq;
 using FluentAssertions;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 
 using Xunit;
 
@@ -23,7 +23,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             const string alias_1 = "email_1_alias_1@networkperspective.io";
             const string alias_2 = "U12345ASD";
 
-            var employeeId = EmployeeId.CreateWithAliases(mainEmail, id, new[] { alias_1, alias_2 }, EmailFilter.Empty);
+            var employeeId = EmployeeId.CreateWithAliases(mainEmail, id, new[] { alias_1, alias_2 }, EmployeeFilter.Empty);
             var employee = Employee.CreateInternal(employeeId, Array.Empty<Group>());
             var employeesCollection = new EmployeeCollection(new[] { employee }, null);
 
@@ -69,7 +69,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             var ic4 = Employee.CreateInternal(EmployeeId.Create("ic4", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "manager3") }));
             var ic5 = Employee.CreateInternal(EmployeeId.Create("ic5", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "director1") }));
 
-            var manager1 = Employee.CreateInternal(EmployeeId.CreateWithAliases("manager1", string.Empty, new[] { "manager1_1" }, EmailFilter.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "director1") }));
+            var manager1 = Employee.CreateInternal(EmployeeId.CreateWithAliases("manager1", string.Empty, new[] { "manager1_1" }, EmployeeFilter.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "director1") }));
             var manager2 = Employee.CreateInternal(EmployeeId.Create("manager2", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "director2") }));
             var manager3 = Employee.CreateInternal(EmployeeId.Create("manager3", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "board2") }));
 

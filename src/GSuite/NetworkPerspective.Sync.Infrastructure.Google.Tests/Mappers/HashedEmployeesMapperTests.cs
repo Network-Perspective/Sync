@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
 using FluentAssertions;
 
@@ -8,6 +7,7 @@ using Google.Apis.Admin.Directory.directory_v1.Data;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Mappers;
 using NetworkPerspective.Sync.Infrastructure.Google.Services;
@@ -51,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
             {
             };
             var exectedRelations1 = new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, manager_email) });
-            var expectedEmployeeId1 = EmployeeId.CreateWithAliases(user_1_email, user_1_id, new[] { user_1_email }, EmailFilter.Empty);
+            var expectedEmployeeId1 = EmployeeId.CreateWithAliases(user_1_email, user_1_id, new[] { user_1_email }, EmployeeFilter.Empty);
             var expectedEmployee1 = Employee.CreateInternal(expectedEmployeeId1, expectedGroups1, expectedProps1, exectedRelations1);
 
             var expectedGroups2 = new[]
@@ -66,7 +66,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
             {
             };
             var expectedRelations2 = new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, manager_email) });
-            var expectedEmployeeId2 = EmployeeId.CreateWithAliases(user_2_email, user_2_id, new[] { user_2_email }, EmailFilter.Empty);
+            var expectedEmployeeId2 = EmployeeId.CreateWithAliases(user_2_email, user_2_id, new[] { user_2_email }, EmployeeFilter.Empty);
             var expectedEmployee2 = Employee.CreateInternal(expectedEmployeeId2, expectedGroups2, expectedProps2, expectedRelations2);
 
             var expectedEmployees = new EmployeeCollection(new[] { expectedEmployee1, expectedEmployee2 }, x => $"{x}_hashed");
@@ -140,7 +140,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
                 new CompanyStructureService(),
                 new CustomAttributesService(CustomAttributesConfig.Empty),
                 EmployeePropsSource.Empty,
-                x => $"{x}_hashed", EmailFilter.Empty
+                x => $"{x}_hashed", EmployeeFilter.Empty
             );
 
             // Act
