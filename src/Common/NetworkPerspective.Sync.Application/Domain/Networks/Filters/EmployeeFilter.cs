@@ -53,15 +53,21 @@ namespace NetworkPerspective.Sync.Application.Domain.Networks.Filters
             return _emailWhitelist.IsAllowed(email);
         }
 
-        public bool IsInternal(string email, string group)
+        public bool IsInternal(IEnumerable<string> emails, IEnumerable<string> groups)
         {
-            if (string.IsNullOrEmpty(email))
+            if (emails == null)
                 return false;
 
-            if (_emailBlacklist.IsForbidden(email))
+            if (!emails.Any())
                 return false;
 
-            return _emailWhitelist.IsAllowed(email) || _groupWhitelist.IsAllowed(group);
+            if (emails.Any(_emailBlacklist.IsForbidden))
+                return false;
+
+            var isEmailWhitelisted = emails.Any(_emailWhitelist.IsAllowed);
+            var isGroupWhitelisted = groups is not null && groups.Any(_groupWhitelist.IsAllowed);
+
+            return isEmailWhitelisted || isGroupWhitelisted;
         }
 
         public override string ToString()

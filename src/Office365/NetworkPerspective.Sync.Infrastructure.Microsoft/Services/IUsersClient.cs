@@ -62,9 +62,30 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             var pageIterator = PageIterator<User, UserCollectionResponse>
                 .CreatePageIterator(_graphClient, usersResponse,
-                user =>
+                async user =>
                 {
-                    result.Add(user);
+                    var groups = await _graphClient
+                        .Users[user.Id]
+                        .TransitiveMemberOf
+                        .GraphGroup
+                        .GetAsync(x =>
+                        {
+                            x.QueryParameters = new()
+                            {
+                                Select = new[]
+                                {
+                                    nameof(Group.DisplayName),
+                                }
+                            };
+                        });
+
+                    var mails = new[] { user.Mail }
+                        .Union(user.OtherMails);
+                    var groupsNames = groups.Value.Select(x => x.DisplayName);
+
+                    if (context.NetworkConfig.EmailFilter.IsInternal(mails, groupsNames))
+                        result.Add(user);
+
                     return true;
                 },
                 request =>
@@ -93,5 +114,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             return result;
         }
+
     }
 }
