@@ -6,7 +6,7 @@ using Microsoft.Graph.Models;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Extensions;
 
 using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
@@ -15,7 +15,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 {
     internal static class EmployeesMapper
     {
-        public static EmployeeCollection ToEmployees(IEnumerable<User> users, HashFunction.Delegate hashFunc, EmailFilter emailFilter)
+        public static EmployeeCollection ToEmployees(IEnumerable<User> users, HashFunction.Delegate hashFunc, EmployeeFilter emailFilter)
         {
             var employees = new List<Employee>();
 

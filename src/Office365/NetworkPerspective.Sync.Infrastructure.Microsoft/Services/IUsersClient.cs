@@ -8,7 +8,7 @@ using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Users;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
@@ -62,9 +62,30 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             var pageIterator = PageIterator<User, UserCollectionResponse>
                 .CreatePageIterator(_graphClient, usersResponse,
-                user =>
+                async user =>
                 {
-                    result.Add(user);
+                    var groups = await _graphClient
+                        .Users[user.Id]
+                        .TransitiveMemberOf
+                        .GraphGroup
+                        .GetAsync(x =>
+                        {
+                            x.QueryParameters = new()
+                            {
+                                Select = new[]
+                                {
+                                    nameof(Group.DisplayName),
+                                }
+                            };
+                        });
+
+                    var mails = new[] { user.Mail }
+                        .Union(user.OtherMails);
+                    var groupsNames = groups.Value.Select(x => x.DisplayName);
+
+                    if (context.NetworkConfig.EmailFilter.IsInternal(mails, groupsNames))
+                        result.Add(user);
+
                     return true;
                 },
                 request =>
@@ -84,14 +105,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return filteredResult;
         }
 
-        private List<User> FilterUsers(EmailFilter filter, List<User> users)
+        private List<User> FilterUsers(EmployeeFilter filter, List<User> users)
         {
             _logger.LogTrace("Filtering users based on network configuration. Input contains {count} users", users.Count);
             var result = users
-                .Where(x => filter.IsInternalUser(x.Mail) || x.OtherMails.Any(filter.IsInternalUser))
+                .Where(x => filter.IsInternal(x.Mail) || x.OtherMails.Any(filter.IsInternal))
                 .ToList();
 
             return result;
         }
+
     }
 }

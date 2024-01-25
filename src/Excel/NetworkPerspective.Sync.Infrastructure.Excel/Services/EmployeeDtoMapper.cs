@@ -1,6 +1,6 @@
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.Excel.Dtos;
 
 namespace NetworkPerspective.Sync.Infrastructure.Excel.Services;
@@ -9,14 +9,14 @@ public static class EmployeeDtoMapper
 {
     public static List<Employee> ToDomainEmployees(
         this List<EmployeeDto> dtos,
-        EmailFilter emailFilter,
+        EmployeeFilter emailFilter,
         HashFunction.Delegate hash // Required to provide already hashed groupAccess
     )
     {
         var result = new List<Employee>();
         foreach (EmployeeDto dto in dtos)
         {
-            var isInternal = emailFilter.IsInternalUser(dto.Email);
+            var isInternal = emailFilter.IsInternal(dto.Email);
 
             if (!isInternal)
             {
@@ -58,13 +58,13 @@ public static class EmployeeDtoMapper
 
     public static List<Employee> ToDomainEmployeesHashed(
         this List<EmployeeDto> dtos,
-        EmailFilter emailFilter
+        EmployeeFilter emailFilter
     )
     {
         var result = new List<Employee>();
         foreach (EmployeeDto dto in dtos)
         {
-            var isInternal = emailFilter.IsInternalUser(dto.Email);
+            var isInternal = emailFilter.IsInternal(dto.Email);
 
             if (!isInternal)
             {

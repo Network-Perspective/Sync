@@ -5,7 +5,7 @@ using Google.Apis.Admin.Directory.directory_v1.Data;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Google.Services;
@@ -20,13 +20,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Mappers
         private readonly ICustomAttributesService _customAttributesService;
         private readonly IEmployeePropsSource _employeePropsSource;
         private readonly HashFunction.Delegate _hashFunc;
-        private readonly EmailFilter _emailFilter;
+        private readonly EmployeeFilter _emailFilter;
 
         public HashedEmployeesMapper(ICompanyStructureService companyStructureService,
             ICustomAttributesService customAttributesService,
             IEmployeePropsSource employeePropsSource,
             HashFunction.Delegate hashFunc,
-            EmailFilter emailFilter)
+            EmployeeFilter emailFilter)
         {
             _companyStructureService = companyStructureService;
             _customAttributesService = customAttributesService;

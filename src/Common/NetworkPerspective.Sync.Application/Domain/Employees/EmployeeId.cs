@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 
 namespace NetworkPerspective.Sync.Application.Domain.Employees
 {
@@ -33,15 +33,15 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         }
 
         public static EmployeeId CreateWithAliases(string primaryId, string dataSourceId,
-            IEnumerable<string> aliases, EmailFilter emailFilter)
+            IEnumerable<string> aliases, EmployeeFilter emailFilter)
         {
             var enumeratedAliases = aliases as string[] ?? aliases.ToArray();
 
             var matchingEmail = primaryId;
-            if (emailFilter != null && !emailFilter.IsInternalUser(matchingEmail))
+            if (emailFilter != null && !emailFilter.IsInternal(matchingEmail))
             {
                 // find username matching whitelist 
-                matchingEmail = enumeratedAliases?.FirstOrDefault(emailFilter.IsInternalUser);
+                matchingEmail = enumeratedAliases?.FirstOrDefault(emailFilter.IsInternal);
             }
             var userName = matchingEmail?.Split('@').FirstOrDefault();
 
