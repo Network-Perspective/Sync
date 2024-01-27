@@ -4,7 +4,7 @@ using FluentAssertions;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 
 using Xunit;
 
@@ -61,7 +61,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             {
                 "test2@*"
             };
-            var emailFilter = new EmailFilter(whitelist, new string[] { });
+            var emailFilter = new EmployeeFilter(whitelist, new string[] { });
 
             HashFunction.Delegate hashingFunction = (x) => $"{x}_hashed";
 
@@ -90,7 +90,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Employees
             {
                 "*email@*"
             };
-            var emailFilter = new EmailFilter(whitelist, new string[] { });
+            var emailFilter = new EmployeeFilter(whitelist, new string[] { });
 
             HashFunction.Delegate hashingFunction = (x) => $"{x}_hashed";
 

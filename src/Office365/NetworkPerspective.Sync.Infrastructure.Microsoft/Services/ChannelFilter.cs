@@ -3,7 +3,7 @@ using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
@@ -17,12 +17,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             _logger = logger;
         }
 
-        public List<Channel> Filter(IEnumerable<Channel> channels, EmailFilter emailFilter)
+        public List<Channel> Filter(IEnumerable<Channel> channels, EmployeeFilter emailFilter)
         {
             _logger.LogDebug("Filtering {count} channels.. Allowing only channels with at least one 'white-listed' member", channels.Count());
 
             var result = channels
-                .Where(channel => channel.UserIds.Any(emailFilter.IsInternalUser))
+                .Where(channel => channel.UserIds.Any(emailFilter.IsInternal))
                 .ToList();
 
             _logger.LogDebug("Filtering completed. Allowed {resultCount} out of {inputCount}", result.Count, channels.Count());

@@ -5,7 +5,7 @@ using Microsoft.Graph.Models;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Extensions;
 
 using DomainChannel = NetworkPerspective.Sync.Infrastructure.Microsoft.Models.Channel;
@@ -15,7 +15,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 {
     internal static class HashedEmployeesMapper
     {
-        public static EmployeeCollection ToEmployees(IEnumerable<User> users, IEnumerable<DomainChannel> channels, HashFunction.Delegate hashFunc, EmailFilter emailFilter)
+        public static EmployeeCollection ToEmployees(IEnumerable<User> users, IEnumerable<DomainChannel> channels, HashFunction.Delegate hashFunc, EmployeeFilter emailFilter)
         {
             var employees = new List<Employee>();
 
