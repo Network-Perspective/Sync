@@ -86,6 +86,12 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Networks.Filters
                         blacklist: Array.Empty<string>(),
                         emails: new[] { "john.doe@networkperspective.io", "john.doe@networkperspective.com" },
                         groups: null);
+
+                    AddTyped(
+                        whitelist: new[] { "john.doe@networkperspective.io" },
+                        blacklist: Array.Empty<string>(),
+                        emails: new[] { "john.doe@networkperspective.io", "john.doe@networkperspective.com" },
+                        groups: new[] { (string)null });
                 }
             }
 
