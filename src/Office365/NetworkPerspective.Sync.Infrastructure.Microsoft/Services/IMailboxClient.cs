@@ -66,6 +66,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                     {
                         Filter = filterString
                     };
+                    x.Headers.Add("Prefer", "IdType=\"ImmutableId\"");
                 }, stoppingToken);
 
             var pageIterator = PageIterator<Message, MessageCollectionResponse>

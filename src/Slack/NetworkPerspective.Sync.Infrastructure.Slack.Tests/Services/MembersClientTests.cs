@@ -6,7 +6,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
@@ -43,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             try
             {
                 // Act
-                var result = await membersClient.GetEmployees(slackClientFacade, EmailFilter.Empty);
+                var result = await membersClient.GetEmployees(slackClientFacade, EmployeeFilter.Empty);
 
                 // Assert
                 result.GetAllInternal().Should().NotBeEmpty();

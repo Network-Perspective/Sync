@@ -12,6 +12,7 @@ using Moq;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
@@ -45,7 +46,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var timeRange = new TimeRange(new DateTime(2023, 04, 10), new DateTime(2023, 04, 11));
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
             var users = await usersClient.GetUsersAsync(syncContext);
-            var employees = EmployeesMapper.ToEmployees(users, EmailFilter.Empty);
+            var employees = EmployeesMapper.ToEmployees(users, HashFunction.Empty, EmployeeFilter.Empty);
 
             var interactionFactory = new MeetingInteractionFactory(HashFunction.Empty, employees, NullLogger<MeetingInteractionFactory>.Instance);
             var calednarClient = new CalendarClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _calendarClientlogger);
@@ -55,11 +56,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
 
             var interactions_1 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2023, 04, 10, 06, 00, 00));
             interactions_1.Should().HaveCount(2);
+            interactions_1.Should().OnlyContain(x => x.EventId == interactions_1.First().EventId);
 
             var interactions_2 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2023, 04, 10, 07, 00, 00));
             interactions_2.Should().HaveCount(2);
+            interactions_2.Should().OnlyContain(x => x.EventId == interactions_2.First().EventId);
 
-            stream.SentInteractions.Should().HaveCount(55);
+            stream.SentInteractions.Should().HaveCount(4);
         }
     }
 }
