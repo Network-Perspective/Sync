@@ -4,7 +4,7 @@ using FluentAssertions;
 
 using Microsoft.Extensions.Logging.Abstractions;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
 
@@ -25,7 +25,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
                 new Channel(ChannelIdentifier.Create("team2", "channel1"), "channelName21", new[] { "user2" })
             };
 
-            var filter = new EmailFilter(new[] { "user1" }, Array.Empty<string>());
+            var filter = new EmployeeFilter(new[] { "user1" }, Array.Empty<string>());
 
             // Act
             var result = new ChannelFilter(NullLogger<ChannelFilter>.Instance).Filter(input, filter);

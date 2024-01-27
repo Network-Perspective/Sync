@@ -1,7 +1,7 @@
 using FluentAssertions;
 
 using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.Excel.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Excel.Services;
 
@@ -17,7 +17,7 @@ public class EmployeeDtoMapperTests
     {
         // Arrange
         var dtos = new List<EmployeeDto>();
-        var emailFilter = EmailFilter.Empty;
+        var emailFilter = EmployeeFilter.Empty;
 
         // Act
         var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
@@ -35,7 +35,7 @@ public class EmployeeDtoMapperTests
             new EmployeeDto { Email = "external1@example.com", EmployeeId = "1" },
             new EmployeeDto { Email = "external2@example.com", EmployeeId = "2" }
         };
-        var emailFilter = new EmailFilter(new[] { "internal@example.com" }, new List<string>());
+        var emailFilter = new EmployeeFilter(new[] { "internal@example.com" }, new List<string>());
 
         // Act
         var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
@@ -54,7 +54,7 @@ public class EmployeeDtoMapperTests
             new EmployeeDto { Email = "internal2@example.com", EmployeeId = "2" }
         };
         var emailFilter =
-            new EmailFilter(new[] { "internal1@example.com", "internal2@example.com" }, new List<string>());
+            new EmployeeFilter(new[] { "internal1@example.com", "internal2@example.com" }, new List<string>());
 
         // Act
         var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
@@ -76,7 +76,7 @@ public class EmployeeDtoMapperTests
                 Props = new List<EmployeePropDto> { new EmployeePropDto { Name = "Prop1", Value = "Value1" } }
             }
         };
-        var emailFilter = EmailFilter.Empty;
+        var emailFilter = EmployeeFilter.Empty;
 
         // Act
         var result = dtos.ToDomainEmployeesHashed(emailFilter);
@@ -98,7 +98,7 @@ public class EmployeeDtoMapperTests
                 Props = new List<EmployeePropDto> { new EmployeePropDto { Name = "Prop1", Value = "Value1" } }
             }
         };
-        var emailFilter = EmailFilter.Empty;
+        var emailFilter = EmployeeFilter.Empty;
 
         // Act
         var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
@@ -120,7 +120,7 @@ public class EmployeeDtoMapperTests
                 Groups = new List<EmployeeGroupDto> { new EmployeeGroupDto { Category = "Group1", Name = "Name1" } }
             }
         };
-        var emailFilter = EmailFilter.Empty;
+        var emailFilter = EmployeeFilter.Empty;
 
         // Act
         var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
@@ -142,7 +142,7 @@ public class EmployeeDtoMapperTests
                 Permissions = new List<EmployeeGroupDto> { new EmployeeGroupDto { Category = "Group1", Name = "Name1", Id = "GroupId1"} }
             }
         };
-        var emailFilter = EmailFilter.Empty;
+        var emailFilter = EmployeeFilter.Empty;
 
         // Act
         var result = dtos.ToDomainEmployees(emailFilter, x => $"{x}_hashed");
@@ -164,7 +164,7 @@ public class EmployeeDtoMapperTests
                 Groups = new List<EmployeeGroupDto> { new EmployeeGroupDto { Category = "Group1", Name = "Name1" } }
             }
         };
-        var emailFilter = EmailFilter.Empty;
+        var emailFilter = EmployeeFilter.Empty;
 
         // Act
         var result = dtos.ToDomainEmployeesHashed(emailFilter);
@@ -187,7 +187,7 @@ public class EmployeeDtoMapperTests
                 Relationships = new List<EmployeeRelationshipDto> { new EmployeeRelationshipDto { RelationshipName = "Relationship1" } }
             }
         };
-        var emailFilter = EmailFilter.Empty;
+        var emailFilter = EmployeeFilter.Empty;
 
         // Act
         var result = dtos.ToDomainEmployees(emailFilter, HashFunction.Empty);
@@ -214,7 +214,7 @@ public class EmployeeDtoMapperTests
                 }
             }
         };
-        var emailFilter = EmailFilter.Empty;
+        var emailFilter = EmployeeFilter.Empty;
 
         // Act
         var result = dtos.ToDomainEmployeesHashed(emailFilter);
@@ -247,7 +247,7 @@ public class EmployeeDtoMapperTests
                 EmployeeId = "2"
             }
         };
-        var emailFilter = EmailFilter.Empty;
+        var emailFilter = EmployeeFilter.Empty;
 
         // Act
         var result = dtos.ToDomainEmployeesHashed(emailFilter);

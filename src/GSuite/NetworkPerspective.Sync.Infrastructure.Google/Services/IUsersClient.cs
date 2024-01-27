@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Criterias;
@@ -93,14 +94,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             return result;
         }
 
-        private IEnumerable<User> FilterUsers(EmailFilter emailFilter, IList<User> employeesProfiles)
+        private IEnumerable<User> FilterUsers(EmployeeFilter emailFilter, IList<User> employeesProfiles)
         {
             foreach (var criteria in _criterias)
                 employeesProfiles = criteria.MeetCriteria(employeesProfiles);
 
             var filteredProfiles = employeesProfiles
-                .Where(x => emailFilter.IsInternalUser(x.PrimaryEmail)
-                    || x.Aliases != null && x.Aliases.Any(emailFilter.IsInternalUser));
+                .Where(x => emailFilter.IsInternal(x.PrimaryEmail)
+                    || x.Aliases != null && x.Aliases.Any(emailFilter.IsInternal));
 
             return filteredProfiles;
         }
