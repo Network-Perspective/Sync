@@ -33,17 +33,47 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 })
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy());
 
+            services
+                .AddHttpClient(Consts.SlackApiHttpClientWithBotTokenName, x =>
+                {
+                    x.BaseAddress = new Uri(slackBaseUrl);
+                })
+                .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy())
+                .AddScopeAwareHttpHandler(sp =>
+                {
+                    var contextProvider = sp.GetRequiredService<ISyncContextProvider>();
+                    var cachedSecretRepository = sp.GetRequiredService<ICachedSecretRepository>();
+                    return new AuthTokenHandler(contextProvider, cachedSecretRepository, SlackKeys.TokenKeyPattern);
+                });
+
+            services
+                .AddHttpClient(Consts.SlackApiHttpClientWithUserTokenName, x =>
+                {
+                    x.BaseAddress = new Uri(slackBaseUrl);
+                })
+                .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy())
+                .AddScopeAwareHttpHandler(sp =>
+                {
+                    var contextProvider = sp.GetRequiredService<ISyncContextProvider>();
+                    var cachedSecretRepository = sp.GetRequiredService<ICachedSecretRepository>();
+                    return new AuthTokenHandler(contextProvider, cachedSecretRepository, SlackKeys.UserTokenKeyPattern);
+                });
+
             services.AddTransient<IAuthTester, AuthTester>();
-            services.AddTransient<ISlackHttpClientFactory, SlackHttpClientFactory>();
-            services.AddTransient<ISlackHttpClient>(sp => sp.GetRequiredService<ISlackHttpClientFactory>().Create());
+            services.AddScoped<ISlackHttpClientFactory, SlackHttpClientFactory>();
+            services.AddScoped<ISlackHttpClient>(sp => sp.GetRequiredService<ISlackHttpClientFactory>().Create());
             services.AddSingleton<ISlackAuthService, SlackAuthService>();
             services.AddTransient<CursorPaginationHandler>();
             services.AddTransient<ISlackClientFacadeFactory, SlackClientFacadeFactory>();
             services.AddTransient<ISlackClientUnauthorizedFacade>(sp => sp.GetRequiredService<ISlackClientFacadeFactory>().CreateUnauthorized());
             services.AddMemoryCache();
 
-            services.AddSingleton<IDataSourceFactory, SlackFacadeFactory>();
+            services.AddScoped<IMembersClient, MembersClient>();
+            services.AddScoped<IChatClient, ChatClient>();
+
+            services.AddScoped<IDataSource, SlackFacade>();
             services.AddTransient<ISecretRotator, SlackSecretsRotator>();
+
             return services;
         }
 

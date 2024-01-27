@@ -44,7 +44,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         {
             try
             {
-                var facade = await _slackClientFacadeFactory.CreateWithBotTokenAsync(networkId, stoppingToken);
+                var facade = _slackClientFacadeFactory.CreateWithBotToken(stoppingToken);
                 await facade.TestAsync(stoppingToken);
                 return true;
 
@@ -60,7 +60,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         {
             try
             {
-                var facade = await _slackClientFacadeFactory.CreateWithUserTokenAsync(networkId, stoppingToken);
+                var facade = _slackClientFacadeFactory.CreateWithUserToken(stoppingToken);
                 await facade.TestAsync(stoppingToken);
                 return true;
 

@@ -18,9 +18,13 @@ namespace NetworkPerspective.Sync.Scheduler
         {
             base.ConfigureScope(scope, bundle, scheduler);
 
-            var initializer = scope.ServiceProvider.GetRequiredService<ISyncContextInitializer>();
             var networkId = GetNetworkId(bundle.JobDetail);
-            initializer.InitializeAsync(networkId).Wait();
+
+            if(networkId != Guid.Empty)
+            {
+                var initializer = scope.ServiceProvider.GetRequiredService<ISyncContextInitializer>();
+                initializer.InitializeAsync(networkId).Wait();
+            }
         }
 
         private static Guid GetNetworkId(IJobDetail jobDetail)

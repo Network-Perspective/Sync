@@ -12,16 +12,16 @@ namespace NetworkPerspective.Sync.Application.Scheduler
     [DisallowConcurrentExecution]
     internal class SyncJob : IJob
     {
-        private readonly ISyncServiceFactory _syncServiceFactory;
+        private readonly ISyncService _syncService;
         private readonly ISyncContextProvider _syncContextProvider;
         private readonly ILogger<SyncJob> _logger;
 
         public SyncJob(
-            ISyncServiceFactory syncServiceFactory,
+            ISyncService syncService,
             ISyncContextProvider syncContextProvider,
             ILogger<SyncJob> logger)
         {
-            _syncServiceFactory = syncServiceFactory;
+            _syncService = syncService;
             _syncContextProvider = syncContextProvider;
             _logger = logger;
         }
@@ -31,8 +31,7 @@ namespace NetworkPerspective.Sync.Application.Scheduler
             try
             {
                 _logger.LogInformation("Triggered synchronization job for network '{network}'", _syncContextProvider.Context.NetworkId);
-                var syncService = await _syncServiceFactory.CreateAsync(_syncContextProvider.Context.NetworkId, context.CancellationToken);
-                await syncService.SyncAsync(_syncContextProvider.Context, context.CancellationToken);
+                await _syncService.SyncAsync(_syncContextProvider.Context, context.CancellationToken);
             }
             catch (Exception ex)
             {

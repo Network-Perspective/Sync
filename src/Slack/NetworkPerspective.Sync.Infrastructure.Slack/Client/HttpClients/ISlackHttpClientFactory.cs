@@ -1,18 +1,16 @@
 ﻿using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
 {
     internal interface ISlackHttpClientFactory
     {
-        ISlackHttpClient CreateWithToken(SecureString token);
+        ISlackHttpClient CreateWithBotToken();
+        ISlackHttpClient CreateWithUserToken();
         ISlackHttpClient Create();
     }
 
@@ -29,18 +27,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
             _httpClientFactory = httpClientFactory;
         }
 
-        public ISlackHttpClient CreateWithToken(SecureString token)
-            => Create(token);
+        public ISlackHttpClient CreateWithBotToken()
+            => CreateUsingClientName(Consts.SlackApiHttpClientWithBotTokenName);
+
+        public ISlackHttpClient CreateWithUserToken()
+            => CreateUsingClientName(Consts.SlackApiHttpClientWithUserTokenName);
 
         public ISlackHttpClient Create()
-            => Create(null);
+            => CreateUsingClientName(Consts.SlackApiHttpClientName);
 
-        private ISlackHttpClient Create(SecureString token)
+        private ISlackHttpClient CreateUsingClientName(string clientName)
         {
-            var httpClient = _httpClientFactory.CreateClient(Consts.SlackApiHttpClientName);
-
-            if (token is not null)
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.ToSystemString());
+            var httpClient = _httpClientFactory.CreateClient(clientName);
 
             var slackHttpClient = new SlackHttpClient(httpClient, _loggerFactory.CreateLogger<SlackHttpClient>());
             return new ResilientSlackHttpClientDecorator(slackHttpClient, _options, _loggerFactory.CreateLogger<ResilientSlackHttpClientDecorator>());

@@ -13,7 +13,6 @@ using Microsoft.Net.Http.Headers;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
@@ -103,7 +102,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
             const string token = "token";
 
             var factory = new SlackHttpClientFactory(_resiliencyOptions, _loggerFactory, _httpClientFactoryMock.Object);
-            var client = factory.CreateWithToken(token.ToSecureString());
+            var client = factory.CreateWithBotToken();
 
             // Act
             var result = await client.PostAsync<SampleResponse>("/");
