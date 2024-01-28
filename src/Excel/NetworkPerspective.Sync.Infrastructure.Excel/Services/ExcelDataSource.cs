@@ -5,14 +5,6 @@ using NetworkPerspective.Sync.Infrastructure.Excel.Dtos;
 
 namespace NetworkPerspective.Sync.Infrastructure.Excel.Services;
 
-public class ExcelDataSourceFactory : IDataSourceFactory
-{
-    public Task<IDataSource> CreateAsync(Guid networkId, CancellationToken stoppingToken = default)
-    {
-        return Task.FromResult<IDataSource>(new ExcelDataSource());
-    }
-}
-
 public class ExcelDataSource : IDataSource
 {
     public Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)

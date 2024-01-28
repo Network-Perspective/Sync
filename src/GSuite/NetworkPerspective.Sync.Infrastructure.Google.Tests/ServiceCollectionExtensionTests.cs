@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 using FluentAssertions;
 
@@ -23,7 +21,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests
     public class ServiceCollectionExtensionTests
     {
         [Fact]
-        public async Task ShouldRegisterRequiredServices()
+        public void ShouldRegisterRequiredServices()
         {
             // Arrange
             var serviceCollection = new ServiceCollection();
@@ -40,7 +38,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests
                 .Build();
 
             serviceCollection.AddLogging();
-            serviceCollection.AddTransient(x => Mock.Of<ISecretRepositoryFactory>());
+            serviceCollection.AddTransient(x => Mock.Of<ISecretRepository>());
             serviceCollection.AddSingleton(Mock.Of<IUnitOfWork>());
             serviceCollection.AddSingleton(Mock.Of<ISyncScheduler>());
             serviceCollection.AddSingleton(Mock.Of<IUnitOfWorkFactory>());
@@ -52,8 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests
 
             // Assert
             var services = serviceCollection.BuildServiceProvider();
-            var factory = services.GetRequiredService<IDataSourceFactory>();
-            var dataSource = await factory.CreateAsync(Guid.NewGuid());
+            var dataSource = services.GetRequiredService<IDataSource>();
             dataSource.Should().BeAssignableTo<GoogleFacade>();
         }
     }
