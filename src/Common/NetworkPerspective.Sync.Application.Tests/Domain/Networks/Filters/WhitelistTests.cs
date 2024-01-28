@@ -54,5 +54,18 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Networks.Filters
             // Assert
             isWhiteListed.Should().BeFalse();
         }
+
+        [Fact]
+        public void ShouldReturnFalseOnNullInput()
+        {
+            // Arrange
+            var whitelist = new Whitelist(new[] { "*" });
+
+            // Act
+            var isWhiteListed = whitelist.IsAllowed(null);
+
+            // Assert
+            isWhiteListed.Should().BeFalse();
+        }
     }
 }
