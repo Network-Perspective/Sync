@@ -18,7 +18,12 @@ namespace NetworkPerspective.Sync.Application.Domain.Networks.Filters
         }
 
         public bool IsAllowed(string input)
-            => _allowedRegexExpressions.Any(x => Regex.IsMatch(input, x));
+        {
+            if (string.IsNullOrEmpty(input))
+                return false;
+
+            return _allowedRegexExpressions.Any(x => Regex.IsMatch(input, x));
+        }
 
         private static string WildCardToRegular(string value)
         {
