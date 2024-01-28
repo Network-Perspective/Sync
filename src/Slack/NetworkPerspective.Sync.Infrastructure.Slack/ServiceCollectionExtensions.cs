@@ -41,9 +41,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy())
                 .AddScopeAwareHttpHandler(sp =>
                 {
-                    var contextProvider = sp.GetRequiredService<ISyncContextProvider>();
+                    var networkIdProvider = sp.GetRequiredService<INetworkIdProvider>();
                     var cachedSecretRepository = sp.GetRequiredService<ICachedSecretRepository>();
-                    return new AuthTokenHandler(contextProvider, cachedSecretRepository, SlackKeys.TokenKeyPattern);
+                    return new AuthTokenHandler(networkIdProvider, cachedSecretRepository, SlackKeys.TokenKeyPattern);
                 });
 
             services
@@ -54,9 +54,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy())
                 .AddScopeAwareHttpHandler(sp =>
                 {
-                    var contextProvider = sp.GetRequiredService<ISyncContextProvider>();
+                    var networkIdProvider = sp.GetRequiredService<INetworkIdProvider>();
                     var cachedSecretRepository = sp.GetRequiredService<ICachedSecretRepository>();
-                    return new AuthTokenHandler(contextProvider, cachedSecretRepository, SlackKeys.UserTokenKeyPattern);
+                    return new AuthTokenHandler(networkIdProvider, cachedSecretRepository, SlackKeys.UserTokenKeyPattern);
                 });
 
             services.AddTransient<IAuthTester, AuthTester>();

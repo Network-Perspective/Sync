@@ -3,6 +3,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Application.Services;
+
 using Quartz;
 using Quartz.Simpl;
 using Quartz.Spi;
@@ -22,8 +24,8 @@ namespace NetworkPerspective.Sync.Scheduler
 
             if (networkId != Guid.Empty)
             {
-                var initializer = scope.ServiceProvider.GetRequiredService<ISyncContextInitializer>();
-                initializer.InitializeAsync(networkId).Wait();
+                var initializer = scope.ServiceProvider.GetRequiredService<INetworkIdInitializer>();
+                initializer.Initialize(networkId);
             }
         }
 

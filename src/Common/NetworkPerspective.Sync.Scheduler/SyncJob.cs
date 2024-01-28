@@ -30,8 +30,9 @@ namespace NetworkPerspective.Sync.Application.Scheduler
         {
             try
             {
-                _logger.LogInformation("Triggered synchronization job for network '{network}'", _syncContextProvider.Context.NetworkId);
-                await _syncService.SyncAsync(_syncContextProvider.Context, context.CancellationToken);
+                var syncContext = await _syncContextProvider.GetAsync(context.CancellationToken);
+                _logger.LogInformation("Triggered synchronization job for network '{network}'", syncContext.NetworkId);
+                await _syncService.SyncAsync(syncContext, context.CancellationToken);
             }
             catch (Exception ex)
             {

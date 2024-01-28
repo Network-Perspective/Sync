@@ -30,9 +30,9 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             services.AddScoped<ISecretRepository>(sp =>
             {
                 var factory = sp.GetRequiredService<ISecretRepositoryFactory>();
-                var contextProvider = sp.GetRequiredService<ISyncContextProvider>();
+                var networkIdProvider = sp.GetRequiredService<INetworkIdProvider>();
 
-                return factory.CreateAsync(contextProvider.Context.NetworkId).Result;
+                return factory.CreateAsync(networkIdProvider.Get()).Result;
             });
 
             services.AddTransient<HcpVaultHealthCheck>();

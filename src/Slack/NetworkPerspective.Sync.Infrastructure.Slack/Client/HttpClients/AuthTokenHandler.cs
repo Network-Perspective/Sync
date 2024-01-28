@@ -13,20 +13,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
 {
     internal class AuthTokenHandler : DelegatingHandler
     {
-        private readonly ISyncContextProvider _contextProvider;
+        private readonly INetworkIdProvider _networkIdProvider;
         private readonly ICachedSecretRepository _cachedSecretRepository;
         private readonly string _tokenPatern;
 
-        public AuthTokenHandler(ISyncContextProvider contextProvider, ICachedSecretRepository cachedSecretRepository, string tokenPatern)
+        public AuthTokenHandler(INetworkIdProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, string tokenPatern)
         {
-            _contextProvider = contextProvider;
+            _networkIdProvider = networkIdProvider;
             _cachedSecretRepository = cachedSecretRepository;
             _tokenPatern = tokenPatern;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var tokenKey = string.Format(_tokenPatern, _contextProvider.Context.NetworkId);
+            var networkId = _networkIdProvider.Get();
+            var tokenKey = string.Format(_tokenPatern, networkId);
             var token = await _cachedSecretRepository.GetSecretAsync(tokenKey, cancellationToken);
 
             await Task.Delay(2000);

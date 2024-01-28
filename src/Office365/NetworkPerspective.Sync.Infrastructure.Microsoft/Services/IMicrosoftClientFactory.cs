@@ -29,14 +29,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
     internal class MicrosoftClientFactory : IMicrosoftClientFactory
     {
         private readonly ISecretRepository _secretRepository;
-        private readonly ISyncContextProvider _syncContextProvider;
+        private readonly INetworkIdProvider _networkIdProvider;
         private readonly INetworkService _networkService;
         private readonly PolicyHttpMessageHandler _retryHandler;
 
-        public MicrosoftClientFactory(ISecretRepository secretRepository, ISyncContextProvider syncContextProvider, INetworkService networkService, IOptions<Resiliency> resiliencyOptions, ILoggerFactory loggerFactory)
+        public MicrosoftClientFactory(ISecretRepository secretRepository, INetworkIdProvider networkIdProvider, INetworkService networkService, IOptions<Resiliency> resiliencyOptions, ILoggerFactory loggerFactory)
         {
             _secretRepository = secretRepository;
-            _syncContextProvider = syncContextProvider;
+            _networkIdProvider = networkIdProvider;
             _networkService = networkService;
             var retryLogger = loggerFactory.CreateLogger<GraphServiceClient>();
 
@@ -62,10 +62,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
         private async Task<AzureIdentityAuthenticationProvider> BuildAuthProvider(CancellationToken stoppingToken)
         {
-            var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, _syncContextProvider.Context.NetworkId);
+            var networkId = _networkIdProvider.Get();
+            var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, networkId);
             var tenantId = await _secretRepository.GetSecretAsync(tenantIdKey, stoppingToken);
 
-            var network = await _networkService.GetAsync<MicrosoftNetworkProperties>(_syncContextProvider.Context.NetworkId, stoppingToken);
+            var network = await _networkService.GetAsync<MicrosoftNetworkProperties>(networkId, stoppingToken);
 
             var clientIdKey = network.Properties.SyncMsTeams == true
                 ? MicrosoftKeys.MicrosoftClientTeamsIdKey

@@ -35,11 +35,6 @@ namespace NetworkPerspective.Sync.Application.Scheduler
             services.AddTransient<IJobDetailFactory, JobDetailFactory<SyncJob>>();
             services.AddTransient<ISyncScheduler, SyncScheduler>();
 
-            services.AddScoped<SyncContextProvider>();
-
-            services.AddScoped<ISyncContextProvider>(x => x.GetRequiredService<SyncContextProvider>());
-            services.AddScoped<ISyncContextInitializer>(x => x.GetRequiredService<SyncContextProvider>());
-
             services.AddQuartz(q =>
             {
                 q.SchedulerId = "scheduler-connector";
