@@ -38,21 +38,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
             {
                 // Arrange
                 _internalHttpClient
-                    .SetupSequence(x => x.GetAsync<SampleResponse>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                    .SetupSequence(x => x.GetAsync<SampleResponseWithError>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.FatalError))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.InternalError))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.ServiceUnavailable))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.RequestTimeout))
-                    .ReturnsAsync(new SampleResponse { IsOk = true, Error = null });
+                    .ReturnsAsync(new SampleResponseWithError { IsOk = true, Error = null });
 
                 var resilientClient = new ResilientSlackHttpClientDecorator(_internalHttpClient.Object, _resiliency, _logger);
 
                 // Act
-                var response = await resilientClient.GetAsync<SampleResponse>("foo");
+                var response = await resilientClient.GetAsync<SampleResponseWithError>("foo");
 
                 // Assert
                 response.IsOk.Should().BeTrue();
-                _internalHttpClient.Verify(x => x.GetAsync<SampleResponse>(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Exactly(5));
+                _internalHttpClient.Verify(x => x.GetAsync<SampleResponseWithError>(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Exactly(5));
             }
         }
 
@@ -63,21 +63,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
             {
                 // Arrange
                 _internalHttpClient
-                    .SetupSequence(x => x.PostAsync<SampleResponse>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                    .SetupSequence(x => x.PostAsync<SampleResponseWithError>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.FatalError))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.InternalError))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.ServiceUnavailable))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.RequestTimeout))
-                    .ReturnsAsync(new SampleResponse { IsOk = true, Error = null });
+                    .ReturnsAsync(new SampleResponseWithError { IsOk = true, Error = null });
 
                 var resilientClient = new ResilientSlackHttpClientDecorator(_internalHttpClient.Object, _resiliency, _logger);
 
                 // Act
-                var response = await resilientClient.PostAsync<SampleResponse>("foo");
+                var response = await resilientClient.PostAsync<SampleResponseWithError>("foo");
 
                 // Assert
                 response.IsOk.Should().BeTrue();
-                _internalHttpClient.Verify(x => x.PostAsync<SampleResponse>(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Exactly(5));
+                _internalHttpClient.Verify(x => x.PostAsync<SampleResponseWithError>(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Exactly(5));
             }
         }
 
@@ -88,21 +88,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
             {
                 // Arrange
                 _internalHttpClient
-                    .SetupSequence(x => x.PostAsync<SampleResponse>(It.IsAny<string>(), It.IsAny<HttpContent>(), It.IsAny<CancellationToken>()))
+                    .SetupSequence(x => x.PostAsync<SampleResponseWithError>(It.IsAny<string>(), It.IsAny<HttpContent>(), It.IsAny<CancellationToken>()))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.FatalError))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.InternalError))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.ServiceUnavailable))
                     .ThrowsAsync(new ApiException(400, SlackApiErrorCodes.RequestTimeout))
-                    .ReturnsAsync(new SampleResponse { IsOk = true, Error = null });
+                    .ReturnsAsync(new SampleResponseWithError { IsOk = true, Error = null });
 
                 var resilientClient = new ResilientSlackHttpClientDecorator(_internalHttpClient.Object, _resiliency, _logger);
 
                 // Act
-                var response = await resilientClient.PostAsync<SampleResponse>("foo", new StringContent("bar"));
+                var response = await resilientClient.PostAsync<SampleResponseWithError>("foo", new StringContent("bar"));
 
                 // Assert
                 response.IsOk.Should().BeTrue();
-                _internalHttpClient.Verify(x => x.PostAsync<SampleResponse>(It.IsAny<string>(), It.IsAny<HttpContent>(), It.IsAny<CancellationToken>()), Times.Exactly(5));
+                _internalHttpClient.Verify(x => x.PostAsync<SampleResponseWithError>(It.IsAny<string>(), It.IsAny<HttpContent>(), It.IsAny<CancellationToken>()), Times.Exactly(5));
             }
         }
     }

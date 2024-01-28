@@ -12,14 +12,14 @@ namespace NetworkPerspective.Sync.Excel.Controllers;
 [Route("sync")]
 public class SyncController : ApiControllerBase
 {
-    private readonly ISyncServiceFactory _syncServiceFactory;
+    private readonly ISyncService _syncService;
     private readonly ISyncContextFactory _syncContextFactory;
 
 
-    public SyncController(INetworkPerspectiveCore networkPerspectiveCore, ISyncServiceFactory syncServiceFactory,
-        ISyncContextFactory syncContextFactory) : base(networkPerspectiveCore)
+    public SyncController(INetworkPerspectiveCore networkPerspectiveCore, ISyncService syncService, ISyncContextFactory syncContextFactory)
+        : base(networkPerspectiveCore)
     {
-        _syncServiceFactory = syncServiceFactory;
+        _syncService = syncService;
         _syncContextFactory = syncContextFactory;
     }
 
@@ -30,15 +30,13 @@ public class SyncController : ApiControllerBase
         var tokenValidationResult = await ValidateTokenAsync(stoppingToken);
 
         // create sync context
-        using var syncContext =
-            await _syncContextFactory.CreateForNetworkAsync(tokenValidationResult.NetworkId, stoppingToken);
+        using var syncContext = await _syncContextFactory.CreateForNetworkAsync(tokenValidationResult.NetworkId, stoppingToken);
 
         // add employees & metadata to sync context
         syncContext.Set(syncRequest.Employees);
 
         // create sync service & sync data
-        var syncService = await _syncServiceFactory.CreateAsync(syncContext.NetworkId, stoppingToken);
-        await syncService.SyncAsync(syncContext, stoppingToken);
+        await _syncService.SyncAsync(syncContext, stoppingToken);
 
         // return success or throw exception
         return Ok();

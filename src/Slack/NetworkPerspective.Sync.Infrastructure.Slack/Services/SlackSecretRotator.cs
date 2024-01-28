@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Security;
 using System.Threading.Tasks;
 
@@ -10,9 +8,8 @@ using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
-
-using Newtonsoft.Json;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
@@ -20,18 +17,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
     {
         private readonly ILogger<SlackSecretsRotator> _logger;
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
-        private readonly ISlackHttpClientFactory _slackHttpClientFactory;
+        private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
         private readonly IUnitOfWork _unitOfWork;
 
         public SlackSecretsRotator(
             ILogger<SlackSecretsRotator> logger,
             ISecretRepositoryFactory secretRepositoryFactory,
-            ISlackHttpClientFactory slackHttpClientFactory,
+            ISlackClientFacadeFactory slackClientFacadeFactory,
             IUnitOfWork unitOfWork)
         {
             _logger = logger;
             _secretRepositoryFactory = secretRepositoryFactory;
-            _slackHttpClientFactory = slackHttpClientFactory;
+            _slackClientFacadeFactory = slackClientFacadeFactory;
             _unitOfWork = unitOfWork;
         }
 
@@ -73,7 +70,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         private async Task RotateNetworkSlackBotToken(Guid networkId, SecureString clientId, SecureString clientSecret)
         {
             var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId);
-            var slackClient = _slackHttpClientFactory.Create();
+            var slackClient = _slackClientFacadeFactory.CreateUnauthorized();
 
             var accessTokenKey = string.Format(SlackKeys.TokenKeyPattern, networkId);
             var refreshTokenKey = string.Format(SlackKeys.RefreshTokenPattern, networkId);
@@ -103,13 +100,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 // we got access_token but not refresh token - looks like access token wasn't yet exchanged
                 // this happens when we just enabled token rotation and we have non-expiring token
                 // We need to exchange it for expiring access token and refresh token
-                var exchangeTokenRequest = new FormUrlEncodedContent(new[]
+                var exchangeTokenRequest = new OAuthExchangeRequest
                 {
-                    new KeyValuePair<string, string>("client_id", clientId.ToSystemString()),
-                    new KeyValuePair<string, string>("client_secret", clientSecret.ToSystemString()),
-                    new KeyValuePair<string, string>("token", accessToken.ToSystemString())
-                });
-                var exchangeResult = await slackClient.PostAsync<TokenExchangeResponse>("oauth.v2.exchange", exchangeTokenRequest);
+                    ClientId = clientId.ToSystemString(),
+                    ClientSecret = clientSecret.ToSystemString(),
+                    AccessToken = accessToken.ToSystemString(),
+                };
+
+                var exchangeResult = await slackClient.ExchangeLegacyTokenAsync(exchangeTokenRequest);
                 if (!exchangeResult.IsOk)
                 {
                     _logger.LogError("Failed to exchange Slack token: {error}", exchangeResult.Error);
@@ -118,7 +116,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
                 await secretRepository.SetSecretAsync(refreshTokenKey, exchangeResult.RefreshToken.ToSecureString());
                 await secretRepository.SetSecretAsync(accessTokenKey, exchangeResult.AccessToken.ToSecureString());
-
+#warning test it manually!!!!
                 // no need to refresh token if we just exchanged it
                 return;
             }
@@ -126,15 +124,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             // Refresh token flow:
             // we have access token and refresh token - we need to refresh access token
             // using the refresh token. Better to do it before tokens expire.
-            var requestContent = new FormUrlEncodedContent(new[]
+            var request = new OAuthAccessRequest
             {
-                new KeyValuePair<string, string>("client_id", clientId.ToSystemString()),
-                new KeyValuePair<string, string>("client_secret", clientSecret.ToSystemString()),
-                new KeyValuePair<string, string>("grant_type", "refresh_token"),
-                new KeyValuePair<string, string>("refresh_token", refreshToken.ToSystemString())
-            });
+                ClientId = clientId.ToSystemString(),
+                ClientSecret = clientSecret.ToSystemString(),
+                GrantType = "refresh_token",
+                RefreshToken = refreshToken.ToSystemString()
+            };
 
-            var refreshResult = await slackClient.PostAsync<TokenExchangeResponse>("oauth.v2.access", requestContent);
+            var refreshResult = await slackClient.AccessAsync(request);
 
             if (!refreshResult.IsOk)
             {
@@ -144,20 +142,5 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             await secretRepository.SetSecretAsync(refreshTokenKey, refreshResult.RefreshToken.ToSecureString());
             await secretRepository.SetSecretAsync(accessTokenKey, refreshResult.AccessToken.ToSecureString());
         }
-    }
-
-    internal class TokenExchangeResponse : IResponseWithError
-    {
-        [JsonProperty("ok")]
-        public bool IsOk { get; set; }
-
-        [JsonProperty("error")]
-        public string Error { get; set; }
-
-        [JsonProperty("access_token")]
-        public string AccessToken { get; set; }
-
-        [JsonProperty("refresh_token")]
-        public string RefreshToken { get; set; }
     }
 }

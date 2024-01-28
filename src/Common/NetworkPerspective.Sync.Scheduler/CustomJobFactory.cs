@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Scheduler
 
             var networkId = GetNetworkId(bundle.JobDetail);
 
-            if(networkId != Guid.Empty)
+            if (networkId != Guid.Empty)
             {
                 var initializer = scope.ServiceProvider.GetRequiredService<ISyncContextInitializer>();
                 initializer.InitializeAsync(networkId).Wait();

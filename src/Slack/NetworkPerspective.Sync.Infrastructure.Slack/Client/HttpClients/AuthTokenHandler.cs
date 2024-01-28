@@ -28,21 +28,23 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
         {
             var tokenKey = string.Format(_tokenPatern, _contextProvider.Context.NetworkId);
             var token = await _cachedSecretRepository.GetSecretAsync(tokenKey, cancellationToken);
+
             await Task.Delay(2000);
 
             if (token is not null)
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.ToSystemString());
 
 
-            var response =  await base.SendAsync(request, cancellationToken);
+            var response = await base.SendAsync(request, cancellationToken);
 
 
             var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
             var responseObject = JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
 
-            if(responseObject.IsOk == false)
+            if (responseObject.IsOk == false && responseObject.Error == SlackApiErrorCodes.TokenRevoked)
             {
-
+                await _cachedSecretRepository.ClearCacheAsync(cancellationToken);
+                return await SendAsync(request, cancellationToken);
             }
 
             return response;

@@ -11,6 +11,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
     internal interface ISlackClientUnauthorizedFacade : IDisposable
     {
         Task<OAuthAccessResponse> AccessAsync(OAuthAccessRequest request, CancellationToken stoppingToken = default);
+        Task<OAuthExchangeResponse> ExchangeLegacyTokenAsync(OAuthExchangeRequest request, CancellationToken stoppingToken = default);
     }
 
     internal class SlackClientUnauthorizedFacade : ISlackClientUnauthorizedFacade
@@ -31,5 +32,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 
         public Task<OAuthAccessResponse> AccessAsync(OAuthAccessRequest request, CancellationToken stoppingToken = default)
             => _oauthClient.AccessAsync(request, stoppingToken);
+
+        public Task<OAuthExchangeResponse> ExchangeLegacyTokenAsync(OAuthExchangeRequest request, CancellationToken stoppingToken = default)
+            => _oauthClient.ExchangeLegacyTokenAsync(request, stoppingToken);
     }
 }

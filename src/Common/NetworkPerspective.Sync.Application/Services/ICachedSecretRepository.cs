@@ -55,7 +55,7 @@ namespace NetworkPerspective.Sync.Application.Services
             }
             finally
             {
-                _semaphore.Release(); 
+                _semaphore.Release();
             }
         }
 

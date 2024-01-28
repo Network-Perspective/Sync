@@ -60,12 +60,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 });
 
             services.AddTransient<IAuthTester, AuthTester>();
-            services.AddScoped<ISlackHttpClientFactory, SlackHttpClientFactory>();
-            services.AddScoped<ISlackHttpClient>(sp => sp.GetRequiredService<ISlackHttpClientFactory>().Create());
-            services.AddSingleton<ISlackAuthService, SlackAuthService>();
+            services.AddScoped<ISlackAuthService, SlackAuthService>();
             services.AddTransient<CursorPaginationHandler>();
-            services.AddTransient<ISlackClientFacadeFactory, SlackClientFacadeFactory>();
-            services.AddTransient<ISlackClientUnauthorizedFacade>(sp => sp.GetRequiredService<ISlackClientFacadeFactory>().CreateUnauthorized());
+            services.AddScoped<ISlackClientFacadeFactory, SlackClientFacadeFactory>();
+            services.AddScoped<ISlackClientUnauthorizedFacade>(sp => sp.GetRequiredService<ISlackClientFacadeFactory>().CreateUnauthorized());
             services.AddMemoryCache();
 
             services.AddScoped<IMembersClient, MembersClient>();

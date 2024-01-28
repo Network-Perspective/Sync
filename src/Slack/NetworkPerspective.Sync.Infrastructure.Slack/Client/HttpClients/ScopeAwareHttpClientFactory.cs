@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Linq;
 using System.Net.Http;
-using System;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Options;
-using System.Linq;
 
 // Source: https://github.com/dotnet/docs/blob/main/docs/core/extensions/snippets/http/scopeworkaround/
 
