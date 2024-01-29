@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Services;
@@ -43,7 +44,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 {
                     var networkIdProvider = sp.GetRequiredService<INetworkIdProvider>();
                     var cachedSecretRepository = sp.GetRequiredService<ICachedSecretRepository>();
-                    return new AuthTokenHandler(networkIdProvider, cachedSecretRepository, SlackKeys.TokenKeyPattern);
+                    var logger = sp.GetRequiredService<ILogger<AuthTokenHandler>>();
+                    return new AuthTokenHandler(networkIdProvider, cachedSecretRepository, SlackKeys.TokenKeyPattern, logger);
                 });
 
             services
@@ -56,7 +58,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 {
                     var networkIdProvider = sp.GetRequiredService<INetworkIdProvider>();
                     var cachedSecretRepository = sp.GetRequiredService<ICachedSecretRepository>();
-                    return new AuthTokenHandler(networkIdProvider, cachedSecretRepository, SlackKeys.UserTokenKeyPattern);
+                    var logger = sp.GetRequiredService<ILogger<AuthTokenHandler>>();
+                    return new AuthTokenHandler(networkIdProvider, cachedSecretRepository, SlackKeys.UserTokenKeyPattern, logger);
                 });
 
             services.AddTransient<IAuthTester, AuthTester>();

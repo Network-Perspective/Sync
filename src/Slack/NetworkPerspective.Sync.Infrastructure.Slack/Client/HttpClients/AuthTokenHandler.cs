@@ -1,7 +1,11 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Services;
@@ -16,39 +20,62 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
         private readonly INetworkIdProvider _networkIdProvider;
         private readonly ICachedSecretRepository _cachedSecretRepository;
         private readonly string _tokenPatern;
+        private readonly ILogger<AuthTokenHandler> _logger;
 
-        public AuthTokenHandler(INetworkIdProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, string tokenPatern)
+        public AuthTokenHandler(INetworkIdProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, string tokenPatern, ILogger<AuthTokenHandler> logger)
         {
             _networkIdProvider = networkIdProvider;
             _cachedSecretRepository = cachedSecretRepository;
             _tokenPatern = tokenPatern;
+            _logger = logger;
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken stoppingToken)
         {
-            var networkId = _networkIdProvider.Get();
-            var tokenKey = string.Format(_tokenPatern, networkId);
-            var token = await _cachedSecretRepository.GetSecretAsync(tokenKey, cancellationToken);
+            var token = await GetAccessTokenAsync(stoppingToken);
+            SetAuthorizationHeader(ref request, token);
 
-            await Task.Delay(2000);
+            var response = await base.SendAsync(request, stoppingToken);
+            var responseObject = await DeserializeResponseObjectAsync(response, stoppingToken);
 
-            if (token is not null)
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.ToSystemString());
+            if (responseObject is null)
+                return response;
 
-
-            var response = await base.SendAsync(request, cancellationToken);
-
-
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-            var responseObject = JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
-
-            if (responseObject.IsOk == false && responseObject.Error == SlackApiErrorCodes.TokenRevoked)
+            if (IsTokenRevoked(responseObject))
             {
-                await _cachedSecretRepository.ClearCacheAsync(cancellationToken);
-                return await SendAsync(request, cancellationToken);
+                await _cachedSecretRepository.ClearCacheAsync(stoppingToken);
+                return await SendAsync(request, stoppingToken);
             }
 
             return response;
         }
+
+        private async Task<SecureString> GetAccessTokenAsync(CancellationToken stoppingToken)
+        {
+            var networkId = _networkIdProvider.Get();
+            var tokenKey = string.Format(_tokenPatern, networkId);
+            return await _cachedSecretRepository.GetSecretAsync(tokenKey, stoppingToken);
+        }
+
+        private static void SetAuthorizationHeader(ref HttpRequestMessage request, SecureString token)
+            => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.ToSystemString());
+
+        private async Task<IResponseWithError> DeserializeResponseObjectAsync(HttpResponseMessage response, CancellationToken stoppingToken)
+        {
+            try
+            {
+                var responseBody = await response.Content.ReadAsStringAsync(stoppingToken);
+                return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Unable to deserialize response to {Type}", typeof(IResponseWithError));
+                return null;
+            }
+
+        }
+
+        private static bool IsTokenRevoked(IResponseWithError response)
+            => response.IsOk == false && response.Error == SlackApiErrorCodes.TokenRevoked;
     }
 }
