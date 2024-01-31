@@ -43,6 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
 
             if (IsTokenRevoked(responseObject))
             {
+                _logger.LogInformation("Response indicate the token has been revoked");
                 await _cachedSecretRepository.ClearCacheAsync(stoppingToken);
                 return await SendAsync(request, stoppingToken);
             }

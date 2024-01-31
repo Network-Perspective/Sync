@@ -32,7 +32,9 @@ namespace NetworkPerspective.Sync.Application.Services
             await _semaphore.WaitAsync(stoppingToken);
             try
             {
+                _logger.LogDebug("Clearing cache...");
                 _cachedSecrets.Clear();
+                _logger.LogDebug("Cache cleared");
             }
             finally
             {
