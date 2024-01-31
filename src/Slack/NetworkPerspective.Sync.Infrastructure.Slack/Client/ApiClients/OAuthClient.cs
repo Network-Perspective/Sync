@@ -32,5 +32,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.ApiClients
 
             return await _client.PostAsync<OAuthAccessResponse>(path, content, stoppingToken);
         }
+
+        public async Task<OAuthExchangeResponse> ExchangeLegacyTokenAsync(OAuthExchangeRequest request, CancellationToken stoppingToken = default)
+        {
+            var path = "oauth.v2.exchange";
+            var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("client_id", request.ClientId),
+                new KeyValuePair<string, string>("client_secret", request.ClientSecret),
+                new KeyValuePair<string, string>("token", request.AccessToken),
+            });
+
+            return await _client.PostAsync<OAuthExchangeResponse>(path, content, stoppingToken);
+        }
     }
 }
