@@ -80,6 +80,7 @@ spec:
             - name: Connector__SecretRotation__RotateOnStartup
               value: "true"              
             {{- end}}
+            {{- include "extraEnvironmentVars" .Values | nindent 12 }}
           volumeMounts:
             - name: logs
               mountPath: /app/logs

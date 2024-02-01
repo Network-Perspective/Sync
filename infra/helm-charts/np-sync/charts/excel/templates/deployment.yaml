@@ -74,6 +74,7 @@ spec:
             - name: Infrastructure__HcpVault__BaseUrl
               value: {{ .Values.global.appSettings.hcpVaultUri }}
             {{- end }}
+            {{- include "extraEnvironmentVars" .Values | nindent 12 }}
           volumeMounts:
             - name: logs
               mountPath: /app/logs

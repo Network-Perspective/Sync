@@ -42,6 +42,8 @@ mssql:
 gsuite:
   enabled: true
   googleKeys: "np-sync-gsuite-secrets"
+  # extraEnvironmentVars:
+  #   test: "test-value"  
   ingress:
     hosts: 
     - host: gsuite.c1.test.networkperspective.io
@@ -52,6 +54,8 @@ gsuite:
 slack:
   enabled: true
   slackSecrets: "np-sync-slack-secrets"
+  # extraEnvironmentVars:
+  #   test: "test-value"  
   ingress:
     hosts: 
     - host: slack.c1.test.networkperspective.io
@@ -62,6 +66,8 @@ slack:
 excel:
   enabled: false
   excelSecrets: "np-sync-excel-secrets"
+  # extraEnvironmentVars:
+  #   test: "test-value"
   ingress:
     hosts: 
     - host: excel.c1.test.networkperspective.io

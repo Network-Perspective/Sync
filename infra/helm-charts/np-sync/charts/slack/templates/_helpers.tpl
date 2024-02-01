@@ -69,3 +69,15 @@ Create the name of the service account to use
 {{- define "appsettings.config" -}}
 {{- printf "%s-appsettings" .Release.Name -}}
 {{- end -}}
+
+{{/*
+Inject environment vars in the format key:value
+*/}}
+{{- define "extraEnvironmentVars" -}}
+{{- if .extraEnvironmentVars -}}
+{{- range $key, $value := .extraEnvironmentVars }}
+- name: {{ printf "%s" $key | quote }}
+  value: {{ $value | quote }}
+{{- end }}
+{{- end -}}
+{{- end -}}
