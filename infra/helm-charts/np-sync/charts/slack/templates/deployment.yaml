@@ -70,6 +70,10 @@ spec:
             - name: Infrastructure__HcpVault__BaseUrl
               value: "https://{{ .Values.global.domainValidation.hostedZoneName }}:8200"
             {{- end }}
+            {{- if .Values.global.appSettings.hcpVaultUri }}
+            - name: Infrastructure__HcpVault__BaseUrl
+              value: {{ .Values.global.appSettings.hcpVaultUri }}
+            {{- end }}
             {{- if .Values.appSettings.secretRotationEnabled }}            
             - name: Connector__SecretRotation__Enabled
               value: "true"
@@ -79,7 +83,7 @@ spec:
           volumeMounts:
             - name: logs
               mountPath: /app/logs
-            {{- if not (.Values.global.appSettings.useLocalHcpVault) }}
+            {{- if not (or (.Values.global.appSettings.useLocalHcpVault) (.Values.global.appSettings.hcpVaultUri))}}
             - name: rsa-keys
               mountPath: "/app/keys"              
             - name: secrets

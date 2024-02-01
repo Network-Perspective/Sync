@@ -59,6 +59,16 @@ slack:
     - hosts:
         - slack.c1.test.networkperspective.io
 
+excel:
+  enabled: false
+  excelSecrets: "np-sync-excel-secrets"
+  ingress:
+    hosts: 
+    - host: excel.c1.test.networkperspective.io
+    tls: 
+    - hosts:
+        - excel.c1.test.networkperspective.io
+
 vault:
   global:
     enabled: true

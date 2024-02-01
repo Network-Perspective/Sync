@@ -16,3 +16,6 @@ vault kv put -mount=np-sync-slack-secrets slack-client-id secret="@../secrets/sl
 vault kv put -mount=np-sync-slack-secrets slack-client-secret secret="@../secrets/slack-client-secret"
 vault kv put -mount=np-sync-slack-secrets hashing-key secret="@../secrets/hashing-key"
 
+# excel secrets
+vault kv put -mount=np-sync-excel-secrets test-key secret=anything
+vault kv put -mount=np-sync-excel-secrets hashing-key secret="@../secrets/hashing-key"

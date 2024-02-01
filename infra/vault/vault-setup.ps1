@@ -16,6 +16,9 @@ vault secrets enable -path=np-sync-gsuite-secrets kv-v2
 # slack mount-point
 vault secrets enable -path=np-sync-slack-secrets kv-v2
 
+# excel mount-point
+vault secrets enable -path=np-sync-excel-secrets kv-v2
+
 # Enable Kubernetes authentication if it hasn't been
 $vaultK8sAuthEnabled = vault auth list | Select-String "kubernetes/"
 if (-not $vaultK8sAuthEnabled) {
