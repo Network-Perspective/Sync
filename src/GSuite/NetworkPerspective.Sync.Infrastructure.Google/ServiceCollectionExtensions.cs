@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Infrastructure.Google.Criterias;
 using NetworkPerspective.Sync.Infrastructure.Google.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google
@@ -13,7 +14,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         {
             services.Configure<GoogleConfig>(configurationSection);
             services.AddTransient<IAuthTester, AuthTester>();
-            services.AddSingleton<IDataSourceFactory, GoogleFacadeFactory>();
+
+            services.AddScoped<ICredentialsProvider, CredentialsProvider>();
+            services.AddScoped<ICriteria, NonServiceUserCriteria>();
+
+            services.AddScoped<IMailboxClient, MailboxClient>();
+            services.AddScoped<ICalendarClient, CalendarClient>();
+            services.AddScoped<IUsersClient, UsersClient>();
+            services.AddScoped<IUserCalendarTimeZoneReader, UserCalendarTimeZoneReader>();
+
+            services.AddScoped<IDataSource, GoogleFacade>();
+
             services.AddTransient<ISecretRotator, GoogleSecretsRotator>();
             return services;
         }

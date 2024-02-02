@@ -9,26 +9,29 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Microsoft.Net.Http.Headers;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
 using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
+using NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients;
 
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client
 {
-    public class SlackClientTests : IClassFixture<MockedRestServerFixture>
+    public class SlackClientFacadeFactoryTests : IClassFixture<MockedRestServerFixture>
     {
         private readonly ILoggerFactory _loggerFactory = NullLoggerFactory.Instance;
         private readonly Mock<IHttpClientFactory> _httpClientFactoryMock = new();
+        private readonly CursorPaginationHandler _cursorPaginationHandler = new(NullLogger<CursorPaginationHandler>.Instance);
         private readonly MockedRestServerFixture _serverFixture;
         private readonly IOptions<Resiliency> _resiliencyOptions = Options.Create(new Resiliency
         {
@@ -38,29 +41,27 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
                 .ToArray()
         });
 
-        public SlackClientTests(MockedRestServerFixture serverFixture)
+        public SlackClientFacadeFactoryTests(MockedRestServerFixture serverFixture)
         {
             _serverFixture = serverFixture;
 
             const string scenarioName = "transientHttpErrors";
             const string stateOk = "state_ok";
 
-            var errorResponse = new SampleResponse
+            var errorResponse = new SampleResponseWithError
             {
                 IsOk = false,
                 Error = SlackApiErrorCodes.InternalError,
             };
 
-            var successResponse = new SampleResponse
+            var successResponse = new SampleResponseWithError
             {
                 IsOk = true,
             };
 
             _serverFixture.WireMockServer.ResetLogEntries();
-
             _serverFixture.WireMockServer
-                .Given(Request.Create()
-                    .WithPath("/*"))
+                .Given(Request.Create())
                 .InScenario(scenarioName)
                 .WillSetStateTo(stateOk, 3)
                 .RespondWith(Response.Create()
@@ -68,8 +69,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
                     .WithBodyAsJson(errorResponse));
 
             _serverFixture.WireMockServer
-                .Given(Request.Create()
-                    .WithPath("/*"))
+                .Given(Request.Create())
                 .InScenario(scenarioName)
                 .WhenStateIs(stateOk)
                 .RespondWith(Response.Create()
@@ -82,44 +82,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
         }
 
         [Fact]
-        public async Task ShouldEventuallyReturnResponse()
+        public async Task ShouldCreateResilientClientThatEventuallyReturnResponse()
         {
             // Arrange
-            var factory = new SlackHttpClientFactory(_resiliencyOptions, _loggerFactory, _httpClientFactoryMock.Object);
-            var client = factory.Create();
+            var factory = new SlackClientFacadeFactory(_resiliencyOptions, _loggerFactory, _httpClientFactoryMock.Object, _cursorPaginationHandler);
+            var client = factory.CreateUnauthorized();
 
             // Act
-            var result = await client.GetAsync<SampleResponse>("/");
+            var result = await client.AccessAsync(new OAuthAccessRequest());
 
             // Assert
             result.IsOk.Should().BeTrue();
             _serverFixture.WireMockServer.LogEntries.Should().HaveCountGreaterThan(1);
-        }
-
-        [Fact]
-        public async Task ShouldUseToken()
-        {
-            // Arrange
-            const string token = "token";
-
-            var factory = new SlackHttpClientFactory(_resiliencyOptions, _loggerFactory, _httpClientFactoryMock.Object);
-            var client = factory.CreateWithToken(token.ToSecureString());
-
-            // Act
-            var result = await client.PostAsync<SampleResponse>("/");
-
-            // Assert
-            _serverFixture
-                .WireMockServer
-                .LogEntries
-                .Last()
-                .RequestMessage
-                .Headers
-                .Single(x => x.Key == HeaderNames.Authorization)
-                .Value
-                .Single()
-                .Should()
-                .Contain(token);
         }
     }
 }

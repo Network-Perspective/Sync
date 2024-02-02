@@ -23,18 +23,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
     internal interface IMicrosoftClientFactory
     {
-        Task<GraphServiceClient> GetMicrosoftClientAsync(Guid networkId, CancellationToken stoppingToken = default);
+        Task<GraphServiceClient> GetMicrosoftClientAsync(CancellationToken stoppingToken = default);
     }
 
     internal class MicrosoftClientFactory : IMicrosoftClientFactory
     {
-        private readonly ISecretRepositoryFactory _secretRepositoryFactory;
+        private readonly ISecretRepository _secretRepository;
+        private readonly INetworkIdProvider _networkIdProvider;
         private readonly INetworkService _networkService;
         private readonly PolicyHttpMessageHandler _retryHandler;
 
-        public MicrosoftClientFactory(ISecretRepositoryFactory secretRepositoryFactory, INetworkService networkService, IOptions<Resiliency> resiliencyOptions, ILoggerFactory loggerFactory)
+        public MicrosoftClientFactory(ISecretRepository secretRepository, INetworkIdProvider networkIdProvider, INetworkService networkService, IOptions<Resiliency> resiliencyOptions, ILoggerFactory loggerFactory)
         {
-            _secretRepositoryFactory = secretRepositoryFactory;
+            _secretRepository = secretRepository;
+            _networkIdProvider = networkIdProvider;
             _networkService = networkService;
             var retryLogger = loggerFactory.CreateLogger<GraphServiceClient>();
 
@@ -50,20 +52,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             _retryHandler = new PolicyHttpMessageHandler(policy);
         }
 
-        public async Task<GraphServiceClient> GetMicrosoftClientAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task<GraphServiceClient> GetMicrosoftClientAsync(CancellationToken stoppingToken = default)
         {
-            var authProvider = await BuildAuthProvider(networkId, stoppingToken);
+            var authProvider = await BuildAuthProvider(stoppingToken);
             var httpClient = BuildHttpClient();
 
             return new GraphServiceClient(httpClient, authProvider);
         }
 
-        private async Task<AzureIdentityAuthenticationProvider> BuildAuthProvider(Guid networkId, CancellationToken stoppingToken)
+        private async Task<AzureIdentityAuthenticationProvider> BuildAuthProvider(CancellationToken stoppingToken)
         {
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId, stoppingToken);
-
+            var networkId = _networkIdProvider.Get();
             var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, networkId);
-            var tenantId = await secretRepository.GetSecretAsync(tenantIdKey, stoppingToken);
+            var tenantId = await _secretRepository.GetSecretAsync(tenantIdKey, stoppingToken);
 
             var network = await _networkService.GetAsync<MicrosoftNetworkProperties>(networkId, stoppingToken);
 
@@ -71,13 +72,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 ? MicrosoftKeys.MicrosoftClientTeamsIdKey
                 : MicrosoftKeys.MicrosoftClientBasicIdKey;
 
-            var clientId = await secretRepository.GetSecretAsync(clientIdKey, stoppingToken);
+            var clientId = await _secretRepository.GetSecretAsync(clientIdKey, stoppingToken);
 
             var clientSecretKey = network.Properties.SyncMsTeams == true
                 ? MicrosoftKeys.MicrosoftClientTeamsSecretKey
                 : MicrosoftKeys.MicrosoftClientBasicSecretKey;
 
-            var clientSecret = await secretRepository.GetSecretAsync(clientSecretKey, stoppingToken);
+            var clientSecret = await _secretRepository.GetSecretAsync(clientSecretKey, stoppingToken);
 
             var options = new TokenCredentialOptions
             {

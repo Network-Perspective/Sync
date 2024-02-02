@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
 {
@@ -25,6 +26,14 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             services.AddTransient<HcpVaultClient>();
             services.AddTransient<ISecretRepositoryFactory, SecretRepositoryClientFactory>();
             services.AddTransient<ISecretRepositoryHealthCheckFactory, SecretRepositoryClientFactory>();
+
+            services.AddScoped<ISecretRepository>(sp =>
+            {
+                var factory = sp.GetRequiredService<ISecretRepositoryFactory>();
+                var networkIdProvider = sp.GetRequiredService<INetworkIdProvider>();
+
+                return factory.CreateAsync(networkIdProvider.Get()).Result;
+            });
 
             services.AddTransient<HcpVaultHealthCheck>();
             services.AddTransient<DbSecretRepositoryHealthCheck>();
