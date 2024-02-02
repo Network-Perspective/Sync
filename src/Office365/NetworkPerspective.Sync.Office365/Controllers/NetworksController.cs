@@ -16,8 +16,8 @@ namespace NetworkPerspective.Sync.Office365.Controllers
 {
     public class NetworksController : NetworksControllerBase
     {
-        public NetworksController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLogger)
-            : base(networkPerspectiveCore, networkService, authService, syncScheduler, statusLogger)
+        public NetworksController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLogger, INetworkIdInitializer networkIdInitializer)
+            : base(networkPerspectiveCore, networkService, authService, syncScheduler, statusLogger, networkIdInitializer)
         { }
 
         /// <summary>

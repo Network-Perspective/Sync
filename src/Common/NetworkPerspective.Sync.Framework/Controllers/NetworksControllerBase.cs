@@ -22,7 +22,7 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         private readonly ISyncScheduler _syncScheduler;
         private readonly IStatusLoggerFactory _statusLoggerFactory;
 
-        public NetworksControllerBase(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLoggerFactory) : base(networkPerspectiveCore)
+        public NetworksControllerBase(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLoggerFactory, INetworkIdInitializer networkIdInitializer) : base(networkPerspectiveCore, networkIdInitializer)
         {
             _networkService = networkService;
             _tokenService = tokenService;

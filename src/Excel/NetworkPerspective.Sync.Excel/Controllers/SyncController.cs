@@ -16,8 +16,8 @@ public class SyncController : ApiControllerBase
     private readonly ISyncContextFactory _syncContextFactory;
 
 
-    public SyncController(INetworkPerspectiveCore networkPerspectiveCore, ISyncService syncService, ISyncContextFactory syncContextFactory)
-        : base(networkPerspectiveCore)
+    public SyncController(INetworkPerspectiveCore networkPerspectiveCore, ISyncService syncService, ISyncContextFactory syncContextFactory, INetworkIdInitializer networkIdInitializer)
+        : base(networkPerspectiveCore, networkIdInitializer)
     {
         _syncService = syncService;
         _syncContextFactory = syncContextFactory;
