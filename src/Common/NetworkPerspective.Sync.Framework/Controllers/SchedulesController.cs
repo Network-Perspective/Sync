@@ -21,7 +21,7 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         private readonly ISyncHistoryService _syncHistoryService;
         private readonly IStatusLoggerFactory _statusLoggerFactory;
 
-        public SchedulesController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ISyncScheduler scheduler, ISyncHistoryService syncHistoryService, IStatusLoggerFactory statusLoggerFactory) : base(networkPerspectiveCore)
+        public SchedulesController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ISyncScheduler scheduler, ISyncHistoryService syncHistoryService, IStatusLoggerFactory statusLoggerFactory, INetworkIdInitializer networkIdInitializer) : base(networkPerspectiveCore, networkIdInitializer)
         {
             _networkService = networkService;
             _scheduler = scheduler;

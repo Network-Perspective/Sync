@@ -57,7 +57,7 @@ namespace NetworkPerspective.Sync.Application.Scheduler
                 }
 
                 q.InterruptJobsOnShutdown = true;
-                q.UseMicrosoftDependencyInjectionJobFactory();
+                q.UseJobFactory<CustomJobFactory>();
 
                 q.UseSimpleTypeLoader();
                 q.UseDefaultThreadPool(threadPool =>

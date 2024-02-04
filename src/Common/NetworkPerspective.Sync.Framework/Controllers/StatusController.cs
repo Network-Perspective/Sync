@@ -19,7 +19,7 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         private readonly INetworkService _networkService;
         private readonly IStatusService _statusService;
 
-        public StatusController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, IStatusService statusService) : base(networkPerspectiveCore)
+        public StatusController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, IStatusService statusService, INetworkIdInitializer networkIdInitializer) : base(networkPerspectiveCore, networkIdInitializer)
         {
             _networkService = networkService;
             _statusService = statusService;

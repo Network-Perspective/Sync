@@ -12,17 +12,17 @@ namespace NetworkPerspective.Sync.Application.Scheduler
     [DisallowConcurrentExecution]
     internal class SyncJob : IJob
     {
-        private readonly ISyncContextFactory _syncContextFactory;
-        private readonly ISyncServiceFactory _syncServiceFactory;
+        private readonly ISyncService _syncService;
+        private readonly ISyncContextProvider _syncContextProvider;
         private readonly ILogger<SyncJob> _logger;
 
         public SyncJob(
-            ISyncContextFactory syncContextFactory,
-            ISyncServiceFactory syncServiceFactory,
+            ISyncService syncService,
+            ISyncContextProvider syncContextProvider,
             ILogger<SyncJob> logger)
         {
-            _syncContextFactory = syncContextFactory;
-            _syncServiceFactory = syncServiceFactory;
+            _syncService = syncService;
+            _syncContextProvider = syncContextProvider;
             _logger = logger;
         }
 
@@ -30,20 +30,14 @@ namespace NetworkPerspective.Sync.Application.Scheduler
         {
             try
             {
-                var networkId = GetNetworkId(context);
-                _logger.LogInformation("Triggered synchronization job for network '{network}'", networkId);
-                using var syncContext = await _syncContextFactory.CreateForNetworkAsync(networkId, context.CancellationToken);
-                var syncService = await _syncServiceFactory.CreateAsync(syncContext.NetworkId, context.CancellationToken);
-                await syncService.SyncAsync(syncContext, context.CancellationToken);
+                var syncContext = await _syncContextProvider.GetAsync(context.CancellationToken);
+                _logger.LogInformation("Triggered synchronization job for network '{network}'", syncContext.NetworkId);
+                await _syncService.SyncAsync(syncContext, context.CancellationToken);
             }
             catch (Exception ex)
             {
                 _logger.LogCritical(ex, "Synchronization job failed '{jobKey}'", context.JobDetail.Key.Name);
             }
-
         }
-
-        private static Guid GetNetworkId(IJobExecutionContext context)
-            => Guid.TryParse(context.JobDetail.Key.Name, out Guid networkId) ? networkId : Guid.Empty;
     }
 }
