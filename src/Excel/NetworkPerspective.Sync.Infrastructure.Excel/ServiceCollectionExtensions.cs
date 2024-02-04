@@ -11,7 +11,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Excel
         public static IServiceCollection AddExcel(this IServiceCollection services)
         {
             // scope data source to single request
-            services.AddScoped<IDataSourceFactory, ExcelDataSourceFactory>();
+            services.AddScoped<IDataSource, ExcelDataSource>();
 
             // dummy scheduler and auth tester
             services.AddTransient<ISyncScheduler, DummySyncScheduler>();

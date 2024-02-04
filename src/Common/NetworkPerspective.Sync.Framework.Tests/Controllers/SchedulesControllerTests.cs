@@ -33,6 +33,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
         private readonly Mock<ISyncHistoryService> _syncHistoryServiceMock = new Mock<ISyncHistoryService>();
         private readonly Mock<IStatusLoggerFactory> _statusLoggerFactoryMock = new Mock<IStatusLoggerFactory>();
         private readonly Mock<IStatusLogger> _statusLoggerMock = new Mock<IStatusLogger>();
+        private readonly Mock<INetworkIdProvider> _networkIdProvider = new Mock<INetworkIdProvider>();
 
         public SchedulesControllerTests()
         {
@@ -58,6 +59,10 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 var connectorId = Guid.NewGuid();
                 var accessToken = "access-token";
 
+                _networkIdProvider
+                    .Setup(x => x.Get())
+                    .Returns(networkId);
+
                 _networkPerspectiveCoreMock
                     .Setup(x => x.ValidateTokenAsync(It.Is<SecureString>(x => new NetworkCredential(string.Empty, x).Password == accessToken), It.IsAny<CancellationToken>()))
                     .ReturnsAsync(new TokenValidationResponse(networkId, connectorId));
@@ -79,6 +84,10 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 var networkId = Guid.NewGuid();
                 var connectorId = Guid.NewGuid();
                 var accessToken = "access-token";
+
+                _networkIdProvider
+                    .Setup(x => x.Get())
+                    .Returns(networkId);
 
                 _networkPerspectiveCoreMock
                     .Setup(x => x.ValidateTokenAsync(It.Is<SecureString>(x => x.ToSystemString() == accessToken), It.IsAny<CancellationToken>()))
@@ -144,6 +153,10 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 var accessToken = "access-token";
                 var syncPeriodStart = DateTime.Now;
 
+                _networkIdProvider
+                    .Setup(x => x.Get())
+                    .Returns(networkId);
+
                 _networkPerspectiveCoreMock
                     .Setup(x => x.ValidateTokenAsync(It.Is<SecureString>(x => x.ToSystemString() == accessToken), It.IsAny<CancellationToken>()))
                     .ReturnsAsync(new TokenValidationResponse(networkId, connectorId));
@@ -167,6 +180,10 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 var networkId = Guid.NewGuid();
                 var connectorId = Guid.NewGuid();
                 var accessToken = "access-token";
+
+                _networkIdProvider
+                    .Setup(x => x.Get())
+                    .Returns(networkId);
 
                 _networkPerspectiveCoreMock
                     .Setup(x => x.ValidateTokenAsync(It.Is<SecureString>(x => new NetworkCredential(string.Empty, x).Password == accessToken), It.IsAny<CancellationToken>()))
@@ -208,7 +225,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             var features = new FeatureCollection();
             features.Set<IHttpRequestFeature>(requestFeature);
 
-            var controller = new SchedulesController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _schduleFacadeMock.Object, _syncHistoryServiceMock.Object, _statusLoggerFactoryMock.Object);
+            var controller = new SchedulesController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _schduleFacadeMock.Object, _syncHistoryServiceMock.Object, _statusLoggerFactoryMock.Object, Mock.Of<INetworkIdInitializer>());
             controller.ControllerContext.HttpContext = new DefaultHttpContext(features);
 
             return controller;
