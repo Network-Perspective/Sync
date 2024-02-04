@@ -116,7 +116,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
                 await secretRepository.SetSecretAsync(refreshTokenKey, exchangeResult.RefreshToken.ToSecureString());
                 await secretRepository.SetSecretAsync(accessTokenKey, exchangeResult.AccessToken.ToSecureString());
-#warning test it manually!!!!
+
                 // no need to refresh token if we just exchanged it
                 return;
             }

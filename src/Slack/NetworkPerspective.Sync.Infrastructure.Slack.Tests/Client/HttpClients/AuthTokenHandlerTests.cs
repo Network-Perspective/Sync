@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -25,9 +24,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
 {
     public class AuthTokenHandlerTests
     {
-        const string Pattern = "token-pattern-{0}";
-
-
         private readonly HttpResponseMessage _successMessage = new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new StringContent(JsonConvert.SerializeObject(new SampleResponseWithError { IsOk = true }), Encoding.UTF8)
@@ -56,10 +52,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedSecretRepository>();
             secretRepositoryMock
-                .Setup(x => x.GetSecretAsync(string.Format(Pattern, networkId.ToString()), It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, networkId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token.ToSecureString());
 
-            var handler = new AuthTokenHandler(networkIdProviderMock.Object, secretRepositoryMock.Object, Pattern, NullLogger<AuthTokenHandler>.Instance)
+            var handler = new BotTokenAuthHandler(networkIdProviderMock.Object, secretRepositoryMock.Object, NullLogger<AuthTokenHandler>.Instance)
             {
                 InnerHandler = new TestHandler(_successMessage)
             };
@@ -88,11 +84,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
             var token2 = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedSecretRepository>();
             secretRepositoryMock
-                .SetupSequence(x => x.GetSecretAsync(string.Format(Pattern, networkId.ToString()), It.IsAny<CancellationToken>()))
+                .SetupSequence(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, networkId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token1.ToSecureString())
                 .ReturnsAsync(token2.ToSecureString());
 
-            var handler = new AuthTokenHandler(networkIdProviderMock.Object, secretRepositoryMock.Object, Pattern, NullLogger<AuthTokenHandler>.Instance)
+            var handler = new BotTokenAuthHandler(networkIdProviderMock.Object, secretRepositoryMock.Object, NullLogger<AuthTokenHandler>.Instance)
             {
                 InnerHandler = new TestHandler(_tokenRevokedMessage, _successMessage)
             };
@@ -120,10 +116,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedSecretRepository>();
             secretRepositoryMock
-                .Setup(x => x.GetSecretAsync(string.Format(Pattern, networkId.ToString()), It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, networkId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token.ToSecureString());
 
-            var handler = new AuthTokenHandler(networkIdProviderMock.Object, secretRepositoryMock.Object, Pattern, NullLogger<AuthTokenHandler>.Instance)
+            var handler = new BotTokenAuthHandler(networkIdProviderMock.Object, secretRepositoryMock.Object, NullLogger<AuthTokenHandler>.Instance)
             {
                 InnerHandler = new TestHandler(_notExpectedMessage)
             };

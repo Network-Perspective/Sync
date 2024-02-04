@@ -15,7 +15,22 @@ using Newtonsoft.Json;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
 {
-    internal class AuthTokenHandler : DelegatingHandler
+
+    internal class UserTokenAuthHandler : AuthTokenHandler
+    {
+        public UserTokenAuthHandler(INetworkIdProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, ILogger<AuthTokenHandler> logger)
+            : base(networkIdProvider, cachedSecretRepository, SlackKeys.UserTokenKeyPattern, logger)
+        { }
+    }
+
+    internal class BotTokenAuthHandler : AuthTokenHandler
+    {
+        public BotTokenAuthHandler(INetworkIdProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, ILogger<AuthTokenHandler> logger)
+            : base(networkIdProvider, cachedSecretRepository, SlackKeys.TokenKeyPattern, logger)
+        { }
+    }
+
+    internal abstract class AuthTokenHandler : DelegatingHandler
     {
         private readonly INetworkIdProvider _networkIdProvider;
         private readonly ICachedSecretRepository _cachedSecretRepository;

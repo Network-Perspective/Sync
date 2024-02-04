@@ -40,13 +40,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                     x.BaseAddress = new Uri(slackBaseUrl);
                 })
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy())
-                .AddScopeAwareHttpHandler(sp =>
-                {
-                    var networkIdProvider = sp.GetRequiredService<INetworkIdProvider>();
-                    var cachedSecretRepository = sp.GetRequiredService<ICachedSecretRepository>();
-                    var logger = sp.GetRequiredService<ILogger<AuthTokenHandler>>();
-                    return new AuthTokenHandler(networkIdProvider, cachedSecretRepository, SlackKeys.TokenKeyPattern, logger);
-                });
+                .AddScopeAwareHttpHandler<BotTokenAuthHandler>();
 
             services
                 .AddHttpClient(Consts.SlackApiHttpClientWithUserTokenName, x =>
@@ -54,13 +48,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                     x.BaseAddress = new Uri(slackBaseUrl);
                 })
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy())
-                .AddScopeAwareHttpHandler(sp =>
-                {
-                    var networkIdProvider = sp.GetRequiredService<INetworkIdProvider>();
-                    var cachedSecretRepository = sp.GetRequiredService<ICachedSecretRepository>();
-                    var logger = sp.GetRequiredService<ILogger<AuthTokenHandler>>();
-                    return new AuthTokenHandler(networkIdProvider, cachedSecretRepository, SlackKeys.UserTokenKeyPattern, logger);
-                });
+                .AddScopeAwareHttpHandler<UserTokenAuthHandler>();
 
             services.AddTransient<IAuthTester, AuthTester>();
             services.AddScoped<ISlackAuthService, SlackAuthService>();

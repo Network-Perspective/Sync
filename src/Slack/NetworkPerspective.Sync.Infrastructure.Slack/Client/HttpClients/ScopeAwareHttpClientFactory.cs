@@ -100,22 +100,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients
 
             return builder;
         }
-
-
-        public static IHttpClientBuilder AddScopeAwareHttpHandler<THandler>(this IHttpClientBuilder builder, Func<IServiceProvider, THandler> func) where THandler : DelegatingHandler
-        {
-            builder.Services.TryAddTransient(func);
-
-            if (!builder.Services.Any(sd => sd.ImplementationType == typeof(ScopeAwareHttpClientFactory)))
-            {
-                // Override default IHttpClientFactory registration
-                builder.Services.AddTransient<IHttpClientFactory, ScopeAwareHttpClientFactory>();
-            }
-
-            builder.Services.Configure<ScopeAwareHttpClientFactoryOptions>(builder.Name, options => options.HttpHandlerType = typeof(THandler));
-
-            return builder;
-        }
         // </AddScopeAwareHttpHandler>
     }
 }
