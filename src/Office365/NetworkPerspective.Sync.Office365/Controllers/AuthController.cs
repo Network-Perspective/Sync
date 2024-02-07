@@ -25,7 +25,8 @@ namespace NetworkPerspective.Sync.Office365.Controllers
         private readonly IMicrosoftAuthService _authService;
         private readonly INetworkService _networkService;
 
-        public AuthController(IMicrosoftAuthService authService, INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService) : base(networkPerspectiveCore)
+        public AuthController(IMicrosoftAuthService authService, INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, INetworkIdInitializer networkIdInitializer)
+            : base(networkPerspectiveCore, networkIdInitializer)
         {
             _authService = authService;
             _networkService = networkService;

@@ -14,10 +14,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         {
             services.Configure<Resiliency>(configurationSection.GetSection("Resiliency"));
 
-            services.AddTransient<IMicrosoftAuthService, MicrosoftAuthService>();
-            services.AddTransient<IMicrosoftClientFactory, MicrosoftClientFactory>();
-            services.AddTransient<IDataSourceFactory, MicrosoftFacadeFactory>();
-            services.AddTransient<IAuthTester, AuthTester>();
+            services.AddScoped<IMicrosoftAuthService, MicrosoftAuthService>();
+            services.AddScoped<IMicrosoftClientFactory, MicrosoftClientFactory>();
+
+            services.AddScoped(sp => sp.GetRequiredService<IMicrosoftClientFactory>().GetMicrosoftClientAsync().Result);
+
+            services.AddScoped<IUsersClient, UsersClient>();
+            services.AddScoped<IMailboxClient, MailboxClient>();
+            services.AddScoped<ICalendarClient, CalendarClient>();
+            services.AddScoped<IChannelsClient, ChannelsClient>();
+            services.AddScoped<IChatClient, ChatClient>();
+
+            services.AddScoped<IDataSource, MicrosoftFacade>();
+            services.AddScoped<IAuthTester, AuthTester>();
 
             services.AddMemoryCache();
 

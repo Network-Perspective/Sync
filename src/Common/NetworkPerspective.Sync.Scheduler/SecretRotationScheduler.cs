@@ -18,7 +18,7 @@ public class SecretRotationConst
 }
 public class SecretRotationScheduler : ISecretRotationScheduler
 {
-    private readonly ISchedulerFactory _schedulerFactory;
+    private readonly IQuartzSchedulerFactory _schedulerFactory;
     private readonly SecretRotationConfig _config;
     private readonly ILogger<SecretRotationScheduler> _logger;
 

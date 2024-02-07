@@ -16,8 +16,8 @@ namespace NetworkPerspective.Sync.Slack.Controllers
 {
     public class NetworksController : NetworksControllerBase
     {
-        public NetworksController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLoggerFactory)
-            : base(networkPerspectiveCore, networkService, tokenService, syncScheduler, statusLoggerFactory)
+        public NetworksController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLoggerFactory, INetworkIdInitializer networkIdInitializer)
+            : base(networkPerspectiveCore, networkService, tokenService, syncScheduler, statusLoggerFactory, networkIdInitializer)
         { }
 
         /// <summary>

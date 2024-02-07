@@ -6,5 +6,6 @@
         public const string RequestTimeout = "request_timeout";
         public const string ServiceUnavailable = "service_unavailable";
         public const string FatalError = "fatal_error";
+        public const string TokenRevoked = "token_revoked";
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,7 +26,7 @@ namespace NetworkPerspective.Sync.Slack.Controllers
         private readonly ISlackAuthService _authService;
         private readonly INetworkService _networkService;
 
-        public AuthController(ISlackAuthService authService, INetworkService networkService, INetworkPerspectiveCore networkPerspectiveCore) : base(networkPerspectiveCore)
+        public AuthController(ISlackAuthService authService, INetworkService networkService, INetworkPerspectiveCore networkPerspectiveCore, INetworkIdInitializer networkIdInitializer) : base(networkPerspectiveCore, networkIdInitializer)
         {
             _authService = authService;
             _networkService = networkService;

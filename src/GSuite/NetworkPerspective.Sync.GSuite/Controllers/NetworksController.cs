@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
@@ -17,7 +16,8 @@ namespace NetworkPerspective.Sync.GSuite.Controllers
 {
     public class NetworksController : NetworksControllerBase
     {
-        public NetworksController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLogger) : base(networkPerspectiveCore, networkService, authService, syncScheduler, statusLogger)
+        public NetworksController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLogger, INetworkIdInitializer networkIdInitializer)
+            : base(networkPerspectiveCore, networkService, authService, syncScheduler, statusLogger, networkIdInitializer)
         { }
 
         /// <summary>

@@ -29,6 +29,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
         private readonly Mock<INetworkPerspectiveCore> _networkPerspectiveCoreMock = new Mock<INetworkPerspectiveCore>();
         private readonly Mock<IStatusService> _statusServiceMock = new Mock<IStatusService>();
         private readonly Mock<INetworkService> _networkServiceMock = new Mock<INetworkService>();
+        private readonly Mock<INetworkIdProvider> _networkIdProvider = new Mock<INetworkIdProvider>();
 
         public StatusControllerTests()
         {
@@ -98,6 +99,10 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 var connectorId = Guid.NewGuid();
                 var accessToken = "access-token";
 
+                _networkIdProvider
+                    .Setup(x => x.Get())
+                    .Returns(networkId);
+
                 _networkPerspectiveCoreMock
                     .Setup(x => x.ValidateTokenAsync(It.Is<SecureString>(x => x.ToSystemString() == accessToken), It.IsAny<CancellationToken>()))
                     .ReturnsAsync(new TokenValidationResponse(networkId, connectorId));
@@ -123,7 +128,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             var features = new FeatureCollection();
             features.Set<IHttpRequestFeature>(requestFeature);
 
-            var controller = new StatusController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _statusServiceMock.Object);
+            var controller = new StatusController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _statusServiceMock.Object, Mock.Of<INetworkIdInitializer>());
             controller.ControllerContext.HttpContext = new DefaultHttpContext(features);
 
             return controller;
