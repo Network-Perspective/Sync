@@ -47,7 +47,7 @@ public class SyncController : ApiControllerBase
         try
         {
             await _syncService.SyncAsync(syncContext, stoppingToken);
-        } 
+        }
         catch (ValidationException ex)
         {
             return BadRequest(ex.Message);

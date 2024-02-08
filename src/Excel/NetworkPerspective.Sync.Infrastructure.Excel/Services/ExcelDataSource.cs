@@ -17,7 +17,7 @@ public class ExcelDataSource : IDataSource
     {
         _syncConstraints = syncConstraints.Value;
     }
-    
+
     public Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
     {
         return Task.FromResult(new SyncResult(0, 0, new List<Exception>()));
@@ -43,7 +43,7 @@ public class ExcelDataSource : IDataSource
         // validate constraints
         if (employees.Count < _syncConstraints.MinRecordsAccepted)
             throw new ValidationException("Operation does not meet the minimum records constraint.");
-        
+
         return Task.FromResult(new EmployeeCollection(employees, context.HashFunction));
     }
 }
