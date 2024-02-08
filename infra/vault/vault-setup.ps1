@@ -4,7 +4,7 @@
 # use -tls-skip-verify in staging environment
 
 # if vault is already initialized, login
-vault login 
+# vault login 
 
 # enable audit
 vault audit enable file file_path=/vault/audit/vault_audit.log

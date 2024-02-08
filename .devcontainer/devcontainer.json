@@ -20,7 +20,7 @@
 	},
 	
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [80, 443],
+	"forwardPorts": [80, 443, 8081, 8082, 8083, 8200],
 	// "portsAttributes ": {
 	// 	"80": ["ingress http"],
 	// 	"443": ["ingress https"]
