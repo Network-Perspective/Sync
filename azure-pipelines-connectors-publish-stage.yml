@@ -69,6 +69,16 @@ stages:
         tags: |
           $(tag)
           latest
+    - task: Docker@2
+      displayName: Build and push Excel connector
+      inputs:
+        command: buildAndPush
+        repository: 'connectors/excel'
+        dockerfile: '$(Build.SourcesDirectory)/src/Excel.Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          latest
     - script: |
         git tag v$(tag)
         git push origin v$(tag)

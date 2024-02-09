@@ -16,6 +16,8 @@ $policyHCL | Out-File -Encoding ASCII np-sync-gsuite-policy.hcl
 
 vault policy write np-sync-gsuite-policy np-sync-gsuite-policy.hcl
 
+Remove-Item np-sync-gsuite-policy.hcl
+
 # Create a role in Vault for Kubernetes auth
 # This binds a Kubernetes service account to the created policy
 # Adjust the bound_service_account_names and bound_service_account_namespaces as needed
