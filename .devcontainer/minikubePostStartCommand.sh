@@ -1,6 +1,10 @@
 #!/bin/bash
 
+# determin number of cpus
+CPUS=$(grep -c ^processor /proc/cpuinfo)
+
 # start minikube
+minikube config set cpus $CPUS
 minikube start
 
 # install ingress
@@ -26,4 +30,7 @@ kubectl create secret generic np-sync-mssql-sapassword --namespace "default" --f
 
 export VAULT_ADDR='http://127.0.0.1:8200'
 
+echo "-------------------------------------------------------------"
 echo "Run 'tilt up' to start the application"
+echo "Run 'minikube dashboard' to view the kubernetes dashboard"
+echo "-------------------------------------------------------------"
