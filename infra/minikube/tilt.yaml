@@ -7,7 +7,7 @@ global:
     saSecret: np-sync-mssql-sapassword    
 
   appSettings:
-    networkPerspectiveApi: https://staging.networkperspective.io/    
+    networkPerspectiveApi: http://host.docker.internal:5000/
     useLocalHcpVault: false
     hcpVaultUri: "http://np-sync-vault:8200"
 
@@ -73,6 +73,8 @@ vault:
       enabled: false
     extraEnvironmentVars:
       VAULT_ADDR: "http://np-sync-vault:8200"
+    volumes: null
+    volumeMounts: null
 
     # a sidecar that will trigger reload of vault config including tls certificates every 24 hours
     shareProcessNamespace: true    

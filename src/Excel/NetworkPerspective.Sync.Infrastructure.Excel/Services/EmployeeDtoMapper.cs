@@ -114,7 +114,7 @@ public static class EmployeeDtoMapper
         var employeeIdEmailDict = new Dictionary<string, string>();
         foreach (EmployeeDto e in all)
         {
-            if (employeeIdEmailDict.ContainsKey(e.EmployeeId)) continue;
+            if (e.EmployeeId == null || employeeIdEmailDict.ContainsKey(e.EmployeeId)) continue;
             employeeIdEmailDict.Add(e.EmployeeId, e.Email);
         }
 

@@ -100,19 +100,19 @@ vault:
           region     = "us-east-1"
           kms_key_id = "fb77baa6-40a2-4cb8-a47c-64e602122f5b"
         }
-    # volumes:
-    # - name: vault-tls
-    #   secret:
-    #     defaultMode: 0420
-    #     secretName: np-sync-tls-prod
+    volumes:
+    - name: vault-tls
+      secret:
+        defaultMode: 0420
+        secretName: np-sync-tls-prod
     # - name: aws-unseal
     #   secret:
     #     defaultMode: 0420
     #     secretName: np-sync-aws-unseal      
-    # volumeMounts:
-    # - mountPath: "/vault/userconfig/vault-tls"
-    #   name: vault-tls
-    #   readOnly: true
+    volumeMounts:
+    - mountPath: "/vault/userconfig/vault-tls"
+      name: vault-tls
+      readOnly: true
     # - mountPath: "/etc/aws"
     #   name: aws-unseal
     #   readOnly: true
