@@ -27,6 +27,6 @@ local_resource('vault-init', 'pwsh -file ./infra/minikube/init-vault.ps1',
 )
 
 # connectors
-k8s_resource('np-sync-gsuite', port_forwards='8081:8080', labels="connectors")
-k8s_resource('np-sync-slack', port_forwards='8082:8080', labels="connectors")
-k8s_resource('np-sync-excel', port_forwards='8083:8080', labels="connectors")
+k8s_resource('np-sync-gsuite', port_forwards='8081:8080', labels="connectors", trigger_mode=TRIGGER_MODE_MANUAL)
+k8s_resource('np-sync-slack', port_forwards='8082:8080', labels="connectors", trigger_mode=TRIGGER_MODE_MANUAL)
+k8s_resource('np-sync-excel', port_forwards='8083:8080', labels="connectors", trigger_mode=TRIGGER_MODE_MANUAL)
