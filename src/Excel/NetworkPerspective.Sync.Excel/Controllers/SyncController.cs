@@ -1,11 +1,15 @@
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Controllers;
+
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace NetworkPerspective.Sync.Excel.Controllers;
 
@@ -24,6 +28,10 @@ public class SyncController : ApiControllerBase
     }
 
     [HttpPost]
+    [SwaggerResponse(StatusCodes.Status200OK, "Network added", typeof(string))]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request or validation error")]
     public async Task<IActionResult> SyncAsync(SyncRequestDto syncRequest, CancellationToken stoppingToken = default)
     {
         // validate token
@@ -36,7 +44,14 @@ public class SyncController : ApiControllerBase
         syncContext.Set(syncRequest.Employees);
 
         // create sync service & sync data
-        await _syncService.SyncAsync(syncContext, stoppingToken);
+        try
+        {
+            await _syncService.SyncAsync(syncContext, stoppingToken);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
 
         // return success or throw exception
         return Ok();

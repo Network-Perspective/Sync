@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "gsuite.fullname" . }}
+  name: {{ include "excel.fullname" . }}
   labels:
-    {{- include "gsuite.labels" . | nindent 4 }}
+    {{- include "excel.labels" . | nindent 4 }}
 spec:
   strategy:
     type: Recreate
   replicas: 1
   selector:
     matchLabels:
-      {{- include "gsuite.selectorLabels" . | nindent 6 }}
+      {{- include "excel.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -19,15 +19,15 @@ spec:
       {{- end }}
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- end }}      
       labels:
-        {{- include "gsuite.selectorLabels" . | nindent 8 }}
+        {{- include "excel.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "gsuite.serviceAccountName" . }}
+      serviceAccountName: {{ include "excel.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       automountServiceAccountToken: false
@@ -50,13 +50,13 @@ spec:
                 {{- else }}
                   name: {{ template "mssql.fullname" . }}-secret
                 {{- end }}                  
-                  key: sapassword
+                  key: sapassword                  
             - name: NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: ConnectionStrings__Database
-              value: Server=tcp:{{ template "mssql.fullname" . }}.$(NAMESPACE).svc.cluster.local,1433;Initial Catalog=gsuite-db;Persist Security Info=False;User ID=sa;Password=$(MSSQL_PASSWORD);MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;
+              value: Server=tcp:{{ template "mssql.fullname" . }}.$(NAMESPACE).svc.cluster.local,1433;Initial Catalog=excel-db;Persist Security Info=False;User ID=sa;Password=$(MSSQL_PASSWORD);MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;
             {{- end }}
             - name: Infrastructure__NetworkPerspectiveCore__BaseUrl
               value: {{ .Values.global.appSettings.networkPerspectiveApi }}
@@ -65,21 +65,15 @@ spec:
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               value: {{ .Values.global.appSettings.applicationInsightsConnectionString }}
             - name: ASPNETCORE_URLS
-              value: http://+:{{ .Values.service.port }}              
-            {{- if .Values.global.appSettings.useLocalHcpVault }}              
+              value: http://+:{{ .Values.service.port }}
+            {{- if .Values.global.appSettings.useLocalHcpVault }}            
             - name: Infrastructure__HcpVault__BaseUrl
               value: "https://{{ .Values.global.domainValidation.hostedZoneName }}:8200"
-            {{- end }}
+            {{- end }}            
             {{- if .Values.global.appSettings.hcpVaultUri }}
             - name: Infrastructure__HcpVault__BaseUrl
               value: {{ .Values.global.appSettings.hcpVaultUri }}
-            {{- end }}            
-            {{- if .Values.appSettings.secretRotationEnabled }}            
-            - name: Connector__SecretRotation__Enabled
-              value: "true"
-            - name: Connector__SecretRotation__RotateOnStartup
-              value: "true"              
-            {{- end}}
+            {{- end }}
             {{- include "extraEnvironmentVars" .Values | nindent 12 }}
           volumeMounts:
             - name: logs
@@ -140,18 +134,18 @@ spec:
           {{- if .Values.logVolume.existingDataClaim }}
           claimName: {{ .Values.logVolume.existingDataClaim }}
           {{- else }}
-          claimName: {{ template "gsuite.fullname" . }}-logs
+          claimName: {{ template "excel.fullname" . }}-logs
           {{- end -}}
       {{- else }}
         emptyDir: {}
-      {{- end }}           
-      {{- if not (.Values.global.appSettings.useLocalHcpVault) }}
+      {{- end }}      
+      {{- if not (.Values.global.appSettings.useLocalHcpVault) }}     
       - name: rsa-keys
         secret:
           secretName: {{ .Values.global.secrets.rsaKeys }} 
       - name: secrets
         secret:
-          secretName: {{ .Values.secrets.googleKeys }}
+          secretName: {{ .Values.secrets.excelSecrets }}
       {{- end }}
       - name: config-volume
         configMap:
