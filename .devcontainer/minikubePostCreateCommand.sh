@@ -8,9 +8,12 @@ sudo apt update && sudo apt install vault -y
 # install socat
 sudo apt install socat -y  
 
-# install cert-manager
+# install cert-manager & vault repos
 helm repo add jetstack https://charts.jetstack.io
+helm repo add hashicorp https://helm.releases.hashicorp.com
 helm repo update
+
+helm dependency build ./infra/helm-charts/np-sync/
 
 # install tilt
 curl -fsSL https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.sh | bash
