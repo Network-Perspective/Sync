@@ -14,14 +14,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
 
         public static int GetDurationInMinutes(this Event @event)
         {
-            if (@event.Start?.DateTime is null || @event.End?.DateTime is null)
+            if (@event.Start?.DateTimeDateTimeOffset is null || @event.End?.DateTimeDateTimeOffset is null)
                 return 0;
             else
-                return (int)(@event.End.DateTime.Value - @event.Start.DateTime.Value).TotalMinutes;
+                return (int)(@event.End.DateTimeDateTimeOffset.Value - @event.Start.DateTimeDateTimeOffset.Value).TotalMinutes;
         }
 
         public static DateTime GetStart(this Event @event)
-            => @event.Start?.DateTime ?? DateTime.UtcNow;
+            => @event.Start?.DateTimeDateTimeOffset?.DateTime ?? DateTime.UtcNow;
 
         public static IEnumerable<string> GetParticipants(this Event @event)
         {

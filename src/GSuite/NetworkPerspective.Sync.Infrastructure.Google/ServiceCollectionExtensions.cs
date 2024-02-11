@@ -15,6 +15,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             services.Configure<GoogleConfig>(configurationSection);
             services.AddTransient<IAuthTester, AuthTester>();
 
+            services.AddTransient<IThrottlingRetryHandler, ThrottlingRetryHandler>();
+
             services.AddScoped<ICredentialsProvider, CredentialsProvider>();
             services.AddScoped<ICriteria, NonServiceUserCriteria>();
 

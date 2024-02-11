@@ -26,6 +26,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         };
 
         private readonly ISecretRepository _secretRepository;
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
+        private GoogleCredential _credential = null;
 
         public CredentialsProvider(ISecretRepository secretRepository)
         {
@@ -34,11 +36,25 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
         public async Task<GoogleCredential> GetCredentialsAsync(CancellationToken stoppingToken = default)
         {
-            var googleKey = await _secretRepository.GetSecretAsync(GoogleKeys.TokenKey, stoppingToken);
+            await _semaphore.WaitAsync();
 
-            return GoogleCredential
-                .FromJson(googleKey.ToSystemString())
-                .CreateScoped(Scopes);
+            try
+            {
+                if (_credential is null)
+                {
+                    var googleKey = await _secretRepository.GetSecretAsync(GoogleKeys.TokenKey, stoppingToken);
+
+                    _credential = GoogleCredential
+                        .FromJson(googleKey.ToSystemString())
+                        .CreateScoped(Scopes);
+                }
+
+                return _credential;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
     }
 }

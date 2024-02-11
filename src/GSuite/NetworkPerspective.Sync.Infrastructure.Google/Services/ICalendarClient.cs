@@ -22,7 +22,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface ICalendarClient
     {
-        public Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        public Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class CalendarClient : ICalendarClient
@@ -33,16 +33,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         private readonly GoogleConfig _config;
         private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ILogger<CalendarClient> _logger;
-        private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
+        private readonly IThrottlingRetryHandler _retryHandler;
+        private readonly ICredentialsProvider _credentialsProvider;
 
-        public CalendarClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILogger<CalendarClient> logger)
+        public CalendarClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, IThrottlingRetryHandler retryHandler, ICredentialsProvider credentialsProvider, ILogger<CalendarClient> logger)
         {
             _config = config.Value;
             _tasksStatusesCache = tasksStatusesCache;
+            _retryHandler = retryHandler;
+            _credentialsProvider = credentialsProvider;
             _logger = logger;
         }
 
-        public async Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             async Task ReportProgressCallbackAsync(double progressRate)
             {
@@ -51,7 +54,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             }
 
             Task<SingleTaskResult> SingleTaskAsync(string userEmail)
-                => GetSingleUserInteractionsAsync(context, stream, userEmail, credentials, interactionFactory, stoppingToken);
+                => GetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on callendar for '{timerange}' for {count} users...", context.TimeRange, usersEmails.Count());
             var result = await ParallelSyncTask<string>.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
@@ -60,7 +63,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             return result;
         }
 
-        private async Task<SingleTaskResult> GetSingleUserInteractionsAsync(SyncContext context, IInteractionsStream stream, string userEmail, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken)
+        private async Task<SingleTaskResult> GetSingleUserInteractionsAsync(SyncContext context, IInteractionsStream stream, string userEmail, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
             try
             {
@@ -69,7 +72,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
                 int interactionsCount = 0;
 
-                var userCredentials = credentials
+                var googleCredentials = await _credentialsProvider.GetCredentialsAsync(stoppingToken);
+
+                var userCredentials = googleCredentials
                     .CreateWithUser(userEmail)
                     .UnderlyingCredential as ServiceAccountCredential;
 
@@ -80,8 +85,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 });
 
                 var request = calendarService.Events.List(userEmail);
-                request.TimeMin = context.TimeRange.Start;
-                request.TimeMax = context.TimeRange.End;
+                request.TimeMinDateTimeOffset = context.TimeRange.Start;
+                request.TimeMaxDateTimeOffset = context.TimeRange.End;
                 request.SingleEvents = true;
 
                 var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);

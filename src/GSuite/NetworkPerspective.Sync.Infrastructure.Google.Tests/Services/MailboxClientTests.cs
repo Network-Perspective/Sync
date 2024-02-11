@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -49,8 +50,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             };
 
             var clock = new Clock();
+            var retryHandler = new ThrottlingRetryHandler();
 
-            var mailboxClient = new MailboxClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLoggerFactory.Instance, clock);
+            var mailboxClient = new MailboxClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), _googleClientFixture.CredentialProvider, retryHandler, NullLoggerFactory.Instance, clock);
 
             var employees = new List<Employee>()
                 .Add(userEmail);
@@ -61,7 +63,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
             // Act
-            await mailboxClient.SyncInteractionsAsync(syncContext, stream, new[] { userEmail }, _googleClientFixture.Credential, interactionFactory);
+            await mailboxClient.SyncInteractionsAsync(syncContext, stream, new[] { userEmail }, interactionFactory);
 
             // Assert
 

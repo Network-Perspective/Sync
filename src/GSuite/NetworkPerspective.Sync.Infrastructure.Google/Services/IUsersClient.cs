@@ -21,7 +21,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface IUsersClient
     {
-        Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, GoogleCredential credentials, CancellationToken stoppingToken = default);
+        Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, CancellationToken stoppingToken = default);
     }
 
     internal sealed class UsersClient : IUsersClient
@@ -32,24 +32,27 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         private readonly GoogleConfig _config;
         private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly IEnumerable<ICriteria> _criterias;
+        private readonly IThrottlingRetryHandler _retryHandler;
+        private readonly ICredentialsProvider _credentialsProvider;
         private readonly ILogger<UsersClient> _logger;
-        private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
 
-        public UsersClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, IEnumerable<ICriteria> criterias, ILogger<UsersClient> logger)
+        public UsersClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, IEnumerable<ICriteria> criterias, IThrottlingRetryHandler retryHandler, ICredentialsProvider credentialsProvider, ILogger<UsersClient> logger)
         {
             _config = config.Value;
             _tasksStatusesCache = tasksStatusesCache;
             _criterias = criterias;
+            _retryHandler = retryHandler;
+            _credentialsProvider = credentialsProvider;
             _logger = logger;
         }
 
-        public async Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, GoogleCredential credentials, CancellationToken stoppingToken = default)
+        public async Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, CancellationToken stoppingToken = default)
         {
             _logger.LogDebug("Fetching users for network '{networkId}'...", network.NetworkId);
 
             await _tasksStatusesCache.SetStatusAsync(network.NetworkId, new SingleTaskStatus(TaskCaption, TaskDescription, null), stoppingToken);
 
-            var users = await GetAllGoogleUsers(network, credentials, stoppingToken);
+            var users = await GetAllGoogleUsers(network, stoppingToken);
             var filteredUsers = FilterUsers(networkConfig.EmailFilter, users);
 
             if (!filteredUsers.Any())
@@ -60,9 +63,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             return filteredUsers;
         }
 
-        private async Task<IList<User>> GetAllGoogleUsers(Network<GoogleNetworkProperties> network, GoogleCredential credentials, CancellationToken stoppingToken)
+        private async Task<IList<User>> GetAllGoogleUsers(Network<GoogleNetworkProperties> network, CancellationToken stoppingToken)
         {
-            var userCredentials = credentials
+            var googleCredentials = await _credentialsProvider.GetCredentialsAsync(stoppingToken);
+
+            var userCredentials = googleCredentials
                 .CreateWithUser(network.Properties.AdminEmail)
                 .UnderlyingCredential as ServiceAccountCredential;
 

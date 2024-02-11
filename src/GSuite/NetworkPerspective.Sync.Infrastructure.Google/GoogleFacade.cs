@@ -16,7 +16,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
     internal sealed class GoogleFacade : IDataSource
     {
         private readonly INetworkService _networkService;
-        private readonly ICredentialsProvider _credentialsProvider;
         private readonly IMailboxClient _mailboxClient;
         private readonly ICalendarClient _calendarClient;
         private readonly IUsersClient _usersClient;
@@ -26,7 +25,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         private readonly ILogger<GoogleFacade> _logger;
 
         public GoogleFacade(INetworkService networkService,
-                            ICredentialsProvider credentialsProvider,
                             IMailboxClient mailboxClient,
                             ICalendarClient calendarClient,
                             IUsersClient usersClient,
@@ -35,7 +33,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
                             ILoggerFactory loggerFactory)
         {
             _networkService = networkService;
-            _credentialsProvider = credentialsProvider;
             _mailboxClient = mailboxClient;
             _calendarClient = calendarClient;
             _usersClient = usersClient;
@@ -50,9 +47,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);
 
             var network = await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
-            var credentials = await context.EnsureSetAsync(() => _credentialsProvider.GetCredentialsAsync(stoppingToken));
 
-            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
+            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, stoppingToken);
 
             var mapper = new EmployeesMapper(
                 new CompanyStructureService(),
@@ -69,8 +65,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
                 .GetAllInternal()
                 .Select(x => x.Id.PrimaryId);
 
-            var resultEmails = await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, credentials, emailInteractionFactory, stoppingToken);
-            var resultCalendar = await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, credentials, meetingInteractionFactory, stoppingToken);
+            var resultEmails = await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, emailInteractionFactory, stoppingToken);
+            var resultCalendar = await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, meetingInteractionFactory, stoppingToken);
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
 
@@ -82,12 +78,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             _logger.LogInformation("Getting employees for network '{networkId}'", context.NetworkId);
 
             var network = await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
-            var credentials = await context.EnsureSetAsync(() => _credentialsProvider.GetCredentialsAsync(stoppingToken));
 
-            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
+            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, stoppingToken);
 
-            var timezonesPropsSource =
-                await _userCalendarTimeZoneReader.FetchTimeZoneInformation(users, credentials, stoppingToken);
+            var timezonesPropsSource = await _userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
 
             var mapper = new EmployeesMapper(
                 new CompanyStructureService(),
@@ -107,14 +101,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var network =
                 await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
 
-            var credentials =
-                await context.EnsureSetAsync(() => _credentialsProvider.GetCredentialsAsync(stoppingToken));
+            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, stoppingToken);
 
-            var users =
-                await _usersClient.GetUsersAsync(network, context.NetworkConfig, credentials, stoppingToken);
-
-            var timezonesPropsSource =
-                await _userCalendarTimeZoneReader.FetchTimeZoneInformation(users, credentials, stoppingToken);
+            var timezonesPropsSource = await _userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
 
             var mapper = new HashedEmployeesMapper(
                 new CompanyStructureService(),

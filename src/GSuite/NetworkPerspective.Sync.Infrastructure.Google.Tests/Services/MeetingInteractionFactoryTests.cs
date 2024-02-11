@@ -44,8 +44,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
                     new EventAttendee { Email = externalUserEmail }
                 },
                 Recurrence = null,
-                Start = new EventDateTime { DateTime = new DateTime(2020, 01, 01, 10, 00, 0) },
-                End = new EventDateTime { DateTime = new DateTime(2020, 01, 01, 11, 30, 0) }
+                Start = new EventDateTime { DateTimeDateTimeOffset = new DateTime(2020, 01, 01, 10, 00, 0) },
+                End = new EventDateTime { DateTimeDateTimeOffset = new DateTime(2020, 01, 01, 11, 30, 0) }
             };
 
             var employees = new List<Employee> { user3 }
@@ -83,8 +83,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             {
                 Attendees = attendees.Union(emails.Select(x => new EventAttendee { Email = x })).ToArray(),
                 Recurrence = null,
-                Start = new EventDateTime { DateTime = new DateTime(2020, 01, 01, 10, 00, 0) },
-                End = new EventDateTime { DateTime = new DateTime(2020, 01, 01, 11, 30, 0) }
+                Start = new EventDateTime { DateTimeDateTimeOffset = new DateTime(2020, 01, 01, 10, 00, 0) },
+                End = new EventDateTime { DateTimeDateTimeOffset = new DateTime(2020, 01, 01, 11, 30, 0) }
             };
 
             var employees = new List<Employee>();
