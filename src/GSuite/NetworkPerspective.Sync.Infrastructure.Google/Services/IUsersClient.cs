@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 using Google.Apis.Admin.Directory.directory_v1;
 using Google.Apis.Admin.Directory.directory_v1.Data;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 
 using Microsoft.Extensions.Logging;
@@ -52,7 +51,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
             await _tasksStatusesCache.SetStatusAsync(network.NetworkId, new SingleTaskStatus(TaskCaption, TaskDescription, null), stoppingToken);
 
-            var users = await GetAllGoogleUsers(network, stoppingToken);
+            var retryPolicy = RetryPolicy.CreateSecretRotationRetryPolicy(_logger);
+            var users = await retryPolicy.ExecuteAsync(() => GetAllGoogleUsers(network, stoppingToken));
+
             var filteredUsers = FilterUsers(networkConfig.EmailFilter, users);
 
             if (!filteredUsers.Any())
@@ -65,15 +66,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
         private async Task<IList<User>> GetAllGoogleUsers(Network<GoogleNetworkProperties> network, CancellationToken stoppingToken)
         {
-            var googleCredentials = await _credentialsProvider.GetCredentialsAsync(stoppingToken);
-
-            var userCredentials = googleCredentials
-                .CreateWithUser(network.Properties.AdminEmail)
-                .UnderlyingCredential as ServiceAccountCredential;
+            var credentials = await _credentialsProvider.GetForUserAsync(network.Properties.AdminEmail, stoppingToken);
 
             var service = new DirectoryService(new BaseClientService.Initializer
             {
-                HttpClientInitializer = userCredentials,
+                HttpClientInitializer = credentials,
                 ApplicationName = _config.ApplicationName,
             });
 

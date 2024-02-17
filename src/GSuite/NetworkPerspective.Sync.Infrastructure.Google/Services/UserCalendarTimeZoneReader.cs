@@ -44,7 +44,8 @@ public class UserCalendarTimeZoneReader : IUserCalendarTimeZoneReader
             if (stoppingToken.IsCancellationRequested) break;
             try
             {
-                var timezone = await ReadUserTimeZoneAsync(user.PrimaryEmail, stoppingToken);
+                var retryPolicy = RetryPolicy.CreateSecretRotationRetryPolicy(_logger);
+                var timezone = await retryPolicy.ExecuteAsync(() => ReadUserTimeZoneAsync(user.PrimaryEmail, stoppingToken));
                 if (timezone != null)
                     result.AddPropForUser(user.PrimaryEmail, "Timezone", timezone);
             }
@@ -64,15 +65,11 @@ public class UserCalendarTimeZoneReader : IUserCalendarTimeZoneReader
 
     private async Task<string> ReadUserTimeZoneAsync(string userEmail, CancellationToken stoppingToken)
     {
-        var googleCredentials = await _credentialsProvider.GetCredentialsAsync(stoppingToken);
-
-        var userCredentials = googleCredentials
-            .CreateWithUser(userEmail)
-            .UnderlyingCredential as ServiceAccountCredential;
+        var credentials = await _credentialsProvider.GetForUserAsync(userEmail, stoppingToken);
 
         var calendarService = new CalendarService(new BaseClientService.Initializer
         {
-            HttpClientInitializer = userCredentials,
+            HttpClientInitializer = credentials,
             ApplicationName = _config.ApplicationName
         });
 

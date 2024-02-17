@@ -37,11 +37,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 var network = await _networkService.GetAsync<GoogleNetworkProperties>(networkId, stoppingToken);
 
                 var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId, stoppingToken);
-                var credentials = await new CredentialsProvider(secretRepository).GetCredentialsAsync(stoppingToken);
-
-                var userCredentials = credentials
-                    .CreateWithUser(network.Properties.AdminEmail)
-                    .UnderlyingCredential as ServiceAccountCredential;
+                var userCredentials = await new CredentialsProvider(secretRepository)
+                    .GetForUserAsync(network.Properties.AdminEmail, stoppingToken);
 
                 var service = new DirectoryService(new BaseClientService.Initializer
                 {

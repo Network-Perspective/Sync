@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Google;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Gmail.v1;
 using Google.Apis.Services;
 
@@ -62,7 +61,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             }
 
             Task<SingleTaskResult> SingleTaskAsync(string userEmail)
-                => GetSingleUserInteractionsAsync(context, stream, userEmail, maxMessagesCountPerUser, interactionFactory, stoppingToken);
+            {
+                var retryPolicy = RetryPolicy.CreateSecretRotationRetryPolicy(_logger);
+                return retryPolicy.ExecuteAsync(() => GetSingleUserInteractionsAsync(context, stream, userEmail, maxMessagesCountPerUser, interactionFactory, stoppingToken));
+            }
 
             _logger.LogInformation("Evaluating interactions based on mailbox for timerange {timerange} for {count} users...", context.TimeRange, usersEmails.Count());
             var result = await ParallelSyncTask<string>.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
@@ -126,15 +128,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
         private async Task<GmailService> InitializeGmailServiceAsync(string userEmail, CancellationToken stoppingToken)
         {
-            var googleCredentials = await _credentialsProvider.GetCredentialsAsync(stoppingToken);
-
-            var userCredentials = googleCredentials
-                .CreateWithUser(userEmail)
-                .UnderlyingCredential as ServiceAccountCredential;
+            var credentials = await _credentialsProvider.GetForUserAsync(userEmail, stoppingToken);
 
             return new GmailService(new BaseClientService.Initializer
             {
-                HttpClientInitializer = userCredentials,
+                HttpClientInitializer = credentials,
                 ApplicationName = _config.ApplicationName
             });
         }

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Google.Apis.Admin.Directory.directory_v1;
@@ -13,7 +14,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     public interface ICredentialsProvider
     {
-        Task<GoogleCredential> GetCredentialsAsync(CancellationToken stoppingToken = default);
+        Task<ServiceAccountCredential> GetForUserAsync(string email, CancellationToken stoppingToken = default);
     }
 
     internal sealed class CredentialsProvider : ICredentialsProvider
@@ -34,9 +35,41 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _secretRepository = secretRepository;
         }
 
-        public async Task<GoogleCredential> GetCredentialsAsync(CancellationToken stoppingToken = default)
+        public async Task<ServiceAccountCredential> GetForUserAsync(string email, CancellationToken stoppingToken = default)
         {
-            await _semaphore.WaitAsync();
+            var googleCredentials = await GetCredentialsAsync(stoppingToken);
+
+            var userCredentials = googleCredentials
+                .CreateWithUser(email)
+                .UnderlyingCredential as ServiceAccountCredential;
+
+            var handler = new UnsuccessfulResponseHandler(ClearCachedCredentialsAsync);
+
+            userCredentials
+                .HttpClient
+                .MessageHandler
+                .AddUnsuccessfulResponseHandler(handler);
+
+            return userCredentials;
+        }
+
+        private async Task ClearCachedCredentialsAsync()
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            await _semaphore.WaitAsync(cts.Token);
+            try
+            {
+                _credential = null;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        private async Task<GoogleCredential> GetCredentialsAsync(CancellationToken stoppingToken = default)
+        {
+            await _semaphore.WaitAsync(stoppingToken);
 
             try
             {

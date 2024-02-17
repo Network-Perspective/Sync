@@ -26,7 +26,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             return await policy.ExecuteAsync(func, stoppingToken);
         }
 
-        private AsyncRetryPolicy CreateRetryPolicy(ILogger logger)
+        private static AsyncRetryPolicy CreateRetryPolicy(ILogger logger)
         {
             void OnThrottingException(Exception exception, TimeSpan timeSpan)
             {

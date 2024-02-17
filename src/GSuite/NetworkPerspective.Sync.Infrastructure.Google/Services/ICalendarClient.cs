@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Google;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
 
@@ -54,7 +53,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             }
 
             Task<SingleTaskResult> SingleTaskAsync(string userEmail)
-                => GetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken);
+            {
+                var retryPolicy = RetryPolicy.CreateSecretRotationRetryPolicy(_logger);
+                return retryPolicy.ExecuteAsync(() => GetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken));
+            }
 
             _logger.LogInformation("Evaluating interactions based on callendar for '{timerange}' for {count} users...", context.TimeRange, usersEmails.Count());
             var result = await ParallelSyncTask<string>.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
@@ -72,15 +74,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
                 int interactionsCount = 0;
 
-                var googleCredentials = await _credentialsProvider.GetCredentialsAsync(stoppingToken);
-
-                var userCredentials = googleCredentials
-                    .CreateWithUser(userEmail)
-                    .UnderlyingCredential as ServiceAccountCredential;
+                var credentials = await _credentialsProvider.GetForUserAsync(userEmail, stoppingToken);
 
                 var calendarService = new CalendarService(new BaseClientService.Initializer
                 {
-                    HttpClientInitializer = userCredentials,
+                    HttpClientInitializer = credentials,
                     ApplicationName = _config.ApplicationName
                 });
 
