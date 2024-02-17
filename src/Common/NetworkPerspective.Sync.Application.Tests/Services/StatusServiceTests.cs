@@ -52,7 +52,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 .ReturnsAsync(true);
 
             _authTesterMock
-                .Setup(x => x.IsAuthorizedAsync(networkId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.IsAuthorizedAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             _schedulerMock
