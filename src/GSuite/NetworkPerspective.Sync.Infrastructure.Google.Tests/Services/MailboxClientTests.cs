@@ -50,9 +50,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             };
 
             var clock = new Clock();
-            var retryHandler = new ThrottlingRetryHandler();
+            var retryPolicyProvider = new RetryPolicyProvider(NullLogger<RetryPolicyProvider>.Instance);
 
-            var mailboxClient = new MailboxClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), _googleClientFixture.CredentialProvider, retryHandler, NullLoggerFactory.Instance, clock);
+            var mailboxClient = new MailboxClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), _googleClientFixture.CredentialProvider, retryPolicyProvider, NullLoggerFactory.Instance, clock);
 
             var employees = new List<Employee>()
                 .Add(userEmail);

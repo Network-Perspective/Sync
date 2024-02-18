@@ -39,7 +39,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
                 ApplicationName = "gmail_app",
             };
 
-            var client = new UsersClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), Array.Empty<ICriteria>(), new ThrottlingRetryHandler(), _googleClientFixture.CredentialProvider, NullLogger<UsersClient>.Instance);
+            var retryPolicyProvider = new RetryPolicyProvider(NullLogger<RetryPolicyProvider>.Instance);
+            var client = new UsersClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), Array.Empty<ICriteria>(), retryPolicyProvider, _googleClientFixture.CredentialProvider, NullLogger<UsersClient>.Instance);
 
             // Act
             var result = await client.GetUsersAsync(network, NetworkConfig.Empty);

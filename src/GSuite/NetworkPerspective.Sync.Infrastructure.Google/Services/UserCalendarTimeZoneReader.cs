@@ -22,15 +22,17 @@ public interface IUserCalendarTimeZoneReader
     Task<IEmployeePropsSource> FetchTimeZoneInformation(IEnumerable<User> users, CancellationToken stoppingToken = default);
 }
 
-public class UserCalendarTimeZoneReader : IUserCalendarTimeZoneReader
+internal class UserCalendarTimeZoneReader : IUserCalendarTimeZoneReader
 {
     private readonly ICredentialsProvider _credentialsProvider;
+    private readonly IRetryPolicyProvider _retryPolicyProvider;
     private readonly ILogger<UserCalendarTimeZoneReader> _logger;
     private readonly GoogleConfig _config;
 
-    public UserCalendarTimeZoneReader(IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, ILogger<UserCalendarTimeZoneReader> logger)
+    public UserCalendarTimeZoneReader(IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, IRetryPolicyProvider retryPolicyProvider, ILogger<UserCalendarTimeZoneReader> logger)
     {
         _credentialsProvider = credentialsProvider;
+        _retryPolicyProvider = retryPolicyProvider;
         _logger = logger;
         _config = config.Value;
     }
@@ -44,7 +46,7 @@ public class UserCalendarTimeZoneReader : IUserCalendarTimeZoneReader
             if (stoppingToken.IsCancellationRequested) break;
             try
             {
-                var retryPolicy = RetryPolicy.CreateSecretRotationRetryPolicy(_logger);
+                var retryPolicy = _retryPolicyProvider.GetSecretRotationRetryPolicy();
                 var timezone = await retryPolicy.ExecuteAsync(() => ReadUserTimeZoneAsync(user.PrimaryEmail, stoppingToken));
                 if (timezone != null)
                     result.AddPropForUser(user.PrimaryEmail, "Timezone", timezone);

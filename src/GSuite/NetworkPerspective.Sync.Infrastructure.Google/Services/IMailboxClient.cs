@@ -33,19 +33,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
         private readonly GoogleConfig _config;
         private readonly ILogger<MailboxClient> _logger;
-        private readonly IThrottlingRetryHandler _retryHandler;
         private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ICredentialsProvider _credentialsProvider;
+        private readonly IRetryPolicyProvider _retryPolicyProvider;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IClock _clock;
 
-        public MailboxClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, IThrottlingRetryHandler retryHandler, ILoggerFactory loggerFactory, IClock clock)
+        public MailboxClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, IRetryPolicyProvider retryPolicyProvider, ILoggerFactory loggerFactory, IClock clock)
         {
             _config = config.Value;
             _logger = loggerFactory.CreateLogger<MailboxClient>();
             _tasksStatusesCache = tasksStatusesCache;
             _credentialsProvider = credentialsProvider;
-            _retryHandler = retryHandler;
+            _retryPolicyProvider = retryPolicyProvider;
             _loggerFactory = loggerFactory;
             _clock = clock;
         }
@@ -62,7 +62,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
             Task<SingleTaskResult> SingleTaskAsync(string userEmail)
             {
-                var retryPolicy = RetryPolicy.CreateSecretRotationRetryPolicy(_logger);
+                var retryPolicy = _retryPolicyProvider.GetSecretRotationRetryPolicy();
                 return retryPolicy.ExecuteAsync(() => GetSingleUserInteractionsAsync(context, stream, userEmail, maxMessagesCountPerUser, interactionFactory, stoppingToken));
             }
 
@@ -81,7 +81,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 _logger.LogDebug("Evaluating interactions based on mailbox for user ***...");
 
                 using var gmailService = await InitializeGmailServiceAsync(userEmail, stoppingToken);
-                var mailboxTraverser = new MailboxTraverser(userEmail, maxMessagesCount, gmailService, _retryHandler, _loggerFactory.CreateLogger<MailboxTraverser>());
+                var mailboxTraverser = new MailboxTraverser(userEmail, maxMessagesCount, gmailService, _retryPolicyProvider, _loggerFactory.CreateLogger<MailboxTraverser>());
                 var message = await mailboxTraverser.GetNextMessageAsync(stoppingToken);
 
                 var periodStart = context.TimeRange.Start.AddMinutes(-_config.SyncOverlapInMinutes);

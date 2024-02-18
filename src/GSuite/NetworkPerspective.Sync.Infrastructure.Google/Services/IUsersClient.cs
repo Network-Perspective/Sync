@@ -31,16 +31,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         private readonly GoogleConfig _config;
         private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly IEnumerable<ICriteria> _criterias;
-        private readonly IThrottlingRetryHandler _retryHandler;
+        private readonly IRetryPolicyProvider _retryPolicyProvider;
         private readonly ICredentialsProvider _credentialsProvider;
         private readonly ILogger<UsersClient> _logger;
 
-        public UsersClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, IEnumerable<ICriteria> criterias, IThrottlingRetryHandler retryHandler, ICredentialsProvider credentialsProvider, ILogger<UsersClient> logger)
+        public UsersClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, IEnumerable<ICriteria> criterias, IRetryPolicyProvider retryPolicyProvider, ICredentialsProvider credentialsProvider, ILogger<UsersClient> logger)
         {
             _config = config.Value;
             _tasksStatusesCache = tasksStatusesCache;
             _criterias = criterias;
-            _retryHandler = retryHandler;
+            _retryPolicyProvider = retryPolicyProvider;
             _credentialsProvider = credentialsProvider;
             _logger = logger;
         }
@@ -51,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
             await _tasksStatusesCache.SetStatusAsync(network.NetworkId, new SingleTaskStatus(TaskCaption, TaskDescription, null), stoppingToken);
 
-            var retryPolicy = RetryPolicy.CreateSecretRotationRetryPolicy(_logger);
+            var retryPolicy = _retryPolicyProvider.GetSecretRotationRetryPolicy();
             var users = await retryPolicy.ExecuteAsync(() => GetAllGoogleUsers(network, stoppingToken));
 
             var filteredUsers = FilterUsers(networkConfig.EmailFilter, users);
@@ -84,7 +84,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 request.OrderBy = UsersResource.ListRequest.OrderByEnum.Email;
                 request.PageToken = nextPageToken;
                 request.Projection = UsersResource.ListRequest.ProjectionEnum.Full; // we do NOT know upfront what kind of custom section is set, so we cannot use ProjectionEnum.Custom
-                var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);
+                var response = await _retryPolicyProvider.GetThrottlingRetryPolicy().ExecuteAsync(request.ExecuteAsync, stoppingToken);
 
                 if (response.UsersValue != null)
                     result.AddRange(response.UsersValue);
