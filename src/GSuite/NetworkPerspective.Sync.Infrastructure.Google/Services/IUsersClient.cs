@@ -84,7 +84,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 request.OrderBy = UsersResource.ListRequest.OrderByEnum.Email;
                 request.PageToken = nextPageToken;
                 request.Projection = UsersResource.ListRequest.ProjectionEnum.Full; // we do NOT know upfront what kind of custom section is set, so we cannot use ProjectionEnum.Custom
-                var response = await _retryPolicyProvider.GetThrottlingRetryPolicy().ExecuteAsync(request.ExecuteAsync, stoppingToken);
+                var response = await _retryPolicyProvider
+                    .GetThrottlingRetryPolicy()
+                    .ExecuteAsync(request.ExecuteAsync, stoppingToken);
 
                 if (response.UsersValue != null)
                     result.AddRange(response.UsersValue);
