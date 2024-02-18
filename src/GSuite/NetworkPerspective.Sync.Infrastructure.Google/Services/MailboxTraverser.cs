@@ -27,19 +27,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         private readonly string _email;
         private readonly int _maxMessagesCount;
         private readonly GmailService _service;
-        private readonly IThrottlingRetryHandler _retryHandler;
+        private readonly IRetryPolicyProvider _retryPolicyProvider;
         private readonly ILogger<MailboxTraverser> _logger;
 
         private readonly List<string> _currentPageMessageIds = new List<string>();
         private string _nextPageToken = string.Empty;
 
 
-        public MailboxTraverser(string email, int maxMessagesCount, GmailService service, IThrottlingRetryHandler retryHandler, ILogger<MailboxTraverser> logger)
+        public MailboxTraverser(string email, int maxMessagesCount, GmailService service, IRetryPolicyProvider retryPolicyProvider, ILogger<MailboxTraverser> logger)
         {
             _email = email;
             _maxMessagesCount = maxMessagesCount;
             _service = service;
-            _retryHandler = retryHandler;
+            _retryPolicyProvider = retryPolicyProvider;
             _logger = logger;
         }
 
@@ -68,7 +68,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             messagesListRequest.MaxResults = MaxResults;
             messagesListRequest.PageToken = _nextPageToken;
 
-            var messagesListResponse = await _retryHandler.ExecuteAsync(messagesListRequest.ExecuteAsync, _logger, stoppingToken);
+            var messagesListResponse = await _retryPolicyProvider
+                .GetThrottlingRetryPolicy()
+                .ExecuteAsync(messagesListRequest.ExecuteAsync, stoppingToken);
 
             _currentPageMessageIds.AddRange(messagesListResponse.Messages?.Select(x => x.Id) ?? Array.Empty<string>());
             _nextPageToken = messagesListResponse.NextPageToken;
@@ -95,7 +97,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             singleMessageRequest.Format = FormatEnum.Metadata;
             singleMessageRequest.MetadataHeaders = new Repeatable<string>(new[] { "from", "to", "cc", "bcc" });
 
-            return await _retryHandler.ExecuteAsync(singleMessageRequest.ExecuteAsync, _logger, stoppingToken);
+            return await _retryPolicyProvider
+                .GetThrottlingRetryPolicy()
+                .ExecuteAsync(singleMessageRequest.ExecuteAsync, stoppingToken);
         }
     }
 }

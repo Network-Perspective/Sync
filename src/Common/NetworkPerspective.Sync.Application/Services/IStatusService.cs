@@ -49,7 +49,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             _logger.LogDebug("Network '{networkId}' authorization status to Core app is '{status}'", networkId, isAuthorizedToCoreApp);
 
-            var isAuthorizedToDataSource = await _authTester.IsAuthorizedAsync(networkId, stoppingToken);
+            var isAuthorizedToDataSource = await _authTester.IsAuthorizedAsync(stoppingToken);
             var isRunning = await _scheduler.IsRunningAsync(networkId, stoppingToken);
 
             _logger.LogDebug("Network '{networkId}' authorization status to data source is '{status}'", networkId, isAuthorizedToDataSource);

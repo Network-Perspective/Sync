@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Google;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
 
@@ -22,7 +21,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface ICalendarClient
     {
-        public Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
+        public Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
     }
 
     internal sealed class CalendarClient : ICalendarClient
@@ -32,17 +31,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
         private readonly GoogleConfig _config;
         private readonly ITasksStatusesCache _tasksStatusesCache;
+        private readonly IRetryPolicyProvider _retryPolicyProvider;
         private readonly ILogger<CalendarClient> _logger;
-        private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
+        private readonly ICredentialsProvider _credentialsProvider;
 
-        public CalendarClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ILogger<CalendarClient> logger)
+        public CalendarClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, IRetryPolicyProvider retryPolicyProvider, ICredentialsProvider credentialsProvider, ILogger<CalendarClient> logger)
         {
             _config = config.Value;
             _tasksStatusesCache = tasksStatusesCache;
+            _retryPolicyProvider = retryPolicyProvider;
+            _credentialsProvider = credentialsProvider;
             _logger = logger;
         }
 
-        public async Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
+        public async Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken = default)
         {
             async Task ReportProgressCallbackAsync(double progressRate)
             {
@@ -51,7 +53,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             }
 
             Task<SingleTaskResult> SingleTaskAsync(string userEmail)
-                => GetSingleUserInteractionsAsync(context, stream, userEmail, credentials, interactionFactory, stoppingToken);
+            {
+                var retryPolicy = _retryPolicyProvider.GetSecretRotationRetryPolicy();
+                return retryPolicy.ExecuteAsync(() => GetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken));
+            }
 
             _logger.LogInformation("Evaluating interactions based on callendar for '{timerange}' for {count} users...", context.TimeRange, usersEmails.Count());
             var result = await ParallelSyncTask<string>.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
@@ -60,7 +65,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             return result;
         }
 
-        private async Task<SingleTaskResult> GetSingleUserInteractionsAsync(SyncContext context, IInteractionsStream stream, string userEmail, GoogleCredential credentials, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken)
+        private async Task<SingleTaskResult> GetSingleUserInteractionsAsync(SyncContext context, IInteractionsStream stream, string userEmail, MeetingInteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
             try
             {
@@ -69,22 +74,22 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
                 int interactionsCount = 0;
 
-                var userCredentials = credentials
-                    .CreateWithUser(userEmail)
-                    .UnderlyingCredential as ServiceAccountCredential;
+                var credentials = await _credentialsProvider.GetForUserAsync(userEmail, stoppingToken);
 
                 var calendarService = new CalendarService(new BaseClientService.Initializer
                 {
-                    HttpClientInitializer = userCredentials,
+                    HttpClientInitializer = credentials,
                     ApplicationName = _config.ApplicationName
                 });
 
                 var request = calendarService.Events.List(userEmail);
-                request.TimeMin = context.TimeRange.Start;
-                request.TimeMax = context.TimeRange.End;
+                request.TimeMinDateTimeOffset = context.TimeRange.Start;
+                request.TimeMaxDateTimeOffset = context.TimeRange.End;
                 request.SingleEvents = true;
 
-                var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);
+                var response = await _retryPolicyProvider
+                    .GetThrottlingRetryPolicy()
+                    .ExecuteAsync(request.ExecuteAsync, stoppingToken);
 
                 _logger.LogDebug("Found '{count}' events in callendar for user '{email}' for period {timeRange}", response.Items.Count, "***", context.TimeRange);
                 _logger.LogTrace("Found '{count}' events in callendar for user '{email}' for period {timeRange}", response.Items.Count, userEmail, context.TimeRange);
@@ -118,7 +123,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             {
                 var request = calendarService.Events.Get(userEmail, recurrenceEventId);
 
-                var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);
+                var response = await _retryPolicyProvider
+                    .GetThrottlingRetryPolicy()
+                    .ExecuteAsync(request.ExecuteAsync, stoppingToken);
                 return response.GetRecurrence();
 
             }

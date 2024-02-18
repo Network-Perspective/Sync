@@ -26,7 +26,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
         }
 
         public static DateTime? GetAccountCreationDate(this User user)
-            => user.CreationTime;
+            => user.CreationTimeDateTimeOffset?.UtcDateTime;
 
         public static ISet<string> GetOrganizationGroupsIds(this User user)
         {

@@ -18,7 +18,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Excel
 
             // dummy scheduler and auth tester
             services.AddTransient<ISyncScheduler, DummySyncScheduler>();
-            services.AddTransient<IAuthTester, DummyAuthTester>();
+            services.AddScoped<IAuthTester, DummyAuthTester>();
 
             // add constraints configuration
             services.Configure<ExcelSyncConstraints>(config.GetSection(SyncConstraintsConfigSection));

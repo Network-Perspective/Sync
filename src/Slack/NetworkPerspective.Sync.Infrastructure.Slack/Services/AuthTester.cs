@@ -12,19 +12,22 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
     internal class AuthTester : IAuthTester
     {
         private readonly INetworkService _networkService;
+        private readonly INetworkIdProvider _networkIdProvider;
         private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
         private readonly ILogger<AuthTester> _logger;
 
-        public AuthTester(INetworkService networkService, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<AuthTester> logger)
+        public AuthTester(INetworkService networkService, INetworkIdProvider networkIdProvider, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<AuthTester> logger)
         {
             _networkService = networkService;
+            _networkIdProvider = networkIdProvider;
             _slackClientFacadeFactory = slackClientFacadeFactory;
             _logger = logger;
         }
 
 
-        public async Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
         {
+            var networkId = _networkIdProvider.Get();
             var network = await _networkService.GetAsync<SlackNetworkProperties>(networkId, stoppingToken);
 
             if (network.Properties.UsesAdminPrivileges)

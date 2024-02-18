@@ -5,9 +5,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Google.Apis.Admin.Directory.directory_v1" Version="1.60.0.3084" />
-        <PackageReference Include="Google.Apis.Calendar.v3" Version="1.60.0.3074" />
-        <PackageReference Include="Google.Apis.Gmail.v1" Version="1.60.0.3084" />
+        <PackageReference Include="Google.Apis.Admin.Directory.directory_v1" Version="1.66.0.3323" />
+        <PackageReference Include="Google.Apis.Calendar.v3" Version="1.66.0.3297" />
+        <PackageReference Include="Google.Apis.Gmail.v1" Version="1.66.0.3287" />
         <PackageReference Include="Google.Cloud.Iam.Admin.V1" Version="2.1.0" />
         <PackageReference Include="Google.Cloud.Iam.V1" Version="3.0.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />

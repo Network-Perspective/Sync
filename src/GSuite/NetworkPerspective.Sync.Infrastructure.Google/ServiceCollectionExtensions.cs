@@ -13,7 +13,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         public static IServiceCollection AddGoogleDataSource(this IServiceCollection services, IConfigurationSection configurationSection)
         {
             services.Configure<GoogleConfig>(configurationSection);
-            services.AddTransient<IAuthTester, AuthTester>();
+            services.AddScoped<IAuthTester, AuthTester>();
+
+            services.AddTransient<IRetryPolicyProvider, RetryPolicyProvider>();
 
             services.AddScoped<ICredentialsProvider, CredentialsProvider>();
             services.AddScoped<ICriteria, NonServiceUserCriteria>();

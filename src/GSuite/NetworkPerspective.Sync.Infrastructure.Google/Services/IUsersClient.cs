@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 using Google.Apis.Admin.Directory.directory_v1;
 using Google.Apis.Admin.Directory.directory_v1.Data;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 
 using Microsoft.Extensions.Logging;
@@ -21,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface IUsersClient
     {
-        Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, GoogleCredential credentials, CancellationToken stoppingToken = default);
+        Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, CancellationToken stoppingToken = default);
     }
 
     internal sealed class UsersClient : IUsersClient
@@ -32,24 +31,29 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         private readonly GoogleConfig _config;
         private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly IEnumerable<ICriteria> _criterias;
+        private readonly IRetryPolicyProvider _retryPolicyProvider;
+        private readonly ICredentialsProvider _credentialsProvider;
         private readonly ILogger<UsersClient> _logger;
-        private readonly IThrottlingRetryHandler _retryHandler = new ThrottlingRetryHandler();
 
-        public UsersClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, IEnumerable<ICriteria> criterias, ILogger<UsersClient> logger)
+        public UsersClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, IEnumerable<ICriteria> criterias, IRetryPolicyProvider retryPolicyProvider, ICredentialsProvider credentialsProvider, ILogger<UsersClient> logger)
         {
             _config = config.Value;
             _tasksStatusesCache = tasksStatusesCache;
             _criterias = criterias;
+            _retryPolicyProvider = retryPolicyProvider;
+            _credentialsProvider = credentialsProvider;
             _logger = logger;
         }
 
-        public async Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, GoogleCredential credentials, CancellationToken stoppingToken = default)
+        public async Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, CancellationToken stoppingToken = default)
         {
             _logger.LogDebug("Fetching users for network '{networkId}'...", network.NetworkId);
 
             await _tasksStatusesCache.SetStatusAsync(network.NetworkId, new SingleTaskStatus(TaskCaption, TaskDescription, null), stoppingToken);
 
-            var users = await GetAllGoogleUsers(network, credentials, stoppingToken);
+            var retryPolicy = _retryPolicyProvider.GetSecretRotationRetryPolicy();
+            var users = await retryPolicy.ExecuteAsync(() => GetAllGoogleUsers(network, stoppingToken));
+
             var filteredUsers = FilterUsers(networkConfig.EmailFilter, users);
 
             if (!filteredUsers.Any())
@@ -60,15 +64,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             return filteredUsers;
         }
 
-        private async Task<IList<User>> GetAllGoogleUsers(Network<GoogleNetworkProperties> network, GoogleCredential credentials, CancellationToken stoppingToken)
+        private async Task<IList<User>> GetAllGoogleUsers(Network<GoogleNetworkProperties> network, CancellationToken stoppingToken)
         {
-            var userCredentials = credentials
-                .CreateWithUser(network.Properties.AdminEmail)
-                .UnderlyingCredential as ServiceAccountCredential;
+            var credentials = await _credentialsProvider.GetForUserAsync(network.Properties.AdminEmail, stoppingToken);
 
             var service = new DirectoryService(new BaseClientService.Initializer
             {
-                HttpClientInitializer = userCredentials,
+                HttpClientInitializer = credentials,
                 ApplicationName = _config.ApplicationName,
             });
 
@@ -82,7 +84,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 request.OrderBy = UsersResource.ListRequest.OrderByEnum.Email;
                 request.PageToken = nextPageToken;
                 request.Projection = UsersResource.ListRequest.ProjectionEnum.Full; // we do NOT know upfront what kind of custom section is set, so we cannot use ProjectionEnum.Custom
-                var response = await _retryHandler.ExecuteAsync(request.ExecuteAsync, _logger, stoppingToken);
+                var response = await _retryPolicyProvider
+                    .GetThrottlingRetryPolicy()
+                    .ExecuteAsync(request.ExecuteAsync, stoppingToken);
 
                 if (response.UsersValue != null)
                     result.AddRange(response.UsersValue);

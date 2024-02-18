@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Google.Apis.Admin.Directory.directory_v1;
@@ -13,7 +14,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     public interface ICredentialsProvider
     {
-        Task<GoogleCredential> GetCredentialsAsync(CancellationToken stoppingToken = default);
+        Task<ServiceAccountCredential> GetForUserAsync(string email, CancellationToken stoppingToken = default);
     }
 
     internal sealed class CredentialsProvider : ICredentialsProvider
@@ -26,19 +27,67 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         };
 
         private readonly ISecretRepository _secretRepository;
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
+        private GoogleCredential _credential = null;
 
         public CredentialsProvider(ISecretRepository secretRepository)
         {
             _secretRepository = secretRepository;
         }
 
-        public async Task<GoogleCredential> GetCredentialsAsync(CancellationToken stoppingToken = default)
+        public async Task<ServiceAccountCredential> GetForUserAsync(string email, CancellationToken stoppingToken = default)
         {
-            var googleKey = await _secretRepository.GetSecretAsync(GoogleKeys.TokenKey, stoppingToken);
+            var googleCredentials = await GetCredentialsAsync(stoppingToken);
 
-            return GoogleCredential
-                .FromJson(googleKey.ToSystemString())
-                .CreateScoped(Scopes);
+            var userCredentials = googleCredentials
+                .CreateWithUser(email)
+                .UnderlyingCredential as ServiceAccountCredential;
+
+            var handler = new UnsuccessfulResponseHandler(ClearCachedCredentialsAsync);
+
+            userCredentials
+                .HttpClient
+                .MessageHandler
+                .AddUnsuccessfulResponseHandler(handler);
+
+            return userCredentials;
+        }
+
+        private async Task ClearCachedCredentialsAsync()
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            await _semaphore.WaitAsync(cts.Token);
+            try
+            {
+                _credential = null;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        private async Task<GoogleCredential> GetCredentialsAsync(CancellationToken stoppingToken = default)
+        {
+            await _semaphore.WaitAsync(stoppingToken);
+
+            try
+            {
+                if (_credential is null)
+                {
+                    var googleKey = await _secretRepository.GetSecretAsync(GoogleKeys.TokenKey, stoppingToken);
+
+                    _credential = GoogleCredential
+                        .FromJson(googleKey.ToSystemString())
+                        .CreateScoped(Scopes);
+                }
+
+                return _credential;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
     }
 }
