@@ -77,7 +77,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Mappers
                 {
                     Id = user_1_id,
                     Name = new UserName { FullName = user_1_name },
-                    CreationTime = new DateTime(2022, 01, 03),
+                    CreationTimeDateTimeOffset = new DateTime(2022, 01, 03),
                     PrimaryEmail = user_1_email,
                     Emails = new[]
                     {

@@ -47,7 +47,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
                 ApplicationName = "gmail_app",
             };
 
-            var client = new CalendarClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), NullLogger<CalendarClient>.Instance);
+            var client = new CalendarClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), new RetryPolicyProvider(NullLogger<RetryPolicyProvider>.Instance), _googleClientFixture.CredentialProvider, NullLogger<CalendarClient>.Instance);
             var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
@@ -62,7 +62,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var stream = new TestableInteractionStream();
 
             // Act
-            await client.SyncInteractionsAsync(syncContext, stream, employeesCollection.GetAllInternal().Select(x => x.Id.PrimaryId), _googleClientFixture.Credential, interactionFactory);
+            await client.SyncInteractionsAsync(syncContext, stream, employeesCollection.GetAllInternal().Select(x => x.Id.PrimaryId), interactionFactory);
 
             // Assert
             stream.SentInteractions.Should().HaveCount(8);

@@ -8,7 +8,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
     internal class AuthTester : IAuthTester
     {
-        public Task<bool> IsAuthorizedAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
             => Task.FromResult(true);
     }
 }

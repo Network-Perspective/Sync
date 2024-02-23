@@ -50,7 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy())
                 .AddScopeAwareHttpHandler<UserTokenAuthHandler>();
 
-            services.AddTransient<IAuthTester, AuthTester>();
+            services.AddScoped<IAuthTester, AuthTester>();
             services.AddScoped<ISlackAuthService, SlackAuthService>();
             services.AddTransient<CursorPaginationHandler>();
             services.AddScoped<ISlackClientFacadeFactory, SlackClientFacadeFactory>();

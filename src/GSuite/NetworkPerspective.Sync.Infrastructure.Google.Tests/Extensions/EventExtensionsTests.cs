@@ -28,8 +28,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Extensions
 
                 var @event = new Event
                 {
-                    Start = new EventDateTime { DateTime = startDateTime },
-                    End = new EventDateTime { DateTime = endDateTime }
+                    Start = new EventDateTime { DateTimeDateTimeOffset = startDateTime },
+                    End = new EventDateTime { DateTimeDateTimeOffset = endDateTime }
                 };
 
                 // Act
@@ -69,7 +69,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Extensions
 
                 var @event = new Event
                 {
-                    Start = new EventDateTime { DateTime = startDateTime }
+                    Start = new EventDateTime { DateTimeDateTimeOffset = startDateTime }
                 };
 
                 // Act
@@ -85,7 +85,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Extensions
                 // Arrange
                 var @event1 = new Event
                 {
-                    Start = new EventDateTime { DateTime = null }
+                    Start = new EventDateTime { DateTimeDateTimeOffset = null }
                 };
 
                 var @event2 = new Event
