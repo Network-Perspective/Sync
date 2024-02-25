@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 using Moq;
 
@@ -15,6 +16,7 @@ using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.GSuite.Client;
 using NetworkPerspective.Sync.GSuite.Tests.Fixtures;
+using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Google;
 
 using Xunit;
@@ -30,6 +32,27 @@ namespace NetworkPerspective.Sync.GSuite.Tests
         {
             _service = service;
             service.Reset();
+        }
+
+        [Fact]
+        public async Task ShouldReturn401OnInvalidToken()
+        {
+            // Arrange
+            var networkId = Guid.NewGuid();
+            var httpClient = _service.CreateDefaultClient();
+
+            const string adminEmail = "admin@networkperspective.io";
+
+            var networkConfig = new NetworkConfigDto
+            {
+                AdminEmail = adminEmail
+            };
+
+            // Act
+            Func<Task> func = () => new NetworksClient(httpClient).NetworksPostAsync(networkConfig);
+
+            // Assert
+            await func.Should().ThrowAsync<GSuiteClientException>().Where(x => x.StatusCode == 401);
         }
 
         [Fact]
