@@ -1,0 +1,28 @@
+{{- if and .Values.logVolume.enabled (not .Values.logVolume.existingDataClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ template "excel.fullname" . }}-logs
+  labels:
+    app: {{ template "excel.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+{{- if .Values.logVolume.annotations }}
+  annotations:
+{{ toYaml .Values.logVolume.annotations | indent 4 }}
+{{- end }}
+spec:
+  accessModes:
+    - {{ .Values.logVolume.dataAccessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.logVolume.dataSize | quote }}
+{{- if .Values.logVolume.storageClass }}
+{{- if (eq "-" .Values.logVolume.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.logVolume.storageClass }}"
+{{- end }}
+{{- end }}
+{{- end -}}

@@ -51,7 +51,7 @@ namespace NetworkPerspective.Sync.Excel
             services
                 .AddDocumentation()
                 .AddApplication(_config.GetSection(ConnectorConfigSection))
-                .AddExcel()
+                .AddExcel(_config.GetSection(ConnectorConfigSection))
                 .AddSecretRepositoryClient(_config.GetSection(SecretRepositoryClientBaseConfigSection), healthChecksBuilder)
                 .AddNetworkPerspectiveCore(_config.GetSection(NetworkPerspectiveCoreConfigSection), healthChecksBuilder)
                 .AddPersistence(healthChecksBuilder)

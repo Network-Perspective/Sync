@@ -49,4 +49,9 @@ spec:
     - {{ . | quote }}
     {{- end }}
     {{- end }}        
+    {{- range .Values.excel.ingress.tls }}
+    {{- range .hosts }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- end }}        
 {{- end }}

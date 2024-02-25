@@ -1,17 +1,29 @@
-1. Test the chart by running
+Test the chart by running
 $ helm test {{ .Release.Name }}
 
-2. GSuite connector URL:
+{{- if .Values.gsuite.enabled }}
+GSuite connector URL:
 {{- range .Values.gsuite.ingress.tls }}
 {{- range .hosts }}
 https://{{ . }}
 {{- end }}
 {{- end }}        
+{{- end }}
 
-3. Slack connector URL:
+{{- if .Values.slack.enabled }}
+Slack connector URL:
 {{- range .Values.slack.ingress.tls }}
 {{- range .hosts }}
 https://{{ . }}
 {{- end }}
 {{- end }}        
+{{- end }}
 
+{{- if .Values.excel.enabled }}
+Excel connector URL:
+{{- range .Values.excel.ingress.tls }}
+{{- range .hosts }}
+https://{{ . }}
+{{- end }}
+{{- end }}        
+{{- end }}

@@ -1,0 +1,1 @@
+helm upgrade --install np-sync helm-charts/np-sync --set mssql.acceptEula.value=Y -f ./secrets/dev.yaml

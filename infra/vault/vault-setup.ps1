@@ -4,7 +4,7 @@
 # use -tls-skip-verify in staging environment
 
 # if vault is already initialized, login
-vault login 
+# vault login 
 
 # enable audit
 vault audit enable file file_path=/vault/audit/vault_audit.log
@@ -15,6 +15,9 @@ vault secrets enable -path=np-sync-gsuite-secrets kv-v2
 
 # slack mount-point
 vault secrets enable -path=np-sync-slack-secrets kv-v2
+
+# excel mount-point
+vault secrets enable -path=np-sync-excel-secrets kv-v2
 
 # Enable Kubernetes authentication if it hasn't been
 $vaultK8sAuthEnabled = vault auth list | Select-String "kubernetes/"
