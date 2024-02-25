@@ -33,6 +33,22 @@ namespace NetworkPerspective.Sync.Office365.Tests
         }
 
         [Fact]
+        public async Task ShouldReturn401OnInvalidToken()
+        {
+            // Arrange
+            var networkId = Guid.NewGuid();
+            var httpClient = _service.CreateDefaultClient();
+
+            var networkConfig = new NetworkConfigDto();
+
+            // Act
+            Func<Task> func = () => new NetworksClient(httpClient).NetworksPostAsync(networkConfig);
+
+            // Assert
+            await func.Should().ThrowAsync<Office365ClientException>().Where(x => x.StatusCode == 401);
+        }
+
+        [Fact]
         public async Task ShouldSetupNetworkProperly()
         {
             // Arrange

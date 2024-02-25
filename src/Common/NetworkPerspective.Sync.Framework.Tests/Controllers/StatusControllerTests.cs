@@ -56,6 +56,10 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                     Logs = Array.Empty<StatusLog>()
                 };
 
+                _networkIdProvider
+                    .Setup(x => x.Get())
+                    .Returns(networkId);
+
                 _networkPerspectiveCoreMock
                     .Setup(x => x.ValidateTokenAsync(It.Is<SecureString>(x => x.ToSystemString() == accessToken), It.IsAny<CancellationToken>()))
                     .ReturnsAsync(new TokenValidationResponse(networkId, connectorId));
@@ -74,25 +78,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             }
 
             [Fact]
-            public async Task ShouldNotReturnStatusOnInvalidToken()
-            {
-                // Arrange
-                var accessToken = "access-token";
-
-                _networkPerspectiveCoreMock
-                    .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                    .ThrowsAsync(new InvalidTokenException("https://networkperspective.io"));
-
-                var controller = Create(accessToken);
-                Func<Task> func = () => controller.GetStatus();
-
-                // Act Assert
-                await func.Should().ThrowExactlyAsync<InvalidTokenException>();
-                _statusServiceMock.Verify(x => x.GetStatusAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
-            }
-
-            [Fact]
-            public async Task ShouldNotAddToSchedulerOnNonExistingNetwork()
+            public async Task ShoulThrowNetworkNotFoundOnNonExistingNetwork()
             {
                 // Arrange
                 var networkId = Guid.NewGuid();
@@ -128,7 +114,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             var features = new FeatureCollection();
             features.Set<IHttpRequestFeature>(requestFeature);
 
-            var controller = new StatusController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _statusServiceMock.Object, Mock.Of<INetworkIdInitializer>());
+            var controller = new StatusController(_networkServiceMock.Object, _statusServiceMock.Object, _networkIdProvider.Object);
             controller.ControllerContext.HttpContext = new DefaultHttpContext(features);
 
             return controller;

@@ -1,11 +1,11 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using NetworkPerspective.Sync.Application.Extensions;
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Dtos;
 
@@ -14,15 +14,18 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace NetworkPerspective.Sync.Framework.Controllers
 {
     [Route("schedules")]
-    public class SchedulesController : ApiControllerBase
+    [Authorize]
+    public class SchedulesController : ControllerBase
     {
+        private readonly INetworkIdProvider _networkIdProvider;
         private readonly INetworkService _networkService;
         private readonly ISyncScheduler _scheduler;
         private readonly ISyncHistoryService _syncHistoryService;
         private readonly IStatusLoggerFactory _statusLoggerFactory;
 
-        public SchedulesController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ISyncScheduler scheduler, ISyncHistoryService syncHistoryService, IStatusLoggerFactory statusLoggerFactory, INetworkIdInitializer networkIdInitializer) : base(networkPerspectiveCore, networkIdInitializer)
+        public SchedulesController(INetworkIdProvider networkIdProvider, INetworkService networkService, ISyncScheduler scheduler, ISyncHistoryService syncHistoryService, IStatusLoggerFactory statusLoggerFactory)
         {
+            _networkIdProvider = networkIdProvider;
             _networkService = networkService;
             _scheduler = scheduler;
             _syncHistoryService = syncHistoryService;
@@ -42,20 +45,19 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
         public async Task<IActionResult> StartAsync([FromBody] SchedulerStartDto request, CancellationToken stoppingToken = default)
         {
-            var tokenValidationResponse = await ValidateTokenAsync(stoppingToken);
-            await _networkService.ValidateExists(tokenValidationResponse.NetworkId, stoppingToken);
+            await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
 
             if (request.OverrideSyncPeriodStart is not null)
-                await _syncHistoryService.OverrideSyncStartAsync(tokenValidationResponse.NetworkId, request.OverrideSyncPeriodStart.Value.ToUniversalTime(), stoppingToken);
+                await _syncHistoryService.OverrideSyncStartAsync(_networkIdProvider.Get(), request.OverrideSyncPeriodStart.Value.ToUniversalTime(), stoppingToken);
 
-            await _scheduler.ScheduleAsync(tokenValidationResponse.NetworkId, stoppingToken);
-            await _scheduler.TriggerNowAsync(tokenValidationResponse.NetworkId, stoppingToken);
+            await _scheduler.ScheduleAsync(_networkIdProvider.Get(), stoppingToken);
+            await _scheduler.TriggerNowAsync(_networkIdProvider.Get(), stoppingToken);
 
             await _statusLoggerFactory
-                .CreateForNetwork(tokenValidationResponse.NetworkId)
+                .CreateForNetwork(_networkIdProvider.Get())
                 .LogInfoAsync("Schedule started", stoppingToken);
 
-            return Ok($"Scheduled sync {tokenValidationResponse.NetworkId}");
+            return Ok($"Scheduled sync {_networkIdProvider.Get()}");
         }
 
         /// <summary>
@@ -70,17 +72,16 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
         public async Task<IActionResult> StopAsync(CancellationToken stoppingToken = default)
         {
-            var tokenValidationResponse = await ValidateTokenAsync(stoppingToken);
-            await _networkService.ValidateExists(tokenValidationResponse.NetworkId, stoppingToken);
+            await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
 
-            await _scheduler.UnscheduleAsync(tokenValidationResponse.NetworkId, stoppingToken);
-            await _scheduler.InterruptNowAsync(tokenValidationResponse.NetworkId, stoppingToken);
+            await _scheduler.UnscheduleAsync(_networkIdProvider.Get(), stoppingToken);
+            await _scheduler.InterruptNowAsync(_networkIdProvider.Get(), stoppingToken);
 
             await _statusLoggerFactory
-                .CreateForNetwork(tokenValidationResponse.NetworkId)
+                .CreateForNetwork(_networkIdProvider.Get())
                 .LogInfoAsync("Schedule stopped", stoppingToken);
 
-            return Ok($"Unscheduled sync {tokenValidationResponse.NetworkId}");
+            return Ok($"Unscheduled sync {_networkIdProvider.Get()}");
         }
     }
 }

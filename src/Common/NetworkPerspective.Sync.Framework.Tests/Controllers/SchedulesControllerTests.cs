@@ -103,30 +103,16 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             }
 
             [Fact]
-            public async Task ShouldNotAddToSchedulerOnInvalidToken()
-            {
-                // Arrange
-                var accessToken = "access-token";
-
-                _networkPerspectiveCoreMock
-                    .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                    .ThrowsAsync(new InvalidTokenException("https://networkperspective.io"));
-
-                var controller = Create(accessToken);
-                Func<Task> func = () => controller.StartAsync(new SchedulerStartDto());
-
-                // Act Assert
-                await func.Should().ThrowExactlyAsync<InvalidTokenException>();
-                _schduleFacadeMock.Verify(x => x.ScheduleAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
-            }
-
-            [Fact]
             public async Task ShouldNotAddToSchedulerOnNonExistingNetwork()
             {
                 // Arrange
                 var networkId = Guid.NewGuid();
                 var connectorId = Guid.NewGuid();
                 var accessToken = "access-token";
+
+                _networkIdProvider
+                    .Setup(x => x.Get())
+                    .Returns(networkId);
 
                 _networkPerspectiveCoreMock
                     .Setup(x => x.ValidateTokenAsync(It.Is<SecureString>(x => x.ToSystemString() == accessToken), It.IsAny<CancellationToken>()))
@@ -197,26 +183,8 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 // Assert
                 _schduleFacadeMock.Verify(x => x.UnscheduleAsync(networkId, It.IsAny<CancellationToken>()), Times.Once);
             }
-
-            [Fact]
-            public async Task ShouldNotRemoveFromSchedulerOnInvalidToken()
-            {
-                // Arrange
-                var accessToken = "access-token";
-
-                _networkPerspectiveCoreMock
-                    .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                    .ThrowsAsync(new InvalidTokenException("https://networkperspective.io"));
-
-                var controller = Create(accessToken);
-                Func<Task> func = () => controller.StopAsync();
-
-                // Act Assert
-                await func.Should().ThrowExactlyAsync<InvalidTokenException>();
-                _schduleFacadeMock.Verify(x => x.UnscheduleAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
-            }
-
         }
+
         protected SchedulesController Create(string accessToken)
         {
             var requestFeature = new HttpRequestFeature();
@@ -225,7 +193,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             var features = new FeatureCollection();
             features.Set<IHttpRequestFeature>(requestFeature);
 
-            var controller = new SchedulesController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _schduleFacadeMock.Object, _syncHistoryServiceMock.Object, _statusLoggerFactoryMock.Object, Mock.Of<INetworkIdInitializer>());
+            var controller = new SchedulesController(_networkIdProvider.Object, _networkServiceMock.Object, _schduleFacadeMock.Object, _syncHistoryServiceMock.Object, _statusLoggerFactoryMock.Object);
             controller.ControllerContext.HttpContext = new DefaultHttpContext(features);
 
             return controller;

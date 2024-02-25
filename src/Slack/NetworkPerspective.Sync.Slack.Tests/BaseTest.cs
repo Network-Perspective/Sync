@@ -33,6 +33,27 @@ namespace NetworkPerspective.Sync.Slack.Tests
         }
 
         [Fact]
+        public async Task ShouldReturn401OnInvalidToken()
+        {
+            // Arrange
+            var networkId = Guid.NewGuid();
+            var httpClient = _service.CreateDefaultClient();
+
+            var networkConfig = new NetworkConfigDto
+            {
+                AutoJoinChannels = true,
+                SyncChannelsNames = true,
+                UsesAdminPrivileges = true
+            };
+
+            // Act
+            Func<Task> func = () => new NetworksClient(httpClient).NetworksPostAsync(networkConfig);
+
+            // Assert
+            await func.Should().ThrowAsync<SlackClientException>().Where(x => x.StatusCode == 401);
+        }
+
+        [Fact]
         public async Task ShouldSetupNetworkProperly()
         {
             // Arrange

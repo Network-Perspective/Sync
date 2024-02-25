@@ -2,13 +2,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using NetworkPerspective.Sync.Application.Exceptions;
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
 
@@ -17,19 +16,20 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace NetworkPerspective.Sync.Office365.Controllers
 {
     [Route(AuthPath)]
-    public class AuthController : ApiControllerBase
+    public class AuthController : ControllerBase
     {
         private const string CallbackPath = "callback";
         private const string AuthPath = "auth";
 
         private readonly IMicrosoftAuthService _authService;
         private readonly INetworkService _networkService;
+        private readonly INetworkIdProvider _networkIdProvider;
 
-        public AuthController(IMicrosoftAuthService authService, INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, INetworkIdInitializer networkIdInitializer)
-            : base(networkPerspectiveCore, networkIdInitializer)
+        public AuthController(IMicrosoftAuthService authService, INetworkService networkService, INetworkIdProvider networkIdProvider)
         {
             _authService = authService;
             _networkService = networkService;
+            _networkIdProvider = networkIdProvider;
         }
 
         /// <summary>
@@ -39,17 +39,17 @@ namespace NetworkPerspective.Sync.Office365.Controllers
         /// <param name="stoppingToken">Stopping token</param>
         /// <returns>Result</returns>
         [HttpPost]
+        [Authorize]
         [SwaggerResponse(StatusCodes.Status200OK, "Initialized OAuth process", typeof(string))]
         [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Network doesn't exist")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
         public async Task<IActionResult> AuthorizeAsync(string callbackUrl = null, CancellationToken stoppingToken = default)
         {
-            var tokenValidationResponse = await ValidateTokenAsync(stoppingToken);
-            await _networkService.ValidateExists(tokenValidationResponse.NetworkId, stoppingToken);
+            await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
 
             var callbackUri = callbackUrl == null ? CreateCallbackUri() : new Uri(callbackUrl);
-            var authProcess = new AuthProcess(tokenValidationResponse.NetworkId, callbackUri);
+            var authProcess = new AuthProcess(_networkIdProvider.Get(), callbackUri);
 
             var result = await _authService.StartAuthProcessAsync(authProcess, stoppingToken);
 

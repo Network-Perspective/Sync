@@ -2,12 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Infrastructure.Slack;
 using NetworkPerspective.Sync.Infrastructure.Slack.Models;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
@@ -17,19 +16,20 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace NetworkPerspective.Sync.Slack.Controllers
 {
     [Route(AuthPath)]
-
-    public class AuthController : ApiControllerBase
+    public class AuthController : ControllerBase
     {
         private const string CallbackPath = "callback";
         private const string AuthPath = "auth";
 
         private readonly ISlackAuthService _authService;
         private readonly INetworkService _networkService;
+        private readonly INetworkIdProvider _networkIdProvider;
 
-        public AuthController(ISlackAuthService authService, INetworkService networkService, INetworkPerspectiveCore networkPerspectiveCore, INetworkIdInitializer networkIdInitializer) : base(networkPerspectiveCore, networkIdInitializer)
+        public AuthController(ISlackAuthService authService, INetworkService networkService, INetworkIdProvider networkIdProvider)
         {
             _authService = authService;
             _networkService = networkService;
+            _networkIdProvider = networkIdProvider;
         }
 
         /// <summary>
@@ -39,18 +39,18 @@ namespace NetworkPerspective.Sync.Slack.Controllers
         /// <param name="stoppingToken">Stopping token</param>
         /// <returns>Result</returns>
         [HttpPost]
+        [Authorize]
         [SwaggerResponse(StatusCodes.Status200OK, "Initialized OAuth process", typeof(string))]
         [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Network doesn't exist")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
         public async Task<IActionResult> SignIn(string callbackUrl = null, CancellationToken stoppingToken = default)
         {
-            var tokenValidationResponse = await ValidateTokenAsync(stoppingToken);
-            await _networkService.ValidateExists(tokenValidationResponse.NetworkId, stoppingToken);
+            await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
 
-            var network = await _networkService.GetAsync<SlackNetworkProperties>(tokenValidationResponse.NetworkId, stoppingToken);
+            var network = await _networkService.GetAsync<SlackNetworkProperties>(_networkIdProvider.Get(), stoppingToken);
             var callbackUri = callbackUrl == null ? CreateCallbackUri() : new Uri(callbackUrl);
-            var authProcess = new AuthProcess(tokenValidationResponse.NetworkId, callbackUri, network.Properties.UsesAdminPrivileges);
+            var authProcess = new AuthProcess(_networkIdProvider.Get(), callbackUri, network.Properties.UsesAdminPrivileges);
 
             var result = await _authService.StartAuthProcessAsync(authProcess, stoppingToken);
 
