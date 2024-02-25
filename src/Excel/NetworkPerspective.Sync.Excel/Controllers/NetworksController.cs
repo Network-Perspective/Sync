@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Excel.Dtos;
 using NetworkPerspective.Sync.Framework.Controllers;
@@ -16,8 +15,9 @@ namespace NetworkPerspective.Sync.Excel.Controllers
 {
     public class NetworksController : NetworksControllerBase
     {
-        public NetworksController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLogger, INetworkIdInitializer networkIdInitializer)
-            : base(networkPerspectiveCore, networkService, authService, syncScheduler, statusLogger, networkIdInitializer)
+
+        public NetworksController(INetworkService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLogger, INetworkIdProvider networkIdProvider)
+            : base(networkService, authService, syncScheduler, statusLogger, networkIdProvider)
         { }
 
         /// <summary>

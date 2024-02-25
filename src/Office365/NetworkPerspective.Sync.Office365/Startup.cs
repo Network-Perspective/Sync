@@ -79,6 +79,9 @@ namespace NetworkPerspective.Sync.Office365
 
             app.UseRouting();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoint =>
             {
                 endpoint.MapControllers();

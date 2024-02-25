@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Infrastructure.Slack;
@@ -16,8 +15,8 @@ namespace NetworkPerspective.Sync.Slack.Controllers
 {
     public class NetworksController : NetworksControllerBase
     {
-        public NetworksController(INetworkPerspectiveCore networkPerspectiveCore, INetworkService networkService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLoggerFactory, INetworkIdInitializer networkIdInitializer)
-            : base(networkPerspectiveCore, networkService, tokenService, syncScheduler, statusLoggerFactory, networkIdInitializer)
+        public NetworksController(INetworkService networkService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLoggerFactory, INetworkIdProvider networkIdProvider)
+            : base(networkService, tokenService, syncScheduler, statusLoggerFactory, networkIdProvider)
         { }
 
         /// <summary>
