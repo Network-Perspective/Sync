@@ -1,36 +1,33 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Framework.Controllers;
 
 namespace NetworkPerspective.Sync.Excel.Controllers;
 
 [Route("sync")]
-public class SyncController : ApiControllerBase
+[Authorize]
+public class SyncController : ControllerBase
 {
     private readonly ISyncService _syncService;
     private readonly ISyncContextFactory _syncContextFactory;
+    private readonly INetworkIdProvider _networkIdProvider;
 
-
-    public SyncController(INetworkPerspectiveCore networkPerspectiveCore, ISyncService syncService, ISyncContextFactory syncContextFactory, INetworkIdInitializer networkIdInitializer)
-        : base(networkPerspectiveCore, networkIdInitializer)
+    public SyncController(ISyncService syncService, ISyncContextFactory syncContextFactory, INetworkIdProvider networkIdProvider)
     {
         _syncService = syncService;
         _syncContextFactory = syncContextFactory;
+        _networkIdProvider = networkIdProvider;
     }
 
     [HttpPost]
     public async Task<IActionResult> SyncAsync(SyncRequestDto syncRequest, CancellationToken stoppingToken = default)
     {
-        // validate token
-        var tokenValidationResult = await ValidateTokenAsync(stoppingToken);
-
         // create sync context
-        using var syncContext = await _syncContextFactory.CreateForNetworkAsync(tokenValidationResult.NetworkId, stoppingToken);
+        using var syncContext = await _syncContextFactory.CreateForNetworkAsync(_networkIdProvider.Get(), stoppingToken);
 
         // add employees & metadata to sync context
         syncContext.Set(syncRequest.Employees);

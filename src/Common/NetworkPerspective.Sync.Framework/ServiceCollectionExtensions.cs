@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 
+using NetworkPerspective.Sync.Framework.Auth;
 using NetworkPerspective.Sync.Framework.Controllers;
 
 using Newtonsoft.Json.Converters;
@@ -18,8 +20,19 @@ namespace NetworkPerspective.Sync.Framework
 
             services.AddTransient<IErrorService, ErrorService>();
 
-            // add telemetry
             services.AddApplicationInsightsTelemetry();
+
+            services
+                .AddAuthentication(ServiceAuthOptions.DefaultScheme)
+                .AddScheme<ServiceAuthOptions, ServiceAuthHandler>(ServiceAuthOptions.DefaultScheme, options => { });
+
+            services
+                .AddAuthorization(options =>
+                {
+                    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .Build();
+                });
 
             return services;
         }

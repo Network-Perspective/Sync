@@ -73,6 +73,9 @@ namespace NetworkPerspective.Sync.Excel
 
             app.UseRouting();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoint =>
             {
                 endpoint.MapControllers();

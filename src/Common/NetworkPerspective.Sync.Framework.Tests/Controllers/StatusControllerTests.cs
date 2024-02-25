@@ -128,7 +128,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             var features = new FeatureCollection();
             features.Set<IHttpRequestFeature>(requestFeature);
 
-            var controller = new StatusController(_networkPerspectiveCoreMock.Object, _networkServiceMock.Object, _statusServiceMock.Object, Mock.Of<INetworkIdInitializer>());
+            var controller = new StatusController(_networkServiceMock.Object, _statusServiceMock.Object, _networkIdProvider.Object);
             controller.ControllerContext.HttpContext = new DefaultHttpContext(features);
 
             return controller;
