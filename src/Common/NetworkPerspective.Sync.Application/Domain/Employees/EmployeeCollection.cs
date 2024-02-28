@@ -57,6 +57,12 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         {
             var employees = GetAllInternal();
 
+            // do not add hierarchy field none of the employees have subordinates
+            if (!employees.Any(e => HasAnySubordinates(e, employees)))
+            {
+                return;
+            }
+
             foreach (var employee in employees)
             {
                 if (!HasAnySubordinates(employee, employees))

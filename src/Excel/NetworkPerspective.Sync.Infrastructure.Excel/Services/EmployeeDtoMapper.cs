@@ -33,7 +33,12 @@ public static class EmployeeDtoMapper
                     props.TryAdd(prop.Name, prop.Value);
                 }
             }
-            props.TryAdd(Employee.PropKeyName, dto.Name);
+
+            // add name if not empty
+            if (!string.IsNullOrEmpty(dto.Name))
+            {
+                props.TryAdd(Employee.PropKeyName, dto.Name);
+            }
 
             // construct groupsAccess from permissions
             var groupAccess = dto.Permissions == null

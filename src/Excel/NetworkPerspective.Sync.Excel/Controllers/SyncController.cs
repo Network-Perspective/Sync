@@ -32,7 +32,7 @@ public class SyncController : ControllerBase
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request or validation error")]
-    public async Task<IActionResult> SyncAsync(SyncRequestDto syncRequest, CancellationToken stoppingToken = default)
+    public async Task<IActionResult> SyncAsync([FromBody] SyncRequestDto syncRequest, CancellationToken stoppingToken = default)
     {
         // create sync context
         using var syncContext = await _syncContextFactory.CreateForNetworkAsync(_networkIdProvider.Get(), stoppingToken);
