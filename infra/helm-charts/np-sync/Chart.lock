@@ -1,18 +1,18 @@
 dependencies:
 - name: mssql
   repository: ""
-  version: 2.1.3323
+  version: 2.1.3360
 - name: gsuite
   repository: ""
-  version: 2.1.3323
+  version: 2.1.3360
 - name: slack
   repository: ""
-  version: 2.1.3323
+  version: 2.1.3360
 - name: excel
   repository: ""
-  version: 2.1.3323
+  version: 2.1.3360
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.25.0
-digest: sha256:383a5d01373580a738f473cbb5c70240b6a900c99b9fe8f04b8b640e6bcaf52f
-generated: "2024-02-09T14:16:31.6473396+01:00"
+digest: sha256:4e4eccb8c234aba3366a1e041c93aeea3565758bf029aef1c4cc813c98634a7a
+generated: "2024-02-28T12:39:15.8950877+01:00"
