@@ -29,7 +29,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
                 var employeeRelations = GetEmployeeRelations(user);
 
                 var employeeId = EmployeeId.CreateWithAliases(user.Mail, user.Id, user.OtherMails, emailFilter);
-                var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations, employeeGroupsAccess);
+                var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations, null); // Temp groupAccess null...  we need to think about it
 
                 employees.Add(employee);
             }
