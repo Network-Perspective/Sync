@@ -33,7 +33,10 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
 
         public IReadOnlyDictionary<string, object> Props => _props.ToImmutableDictionary();
         public IReadOnlyCollection<Group> Groups => new ReadOnlyCollection<Group>(_groups);
-        public IReadOnlyCollection<string> GroupAccess => new ReadOnlyCollection<string>(_groupAccess);
+        public IReadOnlyCollection<string> GroupAccess => _groupAccess is null
+            ? null
+            : new ReadOnlyCollection<string>(_groupAccess);
+
         public RelationsCollection Relations { get; }
 
         private Employee(EmployeeId id, IEnumerable<Group> groups, bool isExternal, bool isBot, bool isHashed, IDictionary<string, object> props, RelationsCollection relations, IEnumerable<string> groupAccess)
@@ -45,7 +48,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
             _props = props;
             Relations = relations;
             _groups = groups.ToList();
-            _groupAccess = groupAccess.ToList();
+            _groupAccess = groupAccess?.ToList();
 
             if (_groups.Any())
             {
@@ -58,13 +61,13 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         }
 
         public static Employee CreateInternal(EmployeeId id, IEnumerable<Group> groups, IDictionary<string, object> props = null, RelationsCollection relations = null, IEnumerable<string> groupAccess = null)
-            => new Employee(id, groups, false, false, false, props ?? new Dictionary<string, object>(), relations ?? RelationsCollection.Empty, groupAccess ?? Enumerable.Empty<string>());
+            => new Employee(id, groups, false, false, false, props ?? new Dictionary<string, object>(), relations ?? RelationsCollection.Empty, groupAccess);
 
         public static Employee CreateExternal(string email)
-            => new Employee(EmployeeId.Create(email, string.Empty), Array.Empty<Group>(), true, false, false, ImmutableDictionary<string, object>.Empty, RelationsCollection.Empty, Enumerable.Empty<string>());
+            => new Employee(EmployeeId.Create(email, string.Empty), Array.Empty<Group>(), true, false, false, ImmutableDictionary<string, object>.Empty, RelationsCollection.Empty, null);
 
         public static Employee CreateBot(string email)
-            => new Employee(EmployeeId.Create(email, string.Empty), Array.Empty<Group>(), false, true, false, ImmutableDictionary<string, object>.Empty, RelationsCollection.Empty, Enumerable.Empty<string>());
+            => new Employee(EmployeeId.Create(email, string.Empty), Array.Empty<Group>(), false, true, false, ImmutableDictionary<string, object>.Empty, RelationsCollection.Empty, null);
 
         public Employee Hash(HashFunction.Delegate hashFunc)
         {
