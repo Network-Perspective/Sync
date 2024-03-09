@@ -145,7 +145,7 @@ namespace NetworkPerspective.Sync.Application.Services
             await context.StatusLogger.LogInfoAsync($"Synchronization of interactions for period '{context.TimeRange}' completed", stoppingToken);
             _logger.LogInformation("Synchronization of interactions for network '{networkId}' for {period} completed{newLine}{result}", context.NetworkId, context.TimeRange, Environment.NewLine, result);
 
-            foreach( var ex in result.Exceptions)
+            foreach (var ex in result.Exceptions)
                 _logger.LogWarning(ex, "Task thrown exception");
         }
     }

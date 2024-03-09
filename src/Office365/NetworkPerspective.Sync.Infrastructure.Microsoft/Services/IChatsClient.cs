@@ -138,8 +138,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             var pageIterator = PageIterator<ChatMessage, ChatMessageCollectionResponse>
                 .CreatePageIterator(_graphClient, messagesResponse,
-                async message => 
-                { 
+                async message =>
+                {
                     if (message.MessageType == ChatMessageType.Message)
                     {
                         var chatMessage = ChatMessageMapper.ToInternalChatMessage(message, chat);
@@ -151,7 +151,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                             ? Enumerable.Empty<InternalChatMessageReaction>()
                             : message.Reactions.Select(x => ChatMessageReactionMapper.ToInternalChatMessageReaction(x, chatMessage));
 
-                        foreach(var reaction in reactions)
+                        foreach (var reaction in reactions)
                         {
                             var reactionInteractions = interactionFactory.CreateFromChatMessageReaction(reaction);
                             var reactionInteractionsCount = await stream.SendAsync(reactionInteractions);
@@ -160,7 +160,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                     }
                     return true;
                 },
-                request => 
+                request =>
                 {
                     return request;
                 });

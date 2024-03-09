@@ -23,7 +23,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
             if (graphChatMessage.From is null)
                 throw new CannotEvaluateUserIdException($"{nameof(ChatMessage.From)} is null");
 
-            if(graphChatMessage.From.User is null)
+            if (graphChatMessage.From.User is null)
                 throw new CannotEvaluateUserIdException($"{nameof(ChatMessageFromIdentitySet.User)} is null");
 
             if (graphChatMessage.From.User.Id is null)
