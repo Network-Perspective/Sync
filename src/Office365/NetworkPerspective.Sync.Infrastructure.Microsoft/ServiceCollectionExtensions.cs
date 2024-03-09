@@ -23,7 +23,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             services.AddScoped<IMailboxClient, MailboxClient>();
             services.AddScoped<ICalendarClient, CalendarClient>();
             services.AddScoped<IChannelsClient, ChannelsClient>();
-            services.AddScoped<IChatClient, ChatClient>();
+            services.AddScoped<IChatsClient, ChatsClient>();
 
             services.AddScoped<IDataSource, MicrosoftFacade>();
             services.AddScoped<IAuthTester, AuthTester>();

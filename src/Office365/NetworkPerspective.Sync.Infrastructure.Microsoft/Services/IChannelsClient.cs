@@ -15,6 +15,7 @@ using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 
 using GraphChannel = Microsoft.Graph.Models.Channel;
+using ChatMessage = Microsoft.Graph.Models.ChatMessage;
 using InternalChannel = NetworkPerspective.Sync.Infrastructure.Microsoft.Models.Channel;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
