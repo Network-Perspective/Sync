@@ -21,7 +21,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         private readonly IMailboxClient _mailboxClient;
         private readonly ICalendarClient _calendarClient;
         private readonly IChannelsClient _channelsClient;
-        private readonly IChatClient _chatClient;
+        private readonly IChatsClient _chatsClient;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<MicrosoftFacade> _logger;
 
@@ -31,7 +31,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             IMailboxClient mailboxClient,
             ICalendarClient calendarClient,
             IChannelsClient teamsClient,
-            IChatClient chatClient,
+            IChatsClient chatsClient,
             ILoggerFactory loggerFactory)
         {
             _networkService = networkService;
@@ -39,7 +39,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             _mailboxClient = mailboxClient;
             _calendarClient = calendarClient;
             _channelsClient = teamsClient;
-            _chatClient = chatClient;
+            _chatsClient = chatsClient;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<MicrosoftFacade>();
         }
@@ -89,6 +89,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<EmailInteractionFactory>());
             var meetingInteractionFactory = new MeetingInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<MeetingInteractionFactory>());
             var channelInteractionFactory = new ChannelInteractionFactory(context.HashFunction, employees);
+            var chatInteractionFactory = new ChatInteractionFactory(context.HashFunction, employees);
 
             var usersEmails = employees
                 .GetAllInternal()
@@ -102,7 +103,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             if (network.Properties.SyncMsTeams)
             {
                 var resultChannels = await _channelsClient.SyncInteractionsAsync(context, channels, stream, channelInteractionFactory, stoppingToken);
-                var resultChat = await _chatClient.SyncInteractionsAsync(context, stream, usersEmails, stoppingToken);
+                var resultChat = await _chatsClient.SyncInteractionsAsync(context, stream, usersEmails, chatInteractionFactory, stoppingToken);
                 result = SyncResult.Combine(result, resultChannels, resultChat);
             }
 

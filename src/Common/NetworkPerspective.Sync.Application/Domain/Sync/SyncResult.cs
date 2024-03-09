@@ -42,7 +42,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
             stringBuilder.AppendLine($"Tasks: {TasksCount}");
             stringBuilder.AppendLine($"Failed: {FailedCount}");
             stringBuilder.AppendLine($"SuccessRate: {SuccessRate:0.00}%");
-            stringBuilder.AppendLine($"Total interactions: {TotalInteractionsCount}");
+            stringBuilder.Append($"Total interactions: {TotalInteractionsCount}");
 
             return stringBuilder.ToString();
         }

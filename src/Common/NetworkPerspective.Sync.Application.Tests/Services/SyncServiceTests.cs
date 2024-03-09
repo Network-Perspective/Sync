@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,6 +63,10 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var end = new DateTime(2022, 01, 02);
             var timeRange = new TimeRange(start, end);
             var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+
+            _dataSourceMock
+                .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new SyncResult(10, 100, Enumerable.Empty<Exception>()));
             var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
 
             // Act
