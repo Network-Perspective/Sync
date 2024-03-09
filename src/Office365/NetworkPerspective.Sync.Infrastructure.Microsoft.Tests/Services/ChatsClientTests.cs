@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
 
@@ -21,13 +22,13 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
 {
-    public class ChannelsClientTests : IClassFixture<MicrosoftClientWithTeamsFixture>
+    public class ChatsClientTests : IClassFixture<MicrosoftClientWithTeamsFixture>
     {
         private readonly MicrosoftClientWithTeamsFixture _microsoftClientFixture;
         private readonly ILogger<UsersClient> _usersClientLogger = NullLogger<UsersClient>.Instance;
-        private readonly ILoggerFactory _loggerFactory = NullLoggerFactory.Instance;
+        private readonly ILogger<ChatsClient> _chatsClientLogger = NullLogger<ChatsClient>.Instance;
 
-        public ChannelsClientTests(MicrosoftClientWithTeamsFixture microsoftClientFixture)
+        public ChatsClientTests(MicrosoftClientWithTeamsFixture microsoftClientFixture)
         {
             _microsoftClientFixture = microsoftClientFixture;
         }
@@ -40,17 +41,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var stream = new TestableInteractionStream();
             var usersClient = new UsersClient(_microsoftClientFixture.Client, _usersClientLogger);
 
-            var timeRange = new TimeRange(new DateTime(2023, 01, 10), new DateTime(2023, 12, 11));
+            var timeRange = new TimeRange(new DateTime(2021, 01, 01), new DateTime(2024, 12, 11));
             var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
             var users = await usersClient.GetUsersAsync(syncContext);
             var employees = EmployeesMapper.ToEmployees(users, x => $"{x}_hashed", EmployeeFilter.Empty);
-            var interactionsFactory = new ChannelInteractionFactory(x => $"{x}_hashed", employees);
+            var interactionsFactory = new ChatInteractionFactory(x => $"{x}_hashed", employees);
 
-            var channelsClient = new ChannelsClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _loggerFactory);
+            var chatsClient = new ChatsClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _chatsClientLogger);
+            var emails = employees.GetAllInternal().Select(x => x.Id.PrimaryId);
 
             // Act
-            var channels = await channelsClient.GetAllChannelsAsync();
-            await channelsClient.SyncInteractionsAsync(syncContext, channels, stream, interactionsFactory);
+            var result = await chatsClient.SyncInteractionsAsync(syncContext, stream, emails, interactionsFactory);
         }
     }
 }
