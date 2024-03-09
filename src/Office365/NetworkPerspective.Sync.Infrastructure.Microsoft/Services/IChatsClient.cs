@@ -50,7 +50,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             Task<SingleTaskResult> SingleTaskAsync(InternalChat chat)
                 => SyncChatInteractionsAsync(context, stream, chat, interactionFactory, stoppingToken);
 
-
             var chats = await GetAllChatsAsync(usersEmails, context.TimeRange, stoppingToken);
             _logger.LogInformation("Evaluating interactions based on chat for '{timerange}' for {count} users...", context.TimeRange, usersEmails.Count());
             var result = await ParallelSyncTask<InternalChat>.RunAsync(chats, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
