@@ -107,7 +107,9 @@ namespace NetworkPerspective.Sync.Cli.Tests
         public void ItShouldShiftTimeZone(string localTime, string? timeZoneWindows, string? timeZoneLinux, string utc)
         {
             // this is system time zone id so it differes in windows and linux
-            string timeZone = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? timeZoneWindows : timeZoneLinux;
+            string? timeZone = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? timeZoneWindows
+                : timeZoneLinux;
             var expected = DateTime.ParseExact(utc, "s", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
 
             // act
