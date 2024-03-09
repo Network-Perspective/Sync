@@ -104,7 +104,7 @@ namespace NetworkPerspective.Sync.Cli.Tests
         [InlineData("2022-03-26T10:00:00", "UTC", "UTC", "2022-03-26T10:00:00")]
         // just date in utc
         [InlineData("2022-03-26", null, null, "2022-03-26T00:00:00")]
-        public void ItShouldShiftTimeZone(string localTime, string timeZoneWindows, string timeZoneLinux, string utc)
+        public void ItShouldShiftTimeZone(string localTime, string? timeZoneWindows, string? timeZoneLinux, string utc)
         {
             // this is system time zone id so it differes in windows and linux
             string timeZone = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? timeZoneWindows : timeZoneLinux;
