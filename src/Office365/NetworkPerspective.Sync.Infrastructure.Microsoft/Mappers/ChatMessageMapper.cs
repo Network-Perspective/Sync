@@ -9,7 +9,7 @@ using InternalChatMessage = NetworkPerspective.Sync.Infrastructure.Microsoft.Mod
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 {
-    internal class ChatMessageMapper
+    internal static class ChatMessageMapper
     {
         public static InternalChatMessage ToInternalChatMessage(ChatMessage graphChatMessage, InternalChat internalChat)
         {

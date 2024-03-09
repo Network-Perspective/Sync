@@ -13,7 +13,6 @@ using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers;
 
 using InternalChat = NetworkPerspective.Sync.Infrastructure.Microsoft.Models.Chat;
-using InternalChatMessage = NetworkPerspective.Sync.Infrastructure.Microsoft.Models.ChatMessage;
 using InternalChatMessageReaction = NetworkPerspective.Sync.Infrastructure.Microsoft.Models.ChatMessageReaction;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
@@ -77,6 +76,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return uniqueChats;
         }
 
+        // https://learn.microsoft.com/en-us/graph/api/chat-list
         private async Task<IEnumerable<InternalChat>> GetSingleUserChatsAsync(string userEmail, Application.Domain.TimeRange timeRange, CancellationToken stoppingToken)
         {
             const int maxPageSize = 50;
@@ -89,10 +89,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                     {
                         x.QueryParameters = new()
                         {
-                            //Select = new[]
-                            //{
-                            //    ""
-                            //},
                             Expand = new[]
                             {
                                 nameof(Chat.Members)
@@ -102,19 +98,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                         };
                     }, stoppingToken);
 
-            return chats.Value.Select(ChatToInternalChat);
+            return chats.Value.Select(ChatMapper.ToInternalChat);
         }
 
-        private InternalChat ChatToInternalChat(Chat chat)
-        {
-            var members = chat.Members.Select(GetUserId);
-            return new InternalChat(chat.Id, members);
-        }
-
-        private string GetUserId(Entity entity)
-            => entity is AadUserConversationMember aadMember ? aadMember.Email : entity.Id; // extract coz its also used in IChannelsClient::182
-
-
+        // https://learn.microsoft.com/en-us/graph/api/chat-list-messages
         private async Task<SingleTaskResult> SyncChatInteractionsAsync(SyncContext context, IInteractionsStream stream, InternalChat chat, IChatInteractionFactory interactionFactory, CancellationToken stoppingToken)
         {
             const int maxPageSize = 50;
@@ -165,8 +152,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 });
             await pageIterator.IterateAsync(stoppingToken);
 
-
-            // https://learn.microsoft.com/en-us/graph/api/chat-list-messages?view=graph-rest-1.0&tabs=http
             return new SingleTaskResult(interactionsCount);
         }
     }

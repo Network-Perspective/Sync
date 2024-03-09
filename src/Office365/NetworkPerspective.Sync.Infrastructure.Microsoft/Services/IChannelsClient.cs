@@ -12,6 +12,7 @@ using Microsoft.Graph.Teams.Item.Channels.Item.Messages.Delta;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Infrastructure.Microsoft.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 
 using ChatMessage = Microsoft.Graph.Models.ChatMessage;
@@ -194,10 +195,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 .CreatePageIterator(_graphClient, membersResponse,
                 member =>
                 {
-                    if (member is AadUserConversationMember aadMember)
-                        result.Add(aadMember.Email);
-                    else
-                        result.Add(member.Id);
+                    result.Add(member.GetUserId());
 
                     return true;
                 },
