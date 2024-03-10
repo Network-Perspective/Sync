@@ -132,6 +132,8 @@ For MS Teams integration:
 * https://graph.microsoft.com/Channel.ReadBasic.All
 * https://graph.microsoft.com/ChannelMember.Read.All
 * https://graph.microsoft.com/ChannelMessage.Read.All
+* https://graph.microsoft.com/GroupMember.Read.All
+* https://graph.microsoft.com/Chat.Read.All
 
 ## Data Hashing
 One of the major requirements is to provide anonymity for fetched data from Office 365 API. It is achieved by using hashing algorithms to convert sensitive information such as employee names to some meaningless string of characters. Office 365 Connector uses the HMAC256 algorithm to convert values to hashed values. Hashing key is stored in Azure Key Vault.
