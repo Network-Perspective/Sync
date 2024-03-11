@@ -16,8 +16,9 @@
 			"minikube": "latest"
 		},
 		"ghcr.io/devcontainers/features/powershell:1": {},
-		"ghcr.io/azure/azure-dev/azd:0": {}
-	},
+		"ghcr.io/azure/azure-dev/azd:latest": {},
+		"ghcr.io/devcontainers/features/azure-cli:1": {}
+	},	
 	
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [80, 443, 8081, 8082, 8083, 8200],
