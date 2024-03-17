@@ -39,7 +39,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                     timestamp: thread.CreatedDateTime.Value.UtcDateTime,
                     source: _employees.Find(thread.From.User.Id),
                     target: _employees.Find(channelMember),
-                    channelId: channel.Id.ChannelId,
+                    channelId: channel.Id,
                     eventId: thread.Id);
 
                 interactions.Add(interaction.Hash(_hash));
@@ -52,13 +52,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             foreach (var reaction in thread.Reactions)
             {
-                var reactionHash = $"{reaction.CreatedDateTime.Value.Ticks}{reaction.User.User.Id.GetStableHashCode()}{channel.Id.ChannelId.GetStableHashCode()}";
+                var reactionHash = $"{reaction.CreatedDateTime.Value.Ticks}{reaction.User.User.Id.GetStableHashCode()}{channel.Id.GetStableHashCode()}";
 
                 var interaction = Interaction.CreateChatReaction(
                     timestamp: reaction.CreatedDateTime.Value.UtcDateTime,
                     source: _employees.Find(reaction.User.User.Id),
                     target: _employees.Find(thread.From.User.Id),
-                    channelId: channel.Id.ChannelId,
+                    channelId: channel.Id,
                     eventId: thread.Id + reactionHash.ToString(),
                     parentEventId: thread.Id);
 

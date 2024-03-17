@@ -25,7 +25,7 @@
         3. Open the URL in the output to grant admin consent
 
 .EXAMPLE
-    .\Deploy-OfficeConnectorKeyVault.ps1 -networkId "28b7d621-46d2-4fd4-8815-3148eefa8d6c" -resourceGroupName "myResourceGroup" -location "westeurope"
+    ./Deploy-OfficeConnectorKeyVault.ps1 -networkId "28b7d621-46d2-4fd4-8815-3148eefa8d6c" -resourceGroupName "myResourceGroup" -location "westeurope"
 #>
 Param(
     [Parameter(Mandatory=$true)]
@@ -75,9 +75,14 @@ function Create-AzureResources
     Write-Host "Creating KeyVault with name $keyVaultName"
 
     # check if keyvault exists
+    $publicIp = $null
     $keyVault = az keyvault list --resource-group $resourceGroupName --query "[?name=='$keyVaultName']" | ConvertFrom-Json
-    if ($keyVault -ne $null) {
+    if ($null -ne $keyVault) {
         Write-Host "✅ KeyVault $keyVaultName already exists"    
+        $publicIp = (Invoke-WebRequest ifconfig.me/ip).Content.Trim()
+        Write-Host "Updating KeyVault firewall to allow access from current ip $publicIp"
+        az keyvault network-rule add --name $keyVaultName --ip-address $publicIp | Out-Null
+        az keyvault update --name $keyVaultName --resource-group $resourceGroupName --default-action Allow | Out-Null
     } else {    
         $keyVault = az keyvault create --name $keyVaultName --resource-group $resourceGroupName --location $location | ConvertFrom-Json
         Write-Host "✅ KeyVault created"
@@ -88,7 +93,7 @@ function Create-AzureResources
     az keyvault secret set --vault-name $keyVault.name --name "health-check" --value "OK" | Out-Null
     Write-Host "- hashing key"
     $hashingKeySecret = az keyvault secret show --vault-name $keyVault.name --name "hashing-key" 2> $null | ConvertFrom-Json
-    if ($hashingKeySecret -eq $null) {    
+    if ($null -eq $hashingKeySecret) {    
         $hashingKey = [guid]::NewGuid().ToString() # create a hashing key as a random guid
         az keyvault secret set --vault-name $keyVault.name --name "hashing-key" --value $hashingKey | Out-Null
     }
@@ -102,7 +107,7 @@ function Create-AzureResources
     Write-Host "Creating service principal"
     # check if service principal exists
     $servicePrincipals = az ad sp list --display-name $npServicePrincipalName --query "[].appId" --output tsv
-    if ($servicePrincipals -ne $null) {
+    if ($null -ne $servicePrincipals) {
         Write-Host "✅ Service principal already exists"
     } else {
         az ad sp create --id $npServicePrincipalId | Out-Null
@@ -114,7 +119,10 @@ function Create-AzureResources
     az keyvault set-policy --name $keyVault.name --spn $npServicePrincipalId --secret-permissions get list set | Out-Null
     Write-Host "✅ Permissions granted"
 
-    return $keyVault.name
+    return @{
+        KeyVaultName = $keyVault.name
+        PublicIp = $publicIp
+    }
 }
 
 function Register-Appliation 
@@ -131,7 +139,7 @@ function Register-Appliation
     # Check if app already exists
     $appId = az ad app list --display-name $appName --query "[].appId"  --output tsv
 
-    if ($appId -ne $null) {
+    if ($null -ne $appId) {
         # ask for confirmation to delete the app
         Write-Host "Application '$appName' already exists"
         Write-Host
@@ -174,12 +182,14 @@ function Register-Appliation
     Add-Permission "df021288-bdef-4463-88db-98f22de89214" "User.Read.All"
     Add-Permission "8ba4a692-bc31-4128-9094-475872af8a53" "Calendars.ReadBasic.All"
     Add-Permission "693c5e45-0940-467d-9b8a-1022fb9d42ef" "Mail.ReadBasic.All"
+    Add-Permission "98830695-27a2-44f7-8c18-0c3ebc9698f6" "GroupMember.Read.All"
 
     if ($teamsPermissions -eq $true) {
         Add-Permission "2280dda6-0bfd-44ee-a2f4-cb867cfc4c1e" "Team.ReadBasic.All"
         Add-Permission "59a6b24b-4225-4393-8165-ebaec5f55d7a" "Channel.ReadBasic.All"
         Add-Permission "3b55498e-47ec-484f-8136-9013221c06a9" "ChannelMember.Read.All"
         Add-Permission "7b2449af-6ccd-4f4d-9f78-e550c193f0d1" "ChannelMessage.Read.All"
+        Add-Permission "6b7d71aa-70aa-4810-a8d9-5d9fb2830017" "Chat.Read.All"
     }
 
     Write-Host "✅ App permissions added"
@@ -208,7 +218,9 @@ Write-Host
 
 Write-Host "Creating azure resources ---------------------------------------------"
 Write-Host
-$keyVaultName = Create-AzureResources
+$azureResources = Create-AzureResources
+$keyVaultName = $azureResources.KeyVaultName
+$publicIp = $azureResources.PublicIp
 Write-Host "✅ Azure resources created"
 Write-Host
 
@@ -221,6 +233,13 @@ $appIdWithTeams = Register-Appliation -appName $appNameWithTeams -keyVaultName $
 Write-Host "Configuring KeyVault firewall ----------------------------------------"
 az keyvault network-rule add --name $keyVaultName --ip-address $firewallIp | Out-Null
 az keyvault update --name $keyVaultName --resource-group $resourceGroupName --default-action Deny | Out-Null
+
+Write-Host "Public ip: $publicIp"
+if ($null -ne $publicIp) {
+    Write-Host "Removing firewall rule that allows access from current ip $publicIp"
+    az keyvault network-rule remove --name $keyVaultName --ip-address $publicIp | Out-Null
+}
+
 Write-Host "✅ KeyVault firewall configured"
 
 # Print info about manual steps

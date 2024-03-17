@@ -13,11 +13,11 @@ using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Extensions;
-using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 
 using ChatMessage = Microsoft.Graph.Models.ChatMessage;
 using GraphChannel = Microsoft.Graph.Models.Channel;
 using InternalChannel = NetworkPerspective.Sync.Infrastructure.Microsoft.Models.Channel;
+using InternalTeam = NetworkPerspective.Sync.Infrastructure.Microsoft.Models.Team;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
@@ -72,11 +72,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             var result = new List<InternalChannel>();
 
-            var teamsIds = await GetAllTeamsIdsAsync(stoppingToken);
+            var teams = await GetAllTeamsAsync(stoppingToken);
 
-            foreach (var teamId in teamsIds)
+            foreach (var team in teams)
             {
-                var channels = await GetAllChannelsInSingleTeamAsync(teamId, stoppingToken);
+                var channels = await GetAllChannelsInSingleTeamAsync(team, stoppingToken);
 
                 result.AddRange(channels);
             }
@@ -86,9 +86,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return result;
         }
 
-        private async Task<List<string>> GetAllTeamsIdsAsync(CancellationToken stoppingToken)
+        private async Task<List<InternalTeam>> GetAllTeamsAsync(CancellationToken stoppingToken)
         {
-            var result = new List<string>();
+            var result = new List<InternalTeam>();
             var teamsResponse = await _graphClient
                 .Teams
                 .GetAsync(x =>
@@ -97,7 +97,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                     {
                         Select = new[]
                         {
-                            nameof(Team.Id)
+                            nameof(Team.Id),
+                            nameof(Team.DisplayName)
                         }
                     };
                 }, stoppingToken);
@@ -106,7 +107,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 .CreatePageIterator(_graphClient, teamsResponse,
                 team =>
                 {
-                    result.Add(team.Id);
+                    result.Add(new InternalTeam(team.Id, team.DisplayName));
                     return true;
                 },
                 request =>
@@ -118,11 +119,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return result;
         }
 
-        private async Task<List<InternalChannel>> GetAllChannelsInSingleTeamAsync(string teamId, CancellationToken stoppingToken)
+        private async Task<List<InternalChannel>> GetAllChannelsInSingleTeamAsync(InternalTeam team, CancellationToken stoppingToken)
         {
             var result = new List<InternalChannel>();
             var channelsResponse = await _graphClient
-                .Teams[teamId].AllChannels
+                .Teams[team.Id].AllChannels
                 .GetAsync(x =>
                 {
                     x.QueryParameters = new()
@@ -139,9 +140,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 .CreatePageIterator(_graphClient, channelsResponse,
                 async channel =>
                 {
-                    var identifier = ChannelIdentifier.Create(teamId, channel.Id);
-                    var userIds = await GetChannelMembersIdsAsync(identifier, stoppingToken);
-                    var internalChannel = new InternalChannel(identifier, channel.DisplayName, userIds);
+                    var userIds = await GetChannelMembersIdsAsync(team.Id, channel.Id, stoppingToken);
+                    var internalChannel = new InternalChannel(channel.Id, channel.DisplayName, team, userIds);
 
                     result.Add(internalChannel);
                     return true;
@@ -161,7 +161,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             var interactionsCount = 0;
 
-            var threads = await GetThreadsAsync(channel.Id, context.TimeRange.Start, stoppingToken);
+            var threads = await GetThreadsAsync(channel, context.TimeRange.Start, stoppingToken);
 
             foreach (var thread in threads)
             {
@@ -169,8 +169,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 var sentThreadInteractionsCount = await stream.SendAsync(threadInteractions);
                 interactionsCount += sentThreadInteractionsCount;
 
-                var replies = await GetThreadsRepliesAsync(channel.Id, thread, stoppingToken);
-                var repliesInteractions = interactionFactory.CreateFromThreadRepliesMessage(replies, channel.Id.ChannelId, thread.Id, thread.From.User.Id, timeRange);
+                var replies = await GetThreadsRepliesAsync(channel, thread, stoppingToken);
+                var repliesInteractions = interactionFactory.CreateFromThreadRepliesMessage(replies, channel.Id, thread.Id, thread.From.User.Id, timeRange);
                 var sentRepliesInteractionsCount = await stream.SendAsync(repliesInteractions);
                 interactionsCount += sentRepliesInteractionsCount;
             }
@@ -181,13 +181,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return new SingleTaskResult(interactionsCount);
         }
 
-        private async Task<ISet<string>> GetChannelMembersIdsAsync(ChannelIdentifier channel, CancellationToken stoppingToken)
+        private async Task<ISet<string>> GetChannelMembersIdsAsync(string teamId, string channelId, CancellationToken stoppingToken)
         {
             var result = new HashSet<string>();
 
             var membersResponse = await _graphClient
-                .Teams[channel.TeamId]
-                .Channels[channel.ChannelId]
+                .Teams[teamId]
+                .Channels[channelId]
                 .Members
                 .GetAsync(cancellationToken: stoppingToken);
 
@@ -207,14 +207,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             return result;
         }
-        private async Task<List<ChatMessage>> GetThreadsAsync(ChannelIdentifier channel, DateTime from, CancellationToken stoppingToken)
+        private async Task<List<ChatMessage>> GetThreadsAsync(InternalChannel channel, DateTime from, CancellationToken stoppingToken)
         {
             var filterString = $"lastModifiedDateTime gt {from:s}Z";
             var result = new List<ChatMessage>();
 
             var threadsResponse = await _graphClient
-                .Teams[channel.TeamId]
-                .Channels[channel.ChannelId]
+                .Teams[channel.Team.Id]
+                .Channels[channel.Id]
                 .Messages
                 .Delta
                 .GetAsDeltaGetResponseAsync(x =>
@@ -244,13 +244,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 .ToList();
         }
 
-        private async Task<List<ChatMessage>> GetThreadsRepliesAsync(ChannelIdentifier channel, ChatMessage thread, CancellationToken stoppingToken)
+        private async Task<List<ChatMessage>> GetThreadsRepliesAsync(InternalChannel channel, ChatMessage thread, CancellationToken stoppingToken)
         {
             var result = new List<ChatMessage>();
 
             var threadsRepliesResponse = await _graphClient
-                .Teams[channel.TeamId]
-                .Channels[channel.ChannelId]
+                .Teams[channel.Team.Id]
+                .Channels[channel.Id]
                 .Messages[thread.Id]
                 .Replies
                 .GetAsync(x =>

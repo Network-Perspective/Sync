@@ -121,24 +121,110 @@ To communicate with Office 365 API Office 365 Connector uses public Microsoft li
 * Azure.Identity
 * Microsoft.Graph
 
-For Outlook integration the Office Connector needs to be privileged to use the following Microsoft Privileges:
+For Outlook integration the Office Connector needs to be privileged to use the following [Microsoft Graph Privileges](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall):
 
-* https://graph.microsoft.com/User.Read.All
-* https://graph.microsoft.com/Mail.ReadBasic.All
-* https://graph.microsoft.com/Calendars.ReadBasic.All
+* User.Read.All
+* Mail.ReadBasic.All
+* Calendars.ReadBasic.All
+* GroupMember.Read.All
 
 For MS Teams integration:
-* https://graph.microsoft.com/Team.ReadBasic.All
-* https://graph.microsoft.com/Channel.ReadBasic.All
-* https://graph.microsoft.com/ChannelMember.Read.All
-* https://graph.microsoft.com/ChannelMessage.Read.All
-* https://graph.microsoft.com/GroupMember.Read.All
-* https://graph.microsoft.com/Chat.Read.All
+* Team.ReadBasic.All
+* Channel.ReadBasic.All
+* ChannelMember.Read.All
+* ChannelMessage.Read.All
+* GroupMember.Read.All
+* Chat.Read.All
+
 
 ## Data Hashing
 One of the major requirements is to provide anonymity for fetched data from Office 365 API. It is achieved by using hashing algorithms to convert sensitive information such as employee names to some meaningless string of characters. Office 365 Connector uses the HMAC256 algorithm to convert values to hashed values. Hashing key is stored in Azure Key Vault.
 
 <img src="images/dataflow.png"  width="100%">
+
+## Detailed use of permissions
+### User.Read.All
+|   |   |   |   |   |
+|---|---|---|---|---|
+| Identifier  | df021288-bdef-4463-88db-98f22de89214 
+| DisplayText | Read all users' full profiles
+| Description |	Allows the app to read user profiles without a signed in user.
+| AdminConsent | Required
+| How it is used  | Office connector uses this permission to read basic information about users in the company such as user email, user id and "Department" attribute. This information is send in both hashed and unhashed streams. Hashed email is used to join data with other connectors such as slack or excel. Hashed used id is used to handle situation when user changes her email address. Hashed Department name is used to mark a person as a member of the department thus allowing to display reports aggregating all users from a department. The email, user id and "Department" are also send separately in unhashed stream to create a list of application users to allow application admin set permissions and roles for each specific user to access report concerning her department.
+
+### Mail.ReadBasic.All
+|   |   |   |   |   |
+|---|---|---|---|---|
+| Identifier  |  	693c5e45-0940-467d-9b8a-1022fb9d42ef
+| DisplayText | Read basic mail in all mailboxes
+| Description |	Allows the app to read basic mail properties in all mailboxes without a signed-in user. Includes all properties except body, previewBody, attachments and any extended properties.
+| AdminConsent | Required
+| How it is used  | Office connector uses this permission to read email **metadata**. All metadata excluding email timestamp is hashed, no unhashed information about user correspondence ever leaves the connector. The metadata includes hashed email addresses of the sender and all email recipients along with hashed email id. 
+
+### Calendars.ReadBasic.All
+|   |   |   |   |   |
+|---|---|---|---|---|
+| Identifier  | 8ba4a692-bc31-4128-9094-475872af8a53
+| DisplayText | RRead basic details of calendars in all mailboxes
+| Description |	Allows the app to read events of all calendars, except for properties such as body, attachments, and extensions, without a signed-in user.
+| AdminConsent | Required
+| How it is used  | Office connector uses this permission to read calendar events **metadata**. The metadata includes hashed email addresses of all the meeting participants along with hashed event id and a label indicating recurrence of the meeting (nor recurring, daily, weekly, monthly).
+
+### GroupMember.Read.All
+|   |   |   |   |   |
+|---|---|---|---|---|
+| Identifier  | 8ba4a692-bc31-4128-9094-475872af8a53
+| DisplayText | Read basic details of calendars in all mailboxes
+| Description |	Allows the app to read events of all calendars, except for properties such as body, attachments, and extensions, without a signed-in user.
+| AdminConsent | Required
+| How it is used  | Office connector can optionally use this to read users group membership to allow whitelist filtering based on Entra Id group name. The connector fetches whitelist definition from Network Perspective API and if it includes group name within the whitelist (or blacklist) it will limit processing of any data to people that belong to specified group. No information about who belongs to which Entra Id group ever leaves the connector.
+
+### Team.ReadBasic.All
+|   |   |   |   |   |
+|---|---|---|---|---|
+| Identifier  | 2280dda6-0bfd-44ee-a2f4-cb867cfc4c1e
+| DisplayText | Get a list of all teams
+| Description |	Get a list of all teams, without a signed-in user.
+| AdminConsent | Required
+| How it is used | Office connector uses this permission to iterate over all teams in the company to index messages appearing on MS Teams channels. The permission itself is used as an iterator.
+
+### Channel.ReadBasic.All
+|   |   |   |   |   |
+|---|---|---|---|---|
+| Identifier  | 59a6b24b-4225-4393-8165-ebaec5f55d7a
+| DisplayText | Read the names and descriptions of all channels 	
+| Description |	Read all channel names and channel descriptions, without a signed-in user.
+| AdminConsent | Required
+| How it is used | Office connector uses this permission to iterate over all channels within all teams to index messages channels. The permission itself is used as an iterator.
+
+### ChannelMember.Read.All
+|   |   |   |   |   |
+|---|---|---|---|---|
+| Identifier  | 3b55498e-47ec-484f-8136-9013221c06a9
+| DisplayText | Read the members of all channels
+| Description |	Read the members of all channels, without a signed-in user.
+| AdminConsent | Required
+| How it is used | Office connector uses this permission to list members of a MS Teams channel. A list of members is used within connector to generate hashed metadata about interactions of people participating within the channel. Details on how the interactions are calculated are described [separate document](interactions.md), however to summarize a new thread created within a channel create an interaction between the message sender and all members of the channel. The channel member emails and ids are never sent unhashed.
+
+### ChannelMessage.Read.All
+|   |   |   |   |   |
+|---|---|---|---|---|
+| Identifier  | 7b2449af-6ccd-4f4d-9f78-e550c193f0d1
+| DisplayText | Read all channel messages
+| Description |	Allows the app to read all channel messages in Microsoft Teams
+| AdminConsent | Required
+| How it is used | Office connector uses this permission to read messages from ms teams channels to generate interactions. Details on how the interactions are calculated are described [separate document](interactions.md), however to we shall emphasize that the content of messages is not processed and only hashed metadata is ever sent out of the connector.
+
+### Chat.Read.All
+|   |   |   |   |   |
+|---|---|---|---|---|
+| Identifier  | 7b2449af-6ccd-4f4d-9f78-e550c193f0d1
+| DisplayText | Read all chat messages	
+| Description |	Allows the app to read all 1-to-1 or group chat messages in Microsoft Teams.
+| AdminConsent | Required
+| How it is used | Office connector uses this permission to read messages from chat messages to generate interactions. Details on how the interactions are calculated are described [separate document](interactions.md), however to we shall emphasize that the content of messages is not processed and only hashed metadata is ever sent out of the connector.
+
+
 
 ## Logging
 The application uses standard .NET logging mechanisms. In addition, it uses 3rd party library for writing logs to the file system. The application uses different log levels to express different kind of operations. Logs cannot contain any data considered sensitive such as, for example, tokens, employee data, etc.

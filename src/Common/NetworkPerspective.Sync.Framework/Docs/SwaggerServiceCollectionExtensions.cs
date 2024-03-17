@@ -12,13 +12,13 @@ namespace NetworkPerspective.Sync.Framework.Docs
 {
     public static class SwaggerServiceCollectionExtensions
     {
-        public static IServiceCollection AddDocumentation(this IServiceCollection services)
+        public static IServiceCollection AddDocumentation(this IServiceCollection services, Assembly serviceAssembly)
         {
             services.AddSwaggerGen(options =>
             {
                 options.AddSecurity();
                 options.AddMetadata();
-                options.AddXmlComments();
+                options.AddXmlComments(serviceAssembly);
                 options.EnableAnnotations();
                 options.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["action"]}");
                 options.IgnoreObsoleteActions();
@@ -75,9 +75,9 @@ namespace NetworkPerspective.Sync.Framework.Docs
             });
         }
 
-        private static void AddXmlComments(this SwaggerGenOptions options)
+        private static void AddXmlComments(this SwaggerGenOptions options, Assembly serviceAssembly)
         {
-            var xmlFileApplication = $"{Assembly.GetEntryAssembly().GetName().Name}.xml";
+            var xmlFileApplication = $"{serviceAssembly.GetName().Name}.xml";
             var xmlPathApplication = Path.Combine(AppContext.BaseDirectory, xmlFileApplication);
             options.IncludeXmlComments(xmlPathApplication);
 
