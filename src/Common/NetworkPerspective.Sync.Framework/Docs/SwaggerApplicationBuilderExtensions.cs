@@ -1,8 +1,10 @@
-﻿
+﻿using Microsoft.AspNetCore.Builder;
+
+#if DEBUG
 using System.Collections.Generic;
 
-using Microsoft.AspNetCore.Builder;
 using Microsoft.OpenApi.Models;
+#endif
 
 namespace NetworkPerspective.Sync.Framework.Docs
 {
@@ -10,8 +12,6 @@ namespace NetworkPerspective.Sync.Framework.Docs
     {
         public static void UseDocumentation(this IApplicationBuilder app)
         {
-            // this breaks ci tests for some reason
-            //
 #if DEBUG
             app.UseSwagger(c =>
             {

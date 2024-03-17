@@ -49,7 +49,7 @@ namespace NetworkPerspective.Sync.Excel
                 .AddHealthChecks();
 
             services
-                .AddDocumentation()
+                .AddDocumentation(typeof(Startup).Assembly)
                 .AddApplication(_config.GetSection(ConnectorConfigSection))
                 .AddExcel(_config.GetSection(ConnectorConfigSection))
                 .AddSecretRepositoryClient(_config.GetSection(SecretRepositoryClientBaseConfigSection), healthChecksBuilder)
