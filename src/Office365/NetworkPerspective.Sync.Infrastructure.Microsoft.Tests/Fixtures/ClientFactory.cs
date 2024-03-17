@@ -31,7 +31,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Fixtures
                     Retries = new[] { TimeSpan.FromMilliseconds(100) }
                 });
 
-            var networkProperties = new MicrosoftNetworkProperties(syncMsTeams, null);
+            var networkProperties = new MicrosoftNetworkProperties(syncMsTeams, true,/* true, true,*/ null);
             var network = Network<MicrosoftNetworkProperties>.Create(networkId, networkProperties, DateTime.UtcNow);
             var networkService = new Mock<INetworkService>();
             networkService

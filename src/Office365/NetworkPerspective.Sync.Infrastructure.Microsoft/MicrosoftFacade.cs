@@ -88,8 +88,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 
             var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<EmailInteractionFactory>());
             var meetingInteractionFactory = new MeetingInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<MeetingInteractionFactory>());
-            var channelInteractionFactory = new ChannelInteractionFactory(context.HashFunction, employees);
-            var chatInteractionFactory = new ChatInteractionFactory(context.HashFunction, employees);
 
             var usersEmails = employees
                 .GetAllInternal()
@@ -102,11 +100,17 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 
             if (network.Properties.SyncMsTeams)
             {
+                var channelInteractionFactory = new ChannelInteractionFactory(context.HashFunction, employees);
                 var resultChannels = await _channelsClient.SyncInteractionsAsync(context, channels, stream, channelInteractionFactory, stoppingToken);
-                var resultChat = await _chatsClient.SyncInteractionsAsync(context, stream, usersEmails, chatInteractionFactory, stoppingToken);
-                result = SyncResult.Combine(result, resultChannels, resultChat);
-            }
+                result = SyncResult.Combine(result, resultChannels);
 
+                if (network.Properties.SyncChats)
+                {
+                    var chatInteractionFactory = new ChatInteractionFactory(context.HashFunction, employees);
+                    var resultChat = await _chatsClient.SyncInteractionsAsync(context, stream, usersEmails, chatInteractionFactory, stoppingToken);
+                    result = SyncResult.Combine(result, resultChat);
+                }
+            }
 
             _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
 
