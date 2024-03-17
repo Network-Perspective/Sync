@@ -52,7 +52,7 @@ namespace NetworkPerspective.Sync.Office365
                 .AddHealthChecks();
 
             services
-                .AddDocumentation()
+                .AddDocumentation(typeof(Startup).Assembly)
                 .AddApplication(_config.GetSection(ConnectorConfigSection))
                 .AddMicrosoft(_config.GetSection(MicrosoftConfigSection))
                 .AddSecretRepositoryClient(_config.GetSection(SecretRepositoryClientBaseConfigSection), healthChecksBuilder)

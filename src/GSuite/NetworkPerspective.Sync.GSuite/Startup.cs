@@ -54,7 +54,7 @@ namespace NetworkPerspective.Sync.GSuite
                 .AddHealthChecks();
 
             services
-                .AddDocumentation()
+                .AddDocumentation(typeof(Startup).Assembly)
                 .AddApplication(_config.GetSection(ConnectorConfigSection))
                 .AddGoogleDataSource(_config.GetSection(GoogleConfigSection))
                 .AddSecretRepositoryClient(_config.GetSection(SecretRepositoryClientBaseConfigSection), healthChecksBuilder)

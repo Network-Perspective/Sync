@@ -53,7 +53,7 @@ namespace NetworkPerspective.Sync.Slack
                 .AddHealthChecks();
 
             services
-                .AddDocumentation()
+                .AddDocumentation(typeof(Startup).Assembly)
                 .AddApplication(_config.GetSection(ConnectorConfigSection))
                 .AddSlack(_config.GetSection(SlackConfigSection))
                 .AddSecretRepositoryClient(_config.GetSection(SecretRepositoryClientBaseConfigSection), healthChecksBuilder)
