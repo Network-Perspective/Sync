@@ -4,14 +4,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Models
 {
     internal class Channel
     {
-        public ChannelIdentifier Id { get; }
+        public string Id { get; }
         public string Name { get; }
+        public Team Team { get; }
         public IEnumerable<string> UserIds { get; }
 
-        public Channel(ChannelIdentifier id, string name, IEnumerable<string> userIds)
+        public Channel(string id, string name, Team team, IEnumerable<string> userIds)
         {
             Id = id;
             Name = name;
+            Team = team;
             UserIds = userIds;
         }
     }

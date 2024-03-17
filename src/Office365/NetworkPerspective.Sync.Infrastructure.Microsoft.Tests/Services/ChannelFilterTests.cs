@@ -20,9 +20,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             // Arrange
             var input = new[]
             {
-                new Channel(ChannelIdentifier.Create("team1", "channel1"), "channelName11", new[] { "user1", "user2" }),
-                new Channel(ChannelIdentifier.Create("team1", "channel2"), "channelName12", new[] { "user1" }),
-                new Channel(ChannelIdentifier.Create("team2", "channel1"), "channelName21", new[] { "user2" })
+                new Channel("channel1", "channelName11", new Team("team1", "TeamName1"), new[] { "user1", "user2" }),
+                new Channel("channel2", "channelName12", new Team("team1", "TeamName1"), new[] { "user1" }),
+                new Channel("channel1", "channelName21", new Team("team2", "TeamName1"), new[] { "user2" })
             };
 
             var filter = new EmployeeFilter(new[] { "user1" }, Array.Empty<string>());
