@@ -8,11 +8,11 @@ using Microsoft.Graph.Models;
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers;
-using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 
 using Xunit;
 
 using DomainChannel = NetworkPerspective.Sync.Infrastructure.Microsoft.Models.Channel;
+using DomainTeam = NetworkPerspective.Sync.Infrastructure.Microsoft.Models.Team;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Mappers
 {
@@ -27,8 +27,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Mappers
 
             var channels = new[]
             {
-                new DomainChannel(ChannelIdentifier.Create("TeamId1", "ChannelId1"), "ChannelName1", new[] { userId1, userId2 } ),
-                new DomainChannel(ChannelIdentifier.Create("TeamId1", "ChannelId2"), "ChannelName2", new[] { userId1, Guid.NewGuid().ToString() } ),
+                new DomainChannel("ChannelId1", "ChannelName1", new DomainTeam("TeamId1", "TeamName1"), new[] { userId1, userId2 } ),
+                new DomainChannel("ChannelId2", "ChannelName2", new DomainTeam("TeamId1", "TeamName1"), new[] { userId1, Guid.NewGuid().ToString() } ),
             };
 
             var users = new[]
