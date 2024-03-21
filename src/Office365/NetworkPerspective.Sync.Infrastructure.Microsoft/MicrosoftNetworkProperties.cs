@@ -9,8 +9,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
     public class MicrosoftNetworkProperties : NetworkProperties
     {
         private new const bool DefaultSyncGroups = true;
-        private const bool DefaultSyncChannelsNames = true;
-        private const bool DefaultSyncGroupAccess = true;
+        private const bool DefaultSyncChannelsNames = false;
+        private const bool DefaultSyncGroupAccess = false;
 
         public bool SyncMsTeams { get; set; } = true;
         public bool SyncChats { get; set; } = true;
