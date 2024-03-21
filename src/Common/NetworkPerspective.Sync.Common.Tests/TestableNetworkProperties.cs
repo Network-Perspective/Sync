@@ -7,7 +7,7 @@ namespace NetworkPerspective.Sync.Common.Tests
 {
     public class TestableNetworkProperties : NetworkProperties
     {
-        public TestableNetworkProperties() : base(true, null)
+        public TestableNetworkProperties() : base(true, true, null)
         { }
 
         public string StringProp { get; set; } = string.Empty;

@@ -11,10 +11,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         public bool AutoJoinChannels { get; private set; } = true;
         public bool UsesAdminPrivileges { get; private set; } = false;
 
-        public SlackNetworkProperties() : base(DefaultSyncGroups, null)
+        public SlackNetworkProperties() : base(DefaultSyncGroups, DefaultSyncChannelsNames, null)
         { }
 
-        public SlackNetworkProperties(bool autoJoinChannels, bool requireAdminPrivileges, bool syncChannelsNames, Uri externalKeyVaultUri) : base(syncChannelsNames, externalKeyVaultUri)
+        public SlackNetworkProperties(bool autoJoinChannels, bool requireAdminPrivileges, bool syncChannelsNames, Uri externalKeyVaultUri)
+            : base(syncChannelsNames, syncChannelsNames, externalKeyVaultUri)
         {
             AutoJoinChannels = autoJoinChannels;
             UsesAdminPrivileges = requireAdminPrivileges;
