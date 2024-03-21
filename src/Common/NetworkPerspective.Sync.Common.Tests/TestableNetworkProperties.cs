@@ -32,9 +32,9 @@ namespace NetworkPerspective.Sync.Common.Tests
         {
             var props = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>(nameof(StringProp), StringProp),
-                new KeyValuePair<string, string>(nameof(IntProp), IntProp.ToString()),
-                new KeyValuePair<string, string>(nameof(BoolProp), BoolProp.ToString())
+                new(nameof(StringProp), StringProp),
+                new(nameof(IntProp), IntProp.ToString()),
+                new(nameof(BoolProp), BoolProp.ToString())
             };
 
             props.AddRange(base.GetAll());

@@ -35,8 +35,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         {
             var props = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>(nameof(AutoJoinChannels), AutoJoinChannels.ToString()),
-                new KeyValuePair<string, string>(nameof(UsesAdminPrivileges), UsesAdminPrivileges.ToString()),
+                new(nameof(AutoJoinChannels), AutoJoinChannels.ToString()),
+                new(nameof(UsesAdminPrivileges), UsesAdminPrivileges.ToString()),
             };
 
             props.AddRange(base.GetAll());

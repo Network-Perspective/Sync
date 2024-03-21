@@ -41,7 +41,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Networks
         {
             var result = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>(nameof(SyncGroups), SyncGroups.ToString())
+                new(nameof(SyncGroups), SyncGroups.ToString())
             };
 
             if (ExternalKeyVaultUri is not null)

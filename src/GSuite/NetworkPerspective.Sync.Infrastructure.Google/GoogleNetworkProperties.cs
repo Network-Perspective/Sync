@@ -38,8 +38,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         {
             var props = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>(nameof(AdminEmail), AdminEmail),
-                new KeyValuePair<string, string>(nameof(Domain), Domain.ToString()),
+                new(nameof(AdminEmail), AdminEmail),
+                new(nameof(Domain), Domain.ToString())
             };
 
             props.AddRange(base.GetAll());

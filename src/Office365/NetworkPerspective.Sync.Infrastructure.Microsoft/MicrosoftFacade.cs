@@ -63,7 +63,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 
             var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.NetworkId, stoppingToken));
 
-            IEnumerable<Models.Channel> channels = network.Properties.SyncMsTeams == true
+            var syncChannelsNames = network.Properties.SyncMsTeams == true && network.Properties.SyncChannelsNames == true;
+
+            IEnumerable<Models.Channel> channels = syncChannelsNames
                 ? await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken))
                 : Enumerable.Empty<Models.Channel>();
 
