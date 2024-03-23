@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 using NetworkPerspective.Sync.Application.Domain;
+using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
@@ -117,6 +118,41 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             // Assert
             _dataSourceMock
                 .Verify(x => x.SyncInteractionsAsync(It.Is<IInteractionsStream>(x => x.GetType() == typeof(FilteredInteractionStreamDecorator)), context, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task ShouldFilterChannelGroupsOnDefaultNetworkProperties()
+        {
+            // Arrange
+            var start = new DateTime(2022, 01, 01);
+            var end = new DateTime(2022, 01, 02);
+            var timeRange = new TimeRange(start, end);
+            var networkProperties = new NetworkProperties(true, false, null);
+            var context = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, networkProperties, "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+
+            var employeeId = EmployeeId.Create("foo", "bar");
+            var departmentGroup = Group.Create("group1Id", "groupName1", Group.DepartmentCatergory);
+            var channelGroup = Group.Create("group2Id", "groupName2", Group.ChannelCategory);
+            var groups = new[] { departmentGroup, channelGroup };
+            var employee = Employee.CreateInternal(employeeId, groups);
+
+            _dataSourceMock
+                .Setup(x => x.GetHashedEmployeesAsync(context, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new EmployeeCollection(new[] { employee }, HashFunction.Empty));
+
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, Mock.Of<ISyncHistoryService>(), _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object, new Clock());
+
+            // Act
+            await syncService.SyncAsync(context);
+
+            // Assert
+            _networkPerspectiveCoreMock
+                .Verify(
+                    x => x.PushGroupsAsync(
+                        It.IsAny<SecureString>(),
+                        It.Is<IEnumerable<Group>>(x => x.Count() == 1 && x.Single().Category != Group.ChannelCategory),
+                        It.IsAny<CancellationToken>()),
+                    Times.Once);
         }
 
         [Fact]
