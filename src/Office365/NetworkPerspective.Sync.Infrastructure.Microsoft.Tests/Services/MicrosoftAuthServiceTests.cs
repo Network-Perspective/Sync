@@ -71,7 +71,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
                     .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, It.IsAny<CancellationToken>()))
                     .ReturnsAsync(clientId.ToSecureString());
 
-                var networkProperties = new MicrosoftNetworkProperties(false, false, /* false, false,*/ null);
+                var networkProperties = new MicrosoftNetworkProperties(false, false, false, false, null);
                 var network = Network<MicrosoftNetworkProperties>.Create(networkId, networkProperties, DateTime.UtcNow);
                 _networkServiceMock
                     .Setup(x => x.GetAsync<MicrosoftNetworkProperties>(networkId, It.IsAny<CancellationToken>()))

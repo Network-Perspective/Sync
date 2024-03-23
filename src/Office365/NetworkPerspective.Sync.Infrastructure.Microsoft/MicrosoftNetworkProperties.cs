@@ -9,21 +9,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
     public class MicrosoftNetworkProperties : NetworkProperties
     {
         private new const bool DefaultSyncGroups = true;
+        private const bool DefaultSyncGroupAccess = false;
 
         public bool SyncMsTeams { get; set; } = true;
         public bool SyncChats { get; set; } = true;
-        //public bool SyncChannelsNames { get; set; } = false;
-        //public bool SyncGroupAccess { get; set; } = false;
+        public bool SyncGroupAccess { get; set; } = DefaultSyncGroupAccess;
 
-        public MicrosoftNetworkProperties(bool syncMsTeams, bool syncChats,/* bool syncChannelsNames, bool syncGroupAccess, */ Uri externalKeyVaultUri) : base(DefaultSyncGroups, externalKeyVaultUri)
+        public MicrosoftNetworkProperties(bool syncMsTeams, bool syncChats, bool syncChannelsNames, bool syncGroupAccess, Uri externalKeyVaultUri) : base(DefaultSyncGroups, DefaultSyncChannelsNames, externalKeyVaultUri)
         {
             SyncMsTeams = syncMsTeams;
             SyncChats = syncChats;
-            //SyncChannelsNames = syncChannelsNames;
-            //SyncGroupAccess = syncGroupAccess;
+            SyncChannelsNames = syncChannelsNames;
+            SyncGroupAccess = syncGroupAccess;
         }
 
-        public MicrosoftNetworkProperties() : base(DefaultSyncGroups, null)
+        public MicrosoftNetworkProperties() : base(DefaultSyncGroups, DefaultSyncChannelsNames, null)
         { }
 
         public override void Bind(IEnumerable<KeyValuePair<string, string>> properties)
@@ -34,11 +34,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             if (properties.Any(x => x.Key == nameof(SyncChats)))
                 SyncChats = bool.Parse(properties.Single(x => x.Key == nameof(SyncChats)).Value);
 
-            //if (properties.Any(x => x.Key == nameof(SyncChannelsNames)))
-            //    SyncChannelsNames = bool.Parse(properties.Single(x => x.Key == nameof(SyncChannelsNames)).Value);
-
-            //if (properties.Any(x => x.Key == nameof(SyncGroupAccess)))
-            //    SyncGroupAccess = bool.Parse(properties.Single(x => x.Key == nameof(SyncGroupAccess)).Value);
+            if (properties.Any(x => x.Key == nameof(SyncGroupAccess)))
+                SyncGroupAccess = bool.Parse(properties.Single(x => x.Key == nameof(SyncGroupAccess)).Value);
 
             base.Bind(properties);
         }
@@ -47,10 +44,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         {
             var props = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>(nameof(SyncMsTeams), SyncMsTeams.ToString()),
-                new KeyValuePair<string, string>(nameof(SyncChats), SyncChats.ToString()),
-                //new KeyValuePair<string, string>(nameof(SyncChannelsNames), SyncChannelsNames.ToString()),
-                //new KeyValuePair<string, string>(nameof(SyncGroupAccess), SyncGroupAccess.ToString()),
+                new(nameof(SyncMsTeams), SyncMsTeams.ToString()),
+                new(nameof(SyncChats), SyncChats.ToString()),
+                new(nameof(SyncGroupAccess), SyncGroupAccess.ToString()),
             };
 
             props.AddRange(base.GetAll());

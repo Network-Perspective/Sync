@@ -7,17 +7,20 @@ namespace NetworkPerspective.Sync.Application.Domain.Networks
     public class NetworkProperties
     {
         protected const bool DefaultSyncGroups = false;
+        protected const bool DefaultSyncChannelsNames = false;
 
         public bool SyncGroups { get; private set; } = DefaultSyncGroups;
+        public bool SyncChannelsNames { get; set; } = DefaultSyncChannelsNames;
 
         public Uri ExternalKeyVaultUri { get; private set; } = null;
 
         public NetworkProperties()
         { }
 
-        public NetworkProperties(bool syncGroups, Uri externalKeyVaultUri)
+        public NetworkProperties(bool syncGroups, bool syncChannelsNames, Uri externalKeyVaultUri)
         {
             SyncGroups = syncGroups;
+            SyncChannelsNames = syncChannelsNames;
             ExternalKeyVaultUri = externalKeyVaultUri;
         }
 
@@ -33,6 +36,9 @@ namespace NetworkPerspective.Sync.Application.Domain.Networks
             if (properties.Any(x => x.Key == nameof(SyncGroups)))
                 SyncGroups = bool.Parse(properties.Single(x => x.Key == nameof(SyncGroups)).Value);
 
+            if (properties.Any(x => x.Key == nameof(SyncChannelsNames)))
+                SyncChannelsNames = bool.Parse(properties.Single(x => x.Key == nameof(SyncChannelsNames)).Value);
+
             if (properties.Any(x => x.Key == nameof(ExternalKeyVaultUri)))
                 ExternalKeyVaultUri = new Uri(properties.Single(x => x.Key == nameof(ExternalKeyVaultUri)).Value);
         }
@@ -41,7 +47,8 @@ namespace NetworkPerspective.Sync.Application.Domain.Networks
         {
             var result = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>(nameof(SyncGroups), SyncGroups.ToString())
+                new(nameof(SyncGroups), SyncGroups.ToString()),
+                new(nameof(SyncChannelsNames), SyncChannelsNames.ToString())
             };
 
             if (ExternalKeyVaultUri is not null)

@@ -13,13 +13,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         public string AdminEmail { get; set; }
         public string Domain { get; set; }
 
-        public GoogleNetworkProperties(string adminEmail, Uri externalKeyVaultUri) : base(DefaultSyncGroups, externalKeyVaultUri)
+        public GoogleNetworkProperties(string adminEmail, Uri externalKeyVaultUri) : base(DefaultSyncGroups, DefaultSyncChannelsNames, externalKeyVaultUri)
         {
             AdminEmail = adminEmail;
             Domain = AdminEmail.Split('@').Skip(1).Single();
         }
 
-        public GoogleNetworkProperties() : base(DefaultSyncGroups, null)
+        public GoogleNetworkProperties() : base(DefaultSyncGroups, DefaultSyncChannelsNames, null)
         { }
 
         public override void Bind(IEnumerable<KeyValuePair<string, string>> properties)
@@ -38,8 +38,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         {
             var props = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>(nameof(AdminEmail), AdminEmail),
-                new KeyValuePair<string, string>(nameof(Domain), Domain.ToString()),
+                new(nameof(AdminEmail), AdminEmail),
+                new(nameof(Domain), Domain.ToString())
             };
 
             props.AddRange(base.GetAll());

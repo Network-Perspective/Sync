@@ -115,8 +115,16 @@ namespace NetworkPerspective.Sync.Application.Services
 
             var groups = employees
                 .GetAllInternal()
-                .SelectMany(x => x.Groups) // flatten groups
+                .SelectMany(x => x.Groups)          // flatten groups
                 .ToHashSet(Group.EqualityComparer); // only distinct values
+
+            if (!context.NetworkProperties.SyncChannelsNames)
+            {
+                groups = groups
+                    .Where(x => x.Category != Group.ChannelCategory)
+                    .ToHashSet(Group.EqualityComparer);
+            }
+
             await context.StatusLogger.LogInfoAsync($"Received {groups.Count} groups", stoppingToken);
 
             await _networkPerspectiveCore.PushGroupsAsync(context.AccessToken, groups, stoppingToken);
