@@ -9,8 +9,6 @@ using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Infrastructure.Microsoft;
 using NetworkPerspective.Sync.Office365.Dtos;
 
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace NetworkPerspective.Sync.Office365.Controllers
 {
     public class NetworksController : NetworksControllerBase
@@ -24,11 +22,13 @@ namespace NetworkPerspective.Sync.Office365.Controllers
         /// </summary>
         /// <param name="config">Network configuration</param>
         /// <param name="stoppingToken">Stopping token</param>
-        /// <returns>Result</returns>
+        /// <response code="200">Network added</response>
+        /// <response code="401">Missing or invalid authorization token</response>
+        /// <response code="500">Internal server error</response>
         [HttpPost]
-        [SwaggerResponse(StatusCodes.Status200OK, "Network added", typeof(string))]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddAsync([FromBody] NetworkConfigDto config, CancellationToken stoppingToken = default)
         {
             var properties = new MicrosoftNetworkProperties(config.SyncMsTeams, config.ExternalKeyVaultUri);

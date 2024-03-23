@@ -9,12 +9,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="dotnet-tools.json" />
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="NSwag.MSBuild" Version="14.0.3">
+        <PackageReference Include="NSwag.MSBuild" Version="14.0.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

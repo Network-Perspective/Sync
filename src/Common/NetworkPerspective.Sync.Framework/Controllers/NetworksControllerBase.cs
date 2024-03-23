@@ -11,8 +11,6 @@ using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Extensions;
 
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace NetworkPerspective.Sync.Framework.Controllers
 {
     [Route("networks")]
@@ -51,11 +49,13 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         /// Removes network and all it's related data - synchronization history, scheduled jobs, Network Perspective Token, Data source keys
         /// </summary>
         /// <param name="stoppingToken">Stopping token</param>
-        /// <returns>Result</returns>
+        /// <response code="200">Network removed</response>
+        /// <response code="401">Missing or invalid authorization token</response>
+        /// <response code="500">Internal server error</response>
         [HttpDelete]
-        [SwaggerResponse(StatusCodes.Status200OK, "Network removed", typeof(string))]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> RemoveAsync(CancellationToken stoppingToken = default)
         {
             await _networkService.EnsureRemovedAsync(_networkIdProvider.Get(), stoppingToken);
