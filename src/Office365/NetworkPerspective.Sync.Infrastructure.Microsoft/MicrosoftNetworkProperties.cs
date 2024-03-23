@@ -15,11 +15,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         public bool SyncChats { get; set; } = true;
         public bool SyncGroupAccess { get; set; } = DefaultSyncGroupAccess;
 
-        public MicrosoftNetworkProperties(bool syncMsTeams, bool syncChats, bool syncChannelsNames, bool syncGroupAccess, Uri externalKeyVaultUri) : base(DefaultSyncGroups, DefaultSyncChannelsNames, externalKeyVaultUri)
+        public MicrosoftNetworkProperties(bool syncMsTeams, bool syncChats, bool syncChannelsNames, bool syncGroupAccess, Uri externalKeyVaultUri) : base(DefaultSyncGroups, syncChannelsNames, externalKeyVaultUri)
         {
             SyncMsTeams = syncMsTeams;
             SyncChats = syncChats;
-            SyncChannelsNames = syncChannelsNames;
             SyncGroupAccess = syncGroupAccess;
         }
 

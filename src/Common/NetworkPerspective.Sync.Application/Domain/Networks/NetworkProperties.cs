@@ -10,7 +10,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Networks
         protected const bool DefaultSyncChannelsNames = false;
 
         public bool SyncGroups { get; private set; } = DefaultSyncGroups;
-        public bool SyncChannelsNames { get; set; } = DefaultSyncChannelsNames;
+        public bool SyncChannelsNames { get; private set; } = DefaultSyncChannelsNames;
 
         public Uri ExternalKeyVaultUri { get; private set; } = null;
 
