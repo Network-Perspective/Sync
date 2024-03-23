@@ -22,15 +22,15 @@ namespace NetworkPerspective.Sync.Office365.Dtos
         /// </summary>
         public bool SyncChats { get; set; } = true;
 
-        ///// <summary>
-        ///// Enable/disable channels names synchronization (applicable only if SyncMsTeams is enabled)
-        ///// </summary>
-        //public bool SyncChannelsNames { get; set; } = false;
+        /// <summary>
+        /// Enable/disable channels names synchronization (applicable only if SyncMsTeams is enabled)
+        /// </summary>
+        public bool SyncChannelsNames { get; set; } = false;
 
-        ///// <summary>
-        ///// Enable/disable user's group access synchronization
-        ///// </summary>
-        //public bool SyncGroupAccess { get; set; } = false;
+        /// <summary>
+        /// Enable/disable user's group access synchronization
+        /// </summary>
+        public bool SyncGroupAccess { get; set; } = false;
 
 
     }

@@ -48,10 +48,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         {
             _logger.LogInformation("Getting employees for network '{networkId}'", context.NetworkId);
 
+            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.NetworkId, stoppingToken));
+
             var employees = await context.EnsureSetAsync(async () =>
             {
                 var users = await _usersClient.GetUsersAsync(context, stoppingToken);
-                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter);
+                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter, network.Properties.SyncGroupAccess);
             });
 
             return employees;
@@ -83,7 +85,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             var employees = await context.EnsureSetAsync(async () =>
             {
                 var users = await _usersClient.GetUsersAsync(context, stoppingToken);
-                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter);
+                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter, network.Properties.SyncGroupAccess);
             });
 
             var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<EmailInteractionFactory>());

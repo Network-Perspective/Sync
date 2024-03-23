@@ -6,11 +6,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Excel
     {
         private new const bool DefaultSyncGroups = true;
 
-        public ExcelNetworkProperties(Uri externalKeyVaultUri) : base(DefaultSyncGroups, externalKeyVaultUri)
+        public ExcelNetworkProperties(Uri externalKeyVaultUri) : base(DefaultSyncGroups, DefaultSyncChannelsNames, externalKeyVaultUri)
         {
         }
 
-        public ExcelNetworkProperties() : base(DefaultSyncGroups, null)
+        public ExcelNetworkProperties() : base(DefaultSyncGroups, DefaultSyncChannelsNames, null)
         { }
     }
 }
