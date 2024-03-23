@@ -8,6 +8,11 @@
         <Compile Include="obj\v1Client.cs" />
     </ItemGroup>
 
+    <!--Temp workaround https://github.com/RicoSuter/NSwag/issues/4633-->
+    <PropertyGroup>
+        <NSwagGenerateExceptionClasses>true</NSwagGenerateExceptionClasses>
+    </PropertyGroup>
+    
     <ItemGroup>
       <OpenApiReference Include="OpenAPIs\v1.json" CodeGenerator="NSwagCSharp" Namespace="NetworkPerspective.Sync.Infrastructure.Core" ClassName="{controller}Client">
         <SourceUri>https://app.networkperspective.io/swagger/v1/swagger.json</SourceUri>
