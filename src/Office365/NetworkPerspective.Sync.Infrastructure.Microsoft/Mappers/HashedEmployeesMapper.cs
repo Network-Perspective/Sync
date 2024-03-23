@@ -43,8 +43,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
             var userDepartmentsGroups = user.GetDepartmentGroups();
             result.AddRange(userDepartmentsGroups);
 
-            var useersChannels = channels.Where(x => x.UserIds.Contains(user.Mail));
-            var usersChannelsGroups = useersChannels.Select(x => Group.Create(x.Id, $"{x.Team.Name} / {x.Name}", Group.ChannelCategory));
+            var usersChannels = channels.Where(x => x.UserIds.Contains(user.Mail));
+            var usersChannelsGroups = usersChannels.Select(x => Group.Create(x.Id, $"{x.Team.Name} / {x.Name}", Group.ChannelCategory));
             result.AddRange(usersChannelsGroups);
 
             return result;

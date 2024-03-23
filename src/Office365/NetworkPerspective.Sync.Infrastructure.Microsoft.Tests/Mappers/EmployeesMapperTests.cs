@@ -36,7 +36,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Mappers
             };
 
             // Act
-            var employees = EmployeesMapper.ToEmployees(users, HashFunction.Empty, EmployeeFilter.Empty);
+            var employees = EmployeesMapper.ToEmployees(users, HashFunction.Empty, EmployeeFilter.Empty, false);
 
             // Assert
             employees.GetAllInternal().Should().NotBeEmpty();

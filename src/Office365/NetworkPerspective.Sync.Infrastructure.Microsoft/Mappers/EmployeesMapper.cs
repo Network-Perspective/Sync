@@ -15,7 +15,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
 {
     internal static class EmployeesMapper
     {
-        public static EmployeeCollection ToEmployees(IEnumerable<User> users, HashFunction.Delegate hashFunc, EmployeeFilter emailFilter)
+        public static EmployeeCollection ToEmployees(IEnumerable<User> users, HashFunction.Delegate hashFunc, EmployeeFilter emailFilter, bool syncGroupAccess)
         {
             var employees = new List<Employee>();
 
@@ -24,12 +24,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers
                 if (user.Mail is null) continue;
 
                 var employeeGroups = GetEmployeeGroups(user);
-                var employeeGroupsAccess = GetEmployeeGroupsAccess(user, hashFunc);
+                var employeeGroupsAccess = syncGroupAccess
+                    ? GetEmployeeGroupsAccess(user, hashFunc)
+                    : null;
                 var employeeProps = GetEmployeeProps(user);
                 var employeeRelations = GetEmployeeRelations(user);
 
                 var employeeId = EmployeeId.CreateWithAliases(user.Mail, user.Id, user.OtherMails, emailFilter);
-                var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations, null); // Temp groupAccess null...  we need to think about it
+                var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations, employeeGroupsAccess);
 
                 employees.Add(employee);
             }
