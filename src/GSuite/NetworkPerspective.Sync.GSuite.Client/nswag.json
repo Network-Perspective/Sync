@@ -45,7 +45,7 @@
       "createWebHostBuilderMethod": null,
       "startupType": null,
       "allowNullableBodyParameters": true,
-      "output": "openapi.json",
+      "output": "$(openApiJson)",
       "outputType": "Swagger2",
       "assemblyPaths": [],
       "assemblyConfig": null,
