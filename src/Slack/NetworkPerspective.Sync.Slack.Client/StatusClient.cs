@@ -8,7 +8,7 @@ namespace NetworkPerspective.Sync.Slack.Client
 {
     public partial class StatusClient
     {
-        partial void UpdateJsonSerializerSettings(JsonSerializerSettings settings)
+        static partial void UpdateJsonSerializerSettings(JsonSerializerSettings settings)
         {
             settings.ContractResolver = new CustomContractResolver();
         }

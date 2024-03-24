@@ -6,8 +6,6 @@ using System.Web;
 
 using FluentAssertions;
 
-using Microsoft.AspNetCore.Mvc;
-
 using Moq;
 
 using NetworkPerspective.Sync.Application.Domain;
@@ -17,9 +15,9 @@ using NetworkPerspective.Sync.Infrastructure.Microsoft;
 using NetworkPerspective.Sync.Office365.Client;
 using NetworkPerspective.Sync.Office365.Tests.Fixtures;
 
-using Newtonsoft.Json;
-
 using Xunit;
+
+using ProblemDetails = NetworkPerspective.Sync.Office365.Client.ProblemDetails;
 
 namespace NetworkPerspective.Sync.Office365.Tests
 {
@@ -149,8 +147,8 @@ namespace NetworkPerspective.Sync.Office365.Tests
 
             // Assert
             await func.Should()
-                .ThrowAsync<Office365ClientException>()
-                .Where(x => JsonConvert.DeserializeObject<ProblemDetails>(x.Response).Detail.Contains(error));
+                .ThrowAsync<Office365ClientException<ProblemDetails>>()
+                .Where(x => x.Result.Detail.Contains("error"));
         }
     }
 }

@@ -9,8 +9,6 @@ using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Dtos;
 using NetworkPerspective.Sync.Framework.Mappers;
 
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace NetworkPerspective.Sync.Framework.Controllers
 {
     [Route("status")]
@@ -32,13 +30,18 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         /// Current network status
         /// </summary>
         /// <param name="stoppingToken">Stopping token</param>
-        /// <returns>Status</returns>
+        /// <response code="200">Status</response>
+        /// <response code="400">Request cancelled</response>
+        /// <response code="401">Missing or invalid authorization token</response>
+        /// <response code="404">Network doesn't exist</response>
+        /// <response code="500">Internal server error</response>
         [HttpGet]
-        [SwaggerResponse(StatusCodes.Status200OK, "Status", typeof(StatusDto))]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Request cancelled")]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Network doesn't exist")]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
+        [ProducesResponseType(typeof(StatusDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<StatusDto> GetStatus(CancellationToken stoppingToken = default)
         {
             await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);

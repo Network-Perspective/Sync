@@ -7,7 +7,7 @@ RUN apt-get update && apt-get dist-upgrade -y
 WORKDIR /app
 
 # run publish
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR "/src"
 COPY . .
 RUN dotnet publish "Cli/NetworkPerspective.Sync.Cli/NetworkPerspective.Sync.Cli.csproj" -c Release --self-contained --os linux -o /app/publish -p:PublishSingleFile=true
