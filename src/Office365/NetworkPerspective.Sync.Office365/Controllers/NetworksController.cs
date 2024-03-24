@@ -31,7 +31,7 @@ namespace NetworkPerspective.Sync.Office365.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddAsync([FromBody] NetworkConfigDto config, CancellationToken stoppingToken = default)
         {
-            var properties = new MicrosoftNetworkProperties(config.SyncMsTeams, config.ExternalKeyVaultUri);
+            var properties = new MicrosoftNetworkProperties(config.SyncMsTeams, config.SyncChats, config.SyncChannelsNames, config.SyncGroupAccess, config.ExternalKeyVaultUri);
 
             var networkId = await InitializeAsync(properties, stoppingToken);
 

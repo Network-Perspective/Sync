@@ -8,6 +8,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Employees
         public const string CompanyCatergory = "OrgUnitCompany";
         public const string TeamCatergory = "OrgUnitTeam";
         public const string DepartmentCatergory = "Department";
+        public const string ChannelCategory = "Channel";
 
         public static IEqualityComparer<Group> EqualityComparer = new GroupEqualityComparer();
 

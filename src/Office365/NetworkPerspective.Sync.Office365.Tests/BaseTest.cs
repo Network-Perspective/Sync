@@ -53,6 +53,9 @@ namespace NetworkPerspective.Sync.Office365.Tests
         {
             // Arrange
             var syncMsTeams = true;
+            var syncChats = false;
+            var syncChannelsNames = false;
+            var syncGroupAccess = false;
             var networkId = Guid.NewGuid();
             var httpClient = _service.CreateDefaultClient();
 
@@ -62,7 +65,10 @@ namespace NetworkPerspective.Sync.Office365.Tests
 
             var networkConfig = new NetworkConfigDto
             {
-                SyncMsTeams = syncMsTeams
+                SyncMsTeams = syncMsTeams,
+                SyncChats = syncChats,
+                SyncChannelsNames = syncChannelsNames,
+                SyncGroupAccess = syncGroupAccess
             };
 
             // Act
@@ -77,6 +83,9 @@ namespace NetworkPerspective.Sync.Office365.Tests
             var network = await networksRepository.FindAsync(networkId);
             network.Properties.ExternalKeyVaultUri.Should().BeNull();
             network.Properties.SyncMsTeams.Should().Be(syncMsTeams);
+            network.Properties.SyncChats.Should().Be(syncChats);
+            network.Properties.SyncChannelsNames.Should().Be(syncChannelsNames);
+            network.Properties.SyncGroupAccess.Should().Be(syncGroupAccess);
         }
 
         [Fact]
