@@ -37,5 +37,6 @@ jobs:
     # NuGet Audit
     - name: Run NuGet audit
       run: |
-        dotnet list ./src/NetworkPerspective.Sync.sln package --vulnerable --include-transitive 2>&1 | tee audit.log
+        cd src
+        dotnet list package --vulnerable --include-transitive 2>&1 | tee audit.log
         grep -i -q -e critical -e high -e moderate audit.log && exit 1 || exit 0
