@@ -199,6 +199,7 @@ Data/
 *.db-wal
 appsettings.development.json
 swagger.json
+openapi.json
 src/NetworkPerspective.Sync.Cli/sample-data.bat
 src/NetworkPerspective.Sync.Cli/Properties/PublishProfiles/x64-ScriptedConnector.pubxml
 infra/helm-charts/np-sync/charts/*.tgz

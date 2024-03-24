@@ -11,8 +11,6 @@ using NetworkPerspective.Sync.Infrastructure.Slack;
 using NetworkPerspective.Sync.Infrastructure.Slack.Models;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
 
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace NetworkPerspective.Sync.Slack.Controllers
 {
     [Route(AuthPath)]
@@ -37,13 +35,16 @@ namespace NetworkPerspective.Sync.Slack.Controllers
         /// </summary>
         /// <param name="callbackUrl">Code redirection url, default the request url. Use it in case application is behind reverse proxy</param>
         /// <param name="stoppingToken">Stopping token</param>
-        /// <returns>Result</returns>
+        /// <response code="200">Initialized OAuth process</response>
+        /// <response code="401">Missing or invalid authorization token</response>
+        /// <response code="404">Network doesn't exist</response>
+        /// <response code="500">Internal server error</response>
         [HttpPost]
         [Authorize]
-        [SwaggerResponse(StatusCodes.Status200OK, "Initialized OAuth process", typeof(string))]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Network doesn't exist")]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> SignIn(string callbackUrl = null, CancellationToken stoppingToken = default)
         {
             await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
@@ -63,11 +64,13 @@ namespace NetworkPerspective.Sync.Slack.Controllers
         /// <param name="code">Authorization code</param>
         /// <param name="state">Anti-forgery unique value</param>
         /// <param name="stoppingToken">Stopping token</param>
-        /// <returns>Result</returns>
+        /// <response code="200">OAuth process completed</response>
+        /// <response code="401">State does not match any initialized OAuth process</response>
+        /// <response code="500">Internal server error</response>
         [HttpGet(CallbackPath)]
-        [SwaggerResponse(StatusCodes.Status200OK, "OAuth process completed", typeof(string))]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized, "State does not match any initialized OAuth process")]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> HandleCallback(string code, string state, CancellationToken stoppingToken = default)
         {
             await _authService.HandleAuthorizationCodeCallbackAsync(code, state, stoppingToken);

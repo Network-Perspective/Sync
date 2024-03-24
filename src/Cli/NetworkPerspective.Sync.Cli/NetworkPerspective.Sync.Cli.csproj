@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AssemblyName>np-sync</AssemblyName>
@@ -29,14 +29,14 @@
 
     <ItemGroup>
         <PackageReference Include="Colors.Net" Version="1.1.0" />
-        <PackageReference Include="CsvHelper" Version="30.0.1" />
-        <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="7.0.7" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+        <PackageReference Include="CsvHelper" Version="31.0.2" />
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="8.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="NLog" Version="5.2.0" />
-        <PackageReference Include="PowerArgs" Version="4.0.2" />
-        <PackageReference Include="System.IO.Abstractions" Version="17.2.3" />
-        <PackageReference Include="System.Security.Cryptography.Pkcs" Version="7.0.2" />
+        <PackageReference Include="NLog" Version="5.2.8" />
+        <PackageReference Include="PowerArgs" Version="4.0.3" />
+        <PackageReference Include="System.IO.Abstractions" Version="21.0.2" />
+        <PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.0" />
     </ItemGroup>
 
     <ItemGroup>

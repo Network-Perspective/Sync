@@ -109,7 +109,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
         protected StatusController Create(string accessToken)
         {
             var requestFeature = new HttpRequestFeature();
-            requestFeature.Headers.Add(HeaderNames.Authorization, $"Bearer {accessToken}");
+            requestFeature.Headers.Append(HeaderNames.Authorization, $"Bearer {accessToken}");
 
             var features = new FeatureCollection();
             features.Set<IHttpRequestFeature>(requestFeature);
