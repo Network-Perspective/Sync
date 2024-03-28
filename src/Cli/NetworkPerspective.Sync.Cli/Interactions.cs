@@ -189,7 +189,7 @@ namespace NetworkPerspective.Sync.Cli
                 return;
             }
 
-            var fileSize = _fileSystem.FileInfo.FromFileName(fileName).Length;
+            var fileSize = _fileSystem.FileInfo.New(fileName).Length;
             var bufferSize = 1024 * 1024 * 10; // 10MB
             var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -203,7 +203,7 @@ namespace NetworkPerspective.Sync.Cli
             }
 
             using (var progress = new ProgressBar())
-            using (var stream = _fileSystem.FileStream.Create(fileName, FileMode.Open, FileAccess.Read))
+            using (var stream = _fileSystem.FileStream.New(fileName, FileMode.Open, FileAccess.Read))
             using (var reader = new StreamReader(stream, Encoding.UTF8, true, bufferSize))
             using (var csv = new CsvReader(reader, csvConfig))
             {

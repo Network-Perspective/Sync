@@ -8,8 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 using NetworkPerspective.Sync.Application.Services;
 
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace NetworkPerspective.Sync.Excel.Controllers;
 
 [Route("sync")]
@@ -27,11 +25,20 @@ public class SyncController : ControllerBase
         _networkIdProvider = networkIdProvider;
     }
 
+    /// <summary>
+    /// Sync
+    /// </summary>
+    /// <param name="syncRequest"></param>
+    /// <param name="stoppingToken"></param>
+    /// <response code="200">Sync completed</response>
+    /// <response code="400">Cannot complete sync due to problem with input data</response>
+    /// <response code="401">Missing or invalid authorization token</response>
+    /// <response code="500">Internal server error</response>
     [HttpPost]
-    [SwaggerResponse(StatusCodes.Status200OK, "Network added", typeof(string))]
-    [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
-    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request or validation error")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> SyncAsync([FromBody] SyncRequestDto syncRequest, CancellationToken stoppingToken = default)
     {
         // create sync context

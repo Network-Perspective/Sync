@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Http;
 
 using Microsoft.AspNetCore.Mvc;
 
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace NetworkPerspective.Sync.Framework.Controllers
 {
     [Route("/")]
@@ -15,8 +13,9 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         /// Alive endpoint
         /// </summary>
         /// <returns>Ok</returns>
+        /// <response code="200">Alive</response>
         [HttpGet]
-        [SwaggerResponse(StatusCodes.Status200OK, "Alive")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public IActionResult GetAlive()
             => Ok();
     }

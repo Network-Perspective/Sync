@@ -44,7 +44,7 @@ namespace NetworkPerspective.Sync.Application.Scheduler
                     q.UsePersistentStore(store =>
                     {
                         store.UseProperties = true;
-                        store.UseJsonSerializer();
+                        store.UseNewtonsoftJsonSerializer();
                         store.UseSqlServer(db =>
                         {
                             db.ConnectionString = dbConnectionString;

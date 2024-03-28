@@ -11,8 +11,6 @@ using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
 
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace NetworkPerspective.Sync.Office365.Controllers
 {
     [Route(AuthPath)]
@@ -37,13 +35,16 @@ namespace NetworkPerspective.Sync.Office365.Controllers
         /// </summary>
         /// <param name="callbackUrl">Code redirection url, default the request url. Use it in case application is behind reverse proxy</param>
         /// <param name="stoppingToken">Stopping token</param>
-        /// <returns>Result</returns>
+        /// <response code="200">Initialized OAuth process</response>
+        /// <response code="401">Missing or invalid authorization token</response>
+        /// <response code="404">Network doesn't exist</response>
+        /// <response code="500">Internal server error</response>
         [HttpPost]
         [Authorize]
-        [SwaggerResponse(StatusCodes.Status200OK, "Initialized OAuth process", typeof(string))]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid authorization token")]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Network doesn't exist")]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AuthorizeAsync(string callbackUrl = null, CancellationToken stoppingToken = default)
         {
             await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
@@ -64,12 +65,15 @@ namespace NetworkPerspective.Sync.Office365.Controllers
         /// <param name="error">Error</param>
         /// <param name="error_description">Error description</param>
         /// <param name="stoppingToken">Stopping token</param>
-        /// <returns>Result</returns>
+        /// <response code="200">OAuth process completed</response>
+        /// <response code="400">Bad request</response>
+        /// <response code="401">State does not match any initialized OAuth process</response>
+        /// <response code="500">Internal server error</response>        
         [HttpGet(CallbackPath)]
-        [SwaggerResponse(StatusCodes.Status200OK, "OAuth process completed", typeof(string))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad request")]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized, "State does not match any initialized OAuth process")]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> HandleCallback(Guid tenant, string state, string error, string error_description, CancellationToken stoppingToken = default)
         {
             if (error is not null || error_description is not null)

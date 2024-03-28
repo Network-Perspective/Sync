@@ -33,8 +33,8 @@ namespace NetworkPerspective.Sync.Framework.Auth
             DefaultValueHandling = DefaultValueHandling.Ignore
         };
 
-        public ServiceAuthHandler(IOptionsMonitor<ServiceAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, INetworkPerspectiveCore networkPerspectiveCore, INetworkIdInitializer networkIdInitializer, IErrorService errorService)
-            : base(options, logger, encoder, clock)
+        public ServiceAuthHandler(IOptionsMonitor<ServiceAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder, INetworkPerspectiveCore networkPerspectiveCore, INetworkIdInitializer networkIdInitializer, IErrorService errorService)
+            : base(options, logger, encoder)
         {
             _networkPerspectiveCore = networkPerspectiveCore;
             _networkIdInitializer = networkIdInitializer;
