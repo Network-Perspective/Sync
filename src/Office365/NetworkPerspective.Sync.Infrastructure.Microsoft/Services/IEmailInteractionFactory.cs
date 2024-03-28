@@ -37,6 +37,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             var recipients = message.ToRecipients
                 .Union(message.CcRecipients)
                 .Union(message.BccRecipients)
+                .Where(x => x.EmailAddress?.Address is not null)
                 .Select(x => _employees.Find(x.EmailAddress?.Address))
                 .Distinct(Employee.EqualityComparer);
             var timestamp = message.SentDateTime.Value.UtcDateTime;

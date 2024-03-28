@@ -36,7 +36,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             foreach (var channelMember in channel.UserIds)
             {
                 var interaction = Interaction.CreateChatThread(
-                    timestamp: thread.CreatedDateTime.Value.UtcDateTime,
+                    timestamp: GetDateTimeOrMinValue(thread.CreatedDateTime),
                     source: _employees.Find(thread.From.User.Id),
                     target: _employees.Find(channelMember),
                     channelId: channel.Id,
@@ -50,7 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 .SelectMany(x => x.User.User.Id)
                 .ToList();
 
-            foreach (var reaction in thread.Reactions)
+            foreach (var reaction in thread.Reactions.Where(x => x.CreatedDateTime.HasValue))
             {
                 var reactionHash = $"{reaction.CreatedDateTime.Value.Ticks}{reaction.User.User.Id.GetStableHashCode()}{channel.Id.GetStableHashCode()}";
 
@@ -81,7 +81,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 foreach (var user in activeUsers)
                 {
                     var interaction = Interaction.CreateChatReply(
-                        timestamp: reply.CreatedDateTime.Value.UtcDateTime,
+                        timestamp: GetDateTimeOrMinValue(reply.CreatedDateTime),
                         source: _employees.Find(reply.From.User.Id),
                         target: _employees.Find(user),
                         channelId: channelId,
@@ -95,7 +95,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 activeUsers.Add(reply.From.User.Id);
 
 
-                foreach (var reaction in reply.Reactions)
+                foreach (var reaction in reply.Reactions.Where(x => x.CreatedDateTime.HasValue))
                 {
                     var reactionHash = $"{reaction.CreatedDateTime.Value.Ticks}{reaction.User.User.Id.GetStableHashCode()}{channelId.GetStableHashCode()}";
 
@@ -113,5 +113,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             return interactions;
         }
+
+        private static DateTime GetDateTimeOrMinValue(DateTimeOffset? input)
+            => input.HasValue
+                ? input.Value.UtcDateTime
+                : DateTime.MinValue.ToUniversalTime();
     }
 }
