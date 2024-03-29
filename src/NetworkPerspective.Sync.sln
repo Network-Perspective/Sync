@@ -105,6 +105,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Excel", "Excel", "{5452E6FD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networkperspective.Sync.Infrastructure.Excel.Tests", "Excel\NetworkPerspective.Sync.Infrastructure.Excel.Tests\Networkperspective.Sync.Infrastructure.Excel.Tests.csproj", "{48655A57-8D30-4B3F-93A7-FDE672FEC9C6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SingleContainer", "SingleContainer", "{AEF09F39-990F-4CAA-A980-E3457D78DFFC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.SingleContainer.Connector", "SingleContainer\NetworkPerspective.Sync.SingleContainer.Connector\NetworkPerspective.Sync.SingleContainer.Connector.csproj", "{49D87E6C-5B01-4C73-95E1-33B0C8109F02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.SingleContainer.Host", "SingleContainer\NetworkPerspective.Sync.SingleContainer.Host\NetworkPerspective.Sync.SingleContainer.Host.csproj", "{E1EE2415-B596-4229-B303-C533A1CCFB9F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.SingleContainer.Messages", "SingleContainer\NetworkPerspective.Sync.SingleContainer.Messages\NetworkPerspective.Sync.SingleContainer.Messages.csproj", "{C317CEDC-502E-486F-A596-7BE19650573E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -251,6 +259,18 @@ Global
 		{48655A57-8D30-4B3F-93A7-FDE672FEC9C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48655A57-8D30-4B3F-93A7-FDE672FEC9C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48655A57-8D30-4B3F-93A7-FDE672FEC9C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49D87E6C-5B01-4C73-95E1-33B0C8109F02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49D87E6C-5B01-4C73-95E1-33B0C8109F02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49D87E6C-5B01-4C73-95E1-33B0C8109F02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49D87E6C-5B01-4C73-95E1-33B0C8109F02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1EE2415-B596-4229-B303-C533A1CCFB9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1EE2415-B596-4229-B303-C533A1CCFB9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1EE2415-B596-4229-B303-C533A1CCFB9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1EE2415-B596-4229-B303-C533A1CCFB9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C317CEDC-502E-486F-A596-7BE19650573E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C317CEDC-502E-486F-A596-7BE19650573E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C317CEDC-502E-486F-A596-7BE19650573E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C317CEDC-502E-486F-A596-7BE19650573E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -305,6 +325,10 @@ Global
 		{AE6094ED-4EED-4528-9524-638458841B0C} = {737E68D0-7792-4402-84A1-585A4B544AE9}
 		{5452E6FD-A9EB-42D1-BBBF-F8A4AC1A1BAC} = {6EFA829B-C784-47D9-9825-3264F052057B}
 		{48655A57-8D30-4B3F-93A7-FDE672FEC9C6} = {5452E6FD-A9EB-42D1-BBBF-F8A4AC1A1BAC}
+		{AEF09F39-990F-4CAA-A980-E3457D78DFFC} = {9AC2B900-B353-4879-A540-108F67D429C1}
+		{49D87E6C-5B01-4C73-95E1-33B0C8109F02} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
+		{E1EE2415-B596-4229-B303-C533A1CCFB9F} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
+		{C317CEDC-502E-486F-A596-7BE19650573E} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}

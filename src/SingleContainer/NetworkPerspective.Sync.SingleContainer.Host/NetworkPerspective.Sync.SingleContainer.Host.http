@@ -1,0 +1,6 @@
+@NetworkPerspective.Sync.SingleContainer.Host_HostAddress = http://localhost:5273
+
+GET {{NetworkPerspective.Sync.SingleContainer.Host_HostAddress}}/networks/add
+Accept: application/json
+
+###
