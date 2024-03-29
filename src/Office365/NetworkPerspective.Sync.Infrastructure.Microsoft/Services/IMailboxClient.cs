@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using Microsoft.Graph.Models.ODataErrors;
 using Microsoft.Graph.Users.Item.Messages;
 
 using NetworkPerspective.Sync.Application.Domain.Statuses;
@@ -43,13 +44,29 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             }
 
             Task<SingleTaskResult> SingleTaskAsync(string userEmail)
-                => GetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken);
+                => TryGetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on mailbox for timerange {timerange} for {count} users...", context.TimeRange, usersEmails.Count());
             var result = await ParallelSyncTask<string>.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
             _logger.LogInformation("Evaluation of interactions based on mailbox for timerange '{timerange}' completed", context.TimeRange);
 
             return result;
+        }
+
+        private async Task<SingleTaskResult> TryGetSingleUserInteractionsAsync(SyncContext context, IInteractionsStream stream, string userEmail, IEmailInteractionFactory interactionFactory, CancellationToken stoppingToken)
+        {
+            try
+            {
+                return await GetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken);
+            }
+            catch (ODataError ex) when (ex.Error.Code == "MailboxNotEnabledForRESTAPI")
+            {
+                return SingleTaskResult.Empty;
+            }
+            catch (ODataError ex) // temp change... hope to find out what edge case is not handled correctly
+            {
+                throw new System.Exception($"Code: {ex.Error.Code}");
+            }
         }
 
         private async Task<SingleTaskResult> GetSingleUserInteractionsAsync(SyncContext context, IInteractionsStream stream, string userEmail, IEmailInteractionFactory interactionFactory, CancellationToken stoppingToken)
