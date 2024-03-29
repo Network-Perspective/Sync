@@ -40,10 +40,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 .Where(x => x.EmailAddress?.Address is not null)
                 .Select(x => _employees.Find(x.EmailAddress?.Address))
                 .Distinct(Employee.EqualityComparer);
-            var timestamp = message.SentDateTime.Value.UtcDateTime;
 
             if (user.IsExternal)
                 return ImmutableHashSet<Interaction>.Empty;
+
+            if (!message.SentDateTime.HasValue)
+                return ImmutableHashSet<Interaction>.Empty;
+
+            var timestamp = message.SentDateTime.Value.UtcDateTime;
 
             if (IsOutgoing(user, sender))
                 return CreateForOutgoing(message.Id, user, recipients, timestamp);

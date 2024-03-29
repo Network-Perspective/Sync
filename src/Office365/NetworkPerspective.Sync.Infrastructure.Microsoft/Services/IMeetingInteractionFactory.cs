@@ -37,6 +37,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             var timestamp = @event.Start.ToDateTimeOffset().DateTime;
             var participants = @event
                 .Attendees
+                .Where(x => x.EmailAddress?.Address is not null)        // Skip users without email address
                 .Select(x => x.EmailAddress.Address)                    // Participants as email address 
                 .Select(_employees.Find)                                // Map to Employee                   
                 .Where(x => !Employee.EqualityComparer.Equals(x, user)) // Skip the user
