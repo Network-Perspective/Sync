@@ -20,6 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\NetworkPerspective.Sync.SingleContainer.Host.Impl\NetworkPerspective.Sync.SingleContainer.Host.Impl.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.SingleContainer.Messages\NetworkPerspective.Sync.SingleContainer.Messages.csproj" />
     </ItemGroup>
 

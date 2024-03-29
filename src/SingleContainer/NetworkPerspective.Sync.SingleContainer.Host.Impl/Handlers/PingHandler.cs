@@ -1,8 +1,6 @@
-using NetworkPerspective.Sync.SingleContainer.Host.Transport;
-using NetworkPerspective.Sync.SingleContainer.Messages;
-using NetworkPerspective.Sync.SingleContainer.Messages.Services;
+using NetworkPerspective.Sync.SingleContainer.Host.Impl.Transport;
 
-namespace NetworkPerspective.Sync.SingleContainer.Host.Handlers;
+namespace NetworkPerspective.Sync.SingleContainer.Host.Impl.Handlers;
 
 public class PingHandler(ILogger<PingHandler> logger, IConnectorContext context) : IMessageHandler<Ping>
 {

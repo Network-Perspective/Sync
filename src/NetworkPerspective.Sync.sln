@@ -113,6 +113,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Sin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.SingleContainer.Messages", "SingleContainer\NetworkPerspective.Sync.SingleContainer.Messages\NetworkPerspective.Sync.SingleContainer.Messages.csproj", "{C317CEDC-502E-486F-A596-7BE19650573E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.SingleContainer.Host.Impl", "SingleContainer\NetworkPerspective.Sync.SingleContainer.Host.Impl\NetworkPerspective.Sync.SingleContainer.Host.Impl.csproj", "{15F8EB32-C85F-49B0-9CBC-49034AEF3E36}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -271,6 +273,10 @@ Global
 		{C317CEDC-502E-486F-A596-7BE19650573E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C317CEDC-502E-486F-A596-7BE19650573E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C317CEDC-502E-486F-A596-7BE19650573E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15F8EB32-C85F-49B0-9CBC-49034AEF3E36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15F8EB32-C85F-49B0-9CBC-49034AEF3E36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15F8EB32-C85F-49B0-9CBC-49034AEF3E36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15F8EB32-C85F-49B0-9CBC-49034AEF3E36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -329,6 +335,7 @@ Global
 		{49D87E6C-5B01-4C73-95E1-33B0C8109F02} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
 		{E1EE2415-B596-4229-B303-C533A1CCFB9F} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
 		{C317CEDC-502E-486F-A596-7BE19650573E} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
+		{15F8EB32-C85F-49B0-9CBC-49034AEF3E36} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}

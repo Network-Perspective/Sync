@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.SignalR;
+
+using NetworkPerspective.Sync.SingleContainer.Host.Impl.Transport;
 using NetworkPerspective.Sync.SingleContainer.Messages.Services;
 
 namespace NetworkPerspective.Sync.SingleContainer.Host.Transport;
-
-using Microsoft.AspNetCore.SignalR;
 
 public interface IConnectorClient
 {
@@ -24,27 +25,4 @@ public class ConnectorHub(ILogger<ConnectorHub> logger, IServiceProvider service
         var dispatcher = scope.ServiceProvider.GetRequiredService<IMessageDispatcher>();
         await dispatcher.DispatchMessage(method, payload);
     }
-}
-
-
-public interface IRemoteConnectorClient
-{
-    Task InvokeConnectorAsync(string connectorName, IMessage message);
-}
-
-public class RemoteRemoteConnectorClient(IHubContext<ConnectorHub> hubContext, IMessageSerializer messageSerializer,
-    IConnectorPool connectorPool)
-    : IRemoteConnectorClient
-{
-    public async Task InvokeConnectorAsync(string connectorName, IMessage message)
-    {
-        var (name, payload) = messageSerializer.Serialize(message);
-        var connectionId = connectorPool.FindConnectionId(connectorName);
-
-        await hubContext
-            .Clients
-            .Clients(connectionId)
-            .SendAsync("InvokeConnector", name, payload);
-    }
-
 }

@@ -1,8 +1,6 @@
 using System.Collections.Concurrent;
 
-using NetworkPerspective.Sync.SingleContainer.Messages;
-
-namespace NetworkPerspective.Sync.SingleContainer.Host.Transport;
+namespace NetworkPerspective.Sync.SingleContainer.Host.Impl.Transport;
 
 public interface IConnectorPool
 {
