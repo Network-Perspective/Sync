@@ -1,18 +1,12 @@
 using Microsoft.AspNetCore.SignalR;
 
 using NetworkPerspective.Sync.SingleContainer.Host.Impl.Transport;
-using NetworkPerspective.Sync.SingleContainer.Messages;
 using NetworkPerspective.Sync.SingleContainer.Messages.Services;
 
 namespace NetworkPerspective.Sync.SingleContainer.Host.Transport;
 
-public interface IConnectorClient
-{
-    Task NotifyConnector(string method, string payload);
-}
-
 public class ConnectorHub(ILogger<ConnectorHub> logger, IServiceProvider services,
-    IRemoteConnectorClientInternal connectorClient) : Hub<IConnectorClient>
+    IRemoteConnectorClientInternal connectorClient) : Hub
 {
     public async Task NotifyHost(string method, string payload)
     {

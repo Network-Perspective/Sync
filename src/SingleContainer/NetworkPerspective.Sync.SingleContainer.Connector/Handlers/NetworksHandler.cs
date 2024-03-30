@@ -17,7 +17,7 @@ public class NetworksHandler(IHostConnection hostConnection, ILogger<NetworksHan
 
         await hostConnection.NotifyAsync(new Ping("Ping from connector"));
 
-        var result = await hostConnection.CallAsync<FindNetworkResult>(new FindNetwork(Guid.Empty));
+        var result = await hostConnection.CallAsync<FindNetworkResult>(new FindNetwork(Guid.NewGuid()));
         logger.LogInformation("Found network {networkId}", JsonSerializer.Serialize(result));
     }
 

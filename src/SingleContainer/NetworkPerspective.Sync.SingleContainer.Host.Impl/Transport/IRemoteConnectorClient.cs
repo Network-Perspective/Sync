@@ -19,9 +19,3 @@ public interface IRemoteConnectorClient
     /// <returns></returns>
     Task<T> CallConnectorAsync<T>(string connectorName, IRpcArgs message);
 }
-
-public interface IRemoteConnectorClientInternal : IRemoteConnectorClient
-{
-    Task HandleConnectorReply(string correlationId, string name, string payload);
-    Task HostReplyAsync(string connectionId, string correlationId, IMessage message);
-}
