@@ -10,6 +10,7 @@ public interface IHostConnection
 {
     Task InvokeAsync(IMessage message);
     Task<T> CallAsync<T>(IRpcArgs message);
+    Task ConnectorReply(string correlationId, IRpcResult message);
     Task HandleHostReply(string name, string correlationId, string payload);
 }
 
@@ -23,22 +24,29 @@ public class HostConnection(HubConnection hubConnection, IMessageSerializer mess
         await hubConnection.SendAsync("InvokeHost", name, payload);
     }
 
-    private  Dictionary<string, TaskCompletionSource<IRpcResult>> _runningRpcCalls = new();
+    private readonly Dictionary<string, TaskCompletionSource<IRpcResult>> _runningRpcCalls = new();
     public async Task<T> CallAsync<T>(IRpcArgs message)
     {
         var (name, payload) = messageSerializer.Serialize(message);
         logger.LogDebug("Sending " + name + " with " + payload + " to host");
-        
+
         var correlationId = Guid.NewGuid().ToString();
-        await hubConnection.SendAsync("CallHost",correlationId, name,  payload, typeof(T).Name);
-        
+        await hubConnection.SendAsync("CallHost", correlationId, name, payload, typeof(T).Name);
+
         // wait for reply
         TaskCompletionSource<IRpcResult> tcs = new();
         _runningRpcCalls.TryAdd(correlationId, tcs);
-        return (T) await tcs.Task ;
+        return (T)await tcs.Task;
     }
 
-    public async Task HandleHostReply( string correlationId, string name, string payload)
+    public async Task ConnectorReply(string correlationId, IRpcResult message)
+    {
+        var (name, payload) = messageSerializer.Serialize(message);
+        logger.LogDebug("Replying " + name + " with " + payload + " to host with correlationId " + correlationId);
+        await hubConnection.SendAsync("ConnectorReply", correlationId, name, payload);
+    }
+
+    public async Task HandleHostReply(string correlationId, string name, string payload)
     {
         logger.LogDebug("Received reply for " + correlationId + " with " + payload);
         var message = messageSerializer.Deserialize(name, payload) as IRpcResult;

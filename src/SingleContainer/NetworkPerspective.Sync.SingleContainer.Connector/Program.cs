@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.SingleContainer.Connector.Handlers;
 using NetworkPerspective.Sync.SingleContainer.Connector.Transport;
 using NetworkPerspective.Sync.SingleContainer.Messages;
 using NetworkPerspective.Sync.SingleContainer.Messages.Services;
@@ -34,6 +35,9 @@ builder.ConfigureServices((_, services) =>
     services.AddTransient<IMessageSerializer, MessageSerializer>();
     services.AddTransient<IMessageDispatcher, MessageDispatcher>();
 
+    services.AddTransient<IRpcHandler<IsAuthenticated, IsAuthenticatedResult>, NetworksHandler>();
+
+
     services.RegisterMessageHandlers(typeof(Program).Assembly);
 });
 
@@ -50,7 +54,20 @@ var hostConnection = app.Services.GetRequiredService<IHostConnection>();
 hubConnection.On<string, string>("InvokeConnector", (name, payload) =>
 {
     using IServiceScope scope = app.Services.CreateScope();
-    scope.ServiceProvider.GetRequiredService<IMessageDispatcher>().DispatchMessage(name, payload);
+    scope.ServiceProvider
+        .GetRequiredService<IMessageDispatcher>()
+        .DispatchMessage(name, payload);
+});
+
+hubConnection.On<string, string, string, string>("CallConnector", async (correlationId, name, payload, returnType) =>
+{
+    using IServiceScope scope = app.Services.CreateScope();
+
+    var result = await scope.ServiceProvider
+        .GetRequiredService<IRpcDispatcher>()
+        .CallRpc(name, payload, returnType);
+
+    await hostConnection.ConnectorReply(correlationId.ToString(), result);
 });
 
 hubConnection.On<string, string, string>("HostReply", (name, correlationId, payload) =>

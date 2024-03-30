@@ -4,3 +4,8 @@ GET {{NetworkPerspective.Sync.SingleContainer.Host_HostAddress}}/networks/add
 Accept: application/json
 
 ###
+
+GET {{NetworkPerspective.Sync.SingleContainer.Host_HostAddress}}/networks/check
+Accept: application/json
+
+###

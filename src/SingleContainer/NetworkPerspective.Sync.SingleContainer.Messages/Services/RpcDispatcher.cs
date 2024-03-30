@@ -29,11 +29,11 @@ public class RpcDispatcher(IMessageSerializer messageSerializer, IServiceProvide
             if (method == null)
             {
                 logger.LogError("No HandleAsync method found for {messageType}", name);
-                throw new InvalidOperationException("No HandleAsync method found for " + name); 
+                throw new InvalidOperationException("No HandleAsync method found for " + name);
             }
             var task = method.Invoke(handler, new object[] { message });
-            
-            return await (dynamic) task;
+
+            return await (dynamic)task;
         }
         catch (Exception e)
         {

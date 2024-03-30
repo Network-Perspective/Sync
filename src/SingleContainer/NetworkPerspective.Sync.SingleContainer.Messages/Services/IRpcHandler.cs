@@ -5,5 +5,5 @@ public interface IRpcHandler<in TArgs, TResult> where TArgs : IMessage where TRe
     Task<TResult> HandleAsync(TArgs args);
 }
 
-public interface IRpcArgs : IMessage{ }
+public interface IRpcArgs : IMessage { }
 public interface IRpcResult : IMessage { }

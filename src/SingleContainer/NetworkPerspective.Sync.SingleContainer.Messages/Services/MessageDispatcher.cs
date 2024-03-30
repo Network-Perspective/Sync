@@ -45,7 +45,7 @@ public class MessageDispatcher(IMessageSerializer messageSerializer, IServicePro
             logger.LogError(e, "Error dispatching message {messageType}", name);
         }
     }
-    
-    
-    
+
+
+
 }
