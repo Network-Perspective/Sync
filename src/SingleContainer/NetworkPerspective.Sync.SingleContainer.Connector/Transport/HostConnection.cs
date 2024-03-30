@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 
@@ -8,23 +10,39 @@ namespace NetworkPerspective.Sync.SingleContainer.Connector.Transport;
 
 public interface IHostConnection
 {
-    Task InvokeAsync(IMessage message);
+    /// <summary>
+    /// Send a message to the host and don't wait for a reply
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    Task NotifyAsync(IMessage message);
+
+    /// <summary>
+    /// Call a method on the host and wait for a reply
+    /// </summary>
+    /// <param name="message"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
     Task<T> CallAsync<T>(IRpcArgs message);
+}
+
+public interface IHostConnectionInternal : IHostConnection
+{
     Task ConnectorReply(string correlationId, IRpcResult message);
     Task HandleHostReply(string name, string correlationId, string payload);
 }
 
 public class HostConnection(HubConnection hubConnection, IMessageSerializer messageSerializer,
-    ILogger<HostConnection> logger) : IHostConnection
+    ILogger<HostConnection> logger) : IHostConnectionInternal
 {
-    public async Task InvokeAsync(IMessage message)
+    public async Task NotifyAsync(IMessage message)
     {
         var (name, payload) = messageSerializer.Serialize(message);
         logger.LogDebug("Sending " + name + " with " + payload + " to host");
-        await hubConnection.SendAsync("InvokeHost", name, payload);
+        await hubConnection.SendAsync("NotifyHost", name, payload);
     }
 
-    private readonly Dictionary<string, TaskCompletionSource<IRpcResult>> _runningRpcCalls = new();
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<IRpcResult>> _runningRpcCalls = new();
     public async Task<T> CallAsync<T>(IRpcArgs message)
     {
         var (name, payload) = messageSerializer.Serialize(message);

@@ -8,13 +8,13 @@ namespace NetworkPerspective.Sync.SingleContainer.Host.Transport;
 
 public interface IConnectorClient
 {
-    Task InvokeConnector(string method, string payload);
+    Task NotifyConnector(string method, string payload);
 }
 
 public class ConnectorHub(ILogger<ConnectorHub> logger, IServiceProvider services,
-    IRemoteConnectorClient connectorClient) : Hub<IConnectorClient>
+    IRemoteConnectorClientInternal connectorClient) : Hub<IConnectorClient>
 {
-    public async Task InvokeHost(string method, string payload)
+    public async Task NotifyHost(string method, string payload)
     {
         logger.LogDebug(Context.ConnectionId + " invoked " + method + " with " + payload);
 

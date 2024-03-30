@@ -25,7 +25,7 @@ builder.Services.AddSignalR();
 builder.Services.RegisterConnectorHostImpl<RemoteConnectorClient>();
 builder.Services.RegisterMessageHandlers(typeof(ConnectorPool).Assembly);
 
-// builder.Services.AddTransient<IFindNetworkRpc, NetworkRepositoryHandler>();
+// todo register all handlers via reflection
 builder.Services.AddTransient<IRpcHandler<FindNetwork, FindNetworkResult>, NetworkRepositoryHandler>();
 
 var app = builder.Build();

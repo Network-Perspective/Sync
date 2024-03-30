@@ -30,13 +30,14 @@ builder.ConfigureLogging(logging =>
 builder.ConfigureServices((_, services) =>
 {
     services.AddSingleton<HubConnection>(hubConnection);
-    services.AddSingleton<IHostConnection, HostConnection>();
+    services.AddSingleton<IHostConnectionInternal, HostConnection>();
+    services.AddTransient<IHostConnection>(s => s.GetRequiredService<IHostConnectionInternal>());
 
     services.AddTransient<IMessageSerializer, MessageSerializer>();
     services.AddTransient<IMessageDispatcher, MessageDispatcher>();
 
+    // todo register all handlers via reflection
     services.AddTransient<IRpcHandler<IsAuthenticated, IsAuthenticatedResult>, NetworksHandler>();
-
 
     services.RegisterMessageHandlers(typeof(Program).Assembly);
 });
@@ -47,11 +48,11 @@ var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Starting connector");
 logger.LogInformation("Connecting to hub at {hubUrl}", hubUrl);
 
-var hostConnection = app.Services.GetRequiredService<IHostConnection>();
+var hostConnection = app.Services.GetRequiredService<IHostConnectionInternal>();
 
 
 
-hubConnection.On<string, string>("InvokeConnector", (name, payload) =>
+hubConnection.On<string, string>("NotifyConnector", (name, payload) =>
 {
     using IServiceScope scope = app.Services.CreateScope();
     scope.ServiceProvider
@@ -74,19 +75,19 @@ hubConnection.On<string, string, string>("HostReply", (name, correlationId, payl
 {
     using IServiceScope scope = app.Services.CreateScope();
     scope.ServiceProvider
-        .GetRequiredService<IHostConnection>()
+        .GetRequiredService<IHostConnectionInternal>()
         .HandleHostReply(name, correlationId, payload);
 });
 
 
 hubConnection.Reconnected += async (connectionId) =>
 {
-    await hostConnection.InvokeAsync(handshake);
+    await hostConnection.NotifyAsync(handshake);
 };
 
 await hubConnection.StartAsync();
 
-await hostConnection.InvokeAsync(handshake);
+await hostConnection.NotifyAsync(handshake);
 
 // Wait indefinitely
 Thread.Sleep(Timeout.Infinite);

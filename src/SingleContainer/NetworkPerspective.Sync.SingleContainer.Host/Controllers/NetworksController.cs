@@ -13,7 +13,7 @@ public class NetworksController(IRemoteConnectorClient remoteConnector) : Contro
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> AddAsync()
     {
-        await remoteConnector.InvokeConnectorAsync("Client-123", new AddNetwork(Guid.NewGuid()));
+        await remoteConnector.NotifyConnectorAsync("Client-123", new AddNetwork(Guid.NewGuid()));
         return Ok($"Added network");
     }
 

@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 using Microsoft.AspNetCore.SignalR;
 
 using NetworkPerspective.Sync.SingleContainer.Host.Controllers;
@@ -8,9 +10,9 @@ namespace NetworkPerspective.Sync.SingleContainer.Host.Transport;
 
 public class RemoteConnectorClient(IHubContext<ConnectorHub> hubContext, IMessageSerializer messageSerializer,
     IConnectorPool connectorPool)
-    : IRemoteConnectorClient
+    : IRemoteConnectorClientInternal
 {
-    public async Task InvokeConnectorAsync(string connectorName, IMessage message)
+    public async Task NotifyConnectorAsync(string connectorName, IMessage message)
     {
         var (name, payload) = messageSerializer.Serialize(message);
         var connectionId = connectorPool.FindConnectionId(connectorName);
@@ -18,10 +20,10 @@ public class RemoteConnectorClient(IHubContext<ConnectorHub> hubContext, IMessag
         await hubContext
             .Clients
             .Clients(connectionId)
-            .SendAsync("InvokeConnector", name, payload);
+            .SendAsync("NotifyConnector", name, payload);
     }
 
-    private readonly Dictionary<string, TaskCompletionSource<IRpcResult>> _runningRpcCalls = new();
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<IRpcResult>> _runningRpcCalls = new();
     public async Task<T> CallConnectorAsync<T>(string connectorName, IRpcArgs message)
     {
         var (name, payload) = messageSerializer.Serialize(message);
