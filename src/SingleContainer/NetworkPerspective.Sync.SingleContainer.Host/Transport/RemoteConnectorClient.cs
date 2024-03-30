@@ -21,4 +21,13 @@ public class RemoteConnectorClient(IHubContext<ConnectorHub> hubContext, IMessag
             .SendAsync("InvokeConnector", name, payload);
     }
 
+    public async Task HostReplyAsync(string connectionId, string correlationId, IMessage message)
+    {
+        var (name, payload) = messageSerializer.Serialize(message);
+
+        await hubContext
+            .Clients
+            .Clients(connectionId)
+            .SendAsync("HostReply", correlationId, name, payload);
+    }
 }

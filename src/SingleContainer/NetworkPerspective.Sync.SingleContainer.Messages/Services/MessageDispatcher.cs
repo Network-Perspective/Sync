@@ -42,7 +42,10 @@ public class MessageDispatcher(IMessageSerializer messageSerializer, IServicePro
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError(e, "Error dispatching message {messageType}", name);
         }
     }
+    
+    
+    
 }

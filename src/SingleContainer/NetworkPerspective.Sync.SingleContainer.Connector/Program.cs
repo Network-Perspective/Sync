@@ -53,6 +53,15 @@ hubConnection.On<string, string>("InvokeConnector", (name, payload) =>
     scope.ServiceProvider.GetRequiredService<IMessageDispatcher>().DispatchMessage(name, payload);
 });
 
+hubConnection.On<string, string, string>("HostReply", (name, correlationId, payload) =>
+{
+    using IServiceScope scope = app.Services.CreateScope();
+    scope.ServiceProvider
+        .GetRequiredService<IHostConnection>()
+        .HandleHostReply(name, correlationId, payload);
+});
+
+
 hubConnection.Reconnected += async (connectionId) =>
 {
     await hostConnection.InvokeAsync(handshake);

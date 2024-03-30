@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc.Formatters;
 
 using NetworkPerspective.Sync.SingleContainer.Host.Impl;
+using NetworkPerspective.Sync.SingleContainer.Host.Impl.Handlers;
 using NetworkPerspective.Sync.SingleContainer.Host.Impl.Transport;
 using NetworkPerspective.Sync.SingleContainer.Host.Transport;
+using NetworkPerspective.Sync.SingleContainer.Messages;
 using NetworkPerspective.Sync.SingleContainer.Messages.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +24,9 @@ builder.Services.AddSignalR();
 // builder.Services.AddTransient<IRemoteConnectorClient, RemoteRemoteConnectorClient>();
 builder.Services.RegisterConnectorHostImpl<RemoteConnectorClient>();
 builder.Services.RegisterMessageHandlers(typeof(ConnectorPool).Assembly);
+
+// builder.Services.AddTransient<IFindNetworkRpc, NetworkRepositoryHandler>();
+builder.Services.AddTransient<IRpcHandler<FindNetwork, FindNetworkResult>, NetworkRepositoryHandler>();
 
 var app = builder.Build();
 

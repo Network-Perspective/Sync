@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.SingleContainer.Connector.Transport;
@@ -12,6 +14,9 @@ public class NetworksHandler(IHostConnection hostConnection, ILogger<NetworksHan
     {
         logger.LogInformation("Adding network {networkId}", msg.NetworkId);
 
-        await hostConnection.InvokeAsync(new Ping("Reply from connector"));
+        await hostConnection.InvokeAsync(new Ping("Ping from connector"));
+
+        var result = await hostConnection.CallAsync<FindNetworkResult>(new FindNetwork(Guid.Empty));
+        logger.LogInformation("Found network {networkId}", JsonSerializer.Serialize(result));
     }
 }

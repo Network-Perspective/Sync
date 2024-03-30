@@ -10,6 +10,7 @@ public static class MessageHandlerExtensions
     {
         services.AddTransient<IMessageSerializer, MessageSerializer>();
         services.AddTransient<IMessageDispatcher, MessageDispatcher>();
+        services.AddTransient<IRpcDispatcher, RpcDispatcher>();
 
         assembly
             .ExportedTypes
