@@ -59,13 +59,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             {
                 return await GetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken);
             }
-            catch (ODataError ex) when (ex.Error.Code == "MailboxNotEnabledForRESTAPI")
+            catch (ODataError ex) when (ex.Error.Code == Consts.ErrorCodes.MailboxInactive)
             {
                 return SingleTaskResult.Empty;
-            }
-            catch (ODataError ex) // temp change... hope to find out what edge case is not handled correctly
-            {
-                throw new System.Exception($"Code: {ex.Error.Code}");
             }
         }
 
