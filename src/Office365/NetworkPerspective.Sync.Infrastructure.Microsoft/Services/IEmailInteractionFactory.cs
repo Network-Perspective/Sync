@@ -44,7 +44,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             if (user.IsExternal)
                 return ImmutableHashSet<Interaction>.Empty;
 
-            if (!message.SentDateTime.HasValue)
+            if (message.SentDateTime is null || !message.SentDateTime.HasValue)
                 return ImmutableHashSet<Interaction>.Empty;
 
             var timestamp = message.SentDateTime.Value.UtcDateTime;
