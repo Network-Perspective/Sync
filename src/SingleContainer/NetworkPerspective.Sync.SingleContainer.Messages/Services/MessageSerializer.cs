@@ -20,6 +20,12 @@ public class MessageSerializer : IMessageSerializer
     public IMessage Deserialize(string name, string payload)
     {
         var type = Type.GetType($"NetworkPerspective.Sync.SingleContainer.Messages.{name}");
-        return (IMessage)JsonSerializer.Deserialize(payload, type);
+        // check if type implements IMessage
+        if (type?.IsAssignableTo(typeof(IMessage)) != true)
+        {
+            throw new InvalidOperationException("Type does not implement IMessage");
+        } 
+        
+        return (IMessage) JsonSerializer.Deserialize(payload, type)!;
     }
 }

@@ -18,6 +18,11 @@ public class RpcDispatcher(IMessageSerializer messageSerializer, IServiceProvide
         {
             var message = messageSerializer.Deserialize(name, payload);
             var resultClass = Type.GetType($"NetworkPerspective.Sync.SingleContainer.Messages.{returnType}");
+            if (resultClass == null)
+            {
+                logger.LogError("No message class found for {returnType}", returnType);
+                throw new InvalidOperationException("No result class found for " + returnType);
+            }
             var handlerType = typeof(IRpcHandler<,>).MakeGenericType(message.GetType(), resultClass);
             var handler = serviceProvider.GetService(handlerType);
             if (handler == null)
@@ -33,7 +38,7 @@ public class RpcDispatcher(IMessageSerializer messageSerializer, IServiceProvide
             }
             var task = method.Invoke(handler, new object[] { message });
 
-            return await (dynamic)task;
+            return await (dynamic) task!;
         }
         catch (Exception e)
         {

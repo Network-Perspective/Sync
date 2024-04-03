@@ -21,12 +21,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 
-// builder.Services.AddTransient<IRemoteConnectorClient, RemoteRemoteConnectorClient>();
 builder.Services.RegisterConnectorHostImpl<RemoteConnectorClient>();
 builder.Services.RegisterMessageHandlers(typeof(ConnectorPool).Assembly);
-
-// todo register all handlers via reflection
-builder.Services.AddTransient<IRpcHandler<FindNetwork, FindNetworkResult>, NetworkRepositoryHandler>();
 
 var app = builder.Build();
 

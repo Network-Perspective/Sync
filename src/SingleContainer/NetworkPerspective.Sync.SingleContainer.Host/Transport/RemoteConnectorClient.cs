@@ -41,17 +41,19 @@ public class RemoteConnectorClient(IHubContext<ConnectorHub> hubContext, IMessag
         return (T)await tcs.Task;
     }
 
-    public async Task HandleConnectorReply(string correlationId, string name, string payload)
+    public Task HandleConnectorReply(string correlationId, string name, string payload)
     {
         var message = messageSerializer.Deserialize(name, payload) as IRpcResult;
-        if (_runningRpcCalls.Remove(correlationId, out TaskCompletionSource<IRpcResult> methodCallCompletionSource))
+        if (_runningRpcCalls.Remove(correlationId, out TaskCompletionSource<IRpcResult>? methodCallCompletionSource))
         {
-            methodCallCompletionSource.SetResult(message);
+            methodCallCompletionSource.SetResult(message!);
         }
         else
         {
             throw new InvalidOperationException("No running rpc call for " + correlationId);
         }
+
+        return Task.CompletedTask;
     }
 
     public async Task HostReplyAsync(string connectionId, string correlationId, IMessage message)

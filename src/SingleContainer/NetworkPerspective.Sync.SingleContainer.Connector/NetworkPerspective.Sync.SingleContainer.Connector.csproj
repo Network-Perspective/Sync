@@ -31,6 +31,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Common\NetworkPerspective.Sync.Application\NetworkPerspective.Sync.Application.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.SingleContainer.Messages\NetworkPerspective.Sync.SingleContainer.Messages.csproj" />
     </ItemGroup>
 

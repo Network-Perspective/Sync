@@ -1,3 +1,5 @@
+using NetworkPerspective.Sync.SingleContainer.Messages.Services;
+
 namespace NetworkPerspective.Sync.SingleContainer.Host.Impl.Transport;
 
 public interface IRemoteConnectorClient

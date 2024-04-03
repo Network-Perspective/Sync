@@ -22,7 +22,7 @@ public class ConnectorPool : IConnectorPool
 
     public string FindConnectionId(string connectorName)
     {
-        return _name2ConnectionId.GetValueOrDefault(connectorName) ?? throw new InvalidOperationException();
+        return _name2ConnectionId.GetValueOrDefault(connectorName) ?? throw new InvalidOperationException($"Connector ${connectorName} is offline");
     }
 
     public RegisterConnector GetConnectorRegistration(string connectionId)

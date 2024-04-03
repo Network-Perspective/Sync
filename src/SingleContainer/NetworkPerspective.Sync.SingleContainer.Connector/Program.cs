@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Repositories;
 using NetworkPerspective.Sync.SingleContainer.Connector.Handlers;
 using NetworkPerspective.Sync.SingleContainer.Connector.Transport;
 using NetworkPerspective.Sync.SingleContainer.Messages;
@@ -37,7 +38,10 @@ builder.ConfigureServices((_, services) =>
     services.AddTransient<IMessageDispatcher, MessageDispatcher>();
 
     // todo register all handlers via reflection
-    services.AddTransient<IRpcHandler<IsAuthenticated, IsAuthenticatedResult>, NetworksHandler>();
+    // services.AddTransient<IRpcHandler<IsAuthenticated, IsAuthenticatedResult>, NetworksHandler>();
+    
+    // remote services
+    services.AddTransient<IStatusLogRepository, RemoteStatusLogRepository>();
 
     services.RegisterMessageHandlers(typeof(Program).Assembly);
 });

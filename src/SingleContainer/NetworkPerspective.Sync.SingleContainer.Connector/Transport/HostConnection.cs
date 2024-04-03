@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.SingleContainer.Messages;
 using NetworkPerspective.Sync.SingleContainer.Messages.Services;
 
 namespace NetworkPerspective.Sync.SingleContainer.Connector.Transport;
@@ -46,14 +45,16 @@ public class HostConnection(HubConnection hubConnection, IMessageSerializer mess
         await hubConnection.SendAsync("ConnectorReply", correlationId, name, payload);
     }
 
-    public async Task HandleHostReply(string correlationId, string name, string payload)
+    public Task HandleHostReply(string correlationId, string name, string payload)
     {
         logger.LogDebug("Received reply for " + correlationId + " with " + payload);
         var message = messageSerializer.Deserialize(name, payload) as IRpcResult;
-        if (_runningRpcCalls.Remove(correlationId, out TaskCompletionSource<IRpcResult> methodCallCompletionSource))
+        if (_runningRpcCalls.Remove(correlationId, out TaskCompletionSource<IRpcResult>? methodCallCompletionSource))
         {
-            methodCallCompletionSource.SetResult(message);
+            methodCallCompletionSource.SetResult(message!);
         }
+
+        return Task.CompletedTask;
     }
 
 }
