@@ -32,40 +32,30 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
         public ISet<Interaction> CreateForUser(Message message, string userEmail)
         {
-            try
-            {
-                var user = _employees.Find(userEmail);
-                var sender = _employees.Find(message.Sender?.EmailAddress?.Address);
-                var recipients = message.ToRecipients
-                    .Union(message.CcRecipients)
-                    .Union(message.BccRecipients)
-                    .Where(x => x.EmailAddress?.Address is not null)
-                    .Select(x => _employees.Find(x.EmailAddress?.Address))
-                    .Distinct(Employee.EqualityComparer);
+            if (message.Sender?.EmailAddress?.Address is null)
+                return ImmutableHashSet<Interaction>.Empty;
 
-                if (user.IsExternal)
-                    return ImmutableHashSet<Interaction>.Empty;
+            var user = _employees.Find(userEmail);
+            var sender = _employees.Find(message.Sender?.EmailAddress?.Address);
+            var recipients = message.ToRecipients
+                .Union(message.CcRecipients)
+                .Union(message.BccRecipients)
+                .Where(x => x.EmailAddress?.Address is not null)
+                .Select(x => _employees.Find(x.EmailAddress.Address))
+                .Distinct(Employee.EqualityComparer);
 
-                if (message.SentDateTime is null || !message.SentDateTime.HasValue)
-                    return ImmutableHashSet<Interaction>.Empty;
+            if (user.IsExternal)
+                return ImmutableHashSet<Interaction>.Empty;
 
-                var timestamp = message.SentDateTime.Value.UtcDateTime;
+            if (message.SentDateTime is null || !message.SentDateTime.HasValue)
+                return ImmutableHashSet<Interaction>.Empty;
 
-                if (IsOutgoing(user, sender))
-                    return CreateForOutgoing(message.Id, user, recipients, timestamp);
-                else
-                    return CreateForIncoming(message.Id, sender, user, timestamp);
-            }
-            catch (Exception)
-            {
-                _logger.LogDebug("Exception has been thrown in {Class}", typeof(EmailInteractionFactory));
-                _logger.LogDebug("Message: {Item}", message);
-                _logger.LogDebug("Message.SentDateTime: {Item}", message.SentDateTime);
-                _logger.LogDebug("Message.SentDateTime.Value: {Item}", message.SentDateTime.Value);
-                _logger.LogDebug("Message.SentDateTime.Value.UtcDateTime: {Item}", message.SentDateTime.Value.UtcDateTime);
-                _logger.LogDebug("Message.Id: {Item}", message.Id);
-                throw;
-            }
+            var timestamp = message.SentDateTime.Value.UtcDateTime;
+
+            if (IsOutgoing(user, sender))
+                return CreateForOutgoing(message.Id, user, recipients, timestamp);
+            else
+                return CreateForIncoming(message.Id, sender, user, timestamp);
         }
 
         private ISet<Interaction> CreateForOutgoing(string eventId, Employee user, IEnumerable<Employee> recipients, DateTime timestamp)
