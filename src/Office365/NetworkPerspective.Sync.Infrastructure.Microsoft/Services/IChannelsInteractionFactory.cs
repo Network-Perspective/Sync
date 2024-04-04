@@ -33,6 +33,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         {
             var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
 
+            if (thread.From?.User?.Id is null)
+                return ImmutableHashSet<Interaction>.Empty;
+
             foreach (var channelMember in channel.UserIds)
             {
                 var interaction = Interaction.CreateChatThread(
@@ -76,7 +79,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             var interactions = new HashSet<Interaction>(new InteractionEqualityComparer());
             var activeUsers = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) { threadCreator };
 
-            foreach (var reply in replies)
+            foreach (var reply in replies.Where(x => x.From?.User?.Id is not null))
             {
                 foreach (var user in activeUsers)
                 {
