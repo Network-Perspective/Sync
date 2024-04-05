@@ -50,6 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
             var reactingUsers = thread
                 .Reactions
+                .Where(x => x.User?.User?.Id is not null)
                 .SelectMany(x => x.User.User.Id)
                 .ToList();
 
@@ -97,8 +98,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
                 activeUsers.Add(reply.From.User.Id);
 
+                var reactions = reply.Reactions
+                    .Where(x => x.CreatedDateTime.HasValue)
+                    .Where(x => x.User?.User?.Id is not null);
 
-                foreach (var reaction in reply.Reactions.Where(x => x.CreatedDateTime.HasValue))
+                foreach (var reaction in reactions)
                 {
                     var reactionHash = $"{reaction.CreatedDateTime.Value.Ticks}{reaction.User.User.Id.GetStableHashCode()}{channelId.GetStableHashCode()}";
 
