@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc.Formatters;
 
 using NetworkPerspective.Sync.SingleContainer.Host.Impl;
-using NetworkPerspective.Sync.SingleContainer.Host.Impl.Handlers;
 using NetworkPerspective.Sync.SingleContainer.Host.Impl.Transport;
 using NetworkPerspective.Sync.SingleContainer.Host.Transport;
-using NetworkPerspective.Sync.SingleContainer.Messages;
 using NetworkPerspective.Sync.SingleContainer.Messages.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +16,7 @@ builder.Services.AddControllers(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 
 builder.Services.RegisterConnectorHostImpl<RemoteConnectorClient>();
@@ -34,8 +32,8 @@ app.MapControllerRoute(
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    //app.UseSwagger();
+    //app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
