@@ -8,7 +8,7 @@ namespace NetworkPerspective.Sync.Office365.Client
 {
     public partial class StatusClient
     {
-        partial void UpdateJsonSerializerSettings(JsonSerializerSettings settings)
+        static partial void UpdateJsonSerializerSettings(JsonSerializerSettings settings)
         {
             settings.ContractResolver = new CustomContractResolver();
         }
