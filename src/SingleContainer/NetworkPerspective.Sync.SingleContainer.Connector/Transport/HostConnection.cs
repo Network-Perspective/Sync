@@ -1,15 +1,20 @@
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.SingleContainer.Messages.Services;
+using NetworkPerspective.Sync.SingleContainer.Messages.CQS;
+using NetworkPerspective.Sync.SingleContainer.Messages.CQS.Queries;
+using NetworkPerspective.Sync.SingleContainer.Messages.Transport.Server;
 
 namespace NetworkPerspective.Sync.SingleContainer.Connector.Transport;
 
-public interface IHostConnectionInternal : IHostConnection
+public interface IHostConnectionInternal : IHubConnection
 {
-    Task ConnectorReply(string correlationId, IRpcResult message);
+    Task ConnectorReply(string correlationId, IQueryResult message);
     Task HandleHostReply(string name, string correlationId, string payload);
 }
 
@@ -18,43 +23,16 @@ public class HostConnection(HubConnection hubConnection, IMessageSerializer mess
 {
     public async Task NotifyAsync(IMessage message)
     {
+        hubConnection.
         var (name, payload) = messageSerializer.Serialize(message);
         logger.LogDebug("Sending " + name + " with " + payload + " to host");
         await hubConnection.SendAsync("NotifyHost", name, payload);
     }
 
-    private readonly ConcurrentDictionary<string, TaskCompletionSource<IRpcResult>> _runningRpcCalls = new();
-    public async Task<T> CallAsync<T>(IRpcArgs message)
+    public async Task<T> CallAsync<T>(IQueryArgs message)
     {
-        var (name, payload) = messageSerializer.Serialize(message);
-        logger.LogDebug("Sending " + name + " with " + payload + " to host");
-
-        var correlationId = Guid.NewGuid().ToString();
-        await hubConnection.SendAsync("CallHost", correlationId, name, payload, typeof(T).Name);
-
-        // wait for reply
-        TaskCompletionSource<IRpcResult> tcs = new();
-        _runningRpcCalls.TryAdd(correlationId, tcs);
-        return (T)await tcs.Task;
+        return await hubConnection.InvokeAsync<T>("CallHost", message);
     }
-
-    public async Task ConnectorReply(string correlationId, IRpcResult message)
-    {
-        var (name, payload) = messageSerializer.Serialize(message);
-        logger.LogDebug("Replying " + name + " with " + payload + " to host with correlationId " + correlationId);
-        await hubConnection.SendAsync("ConnectorReply", correlationId, name, payload);
-    }
-
-    public Task HandleHostReply(string correlationId, string name, string payload)
-    {
-        logger.LogDebug("Received reply for " + correlationId + " with " + payload);
-        var message = messageSerializer.Deserialize(name, payload) as IRpcResult;
-        if (_runningRpcCalls.Remove(correlationId, out TaskCompletionSource<IRpcResult>? methodCallCompletionSource))
-        {
-            methodCallCompletionSource.SetResult(message!);
-        }
-
-        return Task.CompletedTask;
     }
 
 }

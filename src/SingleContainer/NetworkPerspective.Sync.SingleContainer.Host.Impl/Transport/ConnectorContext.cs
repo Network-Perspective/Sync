@@ -1,3 +1,7 @@
+using System;
+
+using NetworkPerspective.Sync.SingleContainer.Messages;
+
 namespace NetworkPerspective.Sync.SingleContainer.Host.Impl.Transport;
 
 public interface IConnectorContext

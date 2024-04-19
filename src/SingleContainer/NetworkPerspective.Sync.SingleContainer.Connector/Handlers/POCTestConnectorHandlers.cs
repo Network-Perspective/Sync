@@ -4,15 +4,16 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Repositories;
-using NetworkPerspective.Sync.SingleContainer.Connector.Transport;
 using NetworkPerspective.Sync.SingleContainer.Messages;
-using NetworkPerspective.Sync.SingleContainer.Messages.Services;
+using NetworkPerspective.Sync.SingleContainer.Messages.CQS.Commands;
+using NetworkPerspective.Sync.SingleContainer.Messages.CQS.Queries;
+using NetworkPerspective.Sync.SingleContainer.Messages.Transport.Server;
 
 namespace NetworkPerspective.Sync.SingleContainer.Connector.Handlers;
 
-public class NetworksHandler(IHostConnection hostConnection, ILogger<NetworksHandler> logger, 
-    IStatusLogRepository statusLogRepository) : IMessageHandler<AddNetwork>,
-    IRpcHandler<IsAuthenticated, IsAuthenticatedResult>
+public class NetworksHandler(IHubConnection hostConnection, ILogger<NetworksHandler> logger, 
+    IStatusLogRepository statusLogRepository) : ICommandHandler<AddNetwork>,
+    IQueryHandler<IsAuthenticated, IsAuthenticatedResult>
 {
     public async Task HandleAsync(AddNetwork msg)
     {

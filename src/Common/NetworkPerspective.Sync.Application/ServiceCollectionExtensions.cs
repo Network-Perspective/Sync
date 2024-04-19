@@ -41,5 +41,15 @@ namespace NetworkPerspective.Sync.Application
 
             return services;
         }
+
+
+        public static IServiceCollection AddOrchestratorApplication(this IServiceCollection services)
+        {
+            services.AddScoped<NetworkIdProvider>();
+            services.AddScoped<INetworkIdProvider>(x => x.GetRequiredService<NetworkIdProvider>());
+            services.AddScoped<INetworkIdInitializer>(x => x.GetRequiredService<NetworkIdProvider>());
+
+            return services;
+        }
     }
 }

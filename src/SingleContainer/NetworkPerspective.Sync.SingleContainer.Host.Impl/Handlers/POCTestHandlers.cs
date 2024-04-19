@@ -1,8 +1,10 @@
 using NetworkPerspective.Sync.SingleContainer.Host.Impl.Transport;
+using NetworkPerspective.Sync.SingleContainer.Messages.CQS.Commands;
+using NetworkPerspective.Sync.SingleContainer.Messages.CQS.Queries;
 
 namespace NetworkPerspective.Sync.SingleContainer.Host.Impl.Handlers;
 
-public class NetworkRepositoryHandler : IRpcHandler<FindNetwork, FindNetworkResult>
+public class NetworkRepositoryHandler : IQueryHandler<FindNetwork, FindNetworkResult>
 {
     public Task<FindNetworkResult> HandleAsync(FindNetwork args)
     {
@@ -14,7 +16,7 @@ public class NetworkRepositoryHandler : IRpcHandler<FindNetwork, FindNetworkResu
     }
 }
 
-public class PingHandler(ILogger<PingHandler> logger, IConnectorContext context) : IMessageHandler<Ping>
+public class PingHandler(ILogger<PingHandler> logger, IConnectorContext context) : ICommandHandler<Ping>
 {
     public Task HandleAsync(Ping msg)
     {

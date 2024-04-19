@@ -1,25 +1,23 @@
-﻿// See https://aka.ms/new-console-template for more information
-using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Repositories;
-using NetworkPerspective.Sync.SingleContainer.Connector.Handlers;
 using NetworkPerspective.Sync.SingleContainer.Connector.Transport;
 using NetworkPerspective.Sync.SingleContainer.Messages;
-using NetworkPerspective.Sync.SingleContainer.Messages.Services;
+using NetworkPerspective.Sync.SingleContainer.Messages.CQS;
+using NetworkPerspective.Sync.SingleContainer.Messages.CQS.Commands;
+using NetworkPerspective.Sync.SingleContainer.Messages.CQS.Queries;
+using NetworkPerspective.Sync.SingleContainer.Messages.Transport.Server;
 
 var hubUrl = "http://localhost:5273/connector-hub";
 var handshake = new RegisterConnector("Client-123", ConnectorFamily.Excel);
-
 
 var hubConnection = new HubConnectionBuilder()
     .WithUrl(hubUrl)
     .WithAutomaticReconnect()
     .Build();
-
 
 var builder = Host.CreateDefaultBuilder();
 builder.ConfigureLogging(logging =>
@@ -32,10 +30,10 @@ builder.ConfigureServices((_, services) =>
 {
     services.AddSingleton<HubConnection>(hubConnection);
     services.AddSingleton<IHostConnectionInternal, HostConnection>();
-    services.AddTransient<IHostConnection>(s => s.GetRequiredService<IHostConnectionInternal>());
+    services.AddTransient<IHubConnection>(s => s.GetRequiredService<IHostConnectionInternal>());
 
     services.AddTransient<IMessageSerializer, MessageSerializer>();
-    services.AddTransient<IMessageDispatcher, MessageDispatcher>();
+    services.AddTransient<ICommandDispatcher, CommandDispatcher>();
 
     // todo register all handlers via reflection
     // services.AddTransient<IRpcHandler<IsAuthenticated, IsAuthenticatedResult>, NetworksHandler>();
@@ -60,7 +58,7 @@ hubConnection.On<string, string>("NotifyConnector", (name, payload) =>
 {
     using IServiceScope scope = app.Services.CreateScope();
     scope.ServiceProvider
-        .GetRequiredService<IMessageDispatcher>()
+        .GetRequiredService<ICommandDispatcher>()
         .DispatchMessage(name, payload);
 });
 
@@ -69,8 +67,8 @@ hubConnection.On<string, string, string, string>("CallConnector", async (correla
     using IServiceScope scope = app.Services.CreateScope();
 
     var result = await scope.ServiceProvider
-        .GetRequiredService<IRpcDispatcher>()
-        .CallRpc(name, payload, returnType);
+        .GetRequiredService<IQueryDispatcher>()
+        .Dispatch(name, payload, returnType);
 
     await hostConnection.ConnectorReply(correlationId.ToString(), result);
 });
