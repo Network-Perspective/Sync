@@ -1,4 +1,4 @@
-﻿namespace NetworkPerspective.Sync.Contract.Dtos;
+﻿namespace NetworkPerspective.Sync.Contract.V1.Dtos;
 
 public interface IResponse
 {

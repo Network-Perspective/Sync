@@ -38,7 +38,7 @@ builder.Services
     .AddAuthentication(ServiceAuthOptions.DefaultScheme)
     .AddScheme<ServiceAuthOptions, ServiceAuthHandler>(ServiceAuthOptions.DefaultScheme, options => { });
 
-builder.Services.AddSingleton<ConnectorHub>();
+builder.Services.AddSingleton<ConnectorHubV1>();
 
 builder.Services
     .AddAuthorization(options =>
@@ -69,7 +69,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapDefaultControllerRoute();
-app.MapHub<ConnectorHub>("/connector-hub");
+app.MapHub<ConnectorHubV1>("/connector-hub-v1");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

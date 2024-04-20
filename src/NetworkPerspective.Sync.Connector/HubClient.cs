@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 
-using NetworkPerspective.Sync.Contract;
-using NetworkPerspective.Sync.Contract.Dtos;
+using NetworkPerspective.Sync.Contract.V1;
+using NetworkPerspective.Sync.Contract.V1.Dtos;
 
 namespace NetworkPerspective.Sync.Connector;
 
@@ -14,7 +14,7 @@ public class HubClient : IOrchestratorClient
     {
         _logger = logger;
 
-        var hubUrl = "https://localhost:7191/connector-hub";
+        var hubUrl = "https://localhost:7191/connector-hub-v1";
 
         static Task<string?> TokenFactory()
         {
@@ -29,16 +29,20 @@ public class HubClient : IOrchestratorClient
             .WithAutomaticReconnect()
             .Build();
 
-        _connection.On<StartSyncRequestDto, AckResponseDto>(nameof(IConnectorClient.StartSyncAsync), async x =>
+        _connection.On<StartSyncDto, AckDto>(nameof(IConnectorClient.StartSyncAsync), async x =>
         {
             _logger.LogInformation("Received request to start sync '{correlationId}'", x.CorrelationId);
 
-            // Magic placeholder
-            // ...
             await Task.Yield();
 
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10));
+                await SyncCompletedAsync(new SyncCompletedDto { CorrelationId = Guid.NewGuid() });
+            });
+
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
-            return new AckResponseDto { CorrelationId = x.CorrelationId };
+            return new AckDto { CorrelationId = x.CorrelationId };
         });
 
     }
@@ -46,8 +50,16 @@ public class HubClient : IOrchestratorClient
     public Task ConnectAsync(CancellationToken stoppingToken = default)
         => _connection.StartAsync(stoppingToken);
 
-    public Task<AckResponseDto> RegisterConnectorAsync(RegisterConnectorRequestDto registerConnectorDto)
+    public Task<AckDto> SyncCompletedAsync(SyncCompletedDto syncCompleted)
     {
-        return _connection.InvokeAsync<AckResponseDto>(nameof(IOrchestratorClient.RegisterConnectorAsync), registerConnectorDto);
+        return _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.SyncCompletedAsync), syncCompleted);
+    }
+
+    public async Task<PongDto> PingAsync(PingDto ping)
+    {
+        var result = await _connection.InvokeAsync<PongDto>(nameof(IOrchestratorClient.PingAsync), ping);
+        var timespan = DateTime.UtcNow - result.PingTimestamp;
+        _logger.LogInformation("Ping response took {timespan}ms", Math.Round(timespan.TotalMilliseconds));
+        return result;
     }
 }

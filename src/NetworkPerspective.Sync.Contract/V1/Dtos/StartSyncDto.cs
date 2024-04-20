@@ -1,6 +1,6 @@
-﻿namespace NetworkPerspective.Sync.Contract.Dtos;
+﻿namespace NetworkPerspective.Sync.Contract.V1.Dtos;
 
-public class StartSyncRequestDto : IRequest
+public class StartSyncDto : IRequest
 {
     public Guid CorrelationId { get; set; } = Guid.NewGuid();
     public DateTime Start { get; set; }

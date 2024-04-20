@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using NetworkPerspective.Sync.Contract.Dtos;
+using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Orchestrator.Hubs;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers
@@ -12,9 +12,9 @@ namespace NetworkPerspective.Sync.Orchestrator.Controllers
     [AllowAnonymous]
     public class TestController : ControllerBase
     {
-        private readonly ConnectorHub _hub;
+        private readonly ConnectorHubV1 _hub;
 
-        public TestController(ConnectorHub hub)
+        public TestController(ConnectorHubV1 hub)
         {
             _hub = hub;
         }
@@ -22,7 +22,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Controllers
         [HttpGet("api/test")]
         public async Task Test()
         {
-            var startRequest = new StartSyncRequestDto
+            var startRequest = new StartSyncDto
             {
                 Start = new DateTime(2022, 01, 01),
                 End = DateTime.UtcNow,

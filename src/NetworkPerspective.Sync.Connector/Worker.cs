@@ -1,4 +1,4 @@
-using NetworkPerspective.Sync.Contract;
+using NetworkPerspective.Sync.Contract.V1.Dtos;
 
 namespace NetworkPerspective.Sync.Connector;
 
@@ -10,12 +10,16 @@ public class Worker(HubClient hubClient, ILogger<Worker> logger) : BackgroundSer
     {
         await hubClient.ConnectAsync(stoppingToken);
 
-        var result = await hubClient.RegisterConnectorAsync(new RegisterConnectorRequestDto {  CorrelationId = Guid.NewGuid()});
 
-        _logger.LogInformation("Response CorrelationId: {id}", result.CorrelationId);
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            var ping = new PingDto 
+            { 
+                CorrelationId = Guid.NewGuid(),
+                Timestamp = DateTime.UtcNow,
+            };
+            _ = await hubClient.PingAsync(ping);
             if (_logger.IsEnabled(LogLevel.Information))
             {
                 _logger.LogDebug("Worker running at: {time}", DateTimeOffset.Now);
