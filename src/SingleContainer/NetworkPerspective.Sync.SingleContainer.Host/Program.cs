@@ -10,8 +10,6 @@ using NetworkPerspective.Sync.Orchestrator.Hubs;
 using NetworkPerspective.Sync.Infrastructure.Core.Stub;
 using NetworkPerspective.Sync.Application;
 using NetworkPerspective.Sync.Framework;
-using NetworkPerspective.Sync.Infrastructure.SecretStorage;
-using NetworkPerspective.Sync.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using System.Threading.Tasks;
 using NetworkPerspective.Sync.Application.Domain.Employees;
@@ -19,6 +17,7 @@ using NetworkPerspective.Sync.Application.Domain.Sync;
 using System.Threading;
 using Microsoft.AspNetCore.SignalR;
 using NetworkPerspective.Sync.Orchestrator;
+using NetworkPerspective.Sync.Orchestrator.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +26,7 @@ builder.Logging.ClearProviders().AddConsole();
 // Add services to the container.
 
 builder.Services.AddTransient<IUserIdProvider, ConnectorIdProvider>();
+builder.Services.AddSingleton<IConnectionsLookupTable, ConnectionsLookupTable>();
 
 builder.Services.AddControllers(options =>
 {
@@ -37,6 +37,8 @@ builder.Services.AddControllers(options =>
 builder.Services
     .AddAuthentication(ServiceAuthOptions.DefaultScheme)
     .AddScheme<ServiceAuthOptions, ServiceAuthHandler>(ServiceAuthOptions.DefaultScheme, options => { });
+
+builder.Services.AddSingleton<ConnectorHub>();
 
 builder.Services
     .AddAuthorization(options =>
@@ -62,14 +64,12 @@ builder.Services.AddSingleton<IDataSource, DS>();
 //builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 
-//builder.Services.RegisterMessageHandlers(typeof(ConnectorPool).Assembly);
-
 var app = builder.Build();
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapDefaultControllerRoute();
 app.MapHub<ConnectorHub>("/connector-hub");
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

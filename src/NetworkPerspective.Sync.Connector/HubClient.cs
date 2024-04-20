@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 
 using NetworkPerspective.Sync.Contract;
+using NetworkPerspective.Sync.Contract.Dtos;
 
 namespace NetworkPerspective.Sync.Connector;
 
@@ -17,7 +18,7 @@ public class HubClient : IOrchestratorClient
 
         static Task<string?> TokenFactory()
         {
-            return Task.FromResult<string?>("who-the-fuck-is-alice");
+            return Task.FromResult<string?>("blablabla");
         }
 
         _connection = new HubConnectionBuilder()
@@ -28,9 +29,16 @@ public class HubClient : IOrchestratorClient
             .WithAutomaticReconnect()
             .Build();
 
-        _connection.On<StartSyncRequestDto>(nameof(IConnectorClient.StartSyncAsync), x =>
+        _connection.On<StartSyncRequestDto, AckResponseDto>(nameof(IConnectorClient.StartSyncAsync), async x =>
         {
-            _logger.LogInformation(x.CorrelationId.ToString());
+            _logger.LogInformation("Received request to start sync '{correlationId}'", x.CorrelationId);
+
+            // Magic placeholder
+            // ...
+            await Task.Yield();
+
+            _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
+            return new AckResponseDto { CorrelationId = x.CorrelationId };
         });
 
     }
