@@ -7,8 +7,8 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Contract.V1;
 using NetworkPerspective.Sync.Contract.V1.Dtos;
+using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
-using NetworkPerspective.Sync.Orchestrator.Services;
 
 namespace NetworkPerspective.Sync.Orchestrator.Hubs;
 

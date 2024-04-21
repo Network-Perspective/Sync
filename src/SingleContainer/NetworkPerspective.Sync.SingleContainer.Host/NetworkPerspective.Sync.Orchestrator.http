@@ -1,0 +1,11 @@
+@orchestrator_host = http://localhost:5273
+
+GET {{orchestrator_host}}/api/test
+Accept: application/json
+
+###
+
+GET {{orchestrator_host}}/networks/check
+Accept: application/json
+
+###

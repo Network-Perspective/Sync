@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NetworkPerspective.Sync.Orchestrator.Services;
+namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
 public interface IConnectionsLookupTable
 {

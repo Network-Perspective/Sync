@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace NetworkPerspective.Sync.Orchestrator.Extensions
 {
-    public static class ClaimsPrincipalExtensions
+    public static class HubCallerContextExtensions
     {
         public static Guid GetConnectorId(this HubCallerContext context)
         {

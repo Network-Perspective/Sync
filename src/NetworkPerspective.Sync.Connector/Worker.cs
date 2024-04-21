@@ -1,3 +1,10 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 
 namespace NetworkPerspective.Sync.Connector;
@@ -9,8 +16,6 @@ public class Worker(HubClient hubClient, ILogger<Worker> logger) : BackgroundSer
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await hubClient.ConnectAsync(stoppingToken);
-
-
 
         while (!stoppingToken.IsCancellationRequested)
         {

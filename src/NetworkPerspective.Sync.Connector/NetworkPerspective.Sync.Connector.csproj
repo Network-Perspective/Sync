@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dotnet-NetworkPerspective.Sync.Connector-a7c3aece-8dd4-4703-aad4-fb9fdefbad6a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NetworkPerspective.Sync.Connector.Application\NetworkPerspective.Sync.Connector.Application.csproj" />
     <ProjectReference Include="..\NetworkPerspective.Sync.Contract\NetworkPerspective.Sync.Contract.csproj" />
   </ItemGroup>
 </Project>

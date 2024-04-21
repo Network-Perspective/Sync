@@ -109,11 +109,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SingleContainer", "SingleCo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator", "SingleContainer\NetworkPerspective.Sync.SingleContainer.Host\NetworkPerspective.Sync.Orchestrator.csproj", "{E1EE2415-B596-4229-B303-C533A1CCFB9F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.SingleContainer.Messages", "SingleContainer\NetworkPerspective.Sync.SingleContainer.Messages\NetworkPerspective.Sync.SingleContainer.Messages.csproj", "{C317CEDC-502E-486F-A596-7BE19650573E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Contract", "NetworkPerspective.Sync.Contract\NetworkPerspective.Sync.Contract.csproj", "{93C8A96B-D0A7-4227-B1F2-08E54643ACC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Contract", "NetworkPerspective.Sync.Contract\NetworkPerspective.Sync.Contract.csproj", "{93C8A96B-D0A7-4227-B1F2-08E54643ACC8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Connector", "NetworkPerspective.Sync.Connector\NetworkPerspective.Sync.Connector.csproj", "{1D021572-1642-458D-9FF3-A4C07D579638}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Connector", "NetworkPerspective.Sync.Connector\NetworkPerspective.Sync.Connector.csproj", "{1D021572-1642-458D-9FF3-A4C07D579638}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Orchestrator", "Orchestrator", "{36F00875-0996-4F8C-89AE-893B756BBCB8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Connector", "Connector", "{2C1709C1-20E7-4BF2-857F-D21195218B64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Connector.Application", "NetworkPerspective.Sync.Connector.Application\NetworkPerspective.Sync.Connector.Application.csproj", "{5D311001-D12C-4288-AC17-C4BAC3E1D7D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Orchestrator.Application", "NetworkPerspective.Sync.Orchestrator.Application\NetworkPerspective.Sync.Orchestrator.Application.csproj", "{D01B43FD-0014-4E16-8803-E1D79EB86F79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -265,10 +271,6 @@ Global
 		{E1EE2415-B596-4229-B303-C533A1CCFB9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1EE2415-B596-4229-B303-C533A1CCFB9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1EE2415-B596-4229-B303-C533A1CCFB9F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C317CEDC-502E-486F-A596-7BE19650573E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C317CEDC-502E-486F-A596-7BE19650573E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C317CEDC-502E-486F-A596-7BE19650573E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C317CEDC-502E-486F-A596-7BE19650573E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{93C8A96B-D0A7-4227-B1F2-08E54643ACC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{93C8A96B-D0A7-4227-B1F2-08E54643ACC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93C8A96B-D0A7-4227-B1F2-08E54643ACC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -277,6 +279,14 @@ Global
 		{1D021572-1642-458D-9FF3-A4C07D579638}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D021572-1642-458D-9FF3-A4C07D579638}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D021572-1642-458D-9FF3-A4C07D579638}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D311001-D12C-4288-AC17-C4BAC3E1D7D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D311001-D12C-4288-AC17-C4BAC3E1D7D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D311001-D12C-4288-AC17-C4BAC3E1D7D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D311001-D12C-4288-AC17-C4BAC3E1D7D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D01B43FD-0014-4E16-8803-E1D79EB86F79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D01B43FD-0014-4E16-8803-E1D79EB86F79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D01B43FD-0014-4E16-8803-E1D79EB86F79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D01B43FD-0014-4E16-8803-E1D79EB86F79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -332,10 +342,13 @@ Global
 		{5452E6FD-A9EB-42D1-BBBF-F8A4AC1A1BAC} = {6EFA829B-C784-47D9-9825-3264F052057B}
 		{48655A57-8D30-4B3F-93A7-FDE672FEC9C6} = {5452E6FD-A9EB-42D1-BBBF-F8A4AC1A1BAC}
 		{AEF09F39-990F-4CAA-A980-E3457D78DFFC} = {9AC2B900-B353-4879-A540-108F67D429C1}
-		{E1EE2415-B596-4229-B303-C533A1CCFB9F} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
-		{C317CEDC-502E-486F-A596-7BE19650573E} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
+		{E1EE2415-B596-4229-B303-C533A1CCFB9F} = {36F00875-0996-4F8C-89AE-893B756BBCB8}
 		{93C8A96B-D0A7-4227-B1F2-08E54643ACC8} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
-		{1D021572-1642-458D-9FF3-A4C07D579638} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
+		{1D021572-1642-458D-9FF3-A4C07D579638} = {2C1709C1-20E7-4BF2-857F-D21195218B64}
+		{36F00875-0996-4F8C-89AE-893B756BBCB8} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
+		{2C1709C1-20E7-4BF2-857F-D21195218B64} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
+		{5D311001-D12C-4288-AC17-C4BAC3E1D7D7} = {2C1709C1-20E7-4BF2-857F-D21195218B64}
+		{D01B43FD-0014-4E16-8803-E1D79EB86F79} = {36F00875-0996-4F8C-89AE-893B756BBCB8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}

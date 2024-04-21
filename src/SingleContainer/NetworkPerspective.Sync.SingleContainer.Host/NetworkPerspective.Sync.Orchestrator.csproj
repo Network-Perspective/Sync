@@ -6,21 +6,15 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="8.0.3" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="..\..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\Common\NetworkPerspective.Sync.Framework\NetworkPerspective.Sync.Framework.csproj" />
       <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Core.Stub\NetworkPerspective.Sync.Infrastructure.Core.Stub.csproj" />
-      <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Persistence\NetworkPerspective.Sync.Infrastructure.Persistence.csproj" />
-      <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage\NetworkPerspective.Sync.Infrastructure.SecretStorage.csproj" />
+      <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Core\NetworkPerspective.Sync.Infrastructure.Core.csproj" />
       <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract\NetworkPerspective.Sync.Contract.csproj" />
-      <ProjectReference Include="..\NetworkPerspective.Sync.SingleContainer.Messages\NetworkPerspective.Sync.SingleContainer.Messages.csproj" />
+      <ProjectReference Include="..\..\NetworkPerspective.Sync.Orchestrator.Application\NetworkPerspective.Sync.Orchestrator.Application.csproj" />
     </ItemGroup>
 
 </Project>

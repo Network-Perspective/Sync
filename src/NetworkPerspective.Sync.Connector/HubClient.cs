@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Contract.V1;
 using NetworkPerspective.Sync.Contract.V1.Dtos;
@@ -16,9 +21,9 @@ public class HubClient : IOrchestratorClient
 
         var hubUrl = "https://localhost:7191/connector-hub-v1";
 
-        static Task<string?> TokenFactory()
+        static Task<string> TokenFactory()
         {
-            return Task.FromResult<string?>("blablabla");
+            return Task.FromResult<string>("blablabla");
         }
 
         _connection = new HubConnectionBuilder()
