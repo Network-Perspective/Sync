@@ -15,7 +15,7 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
         private const string HcpVaultConfigSection = "HcpVault";
         private const string DataProtectionConfigSection = "DataProtection";
 
-        public static IServiceCollection AddSecretRepositoryClient(this IServiceCollection services, IConfigurationSection configurationSection/*, IHealthChecksBuilder healthCheckBuilder*/)
+        public static IServiceCollection AddSecretRepositoryClient(this IServiceCollection services, IConfigurationSection configurationSection, IHealthChecksBuilder healthCheckBuilder)
         {
             services.Configure<AzureKeyVaultConfig>(configurationSection.GetSection(AzureKeyVaultConfigSection));
             services.Configure<HcpVaultConfig>(configurationSection.GetSection(HcpVaultConfigSection));
@@ -37,17 +37,17 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
 
             services.AddTransient<HcpVaultHealthCheck>();
             services.AddTransient<DbSecretRepositoryHealthCheck>();
-            //healthCheckBuilder.Add(new HealthCheckRegistration(
-            //    "SecretRepository",
-            //    sp =>
-            //    {
-            //        var factory = sp.GetRequiredService<ISecretRepositoryHealthCheckFactory>();
-            //        return factory.CreateHealthCheck();
-            //    },
-            //    HealthStatus.Unhealthy,
-            //    Array.Empty<string>(),
-            //    TimeSpan.FromSeconds(30))
-            //);
+            healthCheckBuilder.Add(new HealthCheckRegistration(
+                "SecretRepository",
+                sp =>
+                {
+                    var factory = sp.GetRequiredService<ISecretRepositoryHealthCheckFactory>();
+                    return factory.CreateHealthCheck();
+                },
+                HealthStatus.Unhealthy,
+                Array.Empty<string>(),
+                TimeSpan.FromSeconds(30))
+            );
 
             return services;
         }

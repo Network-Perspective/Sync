@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.Json.Serialization;
 
 namespace NetworkPerspective.Sync.Application.Domain.Statuses
 {
@@ -9,9 +8,6 @@ namespace NetworkPerspective.Sync.Application.Domain.Statuses
         public DateTime TimeStamp { get; set; }
         public string Message { get; set; }
         public StatusLogLevel Level { get; set; }
-        
-        [JsonConstructor]
-        public StatusLog() {}
 
         private StatusLog(Guid networkId, string message, StatusLogLevel level, DateTime timestamp)
         {

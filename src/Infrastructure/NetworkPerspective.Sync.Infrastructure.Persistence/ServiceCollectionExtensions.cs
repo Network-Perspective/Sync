@@ -12,13 +12,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddPersistence(this IServiceCollection services/*, IHealthChecksBuilder healthCheckBuilder*/)
+        public static IServiceCollection AddPersistence(this IServiceCollection services, IHealthChecksBuilder healthCheckBuilder)
         {
             services.AddSingleton<IDbInitializer, DbInitializer>();
             services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
             services.AddTransient(x => x.GetRequiredService<IUnitOfWorkFactory>().Create());
 
-            //healthCheckBuilder.AddCheck<PersistenceHealthCheck>("Database", HealthStatus.Unhealthy, Array.Empty<string>(), TimeSpan.FromSeconds(10));
+            healthCheckBuilder.AddCheck<PersistenceHealthCheck>("Database", HealthStatus.Unhealthy, Array.Empty<string>(), TimeSpan.FromSeconds(10));
 
             return services;
         }
