@@ -4,10 +4,10 @@ namespace NetworkPerspective.Sync.Application.Domain.Statuses
 {
     public class StatusLog
     {
-        public Guid NetworkId { get; set; }
-        public DateTime TimeStamp { get; set; }
-        public string Message { get; set; }
-        public StatusLogLevel Level { get; set; }
+        public Guid NetworkId { get; }
+        public DateTime TimeStamp { get; }
+        public string Message { get; }
+        public StatusLogLevel Level { get; }
 
         private StatusLog(Guid networkId, string message, StatusLogLevel level, DateTime timestamp)
         {
