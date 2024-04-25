@@ -5,7 +5,3 @@ Accept: application/json
 
 ###
 
-GET {{orchestrator_host}}/networks/check
-Accept: application/json
-
-###

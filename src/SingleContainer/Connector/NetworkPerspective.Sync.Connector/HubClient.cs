@@ -19,7 +19,7 @@ public class HubClient : IOrchestratorClient
     {
         _logger = logger;
 
-        var hubUrl = "https://localhost:7191/connector-hub-v1";
+        var hubUrl = "https://localhost:7191/v1/connector-hub";
 
         static Task<string> TokenFactory()
         {
