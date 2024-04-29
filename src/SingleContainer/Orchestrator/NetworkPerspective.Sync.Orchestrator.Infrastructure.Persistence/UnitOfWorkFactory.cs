@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
+using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrations;
 
 namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 
