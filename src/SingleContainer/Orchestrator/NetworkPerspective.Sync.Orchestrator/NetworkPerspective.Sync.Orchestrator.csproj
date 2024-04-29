@@ -13,9 +13,9 @@
       <ProjectReference Include="..\..\..\Common\NetworkPerspective.Sync.Framework\NetworkPerspective.Sync.Framework.csproj" />
       <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Core.Stub\NetworkPerspective.Sync.Infrastructure.Core.Stub.csproj" />
       <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Core\NetworkPerspective.Sync.Infrastructure.Core.csproj" />
-      <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Persistence\NetworkPerspective.Sync.Infrastructure.Persistence.csproj" />
       <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract\NetworkPerspective.Sync.Contract.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Application\NetworkPerspective.Sync.Orchestrator.Application.csproj" />
+      <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence\NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.csproj" />
     </ItemGroup>
 
 </Project>
