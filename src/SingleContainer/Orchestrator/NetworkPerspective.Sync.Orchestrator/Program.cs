@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -7,9 +8,9 @@ using NetworkPerspective.Sync.Orchestrator.Hubs;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Application;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
-using NetworkPerspective.Sync.Infrastructure.Core.Stub;
-using Microsoft.Extensions.Configuration;
 using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
+using NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl;
+using NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Stub;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,7 +28,8 @@ builder.Services
     .AddApplication()
     .AddScheduler(builder.Configuration.GetSection("App:Scheduler"), dbConnectionString)
     .AddPersistence(healthcheckBuilder)
-    .AddNetworkPerspectiveCoreStub(builder.Configuration.GetSection("Infrastructure:NetworkPerspectiveCore"))
+    .AddCore(builder.Configuration.GetSection("Infrastructure:Core"), healthcheckBuilder)
+    .AddCoreStub()
     .AddAuth()
     .AddHub();
 

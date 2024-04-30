@@ -133,6 +133,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl.csproj", "{8AAA86B6-9427-41E5-9D0D-F9D174072977}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Stub", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Stub\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Stub.csproj", "{96509FC3-14D4-4630-8FC0-D358AF0B3BAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -315,6 +317,10 @@ Global
 		{8AAA86B6-9427-41E5-9D0D-F9D174072977}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AAA86B6-9427-41E5-9D0D-F9D174072977}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8AAA86B6-9427-41E5-9D0D-F9D174072977}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96509FC3-14D4-4630-8FC0-D358AF0B3BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96509FC3-14D4-4630-8FC0-D358AF0B3BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96509FC3-14D4-4630-8FC0-D358AF0B3BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96509FC3-14D4-4630-8FC0-D358AF0B3BAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -383,6 +389,7 @@ Global
 		{DA203A8A-90CA-4B70-802E-36A93DD999D0} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
 		{5BB92D04-6524-488A-8645-03D8DF22AB75} = {E87CFB93-B50B-4AF2-B7B7-E269FC407645}
 		{8AAA86B6-9427-41E5-9D0D-F9D174072977} = {E87CFB93-B50B-4AF2-B7B7-E269FC407645}
+		{96509FC3-14D4-4630-8FC0-D358AF0B3BAA} = {E87CFB93-B50B-4AF2-B7B7-E269FC407645}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}

@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
-using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Framework;
-using NetworkPerspective.Sync.Framework.Auth;
+using NetworkPerspective.Sync.Orchestrator.Application.Services;
+using NetworkPerspective.Sync.Orchestrator.Auth;
 using NetworkPerspective.Sync.Orchestrator.Hubs;
 
 namespace NetworkPerspective.Sync.Orchestrator.Extensions;
@@ -21,11 +20,6 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddAuth(this IServiceCollection services)
     {
-        services
-            .AddScoped<NetworkIdProvider>()
-            .AddScoped<INetworkIdProvider>(x => x.GetRequiredService<NetworkIdProvider>())
-            .AddScoped<INetworkIdInitializer>(x => x.GetRequiredService<NetworkIdProvider>());
-
         services
             .AddAuthentication(ServiceAuthOptions.DefaultScheme)
             .AddScheme<ServiceAuthOptions, ServiceAuthHandler>(ServiceAuthOptions.DefaultScheme, options => { });
