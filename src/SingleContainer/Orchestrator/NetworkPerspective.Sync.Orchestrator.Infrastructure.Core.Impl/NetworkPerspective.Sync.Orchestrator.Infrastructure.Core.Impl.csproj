@@ -39,7 +39,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Contract\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Contract.csproj" />
-        <ProjectReference Include="..\SingleContainer\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj" />
+        <ProjectReference Include="..\..\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj" />
     </ItemGroup>
 
     <Target Name="DeleteIntermediateDir" BeforeTargets="AfterTargets">
