@@ -19,7 +19,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-
     public static IServiceCollection AddAuth(this IServiceCollection services)
     {
         services
@@ -32,12 +31,10 @@ public static class ServiceCollectionExtensions
             .AddScheme<ServiceAuthOptions, ServiceAuthHandler>(ServiceAuthOptions.DefaultScheme, options => { });
 
         services
-            .AddAuthorization(options =>
-            {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder()
+            .AddAuthorizationBuilder()
+            .SetDefaultPolicy(new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .Build();
-            });
+                    .Build());
 
         services
             .AddTransient<IErrorService, ErrorService>();

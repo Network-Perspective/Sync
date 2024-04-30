@@ -6,7 +6,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddOrchestratorApplication(this IServiceCollection services)
+    public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddSingleton<IConnectionsLookupTable, ConnectionsLookupTable>();
 

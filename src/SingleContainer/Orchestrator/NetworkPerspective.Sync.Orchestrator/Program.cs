@@ -24,7 +24,7 @@ var healthcheckBuilder = builder.Services
     .AddHealthChecks();
 
 builder.Services
-    .AddOrchestratorApplication()
+    .AddApplication()
     .AddScheduler(builder.Configuration.GetSection("App:Scheduler"), dbConnectionString)
     .AddPersistence(healthcheckBuilder)
     .AddNetworkPerspectiveCoreStub(builder.Configuration.GetSection("Infrastructure:NetworkPerspectiveCore"))
