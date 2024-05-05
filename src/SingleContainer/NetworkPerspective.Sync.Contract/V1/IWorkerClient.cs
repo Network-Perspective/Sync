@@ -4,7 +4,7 @@ using NetworkPerspective.Sync.Contract.V1.Dtos;
 
 namespace NetworkPerspective.Sync.Contract.V1;
 
-public interface IConnectorClient
+public interface IWorkerClient
 {
     Task<AckDto> StartSyncAsync(StartSyncDto startSyncRequestDto);
 }

@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddHub(this IServiceCollection services)
     {
         services
-            .AddSingleton<ConnectorHubV1>()
+            .AddSingleton<WorkerHubV1>()
             .AddSignalR();
 
         return services;

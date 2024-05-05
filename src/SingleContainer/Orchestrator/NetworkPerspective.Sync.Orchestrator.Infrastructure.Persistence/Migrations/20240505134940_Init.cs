@@ -13,20 +13,6 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "DataSources",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ConnectorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DataSources", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "DbSecrets",
                 columns: table => new
                 {
@@ -40,22 +26,54 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
                 });
 
             migrationBuilder.CreateTable(
-                name: "DataSourceProperties",
+                name: "Workers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Workers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Connectors",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    WorkerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Connectors", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Connectors_Workers_WorkerId",
+                        column: x => x.WorkerId,
+                        principalTable: "Workers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ConnectorProperties",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DataSourceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ConnectorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Key = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     Value = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DataSourceProperties", x => x.Id);
+                    table.PrimaryKey("PK_ConnectorProperties", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DataSourceProperties_DataSources_DataSourceId",
-                        column: x => x.DataSourceId,
-                        principalTable: "DataSources",
+                        name: "FK_ConnectorProperties_Connectors_ConnectorId",
+                        column: x => x.ConnectorId,
+                        principalTable: "Connectors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -66,7 +84,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DataSourceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ConnectorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
                     Level = table.Column<int>(type: "int", maxLength: 1024, nullable: false)
@@ -75,9 +93,9 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
                 {
                     table.PrimaryKey("PK_StatusLogs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StatusLogs_DataSources_DataSourceId",
-                        column: x => x.DataSourceId,
-                        principalTable: "DataSources",
+                        name: "FK_StatusLogs_Connectors_ConnectorId",
+                        column: x => x.ConnectorId,
+                        principalTable: "Connectors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -88,7 +106,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DataSourceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ConnectorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SyncPeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SyncPeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -100,34 +118,39 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
                 {
                     table.PrimaryKey("PK_SyncHistory", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SyncHistory_DataSources_DataSourceId",
-                        column: x => x.DataSourceId,
-                        principalTable: "DataSources",
+                        name: "FK_SyncHistory_Connectors_ConnectorId",
+                        column: x => x.ConnectorId,
+                        principalTable: "Connectors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_DataSourceProperties_DataSourceId",
-                table: "DataSourceProperties",
-                column: "DataSourceId");
+                name: "IX_ConnectorProperties_ConnectorId",
+                table: "ConnectorProperties",
+                column: "ConnectorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StatusLogs_DataSourceId",
+                name: "IX_Connectors_WorkerId",
+                table: "Connectors",
+                column: "WorkerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StatusLogs_ConnectorId",
                 table: "StatusLogs",
-                column: "DataSourceId");
+                column: "ConnectorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SyncHistory_DataSourceId",
+                name: "IX_SyncHistory_ConnectorId",
                 table: "SyncHistory",
-                column: "DataSourceId");
+                column: "ConnectorId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "DataSourceProperties");
+                name: "ConnectorProperties");
 
             migrationBuilder.DropTable(
                 name: "DbSecrets");
@@ -139,7 +162,10 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
                 name: "SyncHistory");
 
             migrationBuilder.DropTable(
-                name: "DataSources");
+                name: "Connectors");
+
+            migrationBuilder.DropTable(
+                name: "Workers");
         }
     }
 }

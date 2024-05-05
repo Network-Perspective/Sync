@@ -7,14 +7,14 @@ internal static class SyncHistoryEntryMapper
 {
     public static SyncHistoryEntry EntityToDomainModel(SyncHistoryEntryEntity entity)
     {
-        return SyncHistoryEntry.Create(entity.DataSourceId, entity.TimeStamp, new TimeRange(entity.SyncPeriodStart, entity.SyncPeriodEnd));
+        return SyncHistoryEntry.Create(entity.ConnectorId, entity.TimeStamp, new TimeRange(entity.SyncPeriodStart, entity.SyncPeriodEnd));
     }
 
     public static SyncHistoryEntryEntity DomainModelToEntity(SyncHistoryEntry syncHistoryEntry)
     {
         return new SyncHistoryEntryEntity
         {
-            DataSourceId = syncHistoryEntry.NetworkId,
+            ConnectorId = syncHistoryEntry.ConnectorId,
             TimeStamp = syncHistoryEntry.TimeStamp,
             SyncPeriodStart = syncHistoryEntry.SyncPeriod.Start,
             SyncPeriodEnd = syncHistoryEntry.SyncPeriod.End,

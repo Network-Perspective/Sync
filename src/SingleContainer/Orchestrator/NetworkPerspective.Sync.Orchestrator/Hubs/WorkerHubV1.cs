@@ -13,12 +13,12 @@ using NetworkPerspective.Sync.Orchestrator.Extensions;
 namespace NetworkPerspective.Sync.Orchestrator.Hubs;
 
 [Authorize]
-public class ConnectorHubV1 : Hub<IConnectorClient>, IOrchestratorClient
+public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient
 {
     private readonly IConnectionsLookupTable _connectionsLookupTable;
-    private readonly ILogger<ConnectorHubV1> _logger;
+    private readonly ILogger<WorkerHubV1> _logger;
 
-    public ConnectorHubV1(IConnectionsLookupTable connectionsLookupTable, ILogger<ConnectorHubV1> logger)
+    public WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, ILogger<WorkerHubV1> logger)
     {
         _connectionsLookupTable = connectionsLookupTable;
         _logger = logger;
@@ -26,9 +26,9 @@ public class ConnectorHubV1 : Hub<IConnectorClient>, IOrchestratorClient
 
     public async Task<PongDto> PingAsync(PingDto ping)
     {
-        var connectorId = Context.GetConnectorId();
+        var workerId = Context.GetConnectorId();
 
-        _logger.LogInformation("Received ping from {connectorId}", connectorId);
+        _logger.LogInformation("Received ping from {connectorId}", workerId);
         await Task.Yield();
         return new PongDto { CorrelationId = ping.CorrelationId, PingTimestamp = ping.Timestamp };
     }
@@ -37,7 +37,7 @@ public class ConnectorHubV1 : Hub<IConnectorClient>, IOrchestratorClient
     {
         var connectorId = Context.GetConnectorId();
 
-        _logger.LogInformation("Connector '{id}' connected", connectorId);
+        _logger.LogInformation("Worker '{id}' connected", connectorId);
         _connectionsLookupTable.Set(connectorId, Context.ConnectionId);
 
         await base.OnConnectedAsync();
@@ -47,7 +47,7 @@ public class ConnectorHubV1 : Hub<IConnectorClient>, IOrchestratorClient
     {
         var connectorId = Context.GetConnectorId();
 
-        _logger.LogInformation("Connector '{id}' disconnected", connectorId);
+        _logger.LogInformation("Worker '{id}' disconnected", connectorId);
         _connectionsLookupTable.Remove(connectorId);
 
         return base.OnDisconnectedAsync(exception);
@@ -55,7 +55,7 @@ public class ConnectorHubV1 : Hub<IConnectorClient>, IOrchestratorClient
 
     public async Task<AckDto> StartSyncAsync(Guid connectorId, StartSyncDto startSyncRequestDto)
     {
-        _logger.LogInformation("Sending request '{correlationId}' to connector '{id}' to start sync...", startSyncRequestDto.CorrelationId, connectorId);
+        _logger.LogInformation("Sending request '{correlationId}' to worker '{id}' to start sync...", startSyncRequestDto.CorrelationId, connectorId);
         var connectionId = _connectionsLookupTable.Get(connectorId);
         var response = await Clients.Client(connectionId).StartSyncAsync(startSyncRequestDto);
         _logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
@@ -64,7 +64,7 @@ public class ConnectorHubV1 : Hub<IConnectorClient>, IOrchestratorClient
 
     public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto syncCompleted)
     {
-        _logger.LogInformation("Received notification from connector '{id}' sync completed", Context.GetConnectorId());
+        _logger.LogInformation("Received notification from worker '{id}' sync completed", Context.GetConnectorId());
 
         await Task.Yield();
 

@@ -5,16 +5,16 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrations
 {
-    public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ConnectorDbContext>
+    public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<OrchestratorDbContext>
     {
-        public ConnectorDbContext CreateDbContext(string[] args)
+        public OrchestratorDbContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<ConnectorDbContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<OrchestratorDbContext>();
             var connectionString = GetConnectionString();
             var migrationsAssemblyName = GetType().GetTypeInfo().Assembly.GetName().Name;
             optionsBuilder.UseSqlServer(connectionString, x => x.MigrationsAssembly(migrationsAssemblyName));
 
-            return new ConnectorDbContext(optionsBuilder.Options);
+            return new OrchestratorDbContext(optionsBuilder.Options);
         }
 
         private string GetConnectionString()

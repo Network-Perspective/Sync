@@ -5,12 +5,12 @@ using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities;
 
 namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Configurations;
 
-public class NetworkPropertyConfiguration : IEntityTypeConfiguration<DataSourcePropertyEntity>
+public class ConnectorPropertyConfiguration : IEntityTypeConfiguration<ConnectorPropertyEntity>
 {
-    public void Configure(EntityTypeBuilder<DataSourcePropertyEntity> builder)
+    public void Configure(EntityTypeBuilder<ConnectorPropertyEntity> builder)
     {
         builder
-            .ToTable("DataSourceProperties");
+            .ToTable("ConnectorProperties");
 
         builder
             .HasKey(x => x.Id);

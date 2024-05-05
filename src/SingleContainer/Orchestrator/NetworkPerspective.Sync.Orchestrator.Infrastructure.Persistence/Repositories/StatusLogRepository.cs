@@ -43,7 +43,7 @@ internal class StatusLogRepository : IStatusLogRepository
         try
         {
             var entities = await _dbSet
-                .Where(x => x.DataSourceId == networkId)
+                .Where(x => x.ConnectorId == networkId)
                 .OrderByDescending(x => x.TimeStamp)
                 .Take(count)
                 .ToListAsync(stoppingToken);

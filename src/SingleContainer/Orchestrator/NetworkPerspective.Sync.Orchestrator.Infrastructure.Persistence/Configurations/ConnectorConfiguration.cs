@@ -5,12 +5,12 @@ using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities;
 
 namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Configurations;
 
-public class DataSourceConfiguration : IEntityTypeConfiguration<DataSourceEntity>
+public class ConnectorConfiguration : IEntityTypeConfiguration<ConnectorEntity>
 {
-    public void Configure(EntityTypeBuilder<DataSourceEntity> builder)
+    public void Configure(EntityTypeBuilder<ConnectorEntity> builder)
     {
         builder
-            .ToTable("DataSources");
+            .ToTable("Connectors");
 
         builder
             .HasKey(x => x.Id);
@@ -21,14 +21,14 @@ public class DataSourceConfiguration : IEntityTypeConfiguration<DataSourceEntity
 
         builder
             .HasMany(x => x.Properties)
-            .WithOne(x => x.DataSource)
-            .HasForeignKey(x => x.DataSourceId)
+            .WithOne(x => x.Connector)
+            .HasForeignKey(x => x.ConnectorId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasMany(x => x.SyncHistory)
-            .WithOne(x => x.DataSource)
-            .HasForeignKey(x => x.DataSourceId)
+            .WithOne(x => x.Connector)
+            .HasForeignKey(x => x.ConnectorId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

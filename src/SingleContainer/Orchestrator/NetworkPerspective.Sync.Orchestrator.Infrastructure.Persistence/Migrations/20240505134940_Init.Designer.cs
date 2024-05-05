@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 
@@ -10,10 +11,12 @@ using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 
 namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrations
 {
-    [DbContext(typeof(ConnectorDbContext))]
-    partial class ConnectorDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(OrchestratorDbContext))]
+    [Migration("20240505134940_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,13 +25,10 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.DataSourceEntity", b =>
+            modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.ConnectorEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ConnectorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -37,12 +37,17 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
                     b.Property<Guid>("NetworkId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("WorkerId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.ToTable("DataSources", (string)null);
+                    b.HasIndex("WorkerId");
+
+                    b.ToTable("Connectors", (string)null);
                 });
 
-            modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.DataSourcePropertyEntity", b =>
+            modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.ConnectorPropertyEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -50,7 +55,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<Guid>("DataSourceId")
+                    b.Property<Guid>("ConnectorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Key")
@@ -65,9 +70,9 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DataSourceId");
+                    b.HasIndex("ConnectorId");
 
-                    b.ToTable("DataSourceProperties", (string)null);
+                    b.ToTable("ConnectorProperties", (string)null);
                 });
 
             modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.SecretEntity", b =>
@@ -97,7 +102,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<Guid>("DataSourceId")
+                    b.Property<Guid>("ConnectorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Level")
@@ -114,7 +119,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DataSourceId");
+                    b.HasIndex("ConnectorId");
 
                     b.ToTable("StatusLogs", (string)null);
                 });
@@ -127,7 +132,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<Guid>("DataSourceId")
+                    b.Property<Guid>("ConnectorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<long>("InteractionsCount")
@@ -150,49 +155,79 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DataSourceId");
+                    b.HasIndex("ConnectorId");
 
                     b.ToTable("SyncHistory", (string)null);
                 });
 
-            modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.DataSourcePropertyEntity", b =>
+            modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.WorkerEntity", b =>
                 {
-                    b.HasOne("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.DataSourceEntity", "DataSource")
-                        .WithMany("Properties")
-                        .HasForeignKey("DataSourceId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Workers", (string)null);
+                });
+
+            modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.ConnectorEntity", b =>
+                {
+                    b.HasOne("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.WorkerEntity", "Worker")
+                        .WithMany("Connectors")
+                        .HasForeignKey("WorkerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DataSource");
+                    b.Navigation("Worker");
+                });
+
+            modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.ConnectorPropertyEntity", b =>
+                {
+                    b.HasOne("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.ConnectorEntity", "Connector")
+                        .WithMany("Properties")
+                        .HasForeignKey("ConnectorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Connector");
                 });
 
             modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.StatusLogEntity", b =>
                 {
-                    b.HasOne("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.DataSourceEntity", "DataSource")
+                    b.HasOne("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.ConnectorEntity", "Connector")
                         .WithMany()
-                        .HasForeignKey("DataSourceId")
+                        .HasForeignKey("ConnectorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DataSource");
+                    b.Navigation("Connector");
                 });
 
             modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.SyncHistoryEntryEntity", b =>
                 {
-                    b.HasOne("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.DataSourceEntity", "DataSource")
+                    b.HasOne("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.ConnectorEntity", "Connector")
                         .WithMany("SyncHistory")
-                        .HasForeignKey("DataSourceId")
+                        .HasForeignKey("ConnectorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DataSource");
+                    b.Navigation("Connector");
                 });
 
-            modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.DataSourceEntity", b =>
+            modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.ConnectorEntity", b =>
                 {
                     b.Navigation("Properties");
 
                     b.Navigation("SyncHistory");
+                });
+
+            modelBuilder.Entity("NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities.WorkerEntity", b =>
+                {
+                    b.Navigation("Connectors");
                 });
 #pragma warning restore 612, 618
         }

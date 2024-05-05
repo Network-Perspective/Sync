@@ -14,21 +14,21 @@ using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Mappers;
 
 namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Repositories;
 
-internal class DataSourceRepository<TProperties> : IDataSourceRepository<TProperties>
-    where TProperties : DataSourceProperties, new()
+internal class ConnectorRepository<TProperties> : IConnectorRepository<TProperties>
+    where TProperties : ConnectorProperties, new()
 {
-    private readonly DbSet<DataSourceEntity> _dbSet;
+    private readonly DbSet<ConnectorEntity> _dbSet;
 
-    public DataSourceRepository(DbSet<DataSourceEntity> dbSet)
+    public ConnectorRepository(DbSet<ConnectorEntity> dbSet)
     {
         _dbSet = dbSet;
     }
 
-    public async Task AddAsync(DataSource<TProperties> dataSource, CancellationToken stoppingToken = default)
+    public async Task AddAsync(Connector<TProperties> dataSource, CancellationToken stoppingToken = default)
     {
         try
         {
-            var entity = DataSourceMapper<TProperties>.DomainModelToEntity(dataSource);
+            var entity = ConnectorMapper<TProperties>.DomainModelToEntity(dataSource);
             await _dbSet.AddAsync(entity, stoppingToken);
         }
         catch (Exception ex)
@@ -50,7 +50,7 @@ internal class DataSourceRepository<TProperties> : IDataSourceRepository<TProper
         }
     }
 
-    public async Task<DataSource<TProperties>> FindAsync(Guid networkId, CancellationToken stoppingToken = default)
+    public async Task<Connector<TProperties>> FindAsync(Guid networkId, CancellationToken stoppingToken = default)
     {
         try
         {
@@ -59,7 +59,7 @@ internal class DataSourceRepository<TProperties> : IDataSourceRepository<TProper
                 .Where(x => x.Id == networkId)
                 .FirstOrDefaultAsync(stoppingToken);
 
-            return result is null ? null : DataSourceMapper<TProperties>.EntityToDomainModel(result);
+            return result is null ? null : ConnectorMapper<TProperties>.EntityToDomainModel(result);
         }
         catch (Exception ex)
         {
@@ -67,7 +67,7 @@ internal class DataSourceRepository<TProperties> : IDataSourceRepository<TProper
         }
     }
 
-    public async Task<IEnumerable<DataSource<TProperties>>> GetAllAsync(CancellationToken stoppingToken = default)
+    public async Task<IEnumerable<Connector<TProperties>>> GetAllAsync(CancellationToken stoppingToken = default)
     {
         try
         {
@@ -75,7 +75,7 @@ internal class DataSourceRepository<TProperties> : IDataSourceRepository<TProper
                 .Include(x => x.Properties)
                 .ToListAsync(stoppingToken);
 
-            return entities.Select(DataSourceMapper<TProperties>.EntityToDomainModel);
+            return entities.Select(ConnectorMapper<TProperties>.EntityToDomainModel);
         }
         catch (Exception ex)
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -16,9 +17,9 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<IDbInitializer, DbInitializer>();
         services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
-        services.AddTransient(x => x.GetRequiredService<IUnitOfWorkFactory>().Create());
+        services.AddScoped(x => x.GetRequiredService<IUnitOfWorkFactory>().Create());
 
-        healthCheckBuilder.AddCheck<PersistenceHealthCheck>("Database", HealthStatus.Unhealthy, Array.Empty<string>(), TimeSpan.FromSeconds(10));
+        healthCheckBuilder.AddCheck<PersistenceHealthCheck>("Database", HealthStatus.Unhealthy, Enumerable.Empty<string>(), TimeSpan.FromSeconds(10));
 
         return services;
     }

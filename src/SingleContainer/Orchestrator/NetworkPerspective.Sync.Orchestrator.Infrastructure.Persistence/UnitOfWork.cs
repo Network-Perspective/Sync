@@ -12,11 +12,11 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly ConnectorDbContext _dbContext;
+    private readonly OrchestratorDbContext _dbContext;
 
-    public UnitOfWork(DbContextOptions<ConnectorDbContext> options)
+    public UnitOfWork(DbContextOptions<OrchestratorDbContext> options)
     {
-        _dbContext = new ConnectorDbContext(options);
+        _dbContext = new OrchestratorDbContext(options);
     }
 
     public Task CommitAsync(CancellationToken stoppingToken = default)
@@ -25,11 +25,14 @@ public class UnitOfWork : IUnitOfWork
     public ISyncHistoryRepository GetSyncHistoryRepository()
         => new SyncHistoryRepository(_dbContext.SyncHistoryEntities);
 
-    public IDataSourceRepository<TProperties> GetDataSourceRepository<TProperties>() where TProperties : DataSourceProperties, new()
-        => new DataSourceRepository<TProperties>(_dbContext.NetworkEntities);
+    public IConnectorRepository<TProperties> GetConnectorRepository<TProperties>() where TProperties : ConnectorProperties, new()
+        => new ConnectorRepository<TProperties>(_dbContext.NetworkEntities);
 
     public IStatusLogRepository GetStatusLogRepository()
         => new StatusLogRepository(_dbContext.StatusLogEntities);
+
+    public IWorkerRepository GetWorkerRepository()
+    => new WorkerRepository(_dbContext.WorkerEntities);
 
     public IDbSecretRepository GetDbSecretRepository()
         => new DbSecretRepository(_dbContext.SecretEntities);

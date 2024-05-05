@@ -10,6 +10,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrat
     /// <inheritdoc />
     public partial class Quartz : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             var scriptPath = Path.Combine(AppContext.BaseDirectory, "Migrations", "Scripts", "Quartz_SqlServer_up.sql");

@@ -7,13 +7,13 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Mapper
 public static class StatusLogMapper
 {
     public static StatusLog EntityToDomainModel(StatusLogEntity entity)
-        => StatusLog.Create(entity.DataSourceId, entity.Message, (StatusLogLevel)entity.Level, entity.TimeStamp);
+        => StatusLog.Create(entity.ConnectorId, entity.Message, (StatusLogLevel)entity.Level, entity.TimeStamp);
 
     public static StatusLogEntity DomainModelToEntity(StatusLog log)
     {
         return new StatusLogEntity
         {
-            DataSourceId = log.DataSourceId,
+            ConnectorId = log.DataSourceId,
             TimeStamp = log.TimeStamp,
             Level = (int)log.Level,
             Message = log.Message

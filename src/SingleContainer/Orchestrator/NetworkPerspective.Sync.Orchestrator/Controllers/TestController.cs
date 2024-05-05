@@ -12,9 +12,9 @@ namespace NetworkPerspective.Sync.Orchestrator.Controllers
     [AllowAnonymous]
     public class TestController : ControllerBase
     {
-        private readonly ConnectorHubV1 _hub;
+        private readonly WorkerHubV1 _hub;
 
-        public TestController(ConnectorHubV1 hub)
+        public TestController(WorkerHubV1 hub)
         {
             _hub = hub;
         }

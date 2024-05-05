@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Orchestrator.Application;
 using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
@@ -39,11 +40,12 @@ builder.Services.AddControllers(options =>
 });
 
 var app = builder.Build();
+app.UseExceptionHandler(ErrorController.ErrorRoute);
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapDefaultControllerRoute();
-app.MapHub<ConnectorHubV1>("/v1/connector-hub");
+app.MapHub<WorkerHubV1>("/ws/v1/workers-hub");
 
 app.UseHttpsRedirection();
 

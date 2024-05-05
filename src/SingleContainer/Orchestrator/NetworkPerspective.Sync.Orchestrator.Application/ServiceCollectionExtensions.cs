@@ -8,6 +8,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        services.AddTransient<IClock, Clock>();
+
+        services.AddTransient<IWorkersService, WorkersService>();
+
         services.AddSingleton<IConnectionsLookupTable, ConnectionsLookupTable>();
 
         return services;

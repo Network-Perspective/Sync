@@ -40,7 +40,7 @@ internal class SyncHistoryRepository : ISyncHistoryRepository
         try
         {
             var entity = await _dbSet
-                 .Where(x => x.DataSource.Id == networkId)
+                 .Where(x => x.Connector.Id == networkId)
                  .OrderByDescending(x => x.TimeStamp)
                  .FirstOrDefaultAsync();
 
@@ -60,7 +60,7 @@ internal class SyncHistoryRepository : ISyncHistoryRepository
         try
         {
             var entity = await _dbSet
-                 .Where(x => x.DataSource.Id == networkId)
+                 .Where(x => x.Connector.Id == networkId)
                  .ToListAsync(cancellationToken);
 
             _dbSet

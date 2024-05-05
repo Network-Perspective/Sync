@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Domain;
 
-public class DataSourceProperties
+public class ConnectorProperties
 {
     protected const bool DefaultSyncGroups = false;
     protected const bool DefaultSyncChannelsNames = false;
@@ -14,17 +14,17 @@ public class DataSourceProperties
 
     public Uri ExternalKeyVaultUri { get; private set; } = null;
 
-    public DataSourceProperties()
+    public ConnectorProperties()
     { }
 
-    public DataSourceProperties(bool syncGroups, bool syncChannelsNames, Uri externalKeyVaultUri)
+    public ConnectorProperties(bool syncGroups, bool syncChannelsNames, Uri externalKeyVaultUri)
     {
         SyncGroups = syncGroups;
         SyncChannelsNames = syncChannelsNames;
         ExternalKeyVaultUri = externalKeyVaultUri;
     }
 
-    public static TProperties Create<TProperties>(IEnumerable<KeyValuePair<string, string>> properties) where TProperties : DataSourceProperties, new()
+    public static TProperties Create<TProperties>(IEnumerable<KeyValuePair<string, string>> properties) where TProperties : ConnectorProperties, new()
     {
         var networkProperties = new TProperties();
         networkProperties.Bind(properties);

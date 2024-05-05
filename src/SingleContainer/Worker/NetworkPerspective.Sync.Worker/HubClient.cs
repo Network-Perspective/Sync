@@ -19,7 +19,7 @@ public class HubClient : IOrchestratorClient
     {
         _logger = logger;
 
-        var hubUrl = "https://localhost:7191/v1/connector-hub";
+        var hubUrl = "https://localhost:7191/ws/v1/workers-hub";
 
         static Task<string> TokenFactory()
         {
@@ -34,7 +34,7 @@ public class HubClient : IOrchestratorClient
             .WithAutomaticReconnect()
             .Build();
 
-        _connection.On<StartSyncDto, AckDto>(nameof(IConnectorClient.StartSyncAsync), async x =>
+        _connection.On<StartSyncDto, AckDto>(nameof(IWorkerClient.StartSyncAsync), async x =>
         {
             _logger.LogInformation("Received request to start sync '{correlationId}'", x.CorrelationId);
 

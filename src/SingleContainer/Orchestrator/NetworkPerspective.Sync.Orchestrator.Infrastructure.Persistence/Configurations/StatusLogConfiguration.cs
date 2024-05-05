@@ -16,7 +16,7 @@ public class StatusLogConfiguration : IEntityTypeConfiguration<StatusLogEntity>
             .HasKey(x => x.Id);
 
         builder
-            .Property(x => x.DataSourceId)
+            .Property(x => x.ConnectorId)
             .IsRequired(true);
 
         builder
@@ -34,6 +34,6 @@ public class StatusLogConfiguration : IEntityTypeConfiguration<StatusLogEntity>
             .IsRequired(true);
 
         builder
-            .HasIndex(x => x.DataSourceId);
+            .HasIndex(x => x.ConnectorId);
     }
 }

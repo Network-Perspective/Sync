@@ -1,7 +1,19 @@
 @orchestrator_host = http://localhost:5273
+@worker_id = C67C1E78-99B1-4EC2-82F4-68684F496B0D
+
+###
 
 GET {{orchestrator_host}}/api/test
 Accept: application/json
 
 ###
 
+POST {{orchestrator_host}}/api/workers
+Content-Type: application/json
+Accept: application/json
+
+{
+    "Id": "{{worker_id}}"
+}
+
+###

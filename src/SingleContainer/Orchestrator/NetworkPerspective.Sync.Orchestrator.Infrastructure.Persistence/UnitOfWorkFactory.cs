@@ -8,14 +8,14 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 
 public class UnitOfWorkFactory : IUnitOfWorkFactory
 {
-    private readonly DbContextOptions<ConnectorDbContext> _options;
+    private readonly DbContextOptions<OrchestratorDbContext> _options;
 
     public UnitOfWorkFactory(IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("Database");
 
         var migrationsAssemblyName = typeof(DesignTimeDbContextFactory).Assembly.GetName().Name;
-        _options = new DbContextOptionsBuilder<ConnectorDbContext>()
+        _options = new DbContextOptionsBuilder<OrchestratorDbContext>()
           .UseSqlServer(connectionString, x => x.MigrationsAssembly(migrationsAssemblyName))
           .Options;
     }
