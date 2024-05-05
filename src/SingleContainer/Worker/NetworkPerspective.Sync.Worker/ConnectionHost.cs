@@ -7,11 +7,11 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 
-namespace NetworkPerspective.Sync.Connector;
+namespace NetworkPerspective.Sync.Worker;
 
-public class Worker(HubClient hubClient, ILogger<Worker> logger) : BackgroundService
+public class ConnectionHost(HubClient hubClient, ILogger<ConnectionHost> logger) : BackgroundService
 {
-    private readonly ILogger<Worker> _logger = logger;
+    private readonly ILogger<ConnectionHost> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -19,8 +19,8 @@ public class Worker(HubClient hubClient, ILogger<Worker> logger) : BackgroundSer
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var ping = new PingDto 
-            { 
+            var ping = new PingDto
+            {
                 CorrelationId = Guid.NewGuid(),
                 Timestamp = DateTime.UtcNow,
             };

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Contract.V1;
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 
-namespace NetworkPerspective.Sync.Connector;
+namespace NetworkPerspective.Sync.Worker;
 
 public class HubClient : IOrchestratorClient
 {
@@ -23,7 +23,7 @@ public class HubClient : IOrchestratorClient
 
         static Task<string> TokenFactory()
         {
-            return Task.FromResult<string>("blablabla");
+            return Task.FromResult("blablabla");
         }
 
         _connection = new HubConnectionBuilder()

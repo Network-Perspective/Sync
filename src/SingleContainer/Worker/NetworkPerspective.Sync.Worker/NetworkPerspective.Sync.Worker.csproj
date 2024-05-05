@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NetworkPerspective.Sync.Connector.Application\NetworkPerspective.Sync.Connector.Application.csproj" />
+    <ProjectReference Include="..\NetworkPerspective.Sync.Worker.Application\NetworkPerspective.Sync.Worker.Application.csproj" />
     <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract\NetworkPerspective.Sync.Contract.csproj" />
   </ItemGroup>
 </Project>

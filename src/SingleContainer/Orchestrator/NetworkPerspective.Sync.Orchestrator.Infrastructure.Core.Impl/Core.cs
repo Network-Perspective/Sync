@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Contract;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Contract.Exceptions;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl;
 

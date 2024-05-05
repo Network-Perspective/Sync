@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.AspNetCore.SignalR;
 
 namespace NetworkPerspective.Sync.Orchestrator.Extensions

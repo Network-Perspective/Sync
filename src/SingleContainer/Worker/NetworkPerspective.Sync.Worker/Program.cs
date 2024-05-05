@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 
 using NetworkPerspective.Sync.Connector.Application;
 
-namespace NetworkPerspective.Sync.Connector;
+namespace NetworkPerspective.Sync.Worker;
 
 public class Program
 {
@@ -13,7 +13,7 @@ public class Program
 
         builder.Services.AddConnectorApplication();
         builder.Services.AddSingleton<HubClient>();
-        builder.Services.AddHostedService<Worker>();
+        builder.Services.AddHostedService<ConnectionHost>();
 
         var host = builder.Build();
         host.Run();

@@ -4,13 +4,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Orchestrator.Hubs;
-using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Application;
-using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
+using NetworkPerspective.Sync.Orchestrator.Extensions;
+using NetworkPerspective.Sync.Orchestrator.Hubs;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Stub;
+using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,7 +36,7 @@ builder.Services
 builder.Services.AddControllers(options =>
 {
     options.OutputFormatters.RemoveType<StringOutputFormatter>();
-});  
+});
 
 var app = builder.Build();
 app.UseRouting();
