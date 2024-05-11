@@ -1,24 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities;
 
 namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Mappers;
 
-internal static class ConnectorMapper<TProperties> where TProperties : ConnectorProperties, new()
+internal static class ConnectorMapper
 {
-    public static Connector<TProperties> EntityToDomainModel(ConnectorEntity entity)
+    public static Connector EntityToDomainModel(ConnectorEntity entity)
     {
-        var properties = entity.Properties.Select(x => new KeyValuePair<string, string>(x.Key, x.Value));
-        var dataSourceProperties = ConnectorProperties.Create<TProperties>(properties);
-
+        var properties = entity.Properties.ToDictionary(x => x.Key, y => y.Value);
         var worker = WorkerMapper.EntityToDomainModel(entity.Worker);
-
-        return Connector<TProperties>.Create(entity.Id, worker, entity.NetworkId, dataSourceProperties, entity.CreatedAt);
+        return new Connector(entity.Id, properties, worker, entity.NetworkId, entity.CreatedAt);
     }
 
-    public static ConnectorEntity DomainModelToEntity(Connector<TProperties> connector)
+    public static ConnectorEntity DomainModelToEntity(Connector connector)
     {
         var connectorEntity = new ConnectorEntity
         {
@@ -26,19 +22,15 @@ internal static class ConnectorMapper<TProperties> where TProperties : Connector
             WorkerId = connector.Worker.Id,
             NetworkId = connector.NetworkId,
             CreatedAt = connector.CreatedAt,
+            Properties = connector.Properties
+                .Select(x => new ConnectorPropertyEntity
+                {
+                    Key = x.Key,
+                    Value = x.Value,
+                    ConnectorId = connector.Id,
+                })
+                .ToList()
         };
-
-        var properties = connector.Properties
-            .GetAll()
-            .Select(x => new ConnectorPropertyEntity
-            {
-                Key = x.Key,
-                Value = x.Value,
-                Connector = connectorEntity,
-            })
-            .ToList();
-
-        connectorEntity.Properties = properties;
 
         return connectorEntity;
     }

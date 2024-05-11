@@ -25,8 +25,8 @@ public class UnitOfWork : IUnitOfWork
     public ISyncHistoryRepository GetSyncHistoryRepository()
         => new SyncHistoryRepository(_dbContext.SyncHistoryEntities);
 
-    public IConnectorRepository<TProperties> GetConnectorRepository<TProperties>() where TProperties : ConnectorProperties, new()
-        => new ConnectorRepository<TProperties>(_dbContext.NetworkEntities);
+    public IConnectorRepository GetConnectorRepository()
+        => new ConnectorRepository(_dbContext.NetworkEntities);
 
     public IStatusLogRepository GetStatusLogRepository()
         => new StatusLogRepository(_dbContext.StatusLogEntities);

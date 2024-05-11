@@ -14,8 +14,7 @@ using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Mappers;
 
 namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Repositories;
 
-internal class ConnectorRepository<TProperties> : IConnectorRepository<TProperties>
-    where TProperties : ConnectorProperties, new()
+internal class ConnectorRepository : IConnectorRepository
 {
     private readonly DbSet<ConnectorEntity> _dbSet;
 
@@ -24,11 +23,11 @@ internal class ConnectorRepository<TProperties> : IConnectorRepository<TProperti
         _dbSet = dbSet;
     }
 
-    public async Task AddAsync(Connector<TProperties> dataSource, CancellationToken stoppingToken = default)
+    public async Task AddAsync(Connector connector, CancellationToken stoppingToken = default)
     {
         try
         {
-            var entity = ConnectorMapper<TProperties>.DomainModelToEntity(dataSource);
+            var entity = ConnectorMapper.DomainModelToEntity(connector);
             await _dbSet.AddAsync(entity, stoppingToken);
         }
         catch (Exception ex)
@@ -50,16 +49,16 @@ internal class ConnectorRepository<TProperties> : IConnectorRepository<TProperti
         }
     }
 
-    public async Task<Connector<TProperties>> FindAsync(Guid networkId, CancellationToken stoppingToken = default)
+    public async Task<Connector> FindAsync(Guid connectorId, CancellationToken stoppingToken = default)
     {
         try
         {
             var result = await _dbSet
                 .Include(x => x.Properties)
-                .Where(x => x.Id == networkId)
+                .Where(x => x.Id == connectorId)
                 .FirstOrDefaultAsync(stoppingToken);
 
-            return result is null ? null : ConnectorMapper<TProperties>.EntityToDomainModel(result);
+            return result is null ? null : ConnectorMapper.EntityToDomainModel(result);
         }
         catch (Exception ex)
         {
@@ -67,7 +66,7 @@ internal class ConnectorRepository<TProperties> : IConnectorRepository<TProperti
         }
     }
 
-    public async Task<IEnumerable<Connector<TProperties>>> GetAllAsync(CancellationToken stoppingToken = default)
+    public async Task<IEnumerable<Connector>> GetAllAsync(CancellationToken stoppingToken = default)
     {
         try
         {
@@ -75,7 +74,7 @@ internal class ConnectorRepository<TProperties> : IConnectorRepository<TProperti
                 .Include(x => x.Properties)
                 .ToListAsync(stoppingToken);
 
-            return entities.Select(ConnectorMapper<TProperties>.EntityToDomainModel);
+            return entities.Select(ConnectorMapper.EntityToDomainModel);
         }
         catch (Exception ex)
         {

@@ -1,19 +1,25 @@
 @orchestrator_host = http://localhost:5273
-@worker_id = C67C1E78-99B1-4EC2-82F4-68684F496B0D
+@worker_id = cbb752c9-2886-42b3-8c18-80e72f4980ec
 
-###
-
-GET {{orchestrator_host}}/api/test
+### GET ALL
+GET {{orchestrator_host}}/api/workers
 Accept: application/json
 
-###
-
+### CREATE
 POST {{orchestrator_host}}/api/workers
 Content-Type: application/json
 Accept: application/json
 
 {
-    "Id": "{{worker_id}}"
+    "Name": "client_1",
+    "Secret": "pass1"
 }
 
-###
+### AUTHORIZE
+POST {{orchestrator_host}}/api/workers/{{worker_id}}/auth
+Accept: application/json
+
+### DELETE
+
+DELETE {{orchestrator_host}}/api/workers/{{worker_id}}
+Content-Type: application/json

@@ -7,10 +7,10 @@ using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence.Repositories;
 
-public interface IConnectorRepository<TProperties> where TProperties : ConnectorProperties, new()
+public interface IConnectorRepository
 {
-    Task AddAsync(Connector<TProperties> network, CancellationToken stoppingToken = default);
-    Task RemoveAsync(Guid networkId, CancellationToken stoppingToken = default);
-    Task<Connector<TProperties>> FindAsync(Guid networkId, CancellationToken stoppingToken = default);
-    Task<IEnumerable<Connector<TProperties>>> GetAllAsync(CancellationToken stoppingToken = default);
+    Task AddAsync(Connector connector, CancellationToken stoppingToken = default);
+    Task RemoveAsync(Guid connectorId, CancellationToken stoppingToken = default);
+    Task<Connector> FindAsync(Guid connectorId, CancellationToken stoppingToken = default);
+    Task<IEnumerable<Connector>> GetAllAsync(CancellationToken stoppingToken = default);
 }

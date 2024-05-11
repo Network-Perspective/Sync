@@ -22,7 +22,7 @@ public class PersistenceHealthCheck : IHealthCheck
         try
         {
             await _unitOfWork
-                .GetConnectorRepository<ConnectorProperties>()
+                .GetConnectorRepository()
                 .GetAllAsync(cancellationToken);
 
             return HealthCheckResult.Healthy();

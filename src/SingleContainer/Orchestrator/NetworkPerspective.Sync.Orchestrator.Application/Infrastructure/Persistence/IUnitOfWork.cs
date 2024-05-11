@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence.Repositories;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence
@@ -11,7 +10,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persis
     {
         Task MigrateAsync();
         ISyncHistoryRepository GetSyncHistoryRepository();
-        IConnectorRepository<TProperties> GetConnectorRepository<TProperties>() where TProperties : ConnectorProperties, new();
+        IConnectorRepository GetConnectorRepository();
         IStatusLogRepository GetStatusLogRepository();
         IWorkerRepository GetWorkerRepository();
         Task CommitAsync(CancellationToken stoppingToken = default);
