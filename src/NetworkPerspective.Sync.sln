@@ -139,7 +139,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SingleContainer", "SingleCo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Orchestrator", "Orchestrator", "{E7335FC0-BA6F-43A2-A10F-72C827499A2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Orchestrator.Application.Tests", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Application.Tests\NetworkPerspective.Sync.Orchestrator.Application.Tests.csproj", "{42DB9F4B-E967-4162-B43B-D15FAF66D7A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Application.Tests", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Application.Tests\NetworkPerspective.Sync.Orchestrator.Application.Tests.csproj", "{42DB9F4B-E967-4162-B43B-D15FAF66D7A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Orchestrator.Tests", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Tests\NetworkPerspective.Sync.Orchestrator.Tests.csproj", "{E228A0E1-85CC-4471-AE3F-FAE3EEF486D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Orchestrator.Client", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Client\NetworkPerspective.Sync.Orchestrator.Client.csproj", "{B0755009-D6D4-49BC-A0DD-904EF0CD9327}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -331,6 +335,14 @@ Global
 		{42DB9F4B-E967-4162-B43B-D15FAF66D7A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42DB9F4B-E967-4162-B43B-D15FAF66D7A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42DB9F4B-E967-4162-B43B-D15FAF66D7A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E228A0E1-85CC-4471-AE3F-FAE3EEF486D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E228A0E1-85CC-4471-AE3F-FAE3EEF486D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E228A0E1-85CC-4471-AE3F-FAE3EEF486D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E228A0E1-85CC-4471-AE3F-FAE3EEF486D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0755009-D6D4-49BC-A0DD-904EF0CD9327}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0755009-D6D4-49BC-A0DD-904EF0CD9327}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0755009-D6D4-49BC-A0DD-904EF0CD9327}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0755009-D6D4-49BC-A0DD-904EF0CD9327}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -403,6 +415,8 @@ Global
 		{E63E2215-B67E-466F-BB8C-A90A29349EAA} = {6EFA829B-C784-47D9-9825-3264F052057B}
 		{E7335FC0-BA6F-43A2-A10F-72C827499A2F} = {E63E2215-B67E-466F-BB8C-A90A29349EAA}
 		{42DB9F4B-E967-4162-B43B-D15FAF66D7A1} = {E7335FC0-BA6F-43A2-A10F-72C827499A2F}
+		{E228A0E1-85CC-4471-AE3F-FAE3EEF486D3} = {E7335FC0-BA6F-43A2-A10F-72C827499A2F}
+		{B0755009-D6D4-49BC-A0DD-904EF0CD9327} = {36F00875-0996-4F8C-89AE-893B756BBCB8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}
