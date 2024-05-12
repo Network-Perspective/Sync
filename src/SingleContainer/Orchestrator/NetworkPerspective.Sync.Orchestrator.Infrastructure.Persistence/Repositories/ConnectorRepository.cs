@@ -81,4 +81,22 @@ internal class ConnectorRepository : IConnectorRepository
             throw new DbException(ex);
         }
     }
+
+    public async Task<IEnumerable<Connector>> GetAllAsync(Guid workerId, CancellationToken stoppingToken = default)
+    {
+        try
+        {
+            var entities = await _dbSet
+                .Where(x => x.WorkerId == workerId)
+                .Include(x => x.Properties)
+                .Include(x => x.Worker)
+                .ToListAsync(stoppingToken);
+
+            return entities.Select(ConnectorMapper.EntityToDomainModel);
+        }
+        catch (Exception ex)
+        {
+            throw new DbException(ex);
+        }
+    }
 }

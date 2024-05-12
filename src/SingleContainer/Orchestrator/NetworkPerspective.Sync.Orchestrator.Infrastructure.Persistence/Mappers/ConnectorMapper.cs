@@ -11,7 +11,7 @@ internal static class ConnectorMapper
     {
         var properties = entity.Properties.ToDictionary(x => x.Key, y => y.Value);
         var worker = WorkerMapper.EntityToDomainModel(entity.Worker);
-        return new Connector(entity.Id, properties, worker, entity.NetworkId, entity.CreatedAt);
+        return new Connector(entity.Id, entity.Type, properties, worker, entity.NetworkId, entity.CreatedAt);
     }
 
     public static ConnectorEntity DomainModelToEntity(Connector connector)
@@ -19,6 +19,7 @@ internal static class ConnectorMapper
         var connectorEntity = new ConnectorEntity
         {
             Id = connector.Id,
+            Type = connector.Type,
             WorkerId = connector.Worker.Id,
             NetworkId = connector.NetworkId,
             CreatedAt = connector.CreatedAt,

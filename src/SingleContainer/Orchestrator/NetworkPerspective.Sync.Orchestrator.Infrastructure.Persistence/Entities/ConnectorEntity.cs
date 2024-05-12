@@ -6,6 +6,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entiti
 public class ConnectorEntity
 {
     public Guid Id { get; set; }
+    public string Type { get; set; }
     public Guid WorkerId { get; set; }
     public WorkerEntity Worker { get; set; }
     public Guid NetworkId { get; set; }
