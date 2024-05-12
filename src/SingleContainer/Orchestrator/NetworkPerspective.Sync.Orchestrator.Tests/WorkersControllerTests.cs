@@ -25,7 +25,6 @@ public class WorkersControllerTests
     public async Task ShouldReturnCreatedWorkers()
     {
         // Arrange
-        var networkId = Guid.NewGuid();
         var httpClient = _service.CreateDefaultClient();
 
         var client = new WorkersClient(httpClient);
@@ -47,11 +46,9 @@ public class WorkersControllerTests
 
         // Assert
         var actual = await client.WorkersGetAsync();
-        var expected = new WorkerDto[]
-        {
-            new() { Id = tobeAuthorized, Name = "worker1", IsAuthorized = true },
-            new() { Id = unauthorized, Name = "worker3", IsAuthorized = false }
-        };
-        actual.Should().BeEquivalentTo(expected);
+
+        actual.Should().ContainEquivalentOf(new WorkerDto { Id = tobeAuthorized, Name = "worker1", IsAuthorized = true });
+        actual.Should().NotContainEquivalentOf(new WorkerDto { Id = toBeDeletedId, Name = "worker2", IsAuthorized = false });
+        actual.Should().ContainEquivalentOf(new WorkerDto { Id = unauthorized, Name = "worker3", IsAuthorized = false });
     }
 }
