@@ -141,9 +141,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Orchestrator", "Orchestrato
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Application.Tests", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Application.Tests\NetworkPerspective.Sync.Orchestrator.Application.Tests.csproj", "{42DB9F4B-E967-4162-B43B-D15FAF66D7A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Orchestrator.Tests", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Tests\NetworkPerspective.Sync.Orchestrator.Tests.csproj", "{E228A0E1-85CC-4471-AE3F-FAE3EEF486D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Tests", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Tests\NetworkPerspective.Sync.Orchestrator.Tests.csproj", "{E228A0E1-85CC-4471-AE3F-FAE3EEF486D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Orchestrator.Client", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Client\NetworkPerspective.Sync.Orchestrator.Client.csproj", "{B0755009-D6D4-49BC-A0DD-904EF0CD9327}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Client", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Client\NetworkPerspective.Sync.Orchestrator.Client.csproj", "{B0755009-D6D4-49BC-A0DD-904EF0CD9327}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Vault", "Vault", "{C8C4F9FA-FB48-45CA-84E7-A7938D563462}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract.csproj", "{EF13C43A-C710-4A50-80EB-93812FE37AF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault.csproj", "{2CCFBA14-FE76-422E-B1ED-25F60F012ABE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub.csproj", "{961F80B6-84C1-49F2-ACA6-55068A4480C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -343,6 +351,18 @@ Global
 		{B0755009-D6D4-49BC-A0DD-904EF0CD9327}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0755009-D6D4-49BC-A0DD-904EF0CD9327}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0755009-D6D4-49BC-A0DD-904EF0CD9327}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF13C43A-C710-4A50-80EB-93812FE37AF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF13C43A-C710-4A50-80EB-93812FE37AF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF13C43A-C710-4A50-80EB-93812FE37AF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF13C43A-C710-4A50-80EB-93812FE37AF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CCFBA14-FE76-422E-B1ED-25F60F012ABE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CCFBA14-FE76-422E-B1ED-25F60F012ABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CCFBA14-FE76-422E-B1ED-25F60F012ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CCFBA14-FE76-422E-B1ED-25F60F012ABE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{961F80B6-84C1-49F2-ACA6-55068A4480C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{961F80B6-84C1-49F2-ACA6-55068A4480C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{961F80B6-84C1-49F2-ACA6-55068A4480C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{961F80B6-84C1-49F2-ACA6-55068A4480C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -417,6 +437,10 @@ Global
 		{42DB9F4B-E967-4162-B43B-D15FAF66D7A1} = {E7335FC0-BA6F-43A2-A10F-72C827499A2F}
 		{E228A0E1-85CC-4471-AE3F-FAE3EEF486D3} = {E7335FC0-BA6F-43A2-A10F-72C827499A2F}
 		{B0755009-D6D4-49BC-A0DD-904EF0CD9327} = {36F00875-0996-4F8C-89AE-893B756BBCB8}
+		{C8C4F9FA-FB48-45CA-84E7-A7938D563462} = {4C21511C-5082-4B21-A1A4-F86D1FBCA8CC}
+		{EF13C43A-C710-4A50-80EB-93812FE37AF7} = {C8C4F9FA-FB48-45CA-84E7-A7938D563462}
+		{2CCFBA14-FE76-422E-B1ED-25F60F012ABE} = {C8C4F9FA-FB48-45CA-84E7-A7938D563462}
+		{961F80B6-84C1-49F2-ACA6-55068A4480C1} = {C8C4F9FA-FB48-45CA-84E7-A7938D563462}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}

@@ -13,18 +13,21 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
-using NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Contract;
+using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 using Newtonsoft.Json;
 
-namespace NetworkPerspective.Sync.Orchestrator.Auth;
+namespace NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 
-public class ServiceAuthHandler : AuthenticationHandler<ServiceAuthOptions>
+public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthOptions>
 {
-    private const string AuthenticationExceptionKey = "AuthenticationException";
-    private readonly ICore _core;
-    private readonly IErrorService _errorService;
 
+    private const string AuthenticationExceptionKey = "ApiKeyAuthenticationException";
+
+    private readonly IVault _vault;
+    private readonly IErrorService _errorService;
+    private readonly IOptionsMonitor<ApiKeyAuthOptions> _options;
     private readonly JsonSerializerSettings _jsonSerializerSettings = new()
     {
         Formatting = Formatting.Indented,
@@ -32,11 +35,11 @@ public class ServiceAuthHandler : AuthenticationHandler<ServiceAuthOptions>
         DefaultValueHandling = DefaultValueHandling.Ignore
     };
 
-    public ServiceAuthHandler(IOptionsMonitor<ServiceAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder, ICore core, IErrorService errorService)
-        : base(options, logger, encoder)
+    public ApiKeyAuthHandler(IVault vault, IErrorService errorService, IOptionsMonitor<ApiKeyAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
     {
-        _core = core;
+        _vault = vault;
         _errorService = errorService;
+        _options = options;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -47,6 +50,7 @@ public class ServiceAuthHandler : AuthenticationHandler<ServiceAuthOptions>
         try
         {
             return await AuthenticateInternalAsync();
+
         }
         catch (Exception ex)
         {
@@ -79,17 +83,19 @@ public class ServiceAuthHandler : AuthenticationHandler<ServiceAuthOptions>
 
     private async Task<AuthenticateResult> AuthenticateInternalAsync()
     {
-        var tokenValidationResult = await _core.ValidateTokenAsync(Request.GetServiceAccessToken(), Context.RequestAborted);
+        var expectedKey = await _vault.GetSecretAsync(_options.CurrentValue.ApiKeyVaultKey, Context.RequestAborted);
+        var actualKey = Request.GetBearerToken();
 
-        var claims = new List<Claim>()
-            {
-                new("NetworkId", tokenValidationResult.NetworkId.ToString()),
-                new("ConnectorId", tokenValidationResult.ConnectorId.ToString())
-            };
-        var claimsIdentity = new ClaimsIdentity(claims, Scheme.Name);
-        var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+        if (string.Equals(expectedKey.ToSystemString(), actualKey.ToSystemString()))
+        {
+            var claims = new List<Claim>()
+            { };
+            var claimsIdentity = new ClaimsIdentity(claims, Scheme.Name);
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+            return AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name));
+        }
 
-        return AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name));
+        return AuthenticateResult.Fail("Api key is not valid");
     }
 
     private static bool AllowAnonymousAccess(HttpContext context)

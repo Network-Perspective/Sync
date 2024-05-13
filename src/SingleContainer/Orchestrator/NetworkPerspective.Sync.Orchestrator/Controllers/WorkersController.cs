@@ -9,13 +9,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
+using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 using NetworkPerspective.Sync.Orchestrator.Dtos;
 using NetworkPerspective.Sync.Orchestrator.Mappers;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
-[AllowAnonymous]
 [Route("api/workers")]
+[Authorize(AuthenticationSchemes = ApiKeyAuthOptions.DefaultScheme)]
 public class WorkersController : ControllerBase
 {
     private readonly IWorkersService _workersService;

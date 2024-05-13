@@ -1,5 +1,4 @@
-﻿
-using NetworkPerspective.Sync.Orchestrator.Tests;
+﻿using NetworkPerspective.Sync.Orchestrator.Tests.Fixtures;
 
 using Xunit;
 

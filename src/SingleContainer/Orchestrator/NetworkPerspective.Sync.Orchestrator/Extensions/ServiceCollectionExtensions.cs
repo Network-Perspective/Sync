@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
-using NetworkPerspective.Sync.Orchestrator.Auth;
+using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
+using NetworkPerspective.Sync.Orchestrator.Auth.Worker;
 using NetworkPerspective.Sync.Orchestrator.Hubs;
 
 namespace NetworkPerspective.Sync.Orchestrator.Extensions;
@@ -23,8 +24,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAuth(this IServiceCollection services)
     {
         services
-            .AddAuthentication(ServiceAuthOptions.DefaultScheme)
-            .AddScheme<ServiceAuthOptions, ServiceAuthHandler>(ServiceAuthOptions.DefaultScheme, options => { });
+            .AddAuthentication(ApiKeyAuthOptions.DefaultScheme)
+            .AddScheme<ApiKeyAuthOptions, ApiKeyAuthHandler>(ApiKeyAuthOptions.DefaultScheme, options => { })
+            .AddScheme<WorkerAuthOptions, WorkerAuthHandler>(WorkerAuthOptions.DefaultScheme, options => { });
 
         services
             .AddAuthorizationBuilder()

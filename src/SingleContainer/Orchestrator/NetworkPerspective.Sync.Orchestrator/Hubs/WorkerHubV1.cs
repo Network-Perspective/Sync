@@ -8,11 +8,12 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Contract.V1;
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
+using NetworkPerspective.Sync.Orchestrator.Auth.Worker;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Hubs;
 
-[Authorize]
+[Authorize(AuthenticationSchemes = WorkerAuthOptions.DefaultScheme)]
 public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient
 {
     private readonly IConnectionsLookupTable _connectionsLookupTable;

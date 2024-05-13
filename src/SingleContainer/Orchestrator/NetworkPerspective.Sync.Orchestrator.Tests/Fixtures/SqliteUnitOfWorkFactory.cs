@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 
-namespace NetworkPerspective.Sync.Orchestrator.Tests;
+namespace NetworkPerspective.Sync.Orchestrator.Tests.Fixtures;
 
 public class SqliteUnitOfWorkFactory : IUnitOfWorkFactory, IDisposable
 {

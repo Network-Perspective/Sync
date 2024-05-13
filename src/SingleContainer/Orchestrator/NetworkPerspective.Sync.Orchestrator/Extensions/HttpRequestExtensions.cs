@@ -10,7 +10,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Extensions;
 
 internal static class HttpRequestExtensions
 {
-    public static SecureString GetServiceAccessToken(this HttpRequest request)
+    public static SecureString GetBearerToken(this HttpRequest request)
     {
         var value = request.Headers[HeaderNames.Authorization].ToString();
 

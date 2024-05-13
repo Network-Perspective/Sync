@@ -8,6 +8,7 @@ using Xunit;
 using System.Linq;
 using System.Collections.Generic;
 using FluentAssertions;
+using NetworkPerspective.Sync.Orchestrator.Tests.Fixtures;
 
 namespace NetworkPerspective.Sync.Orchestrator.Tests;
 
