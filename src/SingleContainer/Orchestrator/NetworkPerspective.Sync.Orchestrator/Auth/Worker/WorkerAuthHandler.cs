@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
-using NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Contract;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 using Newtonsoft.Json;
 
@@ -22,7 +23,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Auth.Worker;
 public class WorkerAuthHandler : AuthenticationHandler<WorkerAuthOptions>
 {
     private const string AuthenticationExceptionKey = "WorkerAuthenticationException";
-    private readonly ICore _core;
+    private readonly IWorkersService _workersService;
     private readonly IErrorService _errorService;
 
     private readonly JsonSerializerSettings _jsonSerializerSettings = new()
@@ -32,10 +33,10 @@ public class WorkerAuthHandler : AuthenticationHandler<WorkerAuthOptions>
         DefaultValueHandling = DefaultValueHandling.Ignore
     };
 
-    public WorkerAuthHandler(IOptionsMonitor<WorkerAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder, ICore core, IErrorService errorService)
+    public WorkerAuthHandler(IOptionsMonitor<WorkerAuthOptions> options, IWorkersService workersService, ILoggerFactory logger, UrlEncoder encoder, IErrorService errorService)
         : base(options, logger, encoder)
     {
-        _core = core;
+        _workersService = workersService;
         _errorService = errorService;
     }
 
@@ -79,13 +80,21 @@ public class WorkerAuthHandler : AuthenticationHandler<WorkerAuthOptions>
 
     private async Task<AuthenticateResult> AuthenticateInternalAsync()
     {
-        var tokenValidationResult = await _core.ValidateTokenAsync(Request.GetBearerToken(), Context.RequestAborted);
+        var basicAuth = Request
+            .GetBearerToken()
+            .ToSystemString();
+        var basicAuthByteArray = Convert.FromBase64String(basicAuth);
+        var basicAuthString = Encoding.UTF8.GetString(basicAuthByteArray);
+        var credentialsArray = basicAuthString.Split(':');
+        var username = credentialsArray[0];
+        var password = credentialsArray[1];
+
+        var worker = await _workersService.AuthenticateAsync(username, password, Context.RequestAborted);
 
         var claims = new List<Claim>()
-            {
-                new("NetworkId", tokenValidationResult.NetworkId.ToString()),
-                new("ConnectorId", tokenValidationResult.ConnectorId.ToString())
-            };
+        {
+            new(ClaimTypes.Name, worker.Name),
+        };
         var claimsIdentity = new ClaimsIdentity(claims, Scheme.Name);
         var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 

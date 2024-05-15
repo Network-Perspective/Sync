@@ -25,6 +25,9 @@ internal class WorkerRepository : IWorkerRepository
 
     public async Task AddAsync(Worker worker, CancellationToken stoppingToken = default)
     {
+        if (await ExistsAsync(worker.Name, stoppingToken))
+            throw new EntityAlreadyExistsException($"'{typeof(Worker)}' with a name '{worker.Name}' already exists");
+
         try
         {
             var entity = WorkerMapper.DomainModelToEntity(worker);
@@ -41,7 +44,22 @@ internal class WorkerRepository : IWorkerRepository
         try
         {
             var result = await _dbSet
-                .FirstOrDefaultAsync(x => x.Id == id, stoppingToken);
+                .SingleOrDefaultAsync(x => x.Id == id, stoppingToken);
+
+            return result is not null;
+        }
+        catch (Exception ex)
+        {
+            throw new DbException(ex);
+        }
+    }
+
+    public async Task<bool> ExistsAsync(string name, CancellationToken stoppingToken = default)
+    {
+        try
+        {
+            var result = await _dbSet
+                .SingleOrDefaultAsync(x => x.Name == name, stoppingToken);
 
             return result is not null;
         }
@@ -67,13 +85,31 @@ internal class WorkerRepository : IWorkerRepository
 
     public async Task<Worker> GetAsync(Guid id, CancellationToken stoppingToken = default)
     {
+        if(!await ExistsAsync(id, stoppingToken))
+            throw new EntityNotFoundException(typeof(Worker));
+
         try
         {
             var result = await _dbSet
-                .FirstOrDefaultAsync(x => x.Id == id, stoppingToken);
+                .SingleAsync(x => x.Id == id, stoppingToken);
 
-            if (result is null)
-                throw new EntityNotFoundException(typeof(Worker));
+            return WorkerMapper.EntityToDomainModel(result);
+        }
+        catch (Exception ex)
+        {
+            throw new DbException(ex);
+        }
+    }
+
+    public async Task<Worker> GetAsync(string name, CancellationToken stoppingToken = default)
+    {
+        if (!await ExistsAsync(name, stoppingToken))
+            throw new EntityNotFoundException(typeof(Worker));
+
+        try
+        {
+            var result = await _dbSet
+                .SingleAsync(x => x.Name == name, stoppingToken);
 
             return WorkerMapper.EntityToDomainModel(result);
         }
@@ -85,6 +121,9 @@ internal class WorkerRepository : IWorkerRepository
 
     public async Task RemoveAsync(Guid id, CancellationToken stoppingToken = default)
     {
+        if (!await ExistsAsync(id, stoppingToken))
+            throw new EntityNotFoundException(typeof(Worker));
+
         try
         {
             var result = await _dbSet.SingleAsync(x => x.Id == id, stoppingToken);

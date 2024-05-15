@@ -14,7 +14,6 @@ using Moq;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
-using NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Contract;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 
@@ -25,7 +24,6 @@ public class OrchestratorServiceFixture : WebApplicationFactory<Program>
     private readonly string _validApiKey = Guid.NewGuid().ToString();
 
     public SqliteUnitOfWorkFactory UnitOfWorkFactory { get; } = new SqliteUnitOfWorkFactory();
-    public Mock<ICore> NetworkPerspectiveCoreMock = new Mock<ICore>();
     public Mock<IVault> VaultMock = new Mock<IVault>(); 
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -48,7 +46,6 @@ public class OrchestratorServiceFixture : WebApplicationFactory<Program>
             services.AddSingleton(Mock.Of<IDbInitializer>());
 
             services.AddSingleton(VaultMock.Object);
-            services.AddSingleton(NetworkPerspectiveCoreMock.Object);
         });
 
         VaultMock

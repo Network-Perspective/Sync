@@ -9,8 +9,6 @@ using NetworkPerspective.Sync.Orchestrator.Application;
 using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Hubs;
-using NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl;
-using NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Stub;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub;
@@ -37,9 +35,7 @@ public class Program
             .AddApplication()
             .AddScheduler(builder.Configuration.GetSection("App:Scheduler"), dbConnectionString)
             .AddPersistence(healthcheckBuilder)
-            .AddCore(builder.Configuration.GetSection("Infrastructure:Core"), healthcheckBuilder)
             .AddAzureKeyVault(builder.Configuration.GetSection("Infrastructure:Vault"), healthcheckBuilder)
-            .AddCoreStub()
             .AddVaultStub()
             .AddAuth()
             .AddHub();

@@ -17,8 +17,6 @@
       <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract\NetworkPerspective.Sync.Contract.csproj" />
       <ProjectReference Include="..\..\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Application\NetworkPerspective.Sync.Orchestrator.Application.csproj" />
-      <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl.csproj" />
-      <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Stub\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Stub.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence\NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub.csproj" />

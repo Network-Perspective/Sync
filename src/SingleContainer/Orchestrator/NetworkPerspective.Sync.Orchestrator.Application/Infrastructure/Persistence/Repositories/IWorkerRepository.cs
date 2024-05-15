@@ -11,6 +11,7 @@ public interface IWorkerRepository
 {
     Task<IEnumerable<Worker>> GetAllAsync(CancellationToken stoppingToken = default);
     Task<Worker> GetAsync(Guid id, CancellationToken stoppingToken = default);
+    Task<Worker> GetAsync(string name, CancellationToken stoppingToken = default);
     Task AddAsync(Worker worker, CancellationToken stoppingToken = default);
     Task<bool> ExistsAsync(Guid id, CancellationToken stoppingToken = default);
     Task RemoveAsync(Guid id, CancellationToken stoppingToken = default);

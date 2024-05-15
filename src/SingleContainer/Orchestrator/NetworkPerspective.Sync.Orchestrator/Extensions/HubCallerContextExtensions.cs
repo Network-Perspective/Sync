@@ -6,11 +6,9 @@ namespace NetworkPerspective.Sync.Orchestrator.Extensions
 {
     public static class HubCallerContextExtensions
     {
-        public static Guid GetConnectorId(this HubCallerContext context)
+        public static string GetWorkerName(this HubCallerContext context)
         {
-            var claim = context.User.FindFirst(x => x.Type == "ConnectorId");
-
-            return new Guid(claim.Value);
+            return context.User.Identity.Name;
         }
     }
 }

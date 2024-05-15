@@ -27,7 +27,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Controllers
                 Start = new DateTime(2022, 01, 01),
                 End = DateTime.UtcNow,
             };
-            await _hub.StartSyncAsync(new Guid("04C753D8-FF9A-479C-B857-5D28C1EAF6C1"), startRequest);
+            await _hub.StartSyncAsync("", startRequest);
         }
     }
 }

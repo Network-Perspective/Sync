@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,7 +24,11 @@ public class HubClient : IOrchestratorClient
 
         static Task<string> TokenFactory()
         {
-            return Task.FromResult("blablabla");
+            var name = "client_1";
+            var pass = "pass1";
+            var tokenBytes = Encoding.UTF8.GetBytes($"{name}:{pass}");
+            var tokenBase64 = Convert.ToBase64String(tokenBytes);
+            return Task.FromResult(tokenBase64);
         }
 
         _connection = new HubConnectionBuilder()

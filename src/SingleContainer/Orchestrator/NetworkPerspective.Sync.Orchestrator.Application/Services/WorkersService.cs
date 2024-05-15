@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
+using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
@@ -15,6 +16,7 @@ public interface IWorkersService
     Task<IEnumerable<Worker>> GetAllAsync(CancellationToken stoppingToken = default);
     Task CreateAsync(string name, string secret, CancellationToken stoppingToken = default);
     Task AuthorizeAsync(Guid id, CancellationToken stoppingToken = default);
+    Task<Worker> AuthenticateAsync(string name, string password, CancellationToken stoppingToken = default);
     Task EnsureRemoved(Guid id, CancellationToken stoppingToken = default);
 }
 
@@ -65,6 +67,23 @@ internal class WorkersService : IWorkersService
         await repo.UpdateAsync(worker, stoppingToken);
 
         await _unitOfWork.CommitAsync(stoppingToken);
+    }
+
+    public async Task<Worker> AuthenticateAsync(string name, string password, CancellationToken stoppingToken = default)
+    {
+        var worker = await _unitOfWork
+            .GetWorkerRepository()
+            .GetAsync(name, stoppingToken);
+
+        var isPasswordValid = _cryptoService.VerifyPassword(password, worker.SecretHash, worker.SecretSalt);
+
+        if (!isPasswordValid)
+            throw new InvalidCredentialsException();
+
+        if (!worker.IsAuthorized)
+            throw new WorkerNotAuthorizedException(name);
+
+        return worker;
     }
 
     public async Task EnsureRemoved(Guid id, CancellationToken stoppingToken = default)

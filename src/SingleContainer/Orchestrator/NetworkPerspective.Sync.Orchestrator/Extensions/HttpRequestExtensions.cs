@@ -12,14 +12,20 @@ internal static class HttpRequestExtensions
 {
     public static SecureString GetBearerToken(this HttpRequest request)
     {
+        return request
+            .GetAuthorizationHeaderValue()
+            .Replace("Bearer", string.Empty)
+            .Trim()
+            .ToSecureString();
+    }
+
+    private static string GetAuthorizationHeaderValue(this HttpRequest request)
+    {
         var value = request.Headers[HeaderNames.Authorization].ToString();
 
         if (string.IsNullOrEmpty(value))
             throw new MissingAuthorizationHeaderException(HeaderNames.Authorization);
 
-        return value
-            .Replace("Bearer", string.Empty)
-            .Trim()
-            .ToSecureString();
+        return value;
     }
 }

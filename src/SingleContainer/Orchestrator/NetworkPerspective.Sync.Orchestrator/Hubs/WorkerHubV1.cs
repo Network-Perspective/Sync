@@ -27,26 +27,26 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient
 
     public async Task<PongDto> PingAsync(PingDto ping)
     {
-        var workerId = Context.GetConnectorId();
+        var workerName = Context.GetWorkerName();
 
-        _logger.LogInformation("Received ping from {connectorId}", workerId);
+        _logger.LogInformation("Received ping from {connectorId}", workerName);
         await Task.Yield();
         return new PongDto { CorrelationId = ping.CorrelationId, PingTimestamp = ping.Timestamp };
     }
 
     public override async Task OnConnectedAsync()
     {
-        var connectorId = Context.GetConnectorId();
+        var workerName = Context.GetWorkerName();
 
-        _logger.LogInformation("Worker '{id}' connected", connectorId);
-        _connectionsLookupTable.Set(connectorId, Context.ConnectionId);
+        _logger.LogInformation("Worker '{id}' connected", workerName);
+        _connectionsLookupTable.Set(workerName, Context.ConnectionId);
 
         await base.OnConnectedAsync();
     }
 
     public override Task OnDisconnectedAsync(Exception exception)
     {
-        var connectorId = Context.GetConnectorId();
+        var connectorId = Context.GetWorkerName();
 
         _logger.LogInformation("Worker '{id}' disconnected", connectorId);
         _connectionsLookupTable.Remove(connectorId);
@@ -54,10 +54,10 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient
         return base.OnDisconnectedAsync(exception);
     }
 
-    public async Task<AckDto> StartSyncAsync(Guid connectorId, StartSyncDto startSyncRequestDto)
+    public async Task<AckDto> StartSyncAsync(string workerName, StartSyncDto startSyncRequestDto)
     {
-        _logger.LogInformation("Sending request '{correlationId}' to worker '{id}' to start sync...", startSyncRequestDto.CorrelationId, connectorId);
-        var connectionId = _connectionsLookupTable.Get(connectorId);
+        _logger.LogInformation("Sending request '{correlationId}' to worker '{id}' to start sync...", startSyncRequestDto.CorrelationId, workerName);
+        var connectionId = _connectionsLookupTable.Get(workerName);
         var response = await Clients.Client(connectionId).StartSyncAsync(startSyncRequestDto);
         _logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
         return response;
@@ -65,7 +65,7 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient
 
     public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto syncCompleted)
     {
-        _logger.LogInformation("Received notification from worker '{id}' sync completed", Context.GetConnectorId());
+        _logger.LogInformation("Received notification from worker '{id}' sync completed", Context.GetWorkerName());
 
         await Task.Yield();
 
