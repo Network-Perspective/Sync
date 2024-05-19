@@ -86,16 +86,14 @@ public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthOptions>
         var expectedKey = await _vault.GetSecretAsync(_options.CurrentValue.ApiKeyVaultKey, Context.RequestAborted);
         var actualKey = Request.GetBearerToken();
 
-        if (string.Equals(expectedKey.ToSystemString(), actualKey.ToSystemString()))
-        {
-            var claims = new List<Claim>()
-            { };
-            var claimsIdentity = new ClaimsIdentity(claims, Scheme.Name);
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-            return AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name));
-        }
+        if (!string.Equals(expectedKey.ToSystemString(), actualKey.ToSystemString()))
+            return AuthenticateResult.Fail("Api key is not valid");
 
-        return AuthenticateResult.Fail("Api key is not valid");
+        var claims = new List<Claim>()
+        { };
+        var claimsIdentity = new ClaimsIdentity(claims, Scheme.Name);
+        var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+        return AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name));
     }
 
     private static bool AllowAnonymousAccess(HttpContext context)

@@ -25,6 +25,7 @@
 
 
     <ItemGroup>
+      <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract.V1.Impl\NetworkPerspective.Sync.Contract.V1.Impl.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Client\NetworkPerspective.Sync.Orchestrator.Client.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator\NetworkPerspective.Sync.Orchestrator.csproj" />
     </ItemGroup>

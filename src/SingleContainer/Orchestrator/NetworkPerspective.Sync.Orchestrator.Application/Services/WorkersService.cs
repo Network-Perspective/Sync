@@ -13,8 +13,10 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
 public interface IWorkersService
 {
+    Task<Worker> GetAsync(Guid id, CancellationToken stoppingToken = default);
+    Task<Worker> GetAsync(string name, CancellationToken stoppingToken = default);
     Task<IEnumerable<Worker>> GetAllAsync(CancellationToken stoppingToken = default);
-    Task CreateAsync(string name, string secret, CancellationToken stoppingToken = default);
+    Task<Guid> CreateAsync(string name, string secret, CancellationToken stoppingToken = default);
     Task AuthorizeAsync(Guid id, CancellationToken stoppingToken = default);
     Task<Worker> AuthenticateAsync(string name, string password, CancellationToken stoppingToken = default);
     Task EnsureRemoved(Guid id, CancellationToken stoppingToken = default);
@@ -35,7 +37,7 @@ internal class WorkersService : IWorkersService
         _logger = logger;
     }
 
-    public async Task CreateAsync(string name, string secret, CancellationToken stoppingToken = default)
+    public async Task<Guid> CreateAsync(string name, string secret, CancellationToken stoppingToken = default)
     {
         _logger.LogInformation("Creating new worker '{name}'...", name);
 
@@ -55,6 +57,8 @@ internal class WorkersService : IWorkersService
         await _unitOfWork.CommitAsync(stoppingToken);
 
         _logger.LogInformation("New worker '{id}' has been created", id);
+
+        return id;
     }
 
     public async Task AuthorizeAsync(Guid id, CancellationToken stoppingToken = default)
@@ -108,5 +112,19 @@ internal class WorkersService : IWorkersService
         return _unitOfWork
             .GetWorkerRepository()
             .GetAllAsync(stoppingToken);
+    }
+
+    public Task<Worker> GetAsync(Guid id, CancellationToken stoppingToken = default)
+    {
+        return _unitOfWork
+            .GetWorkerRepository()
+            .GetAsync(id, stoppingToken);
+    }
+
+    public Task<Worker> GetAsync(string name, CancellationToken stoppingToken = default)
+    {
+        return _unitOfWork
+            .GetWorkerRepository()
+            .GetAsync(name, stoppingToken);
     }
 }

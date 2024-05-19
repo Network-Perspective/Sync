@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
@@ -28,6 +29,14 @@ public class WorkersController : ControllerBase
         _logger = logger;
     }
 
+    [HttpGet("{name}")]
+    public async Task<WorkerDto> GetAsync(string name, CancellationToken stoppingToken = default)
+    {
+        _logger.LogDebug("Received request to get all workers");
+        var worker = await _workersService.GetAsync(name, stoppingToken);
+        return WorkerMapper.ToDto(worker);
+    }
+
     [HttpGet]
     public async Task<IEnumerable<WorkerDto>> GetAllAsync(CancellationToken stoppingToken = default)
     {
@@ -44,6 +53,7 @@ public class WorkersController : ControllerBase
 
         return Ok();
     }
+
 
     [HttpPost("{id:guid}/auth")]
     public async Task<IActionResult> AuthorizeAsync(Guid id, CancellationToken stoppingToken = default)

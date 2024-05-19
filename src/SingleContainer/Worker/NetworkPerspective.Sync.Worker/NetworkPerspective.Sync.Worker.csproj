@@ -5,12 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract.V1.Impl\NetworkPerspective.Sync.Contract.V1.Impl.csproj" />
     <ProjectReference Include="..\NetworkPerspective.Sync.Worker.Application\NetworkPerspective.Sync.Worker.Application.csproj" />
-    <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract\NetworkPerspective.Sync.Contract.csproj" />
   </ItemGroup>
 </Project>

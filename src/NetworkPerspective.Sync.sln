@@ -121,15 +121,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{4C21511C-5082-4B21-A1A4-F86D1FBCA8CC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{E87CFB93-B50B-4AF2-B7B7-E269FC407645}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Utils", "SingleContainer\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj", "{DA203A8A-90CA-4B70-802E-36A93DD999D0}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Contract", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Contract\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Contract.csproj", "{5BB92D04-6524-488A-8645-03D8DF22AB75}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Impl.csproj", "{8AAA86B6-9427-41E5-9D0D-F9D174072977}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Stub", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Stub\NetworkPerspective.Sync.Orchestrator.Infrastructure.Core.Stub.csproj", "{96509FC3-14D4-4630-8FC0-D358AF0B3BAA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Worker", "SingleContainer\Worker\NetworkPerspective.Sync.Worker\NetworkPerspective.Sync.Worker.csproj", "{BF0A8939-5057-4B6C-A050-DA8F384B37B6}"
 EndProject
@@ -149,9 +141,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Vault", "Vault", "{C8C4F9FA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract.csproj", "{EF13C43A-C710-4A50-80EB-93812FE37AF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault.csproj", "{2CCFBA14-FE76-422E-B1ED-25F60F012ABE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault.csproj", "{2CCFBA14-FE76-422E-B1ED-25F60F012ABE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub.csproj", "{961F80B6-84C1-49F2-ACA6-55068A4480C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub.csproj", "{961F80B6-84C1-49F2-ACA6-55068A4480C1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Contract.V1.Impl", "SingleContainer\NetworkPerspective.Sync.Contract.V1.Impl\NetworkPerspective.Sync.Contract.V1.Impl.csproj", "{A3F9AB6F-6056-4904-A86C-B7F83FEFCAB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -319,18 +313,6 @@ Global
 		{DA203A8A-90CA-4B70-802E-36A93DD999D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA203A8A-90CA-4B70-802E-36A93DD999D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA203A8A-90CA-4B70-802E-36A93DD999D0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5BB92D04-6524-488A-8645-03D8DF22AB75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5BB92D04-6524-488A-8645-03D8DF22AB75}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5BB92D04-6524-488A-8645-03D8DF22AB75}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5BB92D04-6524-488A-8645-03D8DF22AB75}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8AAA86B6-9427-41E5-9D0D-F9D174072977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8AAA86B6-9427-41E5-9D0D-F9D174072977}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8AAA86B6-9427-41E5-9D0D-F9D174072977}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8AAA86B6-9427-41E5-9D0D-F9D174072977}.Release|Any CPU.Build.0 = Release|Any CPU
-		{96509FC3-14D4-4630-8FC0-D358AF0B3BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{96509FC3-14D4-4630-8FC0-D358AF0B3BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{96509FC3-14D4-4630-8FC0-D358AF0B3BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{96509FC3-14D4-4630-8FC0-D358AF0B3BAA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BF0A8939-5057-4B6C-A050-DA8F384B37B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BF0A8939-5057-4B6C-A050-DA8F384B37B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF0A8939-5057-4B6C-A050-DA8F384B37B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -363,6 +345,10 @@ Global
 		{961F80B6-84C1-49F2-ACA6-55068A4480C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{961F80B6-84C1-49F2-ACA6-55068A4480C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{961F80B6-84C1-49F2-ACA6-55068A4480C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3F9AB6F-6056-4904-A86C-B7F83FEFCAB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3F9AB6F-6056-4904-A86C-B7F83FEFCAB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3F9AB6F-6056-4904-A86C-B7F83FEFCAB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3F9AB6F-6056-4904-A86C-B7F83FEFCAB3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -425,11 +411,7 @@ Global
 		{280AFED3-F178-4226-9B93-8A4BE0BC0E2F} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
 		{0420F70B-C106-4BC2-A148-D07436D563DD} = {4C21511C-5082-4B21-A1A4-F86D1FBCA8CC}
 		{4C21511C-5082-4B21-A1A4-F86D1FBCA8CC} = {36F00875-0996-4F8C-89AE-893B756BBCB8}
-		{E87CFB93-B50B-4AF2-B7B7-E269FC407645} = {4C21511C-5082-4B21-A1A4-F86D1FBCA8CC}
 		{DA203A8A-90CA-4B70-802E-36A93DD999D0} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
-		{5BB92D04-6524-488A-8645-03D8DF22AB75} = {E87CFB93-B50B-4AF2-B7B7-E269FC407645}
-		{8AAA86B6-9427-41E5-9D0D-F9D174072977} = {E87CFB93-B50B-4AF2-B7B7-E269FC407645}
-		{96509FC3-14D4-4630-8FC0-D358AF0B3BAA} = {E87CFB93-B50B-4AF2-B7B7-E269FC407645}
 		{BF0A8939-5057-4B6C-A050-DA8F384B37B6} = {2C1709C1-20E7-4BF2-857F-D21195218B64}
 		{81307E87-5B2E-4867-9798-1B6912EE87C9} = {2C1709C1-20E7-4BF2-857F-D21195218B64}
 		{E63E2215-B67E-466F-BB8C-A90A29349EAA} = {6EFA829B-C784-47D9-9825-3264F052057B}
@@ -441,6 +423,7 @@ Global
 		{EF13C43A-C710-4A50-80EB-93812FE37AF7} = {C8C4F9FA-FB48-45CA-84E7-A7938D563462}
 		{2CCFBA14-FE76-422E-B1ED-25F60F012ABE} = {C8C4F9FA-FB48-45CA-84E7-A7938D563462}
 		{961F80B6-84C1-49F2-ACA6-55068A4480C1} = {C8C4F9FA-FB48-45CA-84E7-A7938D563462}
+		{A3F9AB6F-6056-4904-A86C-B7F83FEFCAB3} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}
