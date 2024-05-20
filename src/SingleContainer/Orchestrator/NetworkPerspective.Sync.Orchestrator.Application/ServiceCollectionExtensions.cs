@@ -13,6 +13,8 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ICryptoService, CryptoService>();
         services.AddTransient<IWorkersService, WorkersService>();
         services.AddTransient<IConnectorsService, ConnectorsService>();
+        services.AddTransient<ISyncHistoryService, SyncHistoryService>();
+        services.AddTransient<IStatusLogger, StatusLogger>();
 
         services.AddSingleton<IConnectionsLookupTable, ConnectionsLookupTable>();
 

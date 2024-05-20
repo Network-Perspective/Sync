@@ -18,9 +18,8 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler
 
         public Task Execute(IJobExecutionContext context)
         {
-            // networkid / connectorId / datasourceId
-            var id = Guid.Parse(context.JobDetail.Key.Name);
-            _logger.LogInformation("Triggered job to order sync... to... using...");
+            var connectorId = Guid.Parse(context.JobDetail.Key.Name);
+            _logger.LogInformation("Triggered job to order sync connector {connectorId}", connectorId);
 
             return Task.CompletedTask;
         }

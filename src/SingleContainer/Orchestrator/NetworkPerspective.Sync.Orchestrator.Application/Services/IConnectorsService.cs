@@ -6,14 +6,16 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
+using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
 public interface IConnectorsService
 {
-    Task CreateAsync(string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default);
+    Task<Guid> CreateAsync(string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default);
     Task<IEnumerable<Connector>> GetAllAsync(Guid workerId, CancellationToken stoppingToken);
+    Task ValidateExists(Guid connectorId, CancellationToken stoppingToken = default);
 }
 
 internal class ConnectorsService : IConnectorsService
@@ -29,7 +31,7 @@ internal class ConnectorsService : IConnectorsService
         _logger = logger;
     }
 
-    public async Task CreateAsync(string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default)
+    public async Task<Guid> CreateAsync(string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default)
     {
         var id = Guid.NewGuid();
         _logger.LogInformation("Creating new connector '{id}' of '{type}'...", id, type);
@@ -49,6 +51,7 @@ internal class ConnectorsService : IConnectorsService
         await _unitOfWork.CommitAsync(stoppingToken);
 
         _logger.LogInformation("New connector '{id}' has been created", id);
+        return id;
     }
 
     public async Task<IEnumerable<Connector>> GetAllAsync(Guid workerId, CancellationToken stoppingToken)
@@ -58,5 +61,15 @@ internal class ConnectorsService : IConnectorsService
         return await _unitOfWork
             .GetConnectorRepository()
             .GetAllAsync(workerId, stoppingToken);
+    }
+
+    public async Task ValidateExists(Guid connectorId, CancellationToken stoppingToken = default)
+    {
+        var connector = await _unitOfWork
+            .GetConnectorRepository()
+            .FindAsync(connectorId, stoppingToken);
+
+        if (connector == null)
+            throw new ConnectorNotFoundException(connectorId);
     }
 }

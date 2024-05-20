@@ -27,7 +27,7 @@ internal class WorkersService : IWorkersService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IClock _clock;
     private readonly ICryptoService _cryptoService;
-    private readonly ILogger<WorkersService> _logger;
+    private readonly ILogger<IWorkersService> _logger;
 
     public WorkersService(IUnitOfWork unitOfWork, IClock clock, ICryptoService cryptoService, ILogger<WorkersService> logger)
     {

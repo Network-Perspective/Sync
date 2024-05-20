@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 using NetworkPerspective.Sync.Orchestrator.Dtos;
@@ -20,11 +21,13 @@ namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 public class ConnectorsController : ControllerBase
 {
     private readonly IConnectorsService _connectorsService;
+    private readonly ISyncScheduler _syncScheduler;
     private readonly ILogger<ConnectorsController> _logger;
 
-    public ConnectorsController(IConnectorsService connectorsService, ILogger<ConnectorsController> logger)
+    public ConnectorsController(IConnectorsService connectorsService, ISyncScheduler syncScheduler, ILogger<ConnectorsController> logger)
     {
         _connectorsService = connectorsService;
+        _syncScheduler = syncScheduler;
         _logger = logger;
     }
 
@@ -34,7 +37,8 @@ public class ConnectorsController : ControllerBase
         _logger.LogDebug("Received request to create new connector '{type}' for worker '{workerId}'", request.Type, request.WorkerId);
 
         var properties = request.Properties.ToDictionary(p => p.Key, p => p.Value);
-        await _connectorsService.CreateAsync(request.Type, request.WorkerId, properties, stoppingToken);
+        var connectorId = await _connectorsService.CreateAsync(request.Type, request.WorkerId, properties, stoppingToken);
+        await _syncScheduler.AddOrReplaceAsync(connectorId, stoppingToken);
 
         return Ok();
     }

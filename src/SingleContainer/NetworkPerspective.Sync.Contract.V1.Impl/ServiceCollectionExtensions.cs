@@ -9,7 +9,9 @@ public static class ServiceCollectionExtensions
     {
         services.Configure<WorkerHubClientConfig>(config);
 
-        services.AddSingleton<IWorkerHubClient, IWorkerHubClient>();
+        services.AddSingleton<WorkerHubClient>();
+        services.AddSingleton<IWorkerHubClient>(sp => sp.GetRequiredService<WorkerHubClient>());
+        services.AddSingleton<IOrchestratorClient>(sp => sp.GetRequiredService<WorkerHubClient>());
 
         return services;
     }

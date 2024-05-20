@@ -1,5 +1,6 @@
 @orchestrator_host = https://localhost:7191
-@worker_id = 13d853bb-6f75-491b-b7c7-1aa5df83dbc8
+@worker_id = 1b66c414-74fc-4e8a-8ca9-1cb96802a601
+@connector_id = b7b32c87-fb9c-41a6-b50f-fa1d149bd8cb
 @api_key = api-key
 
 ### WORKERS GET ALL
@@ -48,4 +49,14 @@ Accept: application/json
         { "Key": "key1", "Value": "value1" },
         { "Key": "key2", "Value": "value2" }
     ]
+}
+
+### SCHEDULER CREATE
+POST {{orchestrator_host}}/api/connectors/{{connector_id}}/schedules
+Authorization: Bearer {{api_key}}
+Content-Type: application/json
+Accept: application/json
+
+{
+
 }

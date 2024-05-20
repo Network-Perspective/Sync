@@ -55,6 +55,7 @@ internal class ConnectorRepository : IConnectorRepository
         {
             var result = await _dbSet
                 .Include(x => x.Properties)
+                .Include(x => x.Worker)
                 .Where(x => x.Id == connectorId)
                 .FirstOrDefaultAsync(stoppingToken);
 
