@@ -8,7 +8,7 @@ using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Orchestrator.Application;
 using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
-using NetworkPerspective.Sync.Orchestrator.Hubs;
+using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub;

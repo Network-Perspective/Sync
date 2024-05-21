@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
+
 namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
 public interface IConnectionsLookupTable
@@ -18,6 +20,9 @@ internal class ConnectionsLookupTable : IConnectionsLookupTable
     {
         lock (_lock)
         {
+            if (!_lookupTable.ContainsKey(workerName))
+                throw new ConnectionNotFoundException(workerName);
+
             return _lookupTable[workerName];
         }
     }

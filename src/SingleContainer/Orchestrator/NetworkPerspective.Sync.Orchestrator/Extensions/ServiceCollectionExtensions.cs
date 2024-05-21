@@ -3,10 +3,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
+using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 using NetworkPerspective.Sync.Orchestrator.Auth.Worker;
-using NetworkPerspective.Sync.Orchestrator.Hubs;
+using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 
 namespace NetworkPerspective.Sync.Orchestrator.Extensions;
 
@@ -16,6 +17,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddSingleton<WorkerHubV1>()
+            .AddSingleton<IWorkerRouter>(sp => sp.GetRequiredService<WorkerHubV1>())
             .AddSignalR();
 
         return services;

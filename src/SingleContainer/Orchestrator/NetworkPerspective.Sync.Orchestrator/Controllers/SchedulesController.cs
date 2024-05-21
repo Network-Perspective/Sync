@@ -75,7 +75,7 @@ public class SchedulesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> StopAsync([FromQuery] Guid connectorId, CancellationToken stoppingToken = default)
+    public async Task<IActionResult> StopAsync([FromRoute] Guid connectorId, CancellationToken stoppingToken = default)
     {
         await _connectorsService.ValidateExists(connectorId, stoppingToken);
 

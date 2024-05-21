@@ -60,3 +60,13 @@ Accept: application/json
 {
 
 }
+
+### SCHEDULER REMOVE
+DELETE {{orchestrator_host}}/api/connectors/{{connector_id}}/schedules
+Authorization: Bearer {{api_key}}
+Content-Type: application/json
+Accept: application/json
+
+{
+
+}
