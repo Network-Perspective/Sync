@@ -12,8 +12,10 @@ public static class StartSyncMapper
         return new StartSyncDto
         {
             CorrelationId = Guid.NewGuid(),
-            Start = syncContext.Start,
-            End = syncContext.End,
+            ConnectorId = syncContext.ConnectorId,
+            Start = syncContext.TimeRange.Start,
+            End = syncContext.TimeRange.End,
+            NetworkProperties = syncContext.NetworkProperties,
         };
     }
 }

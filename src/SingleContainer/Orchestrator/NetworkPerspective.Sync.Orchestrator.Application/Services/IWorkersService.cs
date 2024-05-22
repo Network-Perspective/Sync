@@ -39,6 +39,8 @@ internal class WorkersService : IWorkersService
 
     public async Task<Guid> CreateAsync(string name, string secret, CancellationToken stoppingToken = default)
     {
+        const int workerProtocolVersion = 1;
+
         _logger.LogInformation("Creating new worker '{name}'...", name);
 
         var id = Guid.NewGuid();
@@ -48,7 +50,7 @@ internal class WorkersService : IWorkersService
         var hashedSecretBase64 = Convert.ToBase64String(hashedSecret);
         var now = _clock.UtcNow();
 
-        var worker = new Worker(id, name, hashedSecretBase64, keySaltBase64, false, now);
+        var worker = new Worker(id, workerProtocolVersion, name, hashedSecretBase64, keySaltBase64, false, now);
 
         await _unitOfWork
             .GetWorkerRepository()

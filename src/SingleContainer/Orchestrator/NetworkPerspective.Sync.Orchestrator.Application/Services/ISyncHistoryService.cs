@@ -11,9 +11,9 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
 public interface ISyncHistoryService
 {
-    Task<DateTime> EvaluateSyncStartAsync(Guid networkId, CancellationToken stoppingToken = default);
+    Task<DateTime> EvaluateSyncStartAsync(Guid connectorId, CancellationToken stoppingToken = default);
     Task SaveLogAsync(SyncHistoryEntry syncHistoryEntry, CancellationToken stoppingToken = default);
-    Task OverrideSyncStartAsync(Guid networkId, DateTime syncStart, CancellationToken stoppingToken = default);
+    Task OverrideSyncStartAsync(Guid connectorId, DateTime syncStart, CancellationToken stoppingToken = default);
 }
 
 internal class SyncHistoryService : ISyncHistoryService

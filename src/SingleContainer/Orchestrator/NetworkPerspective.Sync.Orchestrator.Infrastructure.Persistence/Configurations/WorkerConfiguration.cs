@@ -16,6 +16,10 @@ public class WorkerConfiguration : IEntityTypeConfiguration<WorkerEntity>
             .HasKey(x => x.Id);
 
         builder
+            .Property(x => x.Version)
+            .IsRequired();
+
+        builder
             .HasIndex(x => x.Name)
             .IsUnique();
 

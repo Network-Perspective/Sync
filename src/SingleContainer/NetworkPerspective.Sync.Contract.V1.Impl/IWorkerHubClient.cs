@@ -73,7 +73,7 @@ internal class WorkerHubClient : IWorkerHubClient
     {
         _connection.On<StartSyncDto, AckDto>(nameof(IWorkerClient.StartSyncAsync), async x =>
         {
-            _logger.LogInformation("Received request to start sync '{correlationId}'", x.CorrelationId);
+            _logger.LogInformation("Received request '{correlationId}' to start sync '{connectorId}' from {start} to {end}", x.CorrelationId, x.ConnectorId, x.Start, x.End);
 
             await Task.Yield();
 

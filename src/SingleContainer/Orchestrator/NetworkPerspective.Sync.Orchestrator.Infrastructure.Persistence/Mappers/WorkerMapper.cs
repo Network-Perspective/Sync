@@ -7,7 +7,7 @@ internal static class WorkerMapper
 {
     public static Worker EntityToDomainModel(WorkerEntity entity)
     {
-        return new Worker(entity.Id, entity.Name, entity.SecretHash, entity.SecretSalt, entity.IsAuthorized, entity.CreatedAt);
+        return new Worker(entity.Id, entity.Version, entity.Name, entity.SecretHash, entity.SecretSalt, entity.IsAuthorized, entity.CreatedAt);
     }
 
     public static WorkerEntity DomainModelToEntity(Worker worker)
@@ -15,6 +15,7 @@ internal static class WorkerMapper
         return new WorkerEntity
         {
             Id = worker.Id,
+            Version = worker.Version,
             Name = worker.Name,
             SecretHash = worker.SecretHash,
             SecretSalt = worker.SecretSalt,

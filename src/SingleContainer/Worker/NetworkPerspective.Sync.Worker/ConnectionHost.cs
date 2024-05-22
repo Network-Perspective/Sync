@@ -26,11 +26,8 @@ public class ConnectionHost(IWorkerHubClient hubClient, ILogger<ConnectionHost> 
                 Timestamp = DateTime.UtcNow,
             };
             _ = await hubClient.PingAsync(ping);
-            if (_logger.IsEnabled(LogLevel.Information))
-            {
-                _logger.LogDebug("Worker running at: {time}", DateTimeOffset.Now);
-            }
-            await Task.Delay(1000, stoppingToken);
+
+            await Task.Delay(15000, stoppingToken);
         }
     }
 }

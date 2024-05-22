@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(OrchestratorDbContext))]
-    partial class OrchestratorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240522182943_update5")]
+    partial class update5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

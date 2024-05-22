@@ -8,8 +8,8 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persis
 {
     public interface ISyncHistoryRepository
     {
-        Task<SyncHistoryEntry> FindLastLogAsync(Guid networkId, CancellationToken cancellationToken = default);
+        Task<SyncHistoryEntry> FindLastLogAsync(Guid connectorId, CancellationToken cancellationToken = default);
         Task AddAsync(SyncHistoryEntry log, CancellationToken cancellationToken = default);
-        Task RemoveAllAsync(Guid networkId, CancellationToken cancellationToken = default);
+        Task RemoveAllAsync(Guid connectorId, CancellationToken cancellationToken = default);
     }
 }
