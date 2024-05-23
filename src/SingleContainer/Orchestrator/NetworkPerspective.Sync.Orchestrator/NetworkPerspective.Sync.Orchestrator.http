@@ -70,3 +70,8 @@ Accept: application/json
 {
 
 }
+
+### START AUTH SLACK
+POST {{orchestrator_host}}/api/connectors/{{connector_id}}/slack-auth
+Authorization: Bearer {{api_key}}
+Accept: application/json

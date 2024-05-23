@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Configs;
 
 using Polly;
 using Polly.Retry;

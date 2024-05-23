@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Configs;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
 using NetworkPerspective.Sync.Infrastructure.Slack.Configs;

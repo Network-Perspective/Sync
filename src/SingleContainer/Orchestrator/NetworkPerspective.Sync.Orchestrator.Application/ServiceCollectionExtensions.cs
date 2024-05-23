@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<IClock, Clock>();
 
+        services.AddTransient<IAuthStateKeyFactory, AuthStateKeyFactory>();
         services.AddTransient<ICryptoService, CryptoService>();
         services.AddTransient<IWorkersService, WorkersService>();
         services.AddTransient<IConnectorsService, ConnectorsService>();

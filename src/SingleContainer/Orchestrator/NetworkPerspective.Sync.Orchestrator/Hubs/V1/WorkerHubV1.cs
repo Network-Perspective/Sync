@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +16,7 @@ using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.Worker;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 
@@ -57,6 +61,19 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient, IWorkerRoute
         _logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
 
+    public async Task SetSecretsAsync(string workerName, IDictionary<string, SecureString> secrets)
+    {
+        var dto = new SetSecretsDto
+        {
+            CorrelationId = Guid.NewGuid(),
+            Secrets = secrets.ToDictionary(x => x.Key, x => x.Value.ToSystemString())
+        };
+        _logger.LogInformation("Sending request '{correlationId}' to worker '{id}' to set secrets...", dto.CorrelationId, workerName);
+        var connectionId = _connectionsLookupTable.Get(workerName);
+        var response = await Clients.Client(connectionId).SetSecretsAsync(dto);
+        _logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
+    }
+
     public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto syncCompleted)
     {
         _logger.LogInformation("Received notification from worker '{id}' sync completed", Context.GetWorkerName());
@@ -74,4 +91,6 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient, IWorkerRoute
         await Task.Yield();
         return new PongDto { CorrelationId = ping.CorrelationId, PingTimestamp = ping.Timestamp };
     }
+
+
 }

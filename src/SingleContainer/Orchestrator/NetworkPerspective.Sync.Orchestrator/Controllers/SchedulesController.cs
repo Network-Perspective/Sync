@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
@@ -9,12 +10,12 @@ using NetworkPerspective.Sync.Framework.Dtos;
 using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Application.Extensions;
-using System;
+using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 
 namespace NetworkPerspective.Sync.Framework.Controllers;
 
 [Route("api/connectors/{connectorId:guid}/schedules")]
-[Authorize]
+[Authorize(AuthenticationSchemes = ApiKeyAuthOptions.DefaultScheme)]
 public class SchedulesController : ControllerBase
 {
     private readonly ISyncScheduler _scheduler;

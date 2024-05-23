@@ -86,5 +86,15 @@ internal class WorkerHubClient : IWorkerHubClient
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
             return new AckDto { CorrelationId = x.CorrelationId };
         });
+
+        _connection.On<SetSecretsDto, AckDto>(nameof(IWorkerClient.SetSecretsAsync), async x =>
+        {
+            _logger.LogInformation("Received request '{correlationId}' to set {count} secrets", x.CorrelationId, x.Secrets.Count);
+
+            await Task.Yield();
+
+            _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
+            return new AckDto { CorrelationId = x.CorrelationId };
+        });
     }
 }

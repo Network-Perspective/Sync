@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetworkPerspective.Sync.Infrastructure.Slack.Configs
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Client.Configs
 {
     internal sealed class Resiliency
     {

@@ -1,4 +1,6 @@
-﻿namespace NetworkPerspective.Sync.Infrastructure.Slack.Configs
+﻿using NetworkPerspective.Sync.Infrastructure.Slack.Client.Configs;
+
+namespace NetworkPerspective.Sync.Infrastructure.Slack.Configs
 {
     internal class SlackConfig
     {

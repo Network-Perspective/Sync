@@ -4,9 +4,9 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Configs;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
-using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
