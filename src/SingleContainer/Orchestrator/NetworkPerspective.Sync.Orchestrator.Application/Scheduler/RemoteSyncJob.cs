@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
+using NetworkPerspective.Sync.Utils.Models;
 
 using Quartz;
 

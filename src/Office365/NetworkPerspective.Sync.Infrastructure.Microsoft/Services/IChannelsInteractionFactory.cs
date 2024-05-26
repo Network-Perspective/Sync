@@ -15,7 +15,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
     internal interface IChannelsInteractionFactory
     {
         ISet<Interaction> CreateFromThreadMessage(ChatMessage thread, Models.Channel channel);
-        ISet<Interaction> CreateFromThreadRepliesMessage(IEnumerable<ChatMessage> replies, string channelId, string threadId, string threadCreator, Application.Domain.TimeRange timeRange);
+        ISet<Interaction> CreateFromThreadRepliesMessage(IEnumerable<ChatMessage> replies, string channelId, string threadId, string threadCreator, Utils.Models.TimeRange timeRange);
     }
 
     internal class ChannelInteractionFactory : IChannelsInteractionFactory
@@ -72,7 +72,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return interactions;
         }
 
-        public ISet<Interaction> CreateFromThreadRepliesMessage(IEnumerable<ChatMessage> replies, string channelId, string threadId, string threadCreator, Application.Domain.TimeRange timeRange)
+        public ISet<Interaction> CreateFromThreadRepliesMessage(IEnumerable<ChatMessage> replies, string channelId, string threadId, string threadCreator, Utils.Models.TimeRange timeRange)
         {
             if (threadCreator is null)
                 return ImmutableHashSet<Interaction>.Empty;

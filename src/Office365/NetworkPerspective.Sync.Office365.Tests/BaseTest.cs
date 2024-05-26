@@ -16,6 +16,7 @@ using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Microsoft;
 using NetworkPerspective.Sync.Office365.Client;
 using NetworkPerspective.Sync.Office365.Tests.Fixtures;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
 

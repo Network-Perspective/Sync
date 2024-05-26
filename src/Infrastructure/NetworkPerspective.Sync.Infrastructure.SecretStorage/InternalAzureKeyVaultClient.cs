@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage.Exceptions;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
 {

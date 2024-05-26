@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage.Exceptions;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 using VaultSharp;
 using VaultSharp.V1.AuthMethods;

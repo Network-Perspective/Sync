@@ -1,5 +1,6 @@
 ﻿using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Entities;
+using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Mappers;
 

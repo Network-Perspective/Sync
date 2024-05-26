@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using NetworkPerspective.Sync.Utils.Models;
+
 namespace NetworkPerspective.Sync.Orchestrator.Application.Domain;
 
 public class SyncContext

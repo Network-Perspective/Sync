@@ -9,6 +9,9 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Infrastructure.Slack.Client;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract;
@@ -35,15 +38,17 @@ internal class SlackAuthService : ISlackAuthService
     private readonly IAuthStateKeyFactory _stateKeyFactory;
     private readonly IMemoryCache _cache;
     private readonly IWorkerRouter _workerRouter;
+    private readonly ISlackClientUnauthorizedFacade _slackClientUnauthorizedFacade;
     private readonly SlackAuthConfig _slackAuthConfig;
     private readonly ILogger<SlackAuthService> _logger;
 
-    public SlackAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, IMemoryCache cache, IWorkerRouter workerRouter, IOptions<SlackAuthConfig> slackAuthConfig, ILogger<SlackAuthService> logger)
+    public SlackAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, IMemoryCache cache, IWorkerRouter workerRouter, IOptions<SlackAuthConfig> slackAuthConfig, ISlackClientUnauthorizedFacade slackClientUnauthorizedFacade, ILogger<SlackAuthService> logger)
     {
         _vault = vault;
         _stateKeyFactory = stateKeyFactory;
         _cache = cache;
         _workerRouter = workerRouter;
+        _slackClientUnauthorizedFacade = slackClientUnauthorizedFacade;
         _slackAuthConfig = slackAuthConfig.Value;
         _logger = logger;
     }

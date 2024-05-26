@@ -8,6 +8,7 @@ using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage.Exceptions;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.SecretStorage.Tests.Fixtures;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
 

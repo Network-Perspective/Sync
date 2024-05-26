@@ -57,7 +57,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return result;
         }
 
-        public async Task<IEnumerable<InternalChat>> GetAllChatsAsync(IEnumerable<string> usersEmails, Application.Domain.TimeRange timeRange, CancellationToken stoppingToken = default)
+        public async Task<IEnumerable<InternalChat>> GetAllChatsAsync(IEnumerable<string> usersEmails, Utils.Models.TimeRange timeRange, CancellationToken stoppingToken = default)
         {
             _logger.LogDebug("Getting all Chats of all Employees...");
 
@@ -77,7 +77,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         }
 
         // https://learn.microsoft.com/en-us/graph/api/chat-list
-        private async Task<IEnumerable<InternalChat>> GetSingleUserChatsAsync(string userEmail, Application.Domain.TimeRange timeRange, CancellationToken stoppingToken)
+        private async Task<IEnumerable<InternalChat>> GetSingleUserChatsAsync(string userEmail, Utils.Models.TimeRange timeRange, CancellationToken stoppingToken)
         {
             const int maxPageSize = 50;
             var filterString = $"lastUpdatedDateTime ge {timeRange.Start:s}Z and lastUpdatedDateTime lt {timeRange.End:s}Z";
