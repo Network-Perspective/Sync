@@ -5,6 +5,7 @@ using System.Linq;
 using Google.Apis.Calendar.v3.Data;
 
 using NetworkPerspective.Sync.Application.Domain.Meetings;
+using NetworkPerspective.Sync.Infrastructure.Google.Exceptions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
 {
@@ -21,7 +22,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Extensions
         }
 
         public static DateTime GetStart(this Event @event)
-            => @event.Start?.DateTimeDateTimeOffset?.DateTime ?? DateTime.UtcNow;
+        {
+            var start = @event.Start?.DateTimeDateTimeOffset;
+
+            if (start is null)
+                throw new MissingMeetingStartException();
+
+            return start.Value.UtcDateTime;
+        }
 
         public static IEnumerable<string> GetParticipants(this Event @event)
         {
