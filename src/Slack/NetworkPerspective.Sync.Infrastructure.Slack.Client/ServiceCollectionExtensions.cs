@@ -6,7 +6,7 @@ using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Client
 {
-    internal static class ServiceCollectionExtensions
+    public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddSlackClient(this IServiceCollection services, IConfigurationSection configurationSection)
         {

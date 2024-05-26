@@ -21,6 +21,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
     {
         public static IServiceCollection AddSlack(this IServiceCollection services, IConfigurationSection configurationSection)
         {
+            services.AddSlackClient(configurationSection.GetSection("Resiliency"));
+
             var slackBaseUrl = configurationSection.GetValue<string>("BaseUrl");
             services.Configure<AuthConfig>(configurationSection.GetSection("Auth"));
 
