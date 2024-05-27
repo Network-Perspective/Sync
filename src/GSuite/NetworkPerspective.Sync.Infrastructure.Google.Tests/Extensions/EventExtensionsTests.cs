@@ -5,6 +5,7 @@ using FluentAssertions;
 using Google.Apis.Calendar.v3.Data;
 
 using NetworkPerspective.Sync.Application.Domain.Meetings;
+using NetworkPerspective.Sync.Infrastructure.Google.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Google.Extensions;
 
 using Xunit;
@@ -60,12 +61,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Extensions
         public class GetStart
         {
             [Theory]
-            [InlineData("2000-01-01T10:00")]
-            [InlineData("2010-01-11T10:00")]
+            [InlineData("2000-01-01T10:00+01:00")]
+            [InlineData("2010-01-11T10:00+01:00")]
             public void ShouldFindCorrectStart(string start)
             {
                 // Arrange
-                var startDateTime = DateTime.Parse(start);
+                var startDateTime = DateTime.Parse(start).ToUniversalTime();
 
                 var @event = new Event
                 {
@@ -80,7 +81,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Extensions
             }
 
             [Fact]
-            public void ShouldNotThrowOnNull()
+            public void ShouldThrowOnNull()
             {
                 // Arrange
                 var @event1 = new Event
@@ -93,9 +94,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Extensions
                     Start = null
                 };
 
+                Func<DateTime> func1 = () => @event1.GetStart();
+                Func<DateTime> func2 = () => @event2.GetStart();
+
                 // Act Assert
-                _ = @event1.GetStart();
-                _ = @event2.GetStart();
+                func1.Should().ThrowExactly<MissingMeetingStartException>();
+                func2.Should().ThrowExactly<MissingMeetingStartException>();
             }
         }
 

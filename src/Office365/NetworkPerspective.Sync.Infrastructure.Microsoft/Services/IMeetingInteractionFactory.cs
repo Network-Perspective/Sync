@@ -34,7 +34,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         {
             var user = _employees.Find(userEmail);
             var duration = (@event.End.ToDateTimeOffset() - @event.Start.ToDateTimeOffset()).TotalMinutes;
-            var timestamp = @event.Start.ToDateTimeOffset().DateTime;
+            var timestamp = @event.Start.ToDateTimeOffset().UtcDateTime;
             var participants = @event
                 .Attendees
                 .Where(x => x.EmailAddress?.Address is not null)        // Skip users without email address

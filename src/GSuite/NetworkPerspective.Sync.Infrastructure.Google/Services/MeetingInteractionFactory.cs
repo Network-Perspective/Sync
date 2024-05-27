@@ -47,6 +47,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
                 else
                     return CreateForBigMeeting(meeting.Id, user, participants, timestamp, duration, recurrence);
             }
+            catch (MissingMeetingStartException)
+            {
+                _logger.LogWarning("Meeting has no start timestamp");
+                return ImmutableHashSet<Interaction>.Empty;
+            }
             catch (NotSupportedEmailFormatException ex)
             {
                 _logger.LogWarning("Invalid email format");
