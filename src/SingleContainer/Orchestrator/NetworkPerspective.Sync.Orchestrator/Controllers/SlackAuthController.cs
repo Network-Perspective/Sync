@@ -43,7 +43,7 @@ public class SlackAuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> SignIn([FromRoute]Guid connectorId, string callbackUrl = null, CancellationToken stoppingToken = default)
+    public async Task<IActionResult> SignIn([FromRoute] Guid connectorId, string callbackUrl = null, CancellationToken stoppingToken = default)
     {
         var connector = await _connectorsService.GetAsync(connectorId, stoppingToken);
 

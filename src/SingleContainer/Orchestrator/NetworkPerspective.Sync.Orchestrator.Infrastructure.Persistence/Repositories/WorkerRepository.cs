@@ -85,7 +85,7 @@ internal class WorkerRepository : IWorkerRepository
 
     public async Task<Worker> GetAsync(Guid id, CancellationToken stoppingToken = default)
     {
-        if(!await ExistsAsync(id, stoppingToken))
+        if (!await ExistsAsync(id, stoppingToken))
             throw new EntityNotFoundException(typeof(Worker));
 
         try

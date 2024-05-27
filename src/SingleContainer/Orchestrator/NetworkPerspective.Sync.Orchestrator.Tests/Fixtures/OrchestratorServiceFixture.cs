@@ -24,7 +24,7 @@ public class OrchestratorServiceFixture : WebApplicationFactory<Program>
     private readonly string _validApiKey = Guid.NewGuid().ToString();
 
     public SqliteUnitOfWorkFactory UnitOfWorkFactory { get; } = new SqliteUnitOfWorkFactory();
-    public Mock<IVault> VaultMock = new Mock<IVault>(); 
+    public Mock<IVault> VaultMock = new Mock<IVault>();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {

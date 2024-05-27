@@ -45,8 +45,8 @@ public class WorkersHubTests
         var worker = await workersClient.WorkersGetAsync(workerName);
         await workersClient.AuthAsync(worker.Id);
 
-        var config = Options.Create(new WorkerHubClientConfig 
-        { 
+        var config = Options.Create(new WorkerHubClientConfig
+        {
             BaseUrl = _service.Server.BaseAddress.ToString()
         });
         var hubClient = new WorkerHubClient(config, NullLogger<IWorkerHubClient>.Instance);

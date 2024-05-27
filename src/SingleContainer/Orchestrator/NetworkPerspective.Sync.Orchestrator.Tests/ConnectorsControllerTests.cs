@@ -1,13 +1,14 @@
-﻿using System.Threading.Tasks;
-using System;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+using FluentAssertions;
 
 using NetworkPerspective.Sync.Office365.Tests.Fixtures;
 using NetworkPerspective.Sync.Orchestrator.Client;
+using NetworkPerspective.Sync.Orchestrator.Tests.Fixtures;
 
 using Xunit;
-using System.Linq;
-using FluentAssertions;
-using NetworkPerspective.Sync.Orchestrator.Tests.Fixtures;
 
 namespace NetworkPerspective.Sync.Orchestrator.Tests;
 
@@ -37,8 +38,8 @@ public class ConnectorsControllerTests
         // Act
 
 
-        await connectorsClient.ConnectorsPostAsync(new CreateConnectorDto 
-        { 
+        await connectorsClient.ConnectorsPostAsync(new CreateConnectorDto
+        {
             WorkerId = workerId,
             Type = "Google",
             Properties = new ConnectorPropertyDto[]

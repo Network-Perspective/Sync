@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using NetworkPerspective.Sync.Framework.Dtos;
+using NetworkPerspective.Sync.Orchestrator.Application.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
-using NetworkPerspective.Sync.Orchestrator.Application.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 
 namespace NetworkPerspective.Sync.Framework.Controllers;
@@ -46,7 +46,7 @@ public class SchedulesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> StartAsync([FromRoute]Guid connectorId, [FromBody] SchedulerStartDto request, CancellationToken stoppingToken = default)
+    public async Task<IActionResult> StartAsync([FromRoute] Guid connectorId, [FromBody] SchedulerStartDto request, CancellationToken stoppingToken = default)
     {
         await _connectorsService.ValidateExists(connectorId, stoppingToken);
 
