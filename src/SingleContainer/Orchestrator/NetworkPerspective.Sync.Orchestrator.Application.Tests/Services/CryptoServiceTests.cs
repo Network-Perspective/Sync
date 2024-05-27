@@ -52,7 +52,7 @@ public class CryptoServiceTests
 
         // Assert
         hash.Should().NotBeNull();
-        hash.Length.Should().Be(16);
+        hash.Length.Should().Be(32);
     }
 
     [Fact]

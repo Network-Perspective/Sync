@@ -61,6 +61,7 @@ public class WorkersHubTests
         var correlationId = Guid.NewGuid();
         var pongResponse = await hubClient.PingAsync(new PingDto { CorrelationId = correlationId, Timestamp = DateTime.UtcNow });
         pongResponse.CorrelationId.Should().Be(correlationId);
+        await workersClient.WorkersDeleteAsync(worker.Id);
     }
 
     [Fact]
@@ -95,5 +96,6 @@ public class WorkersHubTests
         await func.Should()
             .ThrowAsync<HttpRequestException>()
             .Where(x => x.StatusCode == HttpStatusCode.Unauthorized);
+        await workersClient.WorkersDeleteAsync(worker.Id);
     }
 }
