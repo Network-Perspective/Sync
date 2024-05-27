@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Text;
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Extensions;
@@ -33,7 +31,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Services
                     type: Error.Types.Application,
                     title: "Operation Cancelled",
                     details: "The operation has been canceled before completed",
-                    statusCode: StatusCodes.Status400BadRequest);
+                    statusCode: 400);
             }
 
             _logger.LogError(exception, "Application has thrown an exception");
@@ -46,7 +44,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Services
                             type: Error.Types.Security,
                             title: "Authentication Error",
                             details: mahex.Message,
-                            statusCode: StatusCodes.Status401Unauthorized);
+                            statusCode: 401);
                     }
                 //case InvalidTokenException iatex:
                 //    {
@@ -108,7 +106,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Services
                             type: Error.Types.Unknown,
                             title: "Unexpected Error",
                             details: "Unexpected exception has been thrown. Please see logs for details",
-                            statusCode: StatusCodes.Status500InternalServerError);
+                            statusCode: 500);
                     }
             }
         }
