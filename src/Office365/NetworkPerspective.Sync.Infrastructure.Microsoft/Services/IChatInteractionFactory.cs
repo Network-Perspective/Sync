@@ -33,7 +33,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             foreach (var chatparticipant in chatMessage.Chat.UserIds.Where(x => x != chatMessage.SenderId))
             {
                 var interaction = Interaction.CreateChatThread(
-                    timestamp: chatMessage.TimeStamp,
+                    timestamp: chatMessage.TimeStamp.ToUniversalTime(),
                     source: _employees.Find(chatMessage.SenderId),
                     target: _employees.Find(chatparticipant),
                     channelId: chatMessage.Chat.Id,
@@ -50,7 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             var result = new HashSet<Interaction>(new InteractionEqualityComparer());
 
             var interaction = Interaction.CreateChatReaction(
-                timestamp: chatMessageReaction.TimeStamp,
+                timestamp: chatMessageReaction.TimeStamp.ToUniversalTime(),
                 source: _employees.Find(chatMessageReaction.SenderId),
                 target: _employees.Find(chatMessageReaction.ChatMessage.SenderId),
                 eventId: chatMessageReaction.Id,
