@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 using Moq;
 
@@ -26,19 +27,25 @@ public class OrchestratorServiceFixture : WebApplicationFactory<Program>
     public SqliteUnitOfWorkFactory UnitOfWorkFactory { get; } = new SqliteUnitOfWorkFactory();
     public Mock<IVault> VaultMock = new Mock<IVault>();
 
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        var configOverride = new Dictionary<string, string>
+        {
+            { "App:Scheduler:UsePersistentStore", "false" },
+        };
+
+        builder.ConfigureHostConfiguration(config =>
+        {
+            config.AddInMemoryCollection(configOverride);
+        });
+
+        return base.CreateHost(builder);
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
 
-        var configOverride = new Dictionary<string, string>
-            {
-                { "App:Scheduler:UsePersistentStore", "false" },
-            };
-
-        builder.ConfigureAppConfiguration(config =>
-        {
-            config.AddInMemoryCollection(configOverride);
-        });
 
         builder.ConfigureTestServices(services =>
         {
