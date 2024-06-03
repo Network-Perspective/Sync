@@ -7,6 +7,7 @@ using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Application.Services
 {

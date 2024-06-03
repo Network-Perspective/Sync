@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
+using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Application.Services
 {
@@ -40,7 +40,7 @@ namespace NetworkPerspective.Sync.Application.Services
                 .FindLastLogAsync(networkId, stoppingToken);
             var lastSyncPeriodEnd = lastSyncHistoryEntry?.SyncPeriod.End;
 
-            _logger.LogDebug("Last synchronization of network '{networkId}' {lastSync}", networkId, lastSyncPeriodEnd?.ToString(Consts.DefaultDateTimeFormat) ?? "not found");
+            _logger.LogDebug("Last synchronization of network '{networkId}' {lastSync}", networkId, lastSyncPeriodEnd?.ToString(TimeRange.DefaultDateTimeFormat) ?? "not found");
 
             return lastSyncPeriodEnd ?? _clock.UtcNow().AddDays(-_config.DefaultSyncLookbackInDays);
         }

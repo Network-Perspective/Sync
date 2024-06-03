@@ -20,6 +20,7 @@ using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
 using NetworkPerspective.Sync.Infrastructure.Slack.Models;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
 

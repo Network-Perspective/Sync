@@ -12,6 +12,7 @@ using Moq;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Common.Tests.Factories;
 using NetworkPerspective.Sync.Infrastructure.Core.Services;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
 

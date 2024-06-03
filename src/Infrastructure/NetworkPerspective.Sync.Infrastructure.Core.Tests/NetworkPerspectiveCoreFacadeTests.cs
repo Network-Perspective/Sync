@@ -23,6 +23,8 @@ using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Common.Tests.Factories;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
+using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Utils.Models;
 
 using Xunit;
 

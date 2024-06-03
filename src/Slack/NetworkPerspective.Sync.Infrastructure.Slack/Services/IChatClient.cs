@@ -14,6 +14,7 @@ using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Mappers;
+using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {

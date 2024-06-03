@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Application.Domain.Sync
 {

@@ -14,12 +14,11 @@ using Moq;
 
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Exceptions;
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
-using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Framework.Dtos;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
 

@@ -8,6 +8,7 @@ using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Interactions.Criterias;
+using NetworkPerspective.Sync.Utils.Models;
 
 using Xunit;
 

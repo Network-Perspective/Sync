@@ -19,6 +19,7 @@ using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage.Exceptions;
 using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
 

@@ -14,6 +14,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\Common\NetworkPerspective.Sync.Application\NetworkPerspective.Sync.Application.csproj" />
+        <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Slack.Client\NetworkPerspective.Sync.Infrastructure.Slack.Client.csproj" />
     </ItemGroup>
 
 </Project>

@@ -20,6 +20,7 @@ using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Google.Services;
 using NetworkPerspective.Sync.Infrastructure.Google.Tests.Fixtures;
+using NetworkPerspective.Sync.Utils.Models;
 
 using Xunit;
 
