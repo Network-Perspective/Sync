@@ -15,15 +15,15 @@ namespace NetworkPerspective.Sync.Framework.Controllers
     [Authorize]
     public class StatusController : ControllerBase
     {
-        private readonly INetworkService _networkService;
+        private readonly IConnectorService _connectorService;
         private readonly IStatusService _statusService;
-        private readonly INetworkIdProvider _networkIdProvider;
+        private readonly IConnectorInfoProvider _connectorInfoProvider;
 
-        public StatusController(INetworkService networkService, IStatusService statusService, INetworkIdProvider networkIdProvider)
+        public StatusController(IConnectorService connectorService, IStatusService statusService, IConnectorInfoProvider connectorInfoProvider)
         {
-            _networkService = networkService;
+            _connectorService = connectorService;
             _statusService = statusService;
-            _networkIdProvider = networkIdProvider;
+            _connectorInfoProvider = connectorInfoProvider;
         }
 
         /// <summary>
@@ -44,9 +44,11 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<StatusDto> GetStatus(CancellationToken stoppingToken = default)
         {
-            await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
+            var connectorInfo = _connectorInfoProvider.Get();
 
-            var status = await _statusService.GetStatusAsync(_networkIdProvider.Get(), stoppingToken);
+            await _connectorService.ValidateExists(connectorInfo.Id, stoppingToken);
+
+            var status = await _statusService.GetStatusAsync(connectorInfo.Id, stoppingToken);
 
             return StatusMapper.DomainStatusToDto(status);
         }

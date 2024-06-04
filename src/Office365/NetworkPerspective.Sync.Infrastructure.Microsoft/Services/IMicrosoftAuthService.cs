@@ -29,7 +29,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
         private readonly IMemoryCache _cache;
         private readonly IStatusLoggerFactory _statusLoggerFactory;
-        private readonly INetworkService _networkService;
+        private readonly IConnectorService _networkService;
         private readonly ILogger<MicrosoftAuthService> _logger;
 
         public MicrosoftAuthService(
@@ -37,7 +37,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             ISecretRepositoryFactory secretRepositoryFactory,
             IMemoryCache cache,
             IStatusLoggerFactory statusLoggerFactory,
-            INetworkService networkService,
+            IConnectorService networkService,
             ILogger<MicrosoftAuthService> logger)
         {
             _stateKeyFactory = stateKeyFactory;
@@ -53,13 +53,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             _logger.LogInformation("Starting microsoft admin consent process...");
 
             await _statusLoggerFactory
-                .CreateForNetwork(authProcess.NetworkId)
+                .CreateForConnector(authProcess.ConnectorId)
                 .LogInfoAsync("Admin consent process started", stoppingToken);
 
             var stateKey = _stateKeyFactory.Create();
             _cache.Set(stateKey, authProcess, DateTimeOffset.UtcNow.AddMinutes(AuthorizationStateExpirationTimeInMinutes));
 
-            var clientId = await GetClientIdAsync(authProcess.NetworkId, stoppingToken);
+            var clientId = await GetClientIdAsync(authProcess.ConnectorId, stoppingToken);
             var authUri = BuildMicrosoftAuthUri(clientId, stateKey, authProcess.CallbackUri);
 
             _logger.LogInformation("Micorosoft admin consent process started. Unique state id: '{state}'", stateKey);
@@ -74,16 +74,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             if (!_cache.TryGetValue(state, out AuthProcess authProcess))
                 throw new OAuthException("State does not match initialized value");
 
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.NetworkId, stoppingToken);
-            var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, authProcess.NetworkId);
+            var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.ConnectorId, stoppingToken);
+            var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, authProcess.ConnectorId);
             await secretRepository.SetSecretAsync(tenantIdKey, tenant.ToString().ToSecureString(), stoppingToken);
         }
 
-        private async Task<SecureString> GetClientIdAsync(Guid networkId, CancellationToken stoppingToken)
+        private async Task<SecureString> GetClientIdAsync(Guid connectorId, CancellationToken stoppingToken)
         {
-            var network = await _networkService.GetAsync<MicrosoftNetworkProperties>(networkId, stoppingToken);
+            var network = await _networkService.GetAsync<MicrosoftNetworkProperties>(connectorId, stoppingToken);
 
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId, stoppingToken);
+            var secretRepository = await _secretRepositoryFactory.CreateAsync(connectorId, stoppingToken);
 
             if (network.Properties.SyncMsTeams == true)
             {

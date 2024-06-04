@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
     internal interface IChatClient
     {
-        Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
+        Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, Connector<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default);
     }
 
     internal class ChatClient : IChatClient
@@ -37,7 +37,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _logger = logger;
         }
 
-        public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, Network<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
+        public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, ISlackClientBotScopeFacade slackClientFacade, Connector<SlackNetworkProperties> network, InteractionFactory interactionFactory, TimeRange timeRange, CancellationToken stoppingToken = default)
         {
             var teams = await slackClientFacade.GetTeamsListAsync(stoppingToken);
 
@@ -46,7 +46,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             async Task ReportProgressCallbackAsync(double progressRate)
             {
                 var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, progressRate);
-                await _tasksStatusesCache.SetStatusAsync(network.NetworkId, taskStatus, stoppingToken);
+                await _tasksStatusesCache.SetStatusAsync(network.Id, taskStatus, stoppingToken);
             }
 
             Task<SingleTaskResult> SingleTaskAsync(string channelId)

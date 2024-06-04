@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
@@ -45,7 +45,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var usersClient = new UsersClient(_microsoftClientFixture.Client, _usersClientlogger);
 
             var timeRange = new TimeRange(new DateTime(2023, 04, 10), new DateTime(2023, 04, 11));
-            var syncContext = new SyncContext(Guid.NewGuid(), NetworkConfig.Empty, new NetworkProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+            var syncContext = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, new ConnectorProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
             var users = await usersClient.GetUsersAsync(syncContext);
             var employees = EmployeesMapper.ToEmployees(users, HashFunction.Empty, EmployeeFilter.Empty, true);
 

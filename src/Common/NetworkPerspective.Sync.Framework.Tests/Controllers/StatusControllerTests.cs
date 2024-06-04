@@ -11,7 +11,7 @@ using Microsoft.Net.Http.Headers;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Exceptions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
@@ -27,14 +27,14 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
     {
         private readonly Mock<INetworkPerspectiveCore> _networkPerspectiveCoreMock = new Mock<INetworkPerspectiveCore>();
         private readonly Mock<IStatusService> _statusServiceMock = new Mock<IStatusService>();
-        private readonly Mock<INetworkService> _networkServiceMock = new Mock<INetworkService>();
-        private readonly Mock<INetworkIdProvider> _networkIdProvider = new Mock<INetworkIdProvider>();
+        private readonly Mock<IConnectorService> _connectorServiceMock = new Mock<IConnectorService>();
+        private readonly Mock<IConnectorInfoProvider> _connectorInfoProviderMock = new Mock<IConnectorInfoProvider>();
 
         public StatusControllerTests()
         {
             _networkPerspectiveCoreMock.Reset();
             _statusServiceMock.Reset();
-            _networkServiceMock.Reset();
+            _connectorServiceMock.Reset();
         }
 
         public class GetStatus : StatusControllerTests
@@ -45,6 +45,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 // Arrange
                 var networkId = Guid.NewGuid();
                 var connectorId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
                 var accessToken = "access-token";
 
                 var status = new Status
@@ -55,16 +56,16 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                     Logs = Array.Empty<StatusLog>()
                 };
 
-                _networkIdProvider
+                _connectorInfoProviderMock
                     .Setup(x => x.Get())
-                    .Returns(networkId);
+                    .Returns(connectorInfo);
 
                 _networkPerspectiveCoreMock
                     .Setup(x => x.ValidateTokenAsync(It.Is<SecureString>(x => x.ToSystemString() == accessToken), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(new TokenValidationResponse(networkId, connectorId));
+                    .ReturnsAsync(connectorInfo);
 
                 _statusServiceMock
-                    .Setup(x => x.GetStatusAsync(networkId, It.IsAny<CancellationToken>()))
+                    .Setup(x => x.GetStatusAsync(connectorId, It.IsAny<CancellationToken>()))
                     .ReturnsAsync(status);
 
                 var controller = Create(accessToken);
@@ -82,25 +83,26 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 // Arrange
                 var networkId = Guid.NewGuid();
                 var connectorId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
                 var accessToken = "access-token";
 
-                _networkIdProvider
+                _connectorInfoProviderMock
                     .Setup(x => x.Get())
-                    .Returns(networkId);
+                    .Returns(connectorInfo);
 
                 _networkPerspectiveCoreMock
                     .Setup(x => x.ValidateTokenAsync(It.Is<SecureString>(x => x.ToSystemString() == accessToken), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(new TokenValidationResponse(networkId, connectorId));
+                    .ReturnsAsync(connectorInfo);
 
-                _networkServiceMock
-                    .Setup(x => x.ValidateExists(networkId, It.IsAny<CancellationToken>()))
-                    .ThrowsAsync(new NetworkNotFoundException(networkId));
+                _connectorServiceMock
+                    .Setup(x => x.ValidateExists(connectorId, It.IsAny<CancellationToken>()))
+                    .ThrowsAsync(new ConnectorNotFoundException(networkId));
 
                 var controller = Create(accessToken);
                 Func<Task> func = () => controller.GetStatus();
 
                 // Act Assert
-                await func.Should().ThrowExactlyAsync<NetworkNotFoundException>();
+                await func.Should().ThrowExactlyAsync<ConnectorNotFoundException>();
                 _statusServiceMock.Verify(x => x.GetStatusAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
             }
         }
@@ -113,7 +115,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
             var features = new FeatureCollection();
             features.Set<IHttpRequestFeature>(requestFeature);
 
-            var controller = new StatusController(_networkServiceMock.Object, _statusServiceMock.Object, _networkIdProvider.Object);
+            var controller = new StatusController(_connectorServiceMock.Object, _statusServiceMock.Object, _connectorInfoProviderMock.Object);
             controller.ControllerContext.HttpContext = new DefaultHttpContext(features);
 
             return controller;

@@ -21,16 +21,16 @@ namespace NetworkPerspective.Sync.Application
             services.AddTransient<IHashingServiceFactory, HashingServiceFactory>();
             services.AddTransient<IAuthStateKeyFactory, AuthStateKeyFactory>();
 
-            services.AddScoped<NetworkIdProvider>();
-            services.AddScoped<INetworkIdProvider>(x => x.GetRequiredService<NetworkIdProvider>());
-            services.AddScoped<INetworkIdInitializer>(x => x.GetRequiredService<NetworkIdProvider>());
+            services.AddScoped<ConnectorInfoProvider>();
+            services.AddScoped<IConnectorInfoProvider>(x => x.GetRequiredService<ConnectorInfoProvider>());
+            services.AddScoped<IConnectorInfoInitializer>(x => x.GetRequiredService<ConnectorInfoProvider>());
 
             services.AddScoped<ISyncContextProvider, SyncContextProvider>();
 
             services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<ICachedSecretRepository, CachedSecretRepository>();
 
-            services.AddTransient<INetworkService, NetworkService>();
+            services.AddTransient<IConnectorService, ConnectorService>();
             services.AddTransient<IStatusLoggerFactory, StatusLoggerFactory>();
             services.AddTransient<IStatusService, StatusService>();
             services.AddTransient<ITokenService, TokenService>();

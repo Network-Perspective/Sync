@@ -6,14 +6,14 @@ namespace NetworkPerspective.Sync.Application.Services
 {
     public interface ISyncScheduler
     {
-        Task AddOrReplaceAsync(Guid networkId, CancellationToken stoppingtoken = default);
-        Task EnsureRemovedAsync(Guid networkId, CancellationToken stoppingtoken = default);
-        Task TriggerNowAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task InterruptNowAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task ScheduleAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task UnscheduleAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task<bool> IsScheduledAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task<bool> IsRunningAsync(Guid networkId, CancellationToken stoppingToken = default);
+        Task AddOrReplaceAsync(Guid connectorId, CancellationToken stoppingtoken = default);
+        Task EnsureRemovedAsync(Guid connectorId, CancellationToken stoppingtoken = default);
+        Task TriggerNowAsync(Guid connectorId, CancellationToken stoppingToken = default);
+        Task InterruptNowAsync(Guid connectorId, CancellationToken stoppingToken = default);
+        Task ScheduleAsync(Guid connectorId, CancellationToken stoppingToken = default);
+        Task UnscheduleAsync(Guid connectorId, CancellationToken stoppingToken = default);
+        Task<bool> IsScheduledAsync(Guid connectorId, CancellationToken stoppingToken = default);
+        Task<bool> IsRunningAsync(Guid connectorId, CancellationToken stoppingToken = default);
     }
 
     /// <summary>
@@ -22,42 +22,42 @@ namespace NetworkPerspective.Sync.Application.Services
     /// </summary>
     public class DummySyncScheduler : ISyncScheduler
     {
-        public Task AddOrReplaceAsync(Guid networkId, CancellationToken stoppingtoken = default)
+        public Task AddOrReplaceAsync(Guid connectorId, CancellationToken stoppingtoken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task EnsureRemovedAsync(Guid networkId, CancellationToken stoppingtoken = default)
+        public Task EnsureRemovedAsync(Guid connectorId, CancellationToken stoppingtoken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task TriggerNowAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task TriggerNowAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task InterruptNowAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task InterruptNowAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task ScheduleAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task ScheduleAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task UnscheduleAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task UnscheduleAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task<bool> IsScheduledAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task<bool> IsScheduledAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             return Task.FromResult(true);
         }
 
-        public Task<bool> IsRunningAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task<bool> IsRunningAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             return Task.FromResult(false);
         }

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Slack;
@@ -66,7 +66,7 @@ namespace NetworkPerspective.Sync.Slack.Tests
 
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+                .ReturnsAsync(new ConnectorInfo(networkId, Guid.NewGuid()));
 
             var networkConfig = new NetworkConfigDto
             {
@@ -83,7 +83,7 @@ namespace NetworkPerspective.Sync.Slack.Tests
             _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-Slack-{networkId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
 
             using var unitOfWork = _service.UnitOfWorkFactory.Create();
-            var networksRepository = unitOfWork.GetNetworkRepository<SlackNetworkProperties>();
+            var networksRepository = unitOfWork.GetConnectorRepository<SlackNetworkProperties>();
             var network = await networksRepository.FindAsync(networkId);
             network.Properties.AutoJoinChannels.Should().Be(autoJoinChannels);
             network.Properties.SyncGroups.Should().Be(syncChannelsNames);
@@ -103,7 +103,7 @@ namespace NetworkPerspective.Sync.Slack.Tests
 
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+                .ReturnsAsync(new ConnectorInfo(networkId, Guid.NewGuid()));
 
             var networkConfig = new NetworkConfigDto
             {

@@ -1,4 +1,4 @@
-﻿namespace NetworkPerspective.Sync.Application.Domain.Networks
+﻿namespace NetworkPerspective.Sync.Application.Domain.Connectors
 {
     public class CustomAttributeRelationship
     {

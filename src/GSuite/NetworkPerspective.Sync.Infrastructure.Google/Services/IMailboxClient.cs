@@ -58,7 +58,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             async Task ReportProgressCallbackAsync(double progressRate)
             {
                 var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, progressRate);
-                await _tasksStatusesCache.SetStatusAsync(context.NetworkId, taskStatus, stoppingToken);
+                await _tasksStatusesCache.SetStatusAsync(context.ConnectorId, taskStatus, stoppingToken);
             }
 
             Task<SingleTaskResult> SingleTaskAsync(string userEmail)

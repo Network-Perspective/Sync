@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Exceptions;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Services;
@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
 {
     public class NetworkServiceTests
     {
-        private static readonly ILogger<NetworkService> NullLogger = NullLogger<NetworkService>.Instance;
+        private static readonly ILogger<ConnectorService> NullLogger = NullLogger<ConnectorService>.Instance;
         private readonly IUnitOfWorkFactory _unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         private readonly Mock<ISyncScheduler> _syncSchedulerMock = new Mock<ISyncScheduler>();
 
@@ -35,29 +35,29 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             public async Task ShouldAddNewNetwork()
             {
                 // Arrange
-                var networkId = Guid.NewGuid();
+                var connectorId = Guid.NewGuid();
                 var properties = new TestableNetworkProperties
                 {
                     StringProp = "some-prop",
                     BoolProp = true,
                     IntProp = 321,
                 };
-                var networkService = new NetworkService(_unitOfWorkFactory, NullLogger);
+                var connectorService = new ConnectorService(_unitOfWorkFactory, NullLogger);
 
                 // Act
-                await networkService.AddOrReplace(networkId, properties);
+                await connectorService.AddOrReplace(connectorId, properties);
 
                 // Assert
-                var result = await networkService.GetAsync<TestableNetworkProperties>(networkId);
+                var result = await connectorService.GetAsync<TestableNetworkProperties>(connectorId);
                 result.Properties.Should().BeEquivalentTo(properties);
-                result.NetworkId.Should().Be(networkId);
+                result.Id.Should().Be(connectorId);
             }
 
             [Fact]
             public async Task ShouldReplaceIfAlreadyExists()
             {
                 // Arrange
-                var networkId = Guid.NewGuid();
+                var connectorId = Guid.NewGuid();
                 var properties = new TestableNetworkProperties
                 {
                     StringProp = "some-prop",
@@ -65,16 +65,16 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                     IntProp = 321,
                 };
 
-                var networkService = new NetworkService(_unitOfWorkFactory, NullLogger);
-                await networkService.AddOrReplace(networkId, new TestableNetworkProperties());
+                var connectorService = new ConnectorService(_unitOfWorkFactory, NullLogger);
+                await connectorService.AddOrReplace(connectorId, new TestableNetworkProperties());
 
                 // Act
-                await networkService.AddOrReplace(networkId, properties);
+                await connectorService.AddOrReplace(connectorId, properties);
 
                 // Assert
-                var result = await networkService.GetAsync<TestableNetworkProperties>(networkId);
+                var result = await connectorService.GetAsync<TestableNetworkProperties>(connectorId);
                 result.Properties.Should().BeEquivalentTo(properties);
-                result.NetworkId.Should().Be(networkId);
+                result.Id.Should().Be(connectorId);
             }
         }
 
@@ -84,18 +84,18 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             public async Task ShouldRemoveExistingNetwork()
             {
                 // Arrange
-                var networkId = Guid.NewGuid();
+                var connectorId = Guid.NewGuid();
 
-                var networkService = new NetworkService(_unitOfWorkFactory, NullLogger);
-                await networkService.AddOrReplace(networkId, new TestableNetworkProperties());
+                var connectorService = new ConnectorService(_unitOfWorkFactory, NullLogger);
+                await connectorService.AddOrReplace(connectorId, new TestableNetworkProperties());
 
                 // Act
-                await networkService.EnsureRemovedAsync(networkId);
+                await connectorService.EnsureRemovedAsync(connectorId);
 
                 // Assert
                 var result = await _unitOfWorkFactory
                     .Create()
-                    .GetNetworkRepository<TestableNetworkProperties>()
+                    .GetConnectorRepository<TestableNetworkProperties>()
                     .GetAllAsync();
 
                 result.Should().BeEmpty();
@@ -105,8 +105,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             public async Task ShouldNotThrowOnNonExistingNetwork()
             {
                 // Arrange
-                var networkService = new NetworkService(_unitOfWorkFactory, NullLogger);
-                Func<Task> func = () => networkService.EnsureRemovedAsync(Guid.NewGuid());
+                var connectorService = new ConnectorService(_unitOfWorkFactory, NullLogger);
+                Func<Task> func = () => connectorService.EnsureRemovedAsync(Guid.NewGuid());
 
                 // Act Assert
                 await func.Should().NotThrowAsync();
@@ -119,11 +119,11 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             public async Task ShouldThrowOnNonExisting()
             {
                 // Arrange
-                var networkService = new NetworkService(_unitOfWorkFactory, NullLogger);
-                Func<Task<Network<TestableNetworkProperties>>> func = () => networkService.GetAsync<TestableNetworkProperties>(Guid.NewGuid());
+                var connectorService = new ConnectorService(_unitOfWorkFactory, NullLogger);
+                Func<Task<Connector<TestableNetworkProperties>>> func = () => connectorService.GetAsync<TestableNetworkProperties>(Guid.NewGuid());
 
                 // Act Assert
-                await func.Should().ThrowExactlyAsync<NetworkNotFoundException>();
+                await func.Should().ThrowExactlyAsync<ConnectorNotFoundException>();
             }
         }
 
@@ -133,11 +133,11 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             public async Task ShouldNotThrowOnExisting()
             {
                 // Arrange
-                var networkId = Guid.NewGuid();
-                var networkService = new NetworkService(_unitOfWorkFactory, NullLogger);
-                await networkService.AddOrReplace(networkId, new TestableNetworkProperties());
+                var connectorId = Guid.NewGuid();
+                var connectorService = new ConnectorService(_unitOfWorkFactory, NullLogger);
+                await connectorService.AddOrReplace(connectorId, new TestableNetworkProperties());
 
-                Func<Task> func = () => networkService.ValidateExists(networkId);
+                Func<Task> func = () => connectorService.ValidateExists(connectorId);
 
                 // Act Assert
                 await func.Should().NotThrowAsync();
@@ -147,11 +147,11 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             public async Task ShouldThrowOnNonExisting()
             {
                 // Arrange
-                var networkService = new NetworkService(_unitOfWorkFactory, NullLogger);
-                Func<Task> func = () => networkService.ValidateExists(Guid.NewGuid());
+                var connectorService = new ConnectorService(_unitOfWorkFactory, NullLogger);
+                Func<Task> func = () => connectorService.ValidateExists(Guid.NewGuid());
 
                 // Act Assert
-                await func.Should().ThrowExactlyAsync<NetworkNotFoundException>();
+                await func.Should().ThrowExactlyAsync<ConnectorNotFoundException>();
             }
         }
     }

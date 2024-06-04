@@ -34,8 +34,8 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
         public async Task ShouldCatchExceptions()
         {
             // Arrange
-            var networkId = Guid.NewGuid();
-            var jobContextMock = CreateContext(networkId);
+            var connectorId = Guid.NewGuid();
+            var jobContextMock = CreateContext(connectorId);
 
             _syncServiceMock
                 .Setup(x => x.SyncAsync(It.IsAny<SyncContext>(), It.IsAny<CancellationToken>()))
@@ -50,12 +50,12 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             await func.Should().NotThrowAsync();
         }
 
-        private static IJobExecutionContext CreateContext(Guid networkId)
+        private static IJobExecutionContext CreateContext(Guid connectorId)
         {
             var jobDetails = new Mock<IJobDetail>();
             jobDetails
                 .Setup(x => x.Key)
-                .Returns(new JobKey(networkId.ToString()));
+                .Returns(new JobKey(connectorId.ToString()));
 
             var jobContextMock = new Mock<IJobExecutionContext>();
             jobContextMock

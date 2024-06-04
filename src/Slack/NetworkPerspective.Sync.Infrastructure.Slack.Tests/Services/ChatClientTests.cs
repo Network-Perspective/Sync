@@ -8,8 +8,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
@@ -40,7 +40,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             // Arrange
             const string existingEmail = "maciej@networkperspective.io";
             var timeRange = new TimeRange(new DateTime(1970, 01, 01, 0, 0, 0, DateTimeKind.Utc), DateTime.UtcNow);
-            var network = Network<SlackNetworkProperties>.Create(Guid.NewGuid(), new SlackNetworkProperties(), DateTime.UtcNow);
+            var network = Connector<SlackNetworkProperties>.Create(Guid.NewGuid(), new SlackNetworkProperties(), DateTime.UtcNow);
             var paginationHandler = new CursorPaginationHandler(NullLogger<CursorPaginationHandler>.Instance);
             var chatclient = new ChatClient(Mock.Of<ITasksStatusesCache>(), NullLogger<ChatClient>.Instance);
 

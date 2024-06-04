@@ -35,12 +35,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
             }
         }
 
-        public async Task<SyncHistoryEntry> FindLastLogAsync(Guid networkId, CancellationToken cancellationToken = default)
+        public async Task<SyncHistoryEntry> FindLastLogAsync(Guid connectorId, CancellationToken cancellationToken = default)
         {
             try
             {
                 var entity = await _dbSet
-                     .Where(x => x.Network.Id == networkId)
+                     .Where(x => x.Connector.Id == connectorId)
                      .OrderByDescending(x => x.TimeStamp)
                      .FirstOrDefaultAsync();
 
@@ -55,12 +55,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
             }
         }
 
-        public async Task RemoveAllAsync(Guid networkId, CancellationToken cancellationToken = default)
+        public async Task RemoveAllAsync(Guid connectorId, CancellationToken cancellationToken = default)
         {
             try
             {
                 var entity = await _dbSet
-                     .Where(x => x.Network.Id == networkId)
+                     .Where(x => x.Connector.Id == connectorId)
                      .ToListAsync(cancellationToken);
 
                 _dbSet

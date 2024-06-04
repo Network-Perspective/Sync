@@ -98,12 +98,12 @@ namespace NetworkPerspective.Sync.Framework
                             details: npcex.Message,
                             statusCode: StatusCodes.Status500InternalServerError);
                     }
-                case NetworkNotFoundException nnfex:
+                case ConnectorNotFoundException nnfex:
                     {
                         return new Error(
                             type: Error.Types.Application,
                             title: "Application Error",
-                            details: $"Network '{nnfex.NetworkId}' doesn't exist. Please add network",
+                            details: $"Network '{nnfex.ConnectorId}' doesn't exist. Please add network",
                             statusCode: StatusCodes.Status404NotFound);
                     }
                 case Exception ex when ex.IndicatesTaskCanceled():

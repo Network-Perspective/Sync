@@ -2,11 +2,11 @@
 
 namespace NetworkPerspective.Sync.Infrastructure.Persistence.Entities
 {
-    public class NetworkPropertyEntity
+    public class ConnectorPropertyEntity
     {
         public long Id { get; set; }
-        public Guid NetworkId { get; set; }
-        public NetworkEntity Network { get; set; }
+        public Guid ConnectorId { get; set; }
+        public ConnectorEntity Connector { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
     }

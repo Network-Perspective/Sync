@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Exceptions;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Repositories;
 using NetworkPerspective.Sync.Infrastructure.Persistence.Entities;
@@ -14,16 +14,16 @@ using NetworkPerspective.Sync.Infrastructure.Persistence.Mappers;
 
 namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
 {
-    internal class NetworkRepository<TProperties> : INetworkRepository<TProperties> where TProperties : NetworkProperties, new()
+    internal class ConnectorRepository<TProperties> : IConnectorRepository<TProperties> where TProperties : ConnectorProperties, new()
     {
-        private readonly DbSet<NetworkEntity> _dbSet;
+        private readonly DbSet<ConnectorEntity> _dbSet;
 
-        public NetworkRepository(DbSet<NetworkEntity> dbSet)
+        public ConnectorRepository(DbSet<ConnectorEntity> dbSet)
         {
             _dbSet = dbSet;
         }
 
-        public async Task AddAsync(Network<TProperties> network, CancellationToken stoppingToken = default)
+        public async Task AddAsync(Connector<TProperties> network, CancellationToken stoppingToken = default)
         {
             try
             {
@@ -36,11 +36,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
             }
         }
 
-        public async Task RemoveAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task RemoveAsync(Guid id, CancellationToken stoppingToken = default)
         {
             try
             {
-                var entity = await _dbSet.SingleAsync(x => x.Id == networkId, stoppingToken);
+                var entity = await _dbSet.SingleAsync(x => x.Id == id, stoppingToken);
                 _dbSet.Remove(entity);
             }
             catch (Exception ex)
@@ -49,13 +49,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
             }
         }
 
-        public async Task<Network<TProperties>> FindAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task<Connector<TProperties>> FindAsync(Guid id, CancellationToken stoppingToken = default)
         {
             try
             {
                 var result = await _dbSet
                     .Include(x => x.Properties)
-                    .Where(x => x.Id == networkId)
+                    .Where(x => x.Id == id)
                     .FirstOrDefaultAsync(stoppingToken);
 
                 return result is null ? null : NetworkMapper<TProperties>.EntityToDomainModel(result);
@@ -66,7 +66,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
             }
         }
 
-        public async Task<IEnumerable<Network<TProperties>>> GetAllAsync(CancellationToken stoppingToken = default)
+        public async Task<IEnumerable<Connector<TProperties>>> GetAllAsync(CancellationToken stoppingToken = default)
         {
             try
             {

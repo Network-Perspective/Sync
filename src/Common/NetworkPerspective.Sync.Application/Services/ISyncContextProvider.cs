@@ -14,7 +14,7 @@ namespace NetworkPerspective.Sync.Application.Services
     internal class SyncContextProvider : ISyncContextProvider, IDisposable
     {
         private readonly ISyncContextFactory _syncContextFactory;
-        private readonly INetworkIdProvider _networkIdProvider;
+        private readonly IConnectorInfoProvider _connectorInfoProvider;
 
         private SyncContext _syncContext;
         private readonly SemaphoreSlim _semaphore = new(1);
@@ -27,8 +27,8 @@ namespace NetworkPerspective.Sync.Application.Services
             {
                 if (_syncContext == null)
                 {
-                    var networkId = _networkIdProvider.Get();
-                    _syncContext = await _syncContextFactory.CreateForNetworkAsync(networkId, stoppingToken);
+                    var connectorInfo = _connectorInfoProvider.Get();
+                    _syncContext = await _syncContextFactory.CreateForConnectorAsync(connectorInfo.Id, stoppingToken);
                 }
 
                 return _syncContext;
@@ -39,10 +39,10 @@ namespace NetworkPerspective.Sync.Application.Services
             }
         }
 
-        public SyncContextProvider(ISyncContextFactory syncContextFactory, INetworkIdProvider networkIdProvider)
+        public SyncContextProvider(ISyncContextFactory syncContextFactory, IConnectorInfoProvider connectorInfoProvider)
         {
             _syncContextFactory = syncContextFactory;
-            _networkIdProvider = networkIdProvider;
+            _connectorInfoProvider = connectorInfoProvider;
         }
 
 

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 using FluentAssertions;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Services;
 
 using Xunit;

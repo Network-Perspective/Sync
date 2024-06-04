@@ -9,7 +9,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Persistence.Reposit
 {
     public interface IStatusLogRepository
     {
-        Task<IEnumerable<StatusLog>> GetListAsync(Guid networkId, CancellationToken stoppingToken = default);
+        Task<IEnumerable<StatusLog>> GetListAsync(Guid connectorId, CancellationToken stoppingToken = default);
         Task AddAsync(StatusLog log, CancellationToken stoppingToken = default);
     }
 }

@@ -62,11 +62,11 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
 
         private async Task<IHashingService> CreateHashingServiceAsync(string hashingKey)
         {
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
             var secretRepositoryMock = new Mock<ISecretRepository>();
 
             secretRepositoryMock
-                .Setup(x => x.GetSecretAsync(string.Format(Keys.HashingKey, networkId), It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(string.Format(Keys.HashingKey, connectorId), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new NetworkCredential(string.Empty, hashingKey).SecurePassword);
 
             var hashingServiceFactory = new HashingServiceFactory(NullLoggerFactory.Instance);

@@ -9,8 +9,8 @@ namespace NetworkPerspective.Sync.Application.Services
 {
     public interface ITasksStatusesCache
     {
-        Task<SingleTaskStatus> GetStatusAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task SetStatusAsync(Guid networkId, SingleTaskStatus synchronizationTaskStatus, CancellationToken stoppingToken = default);
+        Task<SingleTaskStatus> GetStatusAsync(Guid connectorId, CancellationToken stoppingToken = default);
+        Task SetStatusAsync(Guid connectorId, SingleTaskStatus synchronizationTaskStatus, CancellationToken stoppingToken = default);
     }
 
     internal class TasksStatusesCache : ITasksStatusesCache
@@ -18,14 +18,14 @@ namespace NetworkPerspective.Sync.Application.Services
         private readonly IDictionary<Guid, SingleTaskStatus> _statuses = new Dictionary<Guid, SingleTaskStatus>();
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
-        public async Task<SingleTaskStatus> GetStatusAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task<SingleTaskStatus> GetStatusAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             try
             {
                 await _semaphore.WaitAsync(stoppingToken);
 
-                if (_statuses.ContainsKey(networkId))
-                    return _statuses[networkId];
+                if (_statuses.ContainsKey(connectorId))
+                    return _statuses[connectorId];
                 else
                     return SingleTaskStatus.Empty;
             }
@@ -35,12 +35,12 @@ namespace NetworkPerspective.Sync.Application.Services
             }
         }
 
-        public async Task SetStatusAsync(Guid networkId, SingleTaskStatus synchronizationTaskStatus, CancellationToken stoppingToken = default)
+        public async Task SetStatusAsync(Guid connectorId, SingleTaskStatus synchronizationTaskStatus, CancellationToken stoppingToken = default)
         {
             try
             {
                 await _semaphore.WaitAsync(stoppingToken);
-                _statuses[networkId] = synchronizationTaskStatus;
+                _statuses[connectorId] = synchronizationTaskStatus;
             }
             finally
             {

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
@@ -26,7 +26,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
         public async Task ShouldReturnPersistedLogs()
         {
             // Arrange
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
             const string message1 = "Dummy message Error";
             const string message2 = "Dummy message Info";
             var timeStamp1 = DateTime.UtcNow;
@@ -40,11 +40,11 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 .Returns(timeStamp2);
 
             var unitOfWork = unitOfWorkFactory.Create();
-            var networkRepository = unitOfWork.GetNetworkRepository<TestableNetworkProperties>();
-            await networkRepository.AddAsync(Network<TestableNetworkProperties>.Create(networkId, new TestableNetworkProperties(), DateTime.UtcNow));
+            var networkRepository = unitOfWork.GetConnectorRepository<TestableNetworkProperties>();
+            await networkRepository.AddAsync(Connector<TestableNetworkProperties>.Create(connectorId, new TestableNetworkProperties(), DateTime.UtcNow));
             await unitOfWork.CommitAsync();
 
-            var statusLogger = new StatusLogger(networkId, unitOfWorkFactory, clockMock.Object, NullLogger);
+            var statusLogger = new StatusLogger(connectorId, unitOfWorkFactory, clockMock.Object, NullLogger);
 
             // Act
             await statusLogger.AddLogAsync(message1, StatusLogLevel.Error);
@@ -53,16 +53,16 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             // Assert
             var result = await unitOfWork
                 .GetStatusLogRepository()
-                .GetListAsync(networkId);
+                .GetListAsync(connectorId);
 
             var log1 = result.First(x => x.Level == StatusLogLevel.Error);
-            log1.NetworkId.Should().Be(networkId);
+            log1.ConnectorId.Should().Be(connectorId);
             log1.Message.Should().Be(message1);
             log1.Level.Should().Be(StatusLogLevel.Error);
             log1.TimeStamp.Should().Be(timeStamp1);
 
             var log2 = result.First(x => x.Level == StatusLogLevel.Info);
-            log2.NetworkId.Should().Be(networkId);
+            log2.ConnectorId.Should().Be(connectorId);
             log2.Message.Should().Be(message2);
             log2.Level.Should().Be(StatusLogLevel.Info);
             log2.TimeStamp.Should().Be(timeStamp2);

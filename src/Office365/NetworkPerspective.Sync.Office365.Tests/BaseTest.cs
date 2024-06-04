@@ -9,8 +9,7 @@ using Microsoft.AspNetCore.Http;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Extensions;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Microsoft;
@@ -37,7 +36,6 @@ namespace NetworkPerspective.Sync.Office365.Tests
         public async Task ShouldReturn401OnInvalidToken()
         {
             // Arrange
-            var networkId = Guid.NewGuid();
             var httpClient = _service.CreateDefaultClient();
 
             var networkConfig = new NetworkConfigDto();
@@ -57,12 +55,12 @@ namespace NetworkPerspective.Sync.Office365.Tests
             var syncChats = false;
             var syncChannelsNames = false;
             var syncGroupAccess = false;
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
             var httpClient = _service.CreateDefaultClient();
 
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+                .ReturnsAsync(new ConnectorInfo(connectorId, Guid.NewGuid()));
 
             var networkConfig = new NetworkConfigDto
             {
@@ -77,16 +75,16 @@ namespace NetworkPerspective.Sync.Office365.Tests
                 .NetworksPostAsync(networkConfig);
 
             // Assert
-            _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-Office365-{networkId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
+            _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-Office365-{connectorId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
 
             using var unitOfWork = _service.UnitOfWorkFactory.Create();
-            var networksRepository = unitOfWork.GetNetworkRepository<MicrosoftNetworkProperties>();
-            var network = await networksRepository.FindAsync(networkId);
-            network.Properties.ExternalKeyVaultUri.Should().BeNull();
-            network.Properties.SyncMsTeams.Should().Be(syncMsTeams);
-            network.Properties.SyncChats.Should().Be(syncChats);
-            network.Properties.SyncChannelsNames.Should().Be(syncChannelsNames);
-            network.Properties.SyncGroupAccess.Should().Be(syncGroupAccess);
+            var connectorRepository = unitOfWork.GetConnectorRepository<MicrosoftNetworkProperties>();
+            var connector = await connectorRepository.FindAsync(connectorId);
+            connector.Properties.ExternalKeyVaultUri.Should().BeNull();
+            connector.Properties.SyncMsTeams.Should().Be(syncMsTeams);
+            connector.Properties.SyncChats.Should().Be(syncChats);
+            connector.Properties.SyncChannelsNames.Should().Be(syncChannelsNames);
+            connector.Properties.SyncGroupAccess.Should().Be(syncGroupAccess);
         }
 
         [Fact]
@@ -102,7 +100,7 @@ namespace NetworkPerspective.Sync.Office365.Tests
 
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+                .ReturnsAsync(new ConnectorInfo(networkId, Guid.NewGuid()));
 
             var networkConfig = new NetworkConfigDto
             {

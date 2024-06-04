@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 
 namespace NetworkPerspective.Sync.Infrastructure.Persistence.HealthChecks
@@ -22,7 +22,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.HealthChecks
             try
             {
                 await _unitOfWork
-                    .GetNetworkRepository<NetworkProperties>()
+                    .GetConnectorRepository<ConnectorProperties>()
                     .GetAllAsync(cancellationToken);
 
                 return HealthCheckResult.Healthy();

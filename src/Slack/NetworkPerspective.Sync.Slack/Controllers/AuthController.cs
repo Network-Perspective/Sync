@@ -20,14 +20,14 @@ namespace NetworkPerspective.Sync.Slack.Controllers
         private const string AuthPath = "auth";
 
         private readonly ISlackAuthService _authService;
-        private readonly INetworkService _networkService;
-        private readonly INetworkIdProvider _networkIdProvider;
+        private readonly IConnectorService _connectorService;
+        private readonly IConnectorInfoProvider _connectorInfoProvider;
 
-        public AuthController(ISlackAuthService authService, INetworkService networkService, INetworkIdProvider networkIdProvider)
+        public AuthController(ISlackAuthService authService, IConnectorService connectorService, IConnectorInfoProvider connectorInfoProvider)
         {
             _authService = authService;
-            _networkService = networkService;
-            _networkIdProvider = networkIdProvider;
+            _connectorService = connectorService;
+            _connectorInfoProvider = connectorInfoProvider;
         }
 
         /// <summary>
@@ -47,11 +47,12 @@ namespace NetworkPerspective.Sync.Slack.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> SignIn(string callbackUrl = null, CancellationToken stoppingToken = default)
         {
-            await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
+            var connectorInfo = _connectorInfoProvider.Get();
+            await _connectorService.ValidateExists(connectorInfo.Id, stoppingToken);
 
-            var network = await _networkService.GetAsync<SlackNetworkProperties>(_networkIdProvider.Get(), stoppingToken);
+            var network = await _connectorService.GetAsync<SlackNetworkProperties>(connectorInfo.Id, stoppingToken);
             var callbackUri = callbackUrl == null ? CreateCallbackUri() : new Uri(callbackUrl);
-            var authProcess = new AuthProcess(_networkIdProvider.Get(), callbackUri, network.Properties.UsesAdminPrivileges);
+            var authProcess = new AuthProcess(connectorInfo.Id, callbackUri, network.Properties.UsesAdminPrivileges);
 
             var result = await _authService.StartAuthProcessAsync(authProcess, stoppingToken);
 

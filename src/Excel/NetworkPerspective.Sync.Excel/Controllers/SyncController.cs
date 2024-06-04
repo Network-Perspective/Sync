@@ -16,13 +16,13 @@ public class SyncController : ControllerBase
 {
     private readonly ISyncService _syncService;
     private readonly ISyncContextFactory _syncContextFactory;
-    private readonly INetworkIdProvider _networkIdProvider;
+    private readonly IConnectorInfoProvider _connectorInfoProvider;
 
-    public SyncController(ISyncService syncService, ISyncContextFactory syncContextFactory, INetworkIdProvider networkIdProvider)
+    public SyncController(ISyncService syncService, ISyncContextFactory syncContextFactory, IConnectorInfoProvider connectorInfoProvider)
     {
         _syncService = syncService;
         _syncContextFactory = syncContextFactory;
-        _networkIdProvider = networkIdProvider;
+        _connectorInfoProvider = connectorInfoProvider;
     }
 
     /// <summary>
@@ -42,7 +42,8 @@ public class SyncController : ControllerBase
     public async Task<IActionResult> SyncAsync([FromBody] SyncRequestDto syncRequest, CancellationToken stoppingToken = default)
     {
         // create sync context
-        using var syncContext = await _syncContextFactory.CreateForNetworkAsync(_networkIdProvider.Get(), stoppingToken);
+        var connectorInfo = _connectorInfoProvider.Get();
+        using var syncContext = await _syncContextFactory.CreateForConnectorAsync(connectorInfo.Id, stoppingToken);
 
         // add employees & metadata to sync context
         syncContext.Set(syncRequest.Employees);

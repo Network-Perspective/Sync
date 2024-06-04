@@ -12,8 +12,7 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Extensions;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
@@ -51,15 +50,15 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 // Arrange
                 const string dataSourceName = "foo";
                 const string accessToken = "bar";
-                var networkId = Guid.NewGuid();
+                var connectorId = Guid.NewGuid();
 
                 var service = new TokenService(_secretRepositoryFactoryMock.Object, _networkPerspectiveCoreMock.Object, CreateOptions(dataSourceName), _logger);
 
                 // Act
-                await service.AddOrReplace(accessToken.ToSecureString(), networkId);
+                await service.AddOrReplace(accessToken.ToSecureString(), connectorId);
 
                 // Assert
-                var expectedKey = $"np-token-{dataSourceName}-{networkId}";
+                var expectedKey = $"np-token-{dataSourceName}-{connectorId}";
                 _secretRepositoryMock
                     .Verify(x => x.SetSecretAsync(
                         expectedKey,
@@ -76,8 +75,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 // Arrange
                 const string dataSourceName = "foo";
                 const string accessToken = "bar";
-                var networkId = Guid.NewGuid();
-                var key = $"np-token-{dataSourceName}-{networkId}";
+                var connectorId = Guid.NewGuid();
+                var key = $"np-token-{dataSourceName}-{connectorId}";
 
                 _secretRepositoryMock
                     .Setup(x => x.GetSecretAsync(key, It.IsAny<CancellationToken>()))
@@ -86,7 +85,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 var service = new TokenService(_secretRepositoryFactoryMock.Object, _networkPerspectiveCoreMock.Object, CreateOptions(dataSourceName), _logger);
 
                 // Act
-                var result = await service.GetAsync(networkId);
+                var result = await service.GetAsync(connectorId);
 
                 // Assert
                 new NetworkCredential(string.Empty, result).Password.Should().Be(accessToken);
@@ -101,8 +100,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 // Arrange
                 const string dataSourceName = "foo";
                 const string accessToken = "bar";
-                var networkId = Guid.NewGuid();
-                var key = $"np-token-{dataSourceName}-{networkId}";
+                var connectorId = Guid.NewGuid();
+                var key = $"np-token-{dataSourceName}-{connectorId}";
 
                 _secretRepositoryMock
                     .Setup(x => x.GetSecretAsync(key, It.IsAny<CancellationToken>()))
@@ -110,12 +109,12 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
 
                 _networkPerspectiveCoreMock
                     .Setup(x => x.ValidateTokenAsync(It.Is<SecureString>(x => new NetworkCredential(string.Empty, x).Password == accessToken), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+                    .ReturnsAsync(new ConnectorInfo(connectorId, Guid.NewGuid()));
 
                 var service = new TokenService(_secretRepositoryFactoryMock.Object, _networkPerspectiveCoreMock.Object, CreateOptions(dataSourceName), _logger);
 
                 // Act
-                var result = await service.HasValidAsync(networkId);
+                var result = await service.HasValidAsync(connectorId);
 
                 // Assert
                 result.Should().BeTrue();
@@ -127,8 +126,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 // Arrange
                 const string dataSourceName = "foo";
                 const string accessToken = "bar";
-                var networkId = Guid.NewGuid();
-                var key = $"np-token-{dataSourceName}-{networkId}";
+                var connectorId = Guid.NewGuid();
+                var key = $"np-token-{dataSourceName}-{connectorId}";
 
                 _secretRepositoryMock
                     .Setup(x => x.GetSecretAsync(key, It.IsAny<CancellationToken>()))
@@ -141,7 +140,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 var service = new TokenService(_secretRepositoryFactoryMock.Object, _networkPerspectiveCoreMock.Object, CreateOptions(dataSourceName), _logger);
 
                 // Act
-                var result = await service.HasValidAsync(networkId);
+                var result = await service.HasValidAsync(connectorId);
 
                 // Assert
                 result.Should().BeFalse();
@@ -156,15 +155,15 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 // Arrange
                 const string dataSourceName = "foo";
 
-                var networkId = Guid.NewGuid();
-                var key = $"np-token-{dataSourceName}-{networkId}";
+                var connectorId = Guid.NewGuid();
+                var key = $"np-token-{dataSourceName}-{connectorId}";
 
                 _secretRepositoryMock
                     .Setup(x => x.GetSecretAsync(key, It.IsAny<CancellationToken>()))
                     .ThrowsAsync(new SecretStorageException("message", new Exception()));
 
                 var service = new TokenService(_secretRepositoryFactoryMock.Object, _networkPerspectiveCoreMock.Object, CreateOptions(dataSourceName), _logger);
-                Func<Task> func = () => service.EnsureRemovedAsync(networkId);
+                Func<Task> func = () => service.EnsureRemovedAsync(connectorId);
 
                 // Act Assert
                 await func.Should().NotThrowAsync();

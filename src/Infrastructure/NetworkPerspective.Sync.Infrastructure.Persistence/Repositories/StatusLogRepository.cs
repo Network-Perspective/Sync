@@ -36,14 +36,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
             }
         }
 
-        public async Task<IEnumerable<StatusLog>> GetListAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task<IEnumerable<StatusLog>> GetListAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             const int count = 50;
 
             try
             {
                 var entities = await _dbSet
-                    .Where(x => x.NetworkId == networkId)
+                    .Where(x => x.ConnectorId == connectorId)
                     .OrderByDescending(x => x.TimeStamp)
                     .Take(count)
                     .ToListAsync(stoppingToken);

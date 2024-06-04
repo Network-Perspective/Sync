@@ -55,7 +55,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                 .ReturnsAsync(_secretRepositoryMock.Object);
 
             _statusLoggerFactoryMock
-                .Setup(x => x.CreateForNetwork(It.IsAny<Guid>()))
+                .Setup(x => x.CreateForConnector(It.IsAny<Guid>()))
                 .Returns(_statusLoggerMock.Object);
         }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Utils.Models;
 
@@ -14,17 +14,17 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
         private readonly IDictionary<Type, object> _container = new Dictionary<Type, object>();
         private readonly IHashingService _hashingService;
 
-        public Guid NetworkId { get; }
-        public NetworkConfig NetworkConfig { get; }
-        public NetworkProperties NetworkProperties { get; }
+        public Guid ConnectorId { get; }
+        public ConnectorConfig NetworkConfig { get; }
+        public ConnectorProperties NetworkProperties { get; }
         public SecureString AccessToken { get; }
         public TimeRange TimeRange { get; }
         public IStatusLogger StatusLogger { get; }
         public HashFunction.Delegate HashFunction { get; }
 
-        public SyncContext(Guid networkId, NetworkConfig networkConfig, NetworkProperties networkProperties, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger, IHashingService hashingService)
+        public SyncContext(Guid connectorId, ConnectorConfig networkConfig, ConnectorProperties networkProperties, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger, IHashingService hashingService)
         {
-            NetworkId = networkId;
+            ConnectorId = connectorId;
             NetworkConfig = networkConfig;
             NetworkProperties = networkProperties;
             AccessToken = accessToken;

@@ -32,7 +32,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
         public async Task<IEnumerable<User>> GetUsersAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
-            _logger.LogDebug("Fetching users for network '{networkId}'...", context.NetworkId);
+            _logger.LogDebug("Fetching users for connector '{connectorId}'...", context.ConnectorId);
             var result = new List<User>();
 
             var usersResponse = await _graphClient
@@ -97,9 +97,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
 
             if (!result.Any())
-                _logger.LogWarning("No users found in network '{networkId}'", context.NetworkId);
+                _logger.LogWarning("No users found in connector '{connectorId}'", context.ConnectorId);
             else
-                _logger.LogDebug("Fetching employees for network '{networkId}' completed. '{count}' employees found", context.NetworkId, result.Count);
+                _logger.LogDebug("Fetching employees for connector '{neconnectorIdtworkId}' completed. '{count}' employees found", context.ConnectorId, result.Count);
 
             return result;
         }

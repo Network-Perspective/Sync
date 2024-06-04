@@ -16,26 +16,26 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
     {
         private readonly GoogleConfig _config;
         private readonly ICredentialsProvider _credentialsProvider;
-        private readonly INetworkService _networkService;
-        private readonly INetworkIdProvider _networkIdProvider;
+        private readonly IConnectorService _connectorService;
+        private readonly IConnectorInfoProvider _connectorInfoProvider;
         private readonly ILogger<AuthTester> _logger;
 
-        public AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, INetworkService networkService, INetworkIdProvider networkIdProvider, ILogger<AuthTester> logger)
+        public AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, IConnectorService connectorService, IConnectorInfoProvider connectorInfoProvider, ILogger<AuthTester> logger)
         {
             _config = config.Value;
             _credentialsProvider = credentialsProvider;
-            _networkService = networkService;
-            _networkIdProvider = networkIdProvider;
+            _connectorService = connectorService;
+            _connectorInfoProvider = connectorInfoProvider;
             _logger = logger;
         }
 
         public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
         {
-            var networkId = _networkIdProvider.Get();
+            var connectorInfo = _connectorInfoProvider.Get();
             try
             {
-                _logger.LogInformation("Checking if network '{networkId}' is authorized", networkId);
-                var network = await _networkService.GetAsync<GoogleNetworkProperties>(networkId, stoppingToken);
+                _logger.LogInformation("Checking if connector '{connectorId}' is authorized", connectorInfo);
+                var network = await _connectorService.GetAsync<GoogleNetworkProperties>(connectorInfo.Id, stoppingToken);
 
                 var userCredentials = await _credentialsProvider.GetForUserAsync(network.Properties.AdminEmail, stoppingToken);
 
@@ -53,7 +53,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "Network '{networkId}' is not authorized", networkId);
+                _logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", connectorInfo);
                 return false;
             }
         }

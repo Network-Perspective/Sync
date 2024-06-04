@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Common.Tests;
 
@@ -19,15 +19,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Tests
             // Arrange
             var unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
 
-            var network1 = Network<TestableNetworkProperties>.Create(Guid.NewGuid(), new TestableNetworkProperties { StringProp = "foo", IntProp = 123, BoolProp = true }, new DateTime(1990, 10, 10));
-            var network2 = Network<TestableNetworkProperties>.Create(Guid.NewGuid(), new TestableNetworkProperties { StringProp = "bar", IntProp = -123, BoolProp = false }, new DateTime(2022, 02, 22));
+            var network1 = Connector<TestableNetworkProperties>.Create(Guid.NewGuid(), new TestableNetworkProperties { StringProp = "foo", IntProp = 123, BoolProp = true }, new DateTime(1990, 10, 10));
+            var network2 = Connector<TestableNetworkProperties>.Create(Guid.NewGuid(), new TestableNetworkProperties { StringProp = "bar", IntProp = -123, BoolProp = false }, new DateTime(2022, 02, 22));
 
             await InitializeNetworksInDatabase(unitOfWorkFactory, network1, network2);
 
             // Act
             var storedNetworks = await unitOfWorkFactory
                 .Create()
-                .GetNetworkRepository<TestableNetworkProperties>()
+                .GetConnectorRepository<TestableNetworkProperties>()
                 .GetAllAsync();
 
             // Assert
@@ -40,16 +40,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Tests
             // Arrange
             using var unitOfWorkFactory = new SqliteUnitOfWorkFactory();
 
-            var network1 = Network<TestableNetworkProperties>.Create(Guid.NewGuid(), new TestableNetworkProperties { StringProp = "foo", IntProp = 123, BoolProp = true }, new DateTime(1990, 10, 10));
-            var network2 = Network<TestableNetworkProperties>.Create(Guid.NewGuid(), new TestableNetworkProperties { StringProp = "bar", IntProp = -123, BoolProp = false }, new DateTime(2022, 02, 22));
+            var network1 = Connector<TestableNetworkProperties>.Create(Guid.NewGuid(), new TestableNetworkProperties { StringProp = "foo", IntProp = 123, BoolProp = true }, new DateTime(1990, 10, 10));
+            var network2 = Connector<TestableNetworkProperties>.Create(Guid.NewGuid(), new TestableNetworkProperties { StringProp = "bar", IntProp = -123, BoolProp = false }, new DateTime(2022, 02, 22));
 
             await InitializeNetworksInDatabase(unitOfWorkFactory, network1, network2);
 
             var unitOfWork = unitOfWorkFactory.Create();
-            var repository = unitOfWork.GetNetworkRepository<TestableNetworkProperties>();
+            var repository = unitOfWork.GetConnectorRepository<TestableNetworkProperties>();
 
             // Act
-            await repository.RemoveAsync(network1.NetworkId);
+            await repository.RemoveAsync(network1.Id);
             await unitOfWork.CommitAsync();
 
             var storedNetworks = await repository.GetAllAsync();
@@ -59,22 +59,22 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Tests
         }
 
         [Fact]
-        public async Task ShoudFindExistingNetwork()
+        public async Task ShoudFindExistingConnector()
         {
             // Arrange
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
 
             var unitOfWorkFactory = new SqliteUnitOfWorkFactory();
 
-            var network = Network<TestableNetworkProperties>.Create(networkId, new TestableNetworkProperties(), new DateTime(1990, 10, 10));
+            var connector = Connector<TestableNetworkProperties>.Create(connectorId, new TestableNetworkProperties(), new DateTime(1990, 10, 10));
 
-            await InitializeNetworksInDatabase(unitOfWorkFactory, network);
+            await InitializeNetworksInDatabase(unitOfWorkFactory, connector);
 
             var unitOfWork = unitOfWorkFactory.Create();
-            var repository = unitOfWork.GetNetworkRepository<TestableNetworkProperties>();
+            var repository = unitOfWork.GetConnectorRepository<TestableNetworkProperties>();
 
             // Act
-            var existingNetwork = await repository.FindAsync(networkId);
+            var existingNetwork = await repository.FindAsync(connectorId);
             var nonExistingNetwork = await repository.FindAsync(Guid.NewGuid());
 
             // Assert
@@ -82,13 +82,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Tests
             nonExistingNetwork.Should().BeNull();
         }
 
-        private static async Task InitializeNetworksInDatabase(IUnitOfWorkFactory unitOfWorkFactory, params Network<TestableNetworkProperties>[] networks)
+        private static async Task InitializeNetworksInDatabase(IUnitOfWorkFactory unitOfWorkFactory, params Connector<TestableNetworkProperties>[] connectors)
         {
             var unitOfWork = unitOfWorkFactory.Create();
-            var networkRepository = unitOfWork.GetNetworkRepository<TestableNetworkProperties>();
+            var connectorRepository = unitOfWork.GetConnectorRepository<TestableNetworkProperties>();
 
-            foreach (var network in networks)
-                await networkRepository.AddAsync(network);
+            foreach (var connector in connectors)
+                await connectorRepository.AddAsync(connector);
 
             await unitOfWork.CommitAsync();
         }

@@ -60,10 +60,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         {
             _logger.LogInformation("Starting slack autentication process...");
             await _statusLoggerFactory
-                .CreateForNetwork(authProcess.NetworkId)
+                .CreateForConnector(authProcess.ConnectorId)
                 .LogInfoAsync("Authorization process started", stoppingToken);
 
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.NetworkId, stoppingToken);
+            var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.ConnectorId, stoppingToken);
             var clientId = await secretRepository.GetSecretAsync(SlackKeys.SlackClientIdKey, stoppingToken);
 
             var stateKey = _stateKeyFactory.Create();
@@ -83,7 +83,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             if (!_cache.TryGetValue(state, out AuthProcess authProcess))
                 throw new OAuthException("State does not match initialized value");
 
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.NetworkId, stoppingToken);
+            var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.ConnectorId, stoppingToken);
 
             var clientId = await secretRepository.GetSecretAsync(SlackKeys.SlackClientIdKey, stoppingToken);
             var clientSecret = await secretRepository.GetSecretAsync(SlackKeys.SlackClientSecretKey, stoppingToken);
@@ -99,27 +99,27 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
             var response = await _slackClientUnauthorizedFacade.AccessAsync(request, stoppingToken);
 
-            var tokenKey = string.Format(SlackKeys.TokenKeyPattern, authProcess.NetworkId);
+            var tokenKey = string.Format(SlackKeys.TokenKeyPattern, authProcess.ConnectorId);
             await secretRepository.SetSecretAsync(tokenKey, response.AccessToken.ToSecureString(), stoppingToken);
 
             // save refresh token if token rotation is enabled
             if (!string.IsNullOrEmpty(response.RefreshToken))
             {
-                var refreshTokenKey = string.Format(SlackKeys.RefreshTokenPattern, authProcess.NetworkId);
+                var refreshTokenKey = string.Format(SlackKeys.RefreshTokenPattern, authProcess.ConnectorId);
                 await secretRepository.SetSecretAsync(refreshTokenKey, response.RefreshToken.ToSecureString(),
                     stoppingToken);
             }
 
             if (authProcess.RequireAdminPrivileges)
             {
-                var userTokenKey = string.Format(SlackKeys.UserTokenKeyPattern, authProcess.NetworkId);
+                var userTokenKey = string.Format(SlackKeys.UserTokenKeyPattern, authProcess.ConnectorId);
                 await secretRepository.SetSecretAsync(userTokenKey, response.User.AccessToken.ToSecureString(), stoppingToken);
             }
 
             await _statusLoggerFactory
-                .CreateForNetwork(authProcess.NetworkId)
+                .CreateForConnector(authProcess.ConnectorId)
                 .LogInfoAsync("Connector authorized successfully", stoppingToken);
-            _logger.LogInformation("Authentication callback processed successfully. Network '{networkId}' is configured for synchronization", authProcess.NetworkId);
+            _logger.LogInformation("Authentication callback processed successfully. Network '{networkId}' is configured for synchronization", authProcess.ConnectorId);
         }
 
         private string BuildSlackAuthUri(string state, AuthProcess authProcess, SecureString slackClientId)

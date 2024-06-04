@@ -17,7 +17,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 {
     internal class SlackFacade : IDataSource
     {
-        private readonly INetworkService _networkService;
+        private readonly IConnectorService _networkService;
         private readonly IMembersClient _employeeProfileClient;
         private readonly IChatClient _chatClient;
         private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
@@ -25,7 +25,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<SlackFacade> _logger;
 
-        public SlackFacade(INetworkService networkService,
+        public SlackFacade(IConnectorService networkService,
                            IMembersClient employeeProfileClient,
                            IChatClient chatClient,
                            ISlackClientFacadeFactory slackClientFacadeFactory,
@@ -45,7 +45,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
         {
             _logger.LogInformation("Fetching employees data...");
 
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<SlackNetworkProperties>(context.NetworkId, stoppingToken));
+            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<SlackNetworkProperties>(context.ConnectorId, stoppingToken));
             var slackClientBotFacade = await context.EnsureSetAsync(() => Task.FromResult(_slackClientFacadeFactory.CreateWithBotToken(stoppingToken)));
             var employees = await context.EnsureSetAsync(() => _employeeProfileClient.GetEmployees(slackClientBotFacade, context.NetworkConfig.EmailFilter, stoppingToken));
 
@@ -73,7 +73,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
         public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<SlackNetworkProperties>(context.NetworkId, stoppingToken));
+            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<SlackNetworkProperties>(context.ConnectorId, stoppingToken));
             var slackClientFacade = await context.EnsureSetAsync(() => Task.FromResult(_slackClientFacadeFactory.CreateWithBotToken(stoppingToken)));
 
             return await _employeeProfileClient.GetHashedEmployees(slackClientFacade, context.NetworkConfig.EmailFilter, context.HashFunction, stoppingToken);

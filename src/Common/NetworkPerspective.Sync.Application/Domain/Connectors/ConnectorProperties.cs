@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NetworkPerspective.Sync.Application.Domain.Networks
+namespace NetworkPerspective.Sync.Application.Domain.Connectors
 {
-    public class NetworkProperties
+    public class ConnectorProperties
     {
         protected const bool DefaultSyncGroups = false;
         protected const bool DefaultSyncChannelsNames = false;
@@ -14,17 +14,17 @@ namespace NetworkPerspective.Sync.Application.Domain.Networks
 
         public Uri ExternalKeyVaultUri { get; private set; } = null;
 
-        public NetworkProperties()
+        public ConnectorProperties()
         { }
 
-        public NetworkProperties(bool syncGroups, bool syncChannelsNames, Uri externalKeyVaultUri)
+        public ConnectorProperties(bool syncGroups, bool syncChannelsNames, Uri externalKeyVaultUri)
         {
             SyncGroups = syncGroups;
             SyncChannelsNames = syncChannelsNames;
             ExternalKeyVaultUri = externalKeyVaultUri;
         }
 
-        public static TProperties Create<TProperties>(IEnumerable<KeyValuePair<string, string>> properties) where TProperties : NetworkProperties, new()
+        public static TProperties Create<TProperties>(IEnumerable<KeyValuePair<string, string>> properties) where TProperties : ConnectorProperties, new()
         {
             var networkProperties = new TProperties();
             networkProperties.Bind(properties);

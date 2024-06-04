@@ -13,8 +13,8 @@ namespace NetworkPerspective.Sync.Slack.Controllers
 {
     public class NetworksController : NetworksControllerBase
     {
-        public NetworksController(INetworkService networkService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLoggerFactory, INetworkIdProvider networkIdProvider)
-            : base(networkService, tokenService, syncScheduler, statusLoggerFactory, networkIdProvider)
+        public NetworksController(IConnectorService networkService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLoggerFactory, IConnectorInfoProvider connectorInfoProvider)
+            : base(networkService, tokenService, syncScheduler, statusLoggerFactory, connectorInfoProvider)
         { }
 
         /// <summary>
@@ -33,9 +33,9 @@ namespace NetworkPerspective.Sync.Slack.Controllers
         {
             var properties = new SlackNetworkProperties(config.AutoJoinChannels, config.UsesAdminPrivileges, config.SyncChannelsNames, config.ExternalKeyVaultUri);
 
-            var networkId = await InitializeAsync(properties, stoppingToken);
+            var connectorId = await InitializeAsync(properties, stoppingToken);
 
-            return Ok($"Added network '{networkId}'");
+            return Ok($"Added connector '{connectorId}'");
         }
     }
 }

@@ -12,7 +12,7 @@ namespace NetworkPerspective.Sync.Common.Tests.Factories
 {
     public class TestableAzureKeyVaultClientFactory : ISecretRepositoryFactory
     {
-        public Task<ISecretRepository> CreateAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task<ISecretRepository> CreateAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             var secretRepositoryOptions = Options.Create(new AzureKeyVaultConfig { BaseUrl = TestsConsts.InternalAzureKeyVaultBaseUrl });
             var secretRepository = new InternalAzureKeyVaultClient(TokenCredentialFactory.Create(), secretRepositoryOptions, NullLogger<InternalAzureKeyVaultClient>.Instance);

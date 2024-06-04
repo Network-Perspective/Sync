@@ -44,18 +44,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 var clientSecret = await secretRepository.GetSecretAsync(SlackKeys.SlackClientSecretKey);
 
                 // for each network
-                var networks = await _unitOfWork.GetNetworkRepository<SlackNetworkProperties>().GetAllAsync();
+                var networks = await _unitOfWork.GetConnectorRepository<SlackNetworkProperties>().GetAllAsync();
                 foreach (var network in networks)
                 {
-                    _logger.LogInformation("Rotating token for network {networkId}", network.NetworkId);
+                    _logger.LogInformation("Rotating token for network {networkId}", network.Id);
                     try
                     {
-                        await RotateNetworkSlackBotToken(network.NetworkId, clientId, clientSecret);
-                        _logger.LogInformation("Token rotated for network {networkId}", network.NetworkId);
+                        await RotateNetworkSlackBotToken(network.Id, clientId, clientSecret);
+                        _logger.LogInformation("Token rotated for network {networkId}", network.Id);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Failed to rotate token for network {networkId}", network.NetworkId);
+                        _logger.LogError(ex, "Failed to rotate token for network {networkId}", network.Id);
                     }
                 }
 

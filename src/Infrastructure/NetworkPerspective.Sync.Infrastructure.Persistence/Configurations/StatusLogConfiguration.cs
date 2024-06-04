@@ -16,7 +16,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Configurations
                 .HasKey(x => x.Id);
 
             builder
-                .Property(x => x.NetworkId)
+                .Property(x => x.ConnectorId)
                 .IsRequired(true);
 
             builder
@@ -34,7 +34,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Configurations
                 .IsRequired(true);
 
             builder
-                .HasIndex(x => x.NetworkId);
+                .HasIndex(x => x.ConnectorId);
         }
     }
 }

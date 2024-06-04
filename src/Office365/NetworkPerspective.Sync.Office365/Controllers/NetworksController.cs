@@ -13,7 +13,7 @@ namespace NetworkPerspective.Sync.Office365.Controllers
 {
     public class NetworksController : NetworksControllerBase
     {
-        public NetworksController(INetworkService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLogger, INetworkIdProvider networkIdProvider)
+        public NetworksController(IConnectorService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLogger, IConnectorInfoProvider networkIdProvider)
             : base(networkService, authService, syncScheduler, statusLogger, networkIdProvider)
         { }
 
@@ -33,9 +33,9 @@ namespace NetworkPerspective.Sync.Office365.Controllers
         {
             var properties = new MicrosoftNetworkProperties(config.SyncMsTeams, config.SyncChats, config.SyncChannelsNames, config.SyncGroupAccess, config.ExternalKeyVaultUri);
 
-            var networkId = await InitializeAsync(properties, stoppingToken);
+            var connectorId = await InitializeAsync(properties, stoppingToken);
 
-            return Ok($"Added network '{networkId}'");
+            return Ok($"Added network '{connectorId}'");
         }
     }
 }

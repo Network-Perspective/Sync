@@ -15,7 +15,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 {
     internal sealed class GoogleFacade : IDataSource
     {
-        private readonly INetworkService _networkService;
+        private readonly IConnectorService _networkService;
         private readonly IMailboxClient _mailboxClient;
         private readonly ICalendarClient _calendarClient;
         private readonly IUsersClient _usersClient;
@@ -24,7 +24,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<GoogleFacade> _logger;
 
-        public GoogleFacade(INetworkService networkService,
+        public GoogleFacade(IConnectorService networkService,
                             IMailboxClient mailboxClient,
                             ICalendarClient calendarClient,
                             IUsersClient usersClient,
@@ -44,9 +44,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
         public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
-            _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);
+            _logger.LogInformation("Getting interactions for connector '{connectorId}' for period {timeRange}", context.ConnectorId, context.TimeRange);
 
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
+            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.ConnectorId, stoppingToken));
 
             var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, stoppingToken);
 
@@ -68,16 +68,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
             var resultEmails = await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, emailInteractionFactory, stoppingToken);
             var resultCalendar = await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, meetingInteractionFactory, stoppingToken);
 
-            _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
+            _logger.LogInformation("Getting interactions for connector '{connectorId}' completed", context.ConnectorId);
 
             return SyncResult.Combine(resultEmails, resultCalendar);
         }
 
         public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
-            _logger.LogInformation("Getting employees for network '{networkId}'", context.NetworkId);
+            _logger.LogInformation("Getting employees for connector '{connectorId}'", context.ConnectorId);
 
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
+            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.ConnectorId, stoppingToken));
 
             var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, stoppingToken);
 
@@ -96,10 +96,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
         public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
-            _logger.LogInformation("Getting hashed employees for network '{networkId}'", context.NetworkId);
+            _logger.LogInformation("Getting hashed employees for connector '{connectorId}'", context.ConnectorId);
 
             var network =
-                await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.NetworkId, stoppingToken));
+                await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.ConnectorId, stoppingToken));
 
             var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, stoppingToken);
 

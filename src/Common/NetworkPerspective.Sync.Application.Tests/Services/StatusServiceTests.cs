@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Services;
@@ -40,15 +40,15 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             // Arrange
             var unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
 
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
             var taskStatus = new SingleTaskStatus("Task", "One of many tasks", 33.922);
-            var status1 = StatusLog.Create(networkId, "Dummy message Error", StatusLogLevel.Error, DateTime.UtcNow);
-            var status2 = StatusLog.Create(networkId, "Dummy message Info", StatusLogLevel.Info, DateTime.UtcNow);
+            var status1 = StatusLog.Create(connectorId, "Dummy message Error", StatusLogLevel.Error, DateTime.UtcNow);
+            var status2 = StatusLog.Create(connectorId, "Dummy message Info", StatusLogLevel.Info, DateTime.UtcNow);
 
-            await InitializeDatabase(networkId, unitOfWorkFactory, status1, status2);
+            await InitializeDatabase(connectorId, unitOfWorkFactory, status1, status2);
 
             _tokenServiceMock
-                .Setup(x => x.HasValidAsync(networkId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.HasValidAsync(connectorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             _authTesterMock
@@ -56,21 +56,21 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 .ReturnsAsync(true);
 
             _schedulerMock
-                .Setup(x => x.IsScheduledAsync(networkId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.IsScheduledAsync(connectorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             _schedulerMock
-                .Setup(x => x.IsRunningAsync(networkId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.IsRunningAsync(connectorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             _tasksStatusesCache
-                .Setup(x => x.GetStatusAsync(networkId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetStatusAsync(connectorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(taskStatus);
 
             var statuService = new StatusService(unitOfWorkFactory, _tokenServiceMock.Object, _schedulerMock.Object, _tasksStatusesCache.Object, _authTesterMock.Object, NullLogger);
 
             // Act
-            var result = await statuService.GetStatusAsync(networkId);
+            var result = await statuService.GetStatusAsync(connectorId);
 
             // Assert
             result.Authorized.Should().BeTrue();
@@ -80,18 +80,18 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             result.Logs.Should().BeEquivalentTo(new[] { status1, status2 });
         }
 
-        private static async Task InitializeDatabase(Guid networkId, IUnitOfWorkFactory unitOfWorkFactory, params StatusLog[] logs)
+        private static async Task InitializeDatabase(Guid connectorId, IUnitOfWorkFactory unitOfWorkFactory, params StatusLog[] logs)
         {
             var unitOfWork = unitOfWorkFactory.Create();
-            await InitializeNetwork(networkId, unitOfWork);
+            await InitializeNetwork(connectorId, unitOfWork);
             await InitializeLogs(unitOfWork, logs);
             await unitOfWork.CommitAsync();
         }
 
-        private static async Task InitializeNetwork(Guid networkId, IUnitOfWork unitOfWork)
+        private static async Task InitializeNetwork(Guid connectorId, IUnitOfWork unitOfWork)
         {
-            var networkRepository = unitOfWork.GetNetworkRepository<TestableNetworkProperties>();
-            await networkRepository.AddAsync(Network<TestableNetworkProperties>.Create(networkId, new TestableNetworkProperties(), DateTime.UtcNow));
+            var networkRepository = unitOfWork.GetConnectorRepository<TestableNetworkProperties>();
+            await networkRepository.AddAsync(Connector<TestableNetworkProperties>.Create(connectorId, new TestableNetworkProperties(), DateTime.UtcNow));
         }
 
         private static async Task InitializeLogs(IUnitOfWork unitOfWork, params StatusLog[] logs)

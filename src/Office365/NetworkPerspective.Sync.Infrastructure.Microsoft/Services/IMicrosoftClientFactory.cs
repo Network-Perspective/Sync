@@ -29,15 +29,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
     internal class MicrosoftClientFactory : IMicrosoftClientFactory
     {
         private readonly ISecretRepository _secretRepository;
-        private readonly INetworkIdProvider _networkIdProvider;
-        private readonly INetworkService _networkService;
+        private readonly IConnectorInfoProvider _connecotorInfoProvider;
+        private readonly IConnectorService _connectorService;
         private readonly PolicyHttpMessageHandler _retryHandler;
 
-        public MicrosoftClientFactory(ISecretRepository secretRepository, INetworkIdProvider networkIdProvider, INetworkService networkService, IOptions<Resiliency> resiliencyOptions, ILoggerFactory loggerFactory)
+        public MicrosoftClientFactory(ISecretRepository secretRepository, IConnectorInfoProvider connectorInfoProvider, IConnectorService connectorService, IOptions<Resiliency> resiliencyOptions, ILoggerFactory loggerFactory)
         {
             _secretRepository = secretRepository;
-            _networkIdProvider = networkIdProvider;
-            _networkService = networkService;
+            _connecotorInfoProvider = connectorInfoProvider;
+            _connectorService = connectorService;
             var retryLogger = loggerFactory.CreateLogger<GraphServiceClient>();
 
             void OnRetry(DelegateResult<HttpResponseMessage> result, TimeSpan timespan)
@@ -62,11 +62,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
         private async Task<AzureIdentityAuthenticationProvider> BuildAuthProvider(CancellationToken stoppingToken)
         {
-            var networkId = _networkIdProvider.Get();
-            var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, networkId);
+            var connectorInfo = _connecotorInfoProvider.Get();
+            var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, connectorInfo.Id);
             var tenantId = await _secretRepository.GetSecretAsync(tenantIdKey, stoppingToken);
 
-            var network = await _networkService.GetAsync<MicrosoftNetworkProperties>(networkId, stoppingToken);
+            var network = await _connectorService.GetAsync<MicrosoftNetworkProperties>(connectorInfo.Id, stoppingToken);
 
             var clientIdKey = network.Properties.SyncMsTeams == true
                 ? MicrosoftKeys.MicrosoftClientTeamsIdKey

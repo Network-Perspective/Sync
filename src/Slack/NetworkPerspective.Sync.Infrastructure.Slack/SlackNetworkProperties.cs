@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack
 {
-    public class SlackNetworkProperties : NetworkProperties
+    public class SlackNetworkProperties : ConnectorProperties
     {
         public bool AutoJoinChannels { get; private set; } = true;
         public bool UsesAdminPrivileges { get; private set; } = false;

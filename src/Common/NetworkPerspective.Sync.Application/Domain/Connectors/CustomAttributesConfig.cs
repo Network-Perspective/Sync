@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NetworkPerspective.Sync.Application.Domain.Networks
+namespace NetworkPerspective.Sync.Application.Domain.Connectors
 {
     public class CustomAttributesConfig
     {

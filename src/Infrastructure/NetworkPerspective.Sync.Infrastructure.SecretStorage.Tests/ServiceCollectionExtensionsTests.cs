@@ -31,7 +31,7 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage.Tests
             serviceCollection.AddLogging();
 
             var healthCheckBuilder = serviceCollection.AddHealthChecks();
-            serviceCollection.AddSingleton(Mock.Of<INetworkService>());
+            serviceCollection.AddSingleton(Mock.Of<IConnectorService>());
 
             // Act
             serviceCollection.AddSecretRepositoryClient(config.GetSection("Infrastructure"), healthCheckBuilder);

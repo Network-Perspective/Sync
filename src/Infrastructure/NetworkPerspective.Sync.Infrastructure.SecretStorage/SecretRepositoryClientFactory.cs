@@ -11,7 +11,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 
@@ -26,14 +26,14 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
     {
         private readonly TokenCredential _tokenCredential;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly INetworkService _networkService;
+        private readonly IConnectorService _networkService;
         private readonly IServiceProvider _serviceProvider;
         private readonly IOptions<AzureKeyVaultConfig> _azureKvOptions;
         private readonly IOptions<HcpVaultConfig> _hcpVaultOptions;
 
         public SecretRepositoryClientFactory(TokenCredential tokenCredential,
             ILoggerFactory loggerFactory,
-            INetworkService networkService,
+            IConnectorService networkService,
             IServiceProvider serviceProvider,
             IOptions<AzureKeyVaultConfig> azureKvOptions,
             IOptions<HcpVaultConfig> hcpVaultOptions)
@@ -46,12 +46,12 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             _hcpVaultOptions = hcpVaultOptions;
         }
 
-        public async Task<ISecretRepository> CreateAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task<ISecretRepository> CreateAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             if (!string.IsNullOrEmpty(_azureKvOptions.Value.BaseUrl))
             {
                 // else return internal or external secret storage based on network configuration
-                var network = await _networkService.GetAsync<NetworkProperties>(networkId, stoppingToken);
+                var network = await _networkService.GetAsync<ConnectorProperties>(connectorId, stoppingToken);
                 var externalKeyVaultUri = network.Properties.ExternalKeyVaultUri;
 
                 if (externalKeyVaultUri is null)

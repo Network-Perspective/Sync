@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Framework.Extensions;
@@ -17,32 +17,34 @@ namespace NetworkPerspective.Sync.Framework.Controllers
     [Authorize]
     public abstract class NetworksControllerBase : ControllerBase
     {
-        private readonly INetworkService _networkService;
+        private readonly IConnectorService _connectorService;
         private readonly ITokenService _tokenService;
         private readonly ISyncScheduler _syncScheduler;
         private readonly IStatusLoggerFactory _statusLoggerFactory;
-        private readonly INetworkIdProvider _networkIdProvider;
+        private readonly IConnectorInfoProvider _connectorInfoProvider;
 
-        public NetworksControllerBase(INetworkService networkService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLoggerFactory, INetworkIdProvider networkIdProvider)
+        public NetworksControllerBase(IConnectorService connectorService, ITokenService tokenService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLoggerFactory, IConnectorInfoProvider connectorInfoProvider)
         {
-            _networkService = networkService;
+            _connectorService = connectorService;
             _tokenService = tokenService;
             _syncScheduler = syncScheduler;
             _statusLoggerFactory = statusLoggerFactory;
-            _networkIdProvider = networkIdProvider;
+            _connectorInfoProvider = connectorInfoProvider;
         }
 
-        protected async Task<Guid> InitializeAsync<TProperties>(TProperties properties, CancellationToken stoppingToken = default) where TProperties : NetworkProperties, new()
+        protected async Task<Guid> InitializeAsync<TProperties>(TProperties properties, CancellationToken stoppingToken = default) where TProperties : ConnectorProperties, new()
         {
-            await _networkService.AddOrReplace(_networkIdProvider.Get(), properties, stoppingToken);
-            await _tokenService.AddOrReplace(Request.GetServiceAccessToken(), _networkIdProvider.Get(), stoppingToken);
-            await _syncScheduler.AddOrReplaceAsync(_networkIdProvider.Get(), stoppingToken);
+            var connectorInfo = _connectorInfoProvider.Get();
+
+            await _connectorService.AddOrReplace(connectorInfo.Id, properties, stoppingToken);
+            await _tokenService.AddOrReplace(Request.GetServiceAccessToken(), connectorInfo.Id, stoppingToken);
+            await _syncScheduler.AddOrReplaceAsync(connectorInfo.Id, stoppingToken);
 
             await _statusLoggerFactory
-                .CreateForNetwork(_networkIdProvider.Get())
-                .LogInfoAsync("Network added", stoppingToken);
+                .CreateForConnector(connectorInfo.Id)
+                .LogInfoAsync("Connector added", stoppingToken);
 
-            return _networkIdProvider.Get();
+            return connectorInfo.Id;
         }
 
         /// <summary>
@@ -58,11 +60,13 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> RemoveAsync(CancellationToken stoppingToken = default)
         {
-            await _networkService.EnsureRemovedAsync(_networkIdProvider.Get(), stoppingToken);
-            await _tokenService.EnsureRemovedAsync(_networkIdProvider.Get(), stoppingToken);
-            await _syncScheduler.EnsureRemovedAsync(_networkIdProvider.Get(), stoppingToken);
+            var connectorInfo = _connectorInfoProvider.Get();
 
-            return Ok($"Removed network '{_networkIdProvider.Get()}'");
+            await _connectorService.EnsureRemovedAsync(connectorInfo.Id, stoppingToken);
+            await _tokenService.EnsureRemovedAsync(connectorInfo.Id, stoppingToken);
+            await _syncScheduler.EnsureRemovedAsync(connectorInfo.Id, stoppingToken);
+
+            return Ok($"Removed connector '{connectorInfo.Id}'");
         }
     }
 }

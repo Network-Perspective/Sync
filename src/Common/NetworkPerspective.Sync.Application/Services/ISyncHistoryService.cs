@@ -13,9 +13,9 @@ namespace NetworkPerspective.Sync.Application.Services
 {
     public interface ISyncHistoryService
     {
-        Task<DateTime> EvaluateSyncStartAsync(Guid networkId, CancellationToken stoppingToken = default);
+        Task<DateTime> EvaluateSyncStartAsync(Guid connectorId, CancellationToken stoppingToken = default);
         Task SaveLogAsync(SyncHistoryEntry syncHistoryEntry, CancellationToken stoppingToken = default);
-        Task OverrideSyncStartAsync(Guid networkId, DateTime syncStart, CancellationToken stoppingToken = default);
+        Task OverrideSyncStartAsync(Guid connectorId, DateTime syncStart, CancellationToken stoppingToken = default);
     }
 
     internal class SyncHistoryService : ISyncHistoryService
@@ -33,14 +33,14 @@ namespace NetworkPerspective.Sync.Application.Services
             _logger = logger;
         }
 
-        public async Task<DateTime> EvaluateSyncStartAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task<DateTime> EvaluateSyncStartAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             var lastSyncHistoryEntry = await _unitOfWork
                 .GetSyncHistoryRepository()
-                .FindLastLogAsync(networkId, stoppingToken);
+                .FindLastLogAsync(connectorId, stoppingToken);
             var lastSyncPeriodEnd = lastSyncHistoryEntry?.SyncPeriod.End;
 
-            _logger.LogDebug("Last synchronization of network '{networkId}' {lastSync}", networkId, lastSyncPeriodEnd?.ToString(TimeRange.DefaultDateTimeFormat) ?? "not found");
+            _logger.LogDebug("Last synchronization of connector '{connectorId}' {lastSync}", connectorId, lastSyncPeriodEnd?.ToString(TimeRange.DefaultDateTimeFormat) ?? "not found");
 
             return lastSyncPeriodEnd ?? _clock.UtcNow().AddDays(-_config.DefaultSyncLookbackInDays);
         }
@@ -58,18 +58,18 @@ namespace NetworkPerspective.Sync.Application.Services
             _logger.LogDebug("Added {type} to persistence", typeof(SyncHistoryEntry));
         }
 
-        public async Task OverrideSyncStartAsync(Guid networkId, DateTime syncStart, CancellationToken stoppingToken = default)
+        public async Task OverrideSyncStartAsync(Guid connectorId, DateTime syncStart, CancellationToken stoppingToken = default)
         {
-            _logger.LogDebug("Overriding sync start to '{start}' for network '{networkId}'", syncStart, networkId);
+            _logger.LogDebug("Overriding sync start to '{start}' for connector '{connectorId}'", syncStart, connectorId);
 
             var repository = _unitOfWork.GetSyncHistoryRepository();
 
-            var initLogEntry = SyncHistoryEntry.Create(networkId, _clock.UtcNow(), new TimeRange(syncStart, syncStart));
+            var initLogEntry = SyncHistoryEntry.Create(connectorId, _clock.UtcNow(), new TimeRange(syncStart, syncStart));
             await repository.AddAsync(initLogEntry, stoppingToken);
 
             await _unitOfWork.CommitAsync(stoppingToken);
 
-            _logger.LogDebug("Overriden sync start to '{start}' for network '{networkId}'", syncStart, networkId);
+            _logger.LogDebug("Overriden sync start to '{start}' for connector '{connectorId}'", syncStart, connectorId);
         }
     }
 }
