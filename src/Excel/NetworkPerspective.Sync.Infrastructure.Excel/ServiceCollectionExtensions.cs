@@ -16,10 +16,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Excel
             // scope data source to single request
             services.AddScoped<IDataSource, ExcelDataSource>();
 
-            // dummy scheduler and auth tester
-            services.AddTransient<ISyncScheduler, DummySyncScheduler>();
-            services.AddScoped<IAuthTester, DummyAuthTester>();
-
             // add constraints configuration
             services.Configure<ExcelSyncConstraints>(config.GetSection(SyncConstraintsConfigSection));
 

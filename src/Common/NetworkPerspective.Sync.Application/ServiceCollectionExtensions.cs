@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Services;
 
 namespace NetworkPerspective.Sync.Application
@@ -14,6 +15,9 @@ namespace NetworkPerspective.Sync.Application
         {
             services.Configure<SyncConfig>(config.GetSection(SyncConfigSection));
             services.Configure<MiscConfig>(config.GetSection(MiscConfigSection));
+
+            services.AddTransient<ISyncScheduler, NoOpSyncScheduler>();
+            services.AddScoped<IAuthTester, DummyAuthTester>();
 
             services.AddTransient<IClock, Clock>();
             services.AddTransient<IHashingServiceFactory, HashingServiceFactory>();
@@ -38,6 +42,7 @@ namespace NetworkPerspective.Sync.Application
             services.AddTransient<ISyncContextFactory, SyncContextFactory>();
 
             services.AddSingleton<ITasksStatusesCache, TasksStatusesCache>();
+            services.AddScoped<IDataSourceFactory, DataSourceFactory>();
 
             return services;
         }

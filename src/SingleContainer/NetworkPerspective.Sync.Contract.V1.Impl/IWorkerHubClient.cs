@@ -13,12 +13,13 @@ namespace NetworkPerspective.Sync.Contract.V1.Impl;
 
 public interface IWorkerHubClient : IOrchestratorClient
 {
-    Task ConnectAsync(Action<IHubConnectionBuilder> configureConnection = null, CancellationToken stoppingToken = default);
+    Task ConnectAsync(Action<OrchestratorClientConfiguration> configuration = null, Action<IHubConnectionBuilder> connectionConfiguration = null, CancellationToken stoppingToken = default);
 }
 
 internal class WorkerHubClient : IWorkerHubClient
 {
     private HubConnection _connection;
+    private readonly OrchestratorClientConfiguration _callbacks = new OrchestratorClientConfiguration();
     private readonly WorkerHubClientConfig _config;
     private readonly ILogger<IWorkerHubClient> _logger;
 
@@ -37,8 +38,10 @@ internal class WorkerHubClient : IWorkerHubClient
         return Task.FromResult(tokenBase64);
     }
 
-    public async Task ConnectAsync(Action<IHubConnectionBuilder> configureConnection = null, CancellationToken stoppingToken = default)
+    public async Task ConnectAsync(Action<OrchestratorClientConfiguration> configuration = null, Action<IHubConnectionBuilder> connectionConfiguration = null, CancellationToken stoppingToken = default)
     {
+        configuration?.Invoke(_callbacks);
+
         var hubUrl = $"{_config.BaseUrl}ws/v1/workers-hub";
 
         var builder = new HubConnectionBuilder()
@@ -48,7 +51,7 @@ internal class WorkerHubClient : IWorkerHubClient
             })
             .WithAutomaticReconnect();
 
-        configureConnection?.Invoke(builder);
+        connectionConfiguration?.Invoke(builder);
 
         _connection = builder.Build();
         InitializeConnection();
@@ -71,15 +74,15 @@ internal class WorkerHubClient : IWorkerHubClient
 
     private void InitializeConnection()
     {
-        _connection.On<StartSyncDto, AckDto>(nameof(IWorkerClient.StartSyncAsync), async x =>
+        _connection.On<StartSyncDto, AckDto>(nameof(IWorkerClient.StartSyncAsync), x =>
         {
             _logger.LogInformation("Received request '{correlationId}' to start sync '{connectorId}' from {start} to {end}", x.CorrelationId, x.ConnectorId, x.Start, x.End);
 
-            await Task.Yield();
-
             _ = Task.Run(async () =>
             {
-                await Task.Delay(TimeSpan.FromSeconds(10));
+                if (_callbacks.OnStartSync is not null)
+                    await _callbacks.OnStartSync.Invoke(x);
+
                 await SyncCompletedAsync(new SyncCompletedDto { CorrelationId = Guid.NewGuid() });
             });
 
@@ -91,7 +94,8 @@ internal class WorkerHubClient : IWorkerHubClient
         {
             _logger.LogInformation("Received request '{correlationId}' to set {count} secrets", x.CorrelationId, x.Secrets.Count);
 
-            await Task.Yield();
+            if (_callbacks.OnSetSecret is not null)
+                await _callbacks.OnSetSecret.Invoke(x);
 
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
             return new AckDto { CorrelationId = x.CorrelationId };

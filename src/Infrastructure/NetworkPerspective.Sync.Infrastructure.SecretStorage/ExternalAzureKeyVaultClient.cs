@@ -8,7 +8,6 @@ using Azure.Security.KeyVault.Secrets;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage.Exceptions;
 using NetworkPerspective.Sync.Utils.Extensions;

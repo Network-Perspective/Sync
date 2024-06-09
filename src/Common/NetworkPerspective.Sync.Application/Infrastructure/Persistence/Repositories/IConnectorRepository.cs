@@ -12,6 +12,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Persistence.Reposit
         Task AddAsync(Connector<TProperties> network, CancellationToken stoppingToken = default);
         Task RemoveAsync(Guid connectorId, CancellationToken stoppingToken = default);
         Task<Connector<TProperties>> FindAsync(Guid connectorId, CancellationToken stoppingToken = default);
+        Task<IEnumerable<KeyValuePair<string, string>>> FindPropertiesAsync(Guid id, CancellationToken stoppingToken = default);
         Task<IEnumerable<Connector<TProperties>>> GetAllAsync(CancellationToken stoppingToken = default);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ namespace NetworkPerspective.Sync.Application.Services
     {
         Task AddOrReplace<TProperties>(Guid id, TProperties properties, CancellationToken stoppingToken = default) where TProperties : ConnectorProperties, new();
         Task<Connector<TProperties>> GetAsync<TProperties>(Guid id, CancellationToken stoppingtoken = default) where TProperties : ConnectorProperties, new();
+        Task<IEnumerable<KeyValuePair<string, string>>> GetProperties(Guid id, CancellationToken stoppingtoken = default);
         Task EnsureRemovedAsync(Guid id, CancellationToken stoppingtoken = default);
         Task ValidateExists(Guid id, CancellationToken stoppingtoken = default);
     }
@@ -34,16 +36,16 @@ namespace NetworkPerspective.Sync.Application.Services
             var network = Connector<TProperties>.Create(id, properties, DateTime.UtcNow);
 
             using var unitOfWork = _unitOfWorkFactory.Create();
-            var networkRepository = unitOfWork.GetConnectorRepository<TProperties>();
+            var connectorRepository = unitOfWork.GetConnectorRepository<TProperties>();
 
-            if (await networkRepository.FindAsync(id, stoppingToken) != null)
+            if (await connectorRepository.FindAsync(id, stoppingToken) != null)
             {
                 _logger.LogDebug("Connector '{connectorId}' already exists. Removing the old network...", id);
-                await networkRepository.RemoveAsync(id, stoppingToken);
+                await connectorRepository.RemoveAsync(id, stoppingToken);
             }
 
             _logger.LogDebug("Adding connector '{connectorId}'...", id);
-            await networkRepository.AddAsync(network, stoppingToken);
+            await connectorRepository.AddAsync(network, stoppingToken);
             await unitOfWork.CommitAsync(stoppingToken);
 
             _logger.LogDebug("Added connector '{connectorId}'...", id);
@@ -52,11 +54,23 @@ namespace NetworkPerspective.Sync.Application.Services
         public async Task<Connector<TProperties>> GetAsync<TProperties>(Guid id, CancellationToken stoppingtoken = default) where TProperties : ConnectorProperties, new()
         {
             using var unitOfWork = _unitOfWorkFactory.Create();
-            var networkRepository = unitOfWork.GetConnectorRepository<TProperties>();
-            var network = await networkRepository.FindAsync(id, stoppingtoken);
+            var connectorRepository = unitOfWork.GetConnectorRepository<TProperties>();
+            var connector = await connectorRepository.FindAsync(id, stoppingtoken);
 
-            if (network != null)
-                return network;
+            if (connector != null)
+                return connector;
+            else
+                throw new ConnectorNotFoundException(id);
+        }
+
+        public async Task<IEnumerable<KeyValuePair<string, string>>> GetProperties(Guid id, CancellationToken stoppingtoken = default)
+        {
+            using var unitOfWork = _unitOfWorkFactory.Create();
+            var connectorRepository = unitOfWork.GetConnectorRepository<ConnectorProperties>();
+            var properties = await connectorRepository.FindPropertiesAsync(id, stoppingtoken);
+
+            if (properties != null)
+                return properties;
             else
                 throw new ConnectorNotFoundException(id);
         }

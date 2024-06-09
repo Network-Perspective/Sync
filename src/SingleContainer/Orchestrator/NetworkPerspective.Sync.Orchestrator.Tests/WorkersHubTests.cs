@@ -52,7 +52,7 @@ public class WorkersHubTests
         var hubClient = new WorkerHubClient(config, NullLogger<IWorkerHubClient>.Instance);
 
         // Act
-        await hubClient.ConnectAsync(x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
+        await hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
         {
             options.HttpMessageHandlerFactory = _ => _service.Server.CreateHandler();
         }));
@@ -87,7 +87,7 @@ public class WorkersHubTests
         var hubClient = new WorkerHubClient(config, NullLogger<IWorkerHubClient>.Instance);
 
         // Act
-        Func<Task> func = () => hubClient.ConnectAsync(x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
+        Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
         {
             options.HttpMessageHandlerFactory = _ => _service.Server.CreateHandler();
         }));

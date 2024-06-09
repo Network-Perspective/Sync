@@ -42,7 +42,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
             var filter = new EmployeeFilter(new[] { "group:Sample Team Site" }, Array.Empty<string>());
             var networkConfig = new ConnectorConfig(filter, CustomAttributesConfig.Empty);
-            var syncContext = new SyncContext(Guid.NewGuid(), networkConfig, new ConnectorProperties(), new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+            var syncContext = new SyncContext(Guid.NewGuid(), networkConfig, [], new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
             // Act
             var result = await client.GetUsersAsync(syncContext);

@@ -66,6 +66,23 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
             }
         }
 
+        public async Task<IEnumerable<KeyValuePair<string,string>>> FindPropertiesAsync(Guid id, CancellationToken stoppingToken = default)
+        {
+            try
+            {
+                var result = await _dbSet
+                    .Include(x => x.Properties)
+                    .Where(x => x.Id == id)
+                    .FirstOrDefaultAsync(stoppingToken);
+
+                return result is null ? null : result.Properties.Select(x => new KeyValuePair<string,string>(x.Key, x.Value));
+            }
+            catch (Exception ex)
+            {
+                throw new DbException(ex);
+            }
+        }
+
         public async Task<IEnumerable<Connector<TProperties>>> GetAllAsync(CancellationToken stoppingToken = default)
         {
             try

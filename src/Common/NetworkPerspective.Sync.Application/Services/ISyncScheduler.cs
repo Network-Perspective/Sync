@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Application.Services
     /// Dummy implementation of <see cref="ISyncScheduler"/> that does nothing
     /// for connectors that don't need scheduling
     /// </summary>
-    public class DummySyncScheduler : ISyncScheduler
+    internal class NoOpSyncScheduler : ISyncScheduler
     {
         public Task AddOrReplaceAsync(Guid connectorId, CancellationToken stoppingtoken = default)
         {

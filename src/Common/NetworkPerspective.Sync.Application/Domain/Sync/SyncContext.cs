@@ -13,20 +13,20 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
     {
         private readonly IDictionary<Type, object> _container = new Dictionary<Type, object>();
         private readonly IHashingService _hashingService;
+        private readonly IEnumerable<KeyValuePair<string, string>> _connectorProperties;
 
         public Guid ConnectorId { get; }
         public ConnectorConfig NetworkConfig { get; }
-        public ConnectorProperties NetworkProperties { get; }
         public SecureString AccessToken { get; }
         public TimeRange TimeRange { get; }
         public IStatusLogger StatusLogger { get; }
         public HashFunction.Delegate HashFunction { get; }
 
-        public SyncContext(Guid connectorId, ConnectorConfig networkConfig, ConnectorProperties networkProperties, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger, IHashingService hashingService)
+        public SyncContext(Guid connectorId, ConnectorConfig networkConfig, IEnumerable<KeyValuePair<string, string>> connectorProperties, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger, IHashingService hashingService)
         {
             ConnectorId = connectorId;
             NetworkConfig = networkConfig;
-            NetworkProperties = networkProperties;
+            _connectorProperties = connectorProperties;
             AccessToken = accessToken;
             TimeRange = timeRange;
             StatusLogger = statusLogger;
@@ -34,6 +34,12 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
             HashFunction = hashingService.Hash;
         }
 
+
+        public T GetConnectorProperties<T>() where T : ConnectorProperties, new()
+            => ConnectorProperties.Create<T>(_connectorProperties);
+
+        public ConnectorProperties GetConnectorProperties()
+            => ConnectorProperties.Create<ConnectorProperties>(_connectorProperties);
 
         public T EnsureSet<T>(Func<T> obj)
         {

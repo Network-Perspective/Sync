@@ -9,6 +9,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Core\NetworkPerspective.Sync.Infrastructure.Core.csproj" />
+    <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage\NetworkPerspective.Sync.Infrastructure.SecretStorage.csproj" />
+    <ProjectReference Include="..\..\..\Slack\NetworkPerspective.Sync.Infrastructure.Slack\NetworkPerspective.Sync.Infrastructure.Slack.csproj" />
     <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract.V1.Impl\NetworkPerspective.Sync.Contract.V1.Impl.csproj" />
     <ProjectReference Include="..\NetworkPerspective.Sync.Worker.Application\NetworkPerspective.Sync.Worker.Application.csproj" />
   </ItemGroup>

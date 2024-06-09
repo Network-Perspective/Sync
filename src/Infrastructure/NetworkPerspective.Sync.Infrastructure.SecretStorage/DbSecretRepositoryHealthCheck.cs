@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.SecretStorage;

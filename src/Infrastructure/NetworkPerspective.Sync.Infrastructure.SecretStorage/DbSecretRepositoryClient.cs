@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage.Exceptions;

@@ -16,9 +16,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
         private readonly ILogger<AuthTester> _logger;
 
-        public AuthTester(IConnectorService networkService, IConnectorInfoProvider connectorInfoProvider, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<AuthTester> logger)
+        public AuthTester(IConnectorService connectorService, IConnectorInfoProvider connectorInfoProvider, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<AuthTester> logger)
         {
-            _connectorService = networkService;
+            _connectorService = connectorService;
             _connectorInfoProvider = connectorInfoProvider;
             _slackClientFacadeFactory = slackClientFacadeFactory;
             _logger = logger;
@@ -28,9 +28,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
         {
             var connectorInfo = _connectorInfoProvider.Get();
-            var network = await _connectorService.GetAsync<SlackNetworkProperties>(connectorInfo.Id, stoppingToken);
+            var connector = await _connectorService.GetAsync<SlackNetworkProperties>(connectorInfo.Id, stoppingToken);
 
-            if (network.Properties.UsesAdminPrivileges)
+            if (connector.Properties.UsesAdminPrivileges)
             {
                 var isUserTokenOk = await TestUserTokenAsync(connectorInfo.Id, stoppingToken);
                 var isBotTokenOk = await TestBotTokenAsync(connectorInfo.Id, stoppingToken);

@@ -1,6 +1,4 @@
-﻿using System;
-
-using NetworkPerspective.Sync.Application.Domain.Connectors;
+﻿using NetworkPerspective.Sync.Application.Domain.Connectors;
 
 namespace NetworkPerspective.Sync.Application.Services
 {
