@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
-using NetworkPerspective.Sync.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault;
 
 namespace NetworkPerspective.Sync.Common.Tests.Factories
 {

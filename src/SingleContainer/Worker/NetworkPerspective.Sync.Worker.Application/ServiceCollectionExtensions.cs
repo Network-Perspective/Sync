@@ -33,37 +33,37 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISyncService, SyncService>();
         services.AddSingleton<ISyncServiceFactory, SyncServiceFactory>();
 
-        services.AddScoped<ISecretRepository, SecretRepositoryStub>();
-        services.AddScoped<ISecretRepositoryFactory, SecretRepositoryFactoryStub>();
+        //services.AddScoped<ISecretRepository, SecretRepositoryStub>();
+        //services.AddScoped<ISecretRepositoryFactory, SecretRepositoryFactoryStub>();
 
         return services;
     }
 }
 
-public class SecretRepositoryStub : ISecretRepository
-{
-    public Task<SecureString> GetSecretAsync(string key, CancellationToken stoppingToken = default)
-    {
-        throw new System.NotImplementedException();
-    }
+//public class SecretRepositoryStub : ISecretRepository
+//{
+//    public Task<SecureString> GetSecretAsync(string key, CancellationToken stoppingToken = default)
+//    {
+//        throw new System.NotImplementedException();
+//    }
 
-    public Task RemoveSecretAsync(string key, CancellationToken stoppingToken = default)
-    {
-        throw new System.NotImplementedException();
-    }
+//    public Task RemoveSecretAsync(string key, CancellationToken stoppingToken = default)
+//    {
+//        throw new System.NotImplementedException();
+//    }
 
-    public Task SetSecretAsync(string key, SecureString secret, CancellationToken stoppingToken = default)
-    {
-        throw new System.NotImplementedException();
-    }
-}
+//    public Task SetSecretAsync(string key, SecureString secret, CancellationToken stoppingToken = default)
+//    {
+//        throw new System.NotImplementedException();
+//    }
+//}
 
-public class SecretRepositoryFactoryStub : ISecretRepositoryFactory
-{
-    public ISecretRepository Create(Uri uri)
-    {
-        return new SecretRepositoryStub();
-    }
+//public class SecretRepositoryFactoryStub : ISecretRepositoryFactory
+//{
+//    public ISecretRepository Create(Uri uri)
+//    {
+//        return new SecretRepositoryStub();
+//    }
 
 
-}
+//}

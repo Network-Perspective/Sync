@@ -4,11 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
+namespace NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault;
 
-namespace NetworkPerspective.Sync.Infrastructure.SecretStorage;
-
-public class HcpVaultHealthCheck : IHealthCheck
+internal class HcpVaultHealthCheck : IHealthCheck
 {
     private readonly HcpVaultClient _hcpVaultClient;
     private readonly string _testSecretName;
@@ -22,7 +20,7 @@ public class HcpVaultHealthCheck : IHealthCheck
         _url = config.Value.BaseUrl;
     }
 
-    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = new CancellationToken())
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         try
         {

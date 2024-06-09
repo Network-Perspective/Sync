@@ -4,6 +4,10 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.SecretStorage.Excep
 {
     public class SecretStorageException : Exception
     {
+        public SecretStorageException(string message)
+            : base(message)
+        { }
+
         public SecretStorageException(string message, Exception innerException)
             : base(message, innerException)
         { }
