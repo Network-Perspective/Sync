@@ -46,9 +46,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
             var interactionFactory = new InteractionFactory(context.HashFunction, employees);
 
-            if (context.GetConnectorProperties<SlackNetworkProperties>().AutoJoinChannels)
+            if (context.GetConnectorProperties<SlackConnectorProperties>().AutoJoinChannels)
             {
-                if (context.GetConnectorProperties<SlackNetworkProperties>().UsesAdminPrivileges)
+                if (context.GetConnectorProperties<SlackConnectorProperties>().UsesAdminPrivileges)
                 {
                     var slackClientAdminFacade = _slackClientFacadeFactory.CreateWithUserToken(stoppingToken);
                     var joiner = new PrivilegedChatJoiner(slackClientBotFacade, slackClientAdminFacade, _loggerFactory.CreateLogger<PrivilegedChatJoiner>());

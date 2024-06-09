@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 
@@ -31,8 +32,11 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             {
                 var factory = sp.GetRequiredService<ISecretRepositoryFactory>();
                 var connectorInfoProvider = sp.GetRequiredService<IConnectorInfoProvider>();
+                var connectorService = sp.GetRequiredService<IConnectorService>();
+
                 var connectorInfo = connectorInfoProvider.Get();
-                return factory.CreateAsync(connectorInfo.Id).Result;
+                var connector = connectorService.GetAsync<ConnectorProperties>(connectorInfo.Id).Result;
+                return factory.Create(connector.Properties.ExternalKeyVaultUri);
             });
 
             services.AddTransient<HcpVaultHealthCheck>();

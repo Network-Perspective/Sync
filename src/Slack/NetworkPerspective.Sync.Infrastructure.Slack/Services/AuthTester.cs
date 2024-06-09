@@ -28,7 +28,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
         {
             var connectorInfo = _connectorInfoProvider.Get();
-            var connector = await _connectorService.GetAsync<SlackNetworkProperties>(connectorInfo.Id, stoppingToken);
+            var connector = await _connectorService.GetAsync<SlackConnectorProperties>(connectorInfo.Id, stoppingToken);
 
             if (connector.Properties.UsesAdminPrivileges)
             {

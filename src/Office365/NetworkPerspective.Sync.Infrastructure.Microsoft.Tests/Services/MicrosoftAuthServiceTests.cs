@@ -45,8 +45,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             _statusLoggerMock.Reset();
 
             _secretRepositoryFactoryMock
-                .Setup(x => x.CreateAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(_secretRepositoryMock.Object);
+                .Setup(x => x.Create(It.IsAny<Uri>()))
+                .Returns(_secretRepositoryMock.Object);
 
             _statusLoggerFactoryMock
                 .Setup(x => x.CreateForConnector(It.IsAny<Guid>()))

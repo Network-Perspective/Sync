@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
@@ -24,13 +25,15 @@ namespace NetworkPerspective.Sync.Application.Services
     {
         private readonly MiscConfig _config;
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
+        private readonly IConnectorService _connectorService;
         private readonly INetworkPerspectiveCore _networkPerspectiveCore;
         private readonly ILogger<TokenService> _logger;
 
-        public TokenService(ISecretRepositoryFactory secretRepositoryFactory, INetworkPerspectiveCore networkPerspectiveCore, IOptions<MiscConfig> config, ILogger<TokenService> logger)
+        public TokenService(ISecretRepositoryFactory secretRepositoryFactory, IConnectorService connectorService, INetworkPerspectiveCore networkPerspectiveCore, IOptions<MiscConfig> config, ILogger<TokenService> logger)
         {
             _config = config.Value;
             _secretRepositoryFactory = secretRepositoryFactory;
+            _connectorService = connectorService;
             _networkPerspectiveCore = networkPerspectiveCore;
             _logger = logger;
         }
@@ -40,7 +43,8 @@ namespace NetworkPerspective.Sync.Application.Services
             _logger.LogDebug("Saving Access Token for connector '{connectorId}'...", connectorId);
 
             var tokenKey = GetAccessTokenKey(connectorId);
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(connectorId, stoppingToken);
+            var props = await _connectorService.GetAsync<ConnectorProperties>(connectorId, stoppingToken);
+            var secretRepository = _secretRepositoryFactory.Create(props.Properties.ExternalKeyVaultUri);
             await secretRepository.SetSecretAsync(tokenKey, accessToken, stoppingToken);
 
             _logger.LogDebug("Access Token for connector '{connectorId}' saved", connectorId);
@@ -49,7 +53,8 @@ namespace NetworkPerspective.Sync.Application.Services
         public async Task<SecureString> GetAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             var tokenKey = GetAccessTokenKey(connectorId);
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(connectorId, stoppingToken);
+            var props = await _connectorService.GetAsync<ConnectorProperties>(connectorId, stoppingToken);
+            var secretRepository = _secretRepositoryFactory.Create(props.Properties.ExternalKeyVaultUri);
             return await secretRepository.GetSecretAsync(tokenKey, stoppingToken);
         }
 
@@ -59,7 +64,8 @@ namespace NetworkPerspective.Sync.Application.Services
             {
                 _logger.LogDebug("Removing Access Token for connector '{connectorId}'...", connectorId);
                 var tokenKey = GetAccessTokenKey(connectorId);
-                var secretRepository = await _secretRepositoryFactory.CreateAsync(connectorId, stoppingToken);
+                var props = await _connectorService.GetAsync<ConnectorProperties>(connectorId, stoppingToken);
+                var secretRepository = _secretRepositoryFactory.Create(props.Properties.ExternalKeyVaultUri);
                 await secretRepository.RemoveSecretAsync(tokenKey, stoppingToken);
                 _logger.LogDebug("Removed Access Token for connector '{connectorId}'...", connectorId);
             }

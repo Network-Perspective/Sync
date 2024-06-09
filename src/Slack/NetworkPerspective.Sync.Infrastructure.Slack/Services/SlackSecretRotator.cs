@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
@@ -37,24 +38,27 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             _logger.LogInformation("Rotating Slack secrets");
             try
             {
-                var secretRepository = _secretRepositoryFactory.CreateDefault();
+                var secretRepository = _secretRepositoryFactory.Create();
 
                 var clientId = await secretRepository.GetSecretAsync(SlackKeys.SlackClientIdKey);
                 var clientSecret = await secretRepository.GetSecretAsync(SlackKeys.SlackClientSecretKey);
 
                 // for each network
-                var networks = await _unitOfWork.GetConnectorRepository<SlackNetworkProperties>().GetAllAsync();
-                foreach (var network in networks)
+                var connectors = await _unitOfWork
+                    .GetConnectorRepository<SlackConnectorProperties>()
+                    .GetAllAsync();
+
+                foreach (var connector in connectors)
                 {
-                    _logger.LogInformation("Rotating token for network {networkId}", network.Id);
+                    _logger.LogInformation("Rotating token for network {networkId}", connector.Id);
                     try
                     {
-                        await RotateNetworkSlackBotToken(network.Id, clientId, clientSecret);
-                        _logger.LogInformation("Token rotated for network {networkId}", network.Id);
+                        await RotateNetworkSlackBotToken(connector, clientId, clientSecret);
+                        _logger.LogInformation("Token rotated for network {networkId}", connector.Id);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Failed to rotate token for network {networkId}", network.Id);
+                        _logger.LogError(ex, "Failed to rotate token for network {networkId}", connector.Id);
                     }
                 }
 
@@ -67,13 +71,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             }
         }
 
-        private async Task RotateNetworkSlackBotToken(Guid networkId, SecureString clientId, SecureString clientSecret)
+        private async Task RotateNetworkSlackBotToken(Connector<SlackConnectorProperties> connector, SecureString clientId, SecureString clientSecret)
         {
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId);
+            var secretRepository = _secretRepositoryFactory.Create(connector.Properties.ExternalKeyVaultUri);
             var slackClient = _slackClientFacadeFactory.CreateUnauthorized();
 
-            var accessTokenKey = string.Format(SlackKeys.TokenKeyPattern, networkId);
-            var refreshTokenKey = string.Format(SlackKeys.RefreshTokenPattern, networkId);
+            var accessTokenKey = string.Format(SlackKeys.TokenKeyPattern, connector.Id);
+            var refreshTokenKey = string.Format(SlackKeys.RefreshTokenPattern, connector.Id);
 
             // try to get access token for the network
             // the access token might be not yet there if the network is not yet authorized
@@ -84,7 +88,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             }
             catch
             {
-                _logger.LogInformation("Network {networkId} not yet authorized. No token to rotate.", networkId);
+                _logger.LogInformation("Network {networkId} not yet authorized. No token to rotate.", connector.Id);
                 return;
             }
 

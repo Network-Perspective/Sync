@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
@@ -49,17 +50,19 @@ namespace NetworkPerspective.Sync.Application.Services
         {
             var token = await _tokenService.GetAsync(connectorId, stoppingToken);
             var networkConfig = await _networkPerspectiveCore.GetNetworkConfigAsync(token, stoppingToken);
-            var connectorProperties = await _connectorService.GetProperties(connectorId, stoppingToken);
+            var properties = await _connectorService.GetProperties(connectorId, stoppingToken);
             var lastSyncedTimeStamp = await _syncHistoryService.EvaluateSyncStartAsync(connectorId, stoppingToken);
             var statusLogger = _statusLoggerFactory.CreateForConnector(connectorId);
             var now = _clock.UtcNow();
 
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(connectorId, stoppingToken);
+
+            var connectorProperties = ConnectorProperties.Create<ConnectorProperties>(properties);
+            var secretRepository = _secretRepositoryFactory.Create(connectorProperties.ExternalKeyVaultUri);
             var hashingService = await _hashingServiceFactory.CreateAsync(secretRepository, stoppingToken);
 
             var timeRange = new TimeRange(lastSyncedTimeStamp, now);
 
-            return new SyncContext(connectorId, networkConfig, connectorProperties, token, timeRange, statusLogger, hashingService);
+            return new SyncContext(connectorId, networkConfig, properties, token, timeRange, statusLogger, hashingService);
         }
     }
 }

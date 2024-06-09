@@ -35,7 +35,7 @@ public class GoogleSecretsRotator : ISecretRotator
         _logger.LogInformation("Rotating Google secrets");
         try
         {
-            var secretRepository = _secretRepositoryFactory.CreateDefault();
+            var secretRepository = _secretRepositoryFactory.Create();
 
             var googleKey = await secretRepository.GetSecretAsync(GoogleKeys.TokenKey);
             var credential = GoogleCredential

@@ -83,7 +83,7 @@ namespace NetworkPerspective.Sync.Slack.Tests
             _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-Slack-{networkId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
 
             using var unitOfWork = _service.UnitOfWorkFactory.Create();
-            var networksRepository = unitOfWork.GetConnectorRepository<SlackNetworkProperties>();
+            var networksRepository = unitOfWork.GetConnectorRepository<SlackConnectorProperties>();
             var network = await networksRepository.FindAsync(networkId);
             network.Properties.AutoJoinChannels.Should().Be(autoJoinChannels);
             network.Properties.SyncGroups.Should().Be(syncChannelsNames);

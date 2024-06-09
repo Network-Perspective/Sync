@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Azure.Core;
 
@@ -11,9 +9,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
-using NetworkPerspective.Sync.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
 {
@@ -26,34 +22,27 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
     {
         private readonly TokenCredential _tokenCredential;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly IConnectorService _networkService;
         private readonly IServiceProvider _serviceProvider;
         private readonly IOptions<AzureKeyVaultConfig> _azureKvOptions;
         private readonly IOptions<HcpVaultConfig> _hcpVaultOptions;
 
         public SecretRepositoryClientFactory(TokenCredential tokenCredential,
             ILoggerFactory loggerFactory,
-            IConnectorService networkService,
             IServiceProvider serviceProvider,
             IOptions<AzureKeyVaultConfig> azureKvOptions,
             IOptions<HcpVaultConfig> hcpVaultOptions)
         {
             _tokenCredential = tokenCredential;
             _loggerFactory = loggerFactory;
-            _networkService = networkService;
             _serviceProvider = serviceProvider;
             _azureKvOptions = azureKvOptions;
             _hcpVaultOptions = hcpVaultOptions;
         }
 
-        public async Task<ISecretRepository> CreateAsync(Guid connectorId, CancellationToken stoppingToken = default)
+        public ISecretRepository Create(Uri externalKeyVaultUri = null)
         {
             if (!string.IsNullOrEmpty(_azureKvOptions.Value.BaseUrl))
             {
-                // else return internal or external secret storage based on network configuration
-                var network = await _networkService.GetAsync<ConnectorProperties>(connectorId, stoppingToken);
-                var externalKeyVaultUri = network.Properties.ExternalKeyVaultUri;
-
                 if (externalKeyVaultUri is null)
                     return CreateInternalAzureKeyVaultClient();
                 else
@@ -62,27 +51,6 @@ namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
             else if (!string.IsNullOrEmpty(_hcpVaultOptions.Value.BaseUrl))
             {
                 // create Hcp vault client
-                return CreateHcpVaultClient();
-            }
-
-            return CreateDbSecretRepository();
-        }
-
-        /// <summary>
-        /// Returns default secret storage client
-        /// some networks might have external key vault configured
-        /// that overrides default secret storage
-        /// </summary>
-        /// <returns></returns>
-        public ISecretRepository CreateDefault()
-        {
-            if (!string.IsNullOrEmpty(_azureKvOptions.Value.BaseUrl))
-            {
-                return CreateInternalAzureKeyVaultClient();
-            }
-
-            if (!string.IsNullOrEmpty(_hcpVaultOptions.Value.BaseUrl))
-            {
                 return CreateHcpVaultClient();
             }
 

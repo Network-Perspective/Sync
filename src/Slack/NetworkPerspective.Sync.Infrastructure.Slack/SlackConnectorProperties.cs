@@ -6,15 +6,15 @@ using NetworkPerspective.Sync.Application.Domain.Connectors;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack
 {
-    public class SlackNetworkProperties : ConnectorProperties
+    public class SlackConnectorProperties : ConnectorProperties
     {
         public bool AutoJoinChannels { get; private set; } = true;
         public bool UsesAdminPrivileges { get; private set; } = false;
 
-        public SlackNetworkProperties() : base(DefaultSyncGroups, DefaultSyncChannelsNames, null)
+        public SlackConnectorProperties() : base(DefaultSyncGroups, DefaultSyncChannelsNames, null)
         { }
 
-        public SlackNetworkProperties(bool autoJoinChannels, bool requireAdminPrivileges, bool syncChannelsNames, Uri externalKeyVaultUri)
+        public SlackConnectorProperties(bool autoJoinChannels, bool requireAdminPrivileges, bool syncChannelsNames, Uri externalKeyVaultUri)
             : base(syncChannelsNames, syncChannelsNames, externalKeyVaultUri)
         {
             AutoJoinChannels = autoJoinChannels;

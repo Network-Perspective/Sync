@@ -31,6 +31,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         private const int SlackAuthorizationCodeExpirationTimeInMinutes = 10;
 
         private readonly AuthConfig _slackAuthConfig;
+        private readonly IConnectorService _connectorService;
         private readonly IAuthStateKeyFactory _stateKeyFactory;
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
         private readonly ISlackClientUnauthorizedFacade _slackClientUnauthorizedFacade;
@@ -39,6 +40,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
         private readonly ILogger<SlackAuthService> _logger;
 
         public SlackAuthService(
+            IConnectorService connectorService,
             IAuthStateKeyFactory stateFactory,
             IOptions<AuthConfig> slackAuthConfig,
             ISecretRepositoryFactory secretRepositoryFactory,
@@ -48,6 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             ILogger<SlackAuthService> logger)
         {
             _slackAuthConfig = slackAuthConfig.Value;
+            _connectorService = connectorService;
             _stateKeyFactory = stateFactory;
             _secretRepositoryFactory = secretRepositoryFactory;
             _slackClientUnauthorizedFacade = slackClientUnauthorizedFacade;
@@ -63,7 +66,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
                 .CreateForConnector(authProcess.ConnectorId)
                 .LogInfoAsync("Authorization process started", stoppingToken);
 
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.ConnectorId, stoppingToken);
+            var connector = await _connectorService.GetAsync<SlackConnectorProperties>(authProcess.ConnectorId, stoppingToken);
+            var secretRepository = _secretRepositoryFactory.Create(connector.Properties.ExternalKeyVaultUri);
             var clientId = await secretRepository.GetSecretAsync(SlackKeys.SlackClientIdKey, stoppingToken);
 
             var stateKey = _stateKeyFactory.Create();
@@ -83,7 +87,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             if (!_cache.TryGetValue(state, out AuthProcess authProcess))
                 throw new OAuthException("State does not match initialized value");
 
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.ConnectorId, stoppingToken);
+            var connector = await _connectorService.GetAsync<SlackConnectorProperties>(authProcess.ConnectorId);
+            var secretRepository = _secretRepositoryFactory.Create(connector.Properties.ExternalKeyVaultUri);
 
             var clientId = await secretRepository.GetSecretAsync(SlackKeys.SlackClientIdKey, stoppingToken);
             var clientSecret = await secretRepository.GetSecretAsync(SlackKeys.SlackClientSecretKey, stoppingToken);

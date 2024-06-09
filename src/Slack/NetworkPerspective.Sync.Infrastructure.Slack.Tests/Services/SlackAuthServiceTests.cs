@@ -12,8 +12,8 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Exceptions;
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
@@ -29,10 +29,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
     public class SlackAuthServiceTests
     {
         private const string ClientId = "1234";
-        private static readonly string[] Scopes = new[] { "scope1", "scope2" };
-        private static readonly string[] UserScopes = new[] { "userScope1", "userScope2" };
-        private static readonly string[] AdminUserScopes = new[] { "adminUserScope1", "adminUserScope2" };
+        private static readonly string[] Scopes = ["scope1", "scope2"];
+        private static readonly string[] UserScopes = ["userScope1", "userScope2"];
+        private static readonly string[] AdminUserScopes = ["adminUserScope1", "adminUserScope2"];
 
+        private readonly Mock<IConnectorService> _connectorServiceMock = new();
         private readonly Mock<IAuthStateKeyFactory> _stateFactoryMock = new();
         private readonly Mock<ISecretRepositoryFactory> _secretRepositoryFactoryMock = new();
         private readonly Mock<ISecretRepository> _secretRepositoryMock = new();
@@ -43,6 +44,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
 
         public SlackAuthServiceTests()
         {
+            _connectorServiceMock.Reset();
             _stateFactoryMock.Reset();
             _secretRepositoryFactoryMock.Reset();
             _secretRepositoryMock.Reset();
@@ -51,8 +53,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             _statusLoggerMock.Reset();
 
             _secretRepositoryFactoryMock
-                .Setup(x => x.CreateAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(_secretRepositoryMock.Object);
+                .Setup(x => x.Create(It.IsAny<Uri>()))
+                .Returns(_secretRepositoryMock.Object);
 
             _statusLoggerFactoryMock
                 .Setup(x => x.CreateForConnector(It.IsAny<Guid>()))
@@ -69,6 +71,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                 var config = CreateDefaultOptions();
                 const string redirectUrl = "https://networkperspective.io:5001/callback";
 
+                var connector = Connector<SlackConnectorProperties>.Create(Guid.NewGuid(), ConnectorProperties.Create<SlackConnectorProperties>([]), DateTime.UtcNow);
+
+                _connectorServiceMock
+                    .Setup(x => x.GetAsync<SlackConnectorProperties>(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(connector);
+
                 _stateFactoryMock
                     .Setup(x => x.Create())
                     .Returns(state);
@@ -80,6 +88,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                 var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
 
                 var service = new SlackAuthService(
+                    _connectorServiceMock.Object,
                     _stateFactoryMock.Object,
                     config,
                     _secretRepositoryFactoryMock.Object,
@@ -107,6 +116,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                 var config = CreateDefaultOptions();
                 const string redirectUrl = "https://networkperspective.io:5001/callback";
 
+                var connector = Connector<SlackConnectorProperties>.Create(Guid.NewGuid(), ConnectorProperties.Create<SlackConnectorProperties>([]), DateTime.UtcNow);
+
+                _connectorServiceMock
+                    .Setup(x => x.GetAsync<SlackConnectorProperties>(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(connector);
+
                 _stateFactoryMock
                     .Setup(x => x.Create())
                     .Returns(state);
@@ -118,6 +133,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                 var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
 
                 var service = new SlackAuthService(
+                    _connectorServiceMock.Object,
                     _stateFactoryMock.Object,
                     config,
                     _secretRepositoryFactoryMock.Object,
@@ -141,12 +157,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
             public void ShouldPutStateToCache()
             {
                 // Arrange
-                var networkId = Guid.NewGuid();
+                var connectorId = Guid.NewGuid();
                 var callbackUri = new Uri("https://localhost:5001/callback");
-                var authProcess = new AuthProcess(networkId, callbackUri, false);
+                var authProcess = new AuthProcess(connectorId, callbackUri, false);
 
                 var stateKey = Guid.NewGuid().ToString();
                 var config = CreateDefaultOptions();
+
+                var connector = Connector<SlackConnectorProperties>.Create(connectorId, ConnectorProperties.Create<SlackConnectorProperties>([]), DateTime.UtcNow);
+
+                _connectorServiceMock
+                    .Setup(x => x.GetAsync<SlackConnectorProperties>(connectorId, It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(connector);
 
                 _stateFactoryMock
                     .Setup(x => x.Create())
@@ -154,6 +176,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
 
                 var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
                 var service = new SlackAuthService(
+                    _connectorServiceMock.Object,
                     _stateFactoryMock.Object,
                     config,
                     _secretRepositoryFactoryMock.Object,
@@ -183,6 +206,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                 var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
 
                 var service = new SlackAuthService(
+                    _connectorServiceMock.Object,
                     _stateFactoryMock.Object,
                     config,
                     _secretRepositoryFactoryMock.Object,

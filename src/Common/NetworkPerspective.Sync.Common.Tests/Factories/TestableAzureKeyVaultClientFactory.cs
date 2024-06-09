@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -12,17 +10,11 @@ namespace NetworkPerspective.Sync.Common.Tests.Factories
 {
     public class TestableAzureKeyVaultClientFactory : ISecretRepositoryFactory
     {
-        public Task<ISecretRepository> CreateAsync(Guid connectorId, CancellationToken stoppingToken = default)
+        public ISecretRepository Create(Uri externalKeyVaultUri = default)
         {
             var secretRepositoryOptions = Options.Create(new AzureKeyVaultConfig { BaseUrl = TestsConsts.InternalAzureKeyVaultBaseUrl });
             var secretRepository = new InternalAzureKeyVaultClient(TokenCredentialFactory.Create(), secretRepositoryOptions, NullLogger<InternalAzureKeyVaultClient>.Instance);
-            return Task.FromResult(secretRepository as ISecretRepository);
-        }
-
-        public ISecretRepository CreateDefault()
-        {
-            var secretRepositoryOptions = Options.Create(new AzureKeyVaultConfig { BaseUrl = TestsConsts.InternalAzureKeyVaultBaseUrl });
-            return new InternalAzureKeyVaultClient(TokenCredentialFactory.Create(), secretRepositoryOptions, NullLogger<InternalAzureKeyVaultClient>.Instance);
+            return secretRepository;
         }
     }
 }

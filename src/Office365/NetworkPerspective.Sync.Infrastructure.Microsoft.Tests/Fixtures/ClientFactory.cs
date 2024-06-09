@@ -24,7 +24,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Fixtures
             var networkId = new Guid("bd1bc916-db78-4e1e-b93b-c6feb8cf729e");
             var connectorId = new Guid("04C753D8-FF9A-479C-B857-5D28C1EAF6C1");
             var secretRepositoryFactory = new TestableAzureKeyVaultClientFactory();
-            var secretRepository = new TestableAzureKeyVaultClientFactory().CreateAsync(connectorId).Result;
+            var secretRepository = new TestableAzureKeyVaultClientFactory().Create();
 
             var resiliency = Options.Create(
                 new Resiliency

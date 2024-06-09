@@ -60,13 +60,10 @@ public class SecretRepositoryStub : ISecretRepository
 
 public class SecretRepositoryFactoryStub : ISecretRepositoryFactory
 {
-    public Task<ISecretRepository> CreateAsync(Guid connectorId, CancellationToken stoppingToken = default)
-    {
-        return Task.FromResult(new SecretRepositoryStub() as ISecretRepository);
-    }
-
-    public ISecretRepository CreateDefault()
+    public ISecretRepository Create(Uri uri)
     {
         return new SecretRepositoryStub();
     }
+
+
 }

@@ -25,10 +25,10 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
 {
     public class StatusControllerTests
     {
-        private readonly Mock<INetworkPerspectiveCore> _networkPerspectiveCoreMock = new Mock<INetworkPerspectiveCore>();
-        private readonly Mock<IStatusService> _statusServiceMock = new Mock<IStatusService>();
-        private readonly Mock<IConnectorService> _connectorServiceMock = new Mock<IConnectorService>();
-        private readonly Mock<IConnectorInfoProvider> _connectorInfoProviderMock = new Mock<IConnectorInfoProvider>();
+        private readonly Mock<INetworkPerspectiveCore> _networkPerspectiveCoreMock = new();
+        private readonly Mock<IStatusService> _statusServiceMock = new();
+        private readonly Mock<IConnectorService> _connectorServiceMock = new();
+        private readonly Mock<IConnectorInfoProvider> _connectorInfoProviderMock = new();
 
         public StatusControllerTests()
         {

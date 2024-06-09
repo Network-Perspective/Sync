@@ -50,7 +50,7 @@ namespace NetworkPerspective.Sync.Slack.Controllers
             var connectorInfo = _connectorInfoProvider.Get();
             await _connectorService.ValidateExists(connectorInfo.Id, stoppingToken);
 
-            var network = await _connectorService.GetAsync<SlackNetworkProperties>(connectorInfo.Id, stoppingToken);
+            var network = await _connectorService.GetAsync<SlackConnectorProperties>(connectorInfo.Id, stoppingToken);
             var callbackUri = callbackUrl == null ? CreateCallbackUri() : new Uri(callbackUrl);
             var authProcess = new AuthProcess(connectorInfo.Id, callbackUri, network.Properties.UsesAdminPrivileges);
 
