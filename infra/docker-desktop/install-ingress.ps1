@@ -1,3 +1,10 @@
+$currentContext = kubectl config current-context
+
+if ($currentContext -ne "docker-desktop") {
+    Write-Host "The current context is not Docker Desktop. Exiting..."
+    exit
+}
+
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 
