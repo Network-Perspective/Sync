@@ -23,7 +23,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
     {
         private readonly Mock<ISyncContextProvider> _syncContextFactory = new Mock<ISyncContextProvider>();
         private readonly Mock<ISyncService> _syncServiceMock = new Mock<ISyncService>();
-        private readonly Mock<ISyncHistoryService> _syncHistoryService= new Mock<ISyncHistoryService>();
+        private readonly Mock<ISyncHistoryService> _syncHistoryService = new Mock<ISyncHistoryService>();
         private readonly ILogger<SyncJob> _logger = NullLogger<SyncJob>.Instance;
         public SyncJobTests()
         {

@@ -151,9 +151,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Inf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.Slack.Client.Tests", "Slack\NetworkPerspective.Sync.Infrastructure.Slack.Client.Tests\NetworkPerspective.Sync.Infrastructure.Slack.Client.Tests.csproj", "{7345F0A2-AB3A-4B16-8EDD-C3D159C0B085}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault", "Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault\NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault.csproj", "{4F0AED1D-9D13-4C8E-B6DB-E43B96E3BDE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault", "Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault\NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault.csproj", "{4F0AED1D-9D13-4C8E-B6DB-E43B96E3BDE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault", "Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault\NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault.csproj", "{11A6BC55-3DD5-4FAF-BECD-6845AA2B0872}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault", "Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault\NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault.csproj", "{11A6BC55-3DD5-4FAF-BECD-6845AA2B0872}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.SecretStorage.DbVault", "Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage.DbVault\NetworkPerspective.Sync.Infrastructure.SecretStorage.DbVault.csproj", "{A8DD2CB2-AC19-43D4-842C-592AB12E22EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -373,6 +375,10 @@ Global
 		{11A6BC55-3DD5-4FAF-BECD-6845AA2B0872}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11A6BC55-3DD5-4FAF-BECD-6845AA2B0872}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11A6BC55-3DD5-4FAF-BECD-6845AA2B0872}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8DD2CB2-AC19-43D4-842C-592AB12E22EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8DD2CB2-AC19-43D4-842C-592AB12E22EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8DD2CB2-AC19-43D4-842C-592AB12E22EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8DD2CB2-AC19-43D4-842C-592AB12E22EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -452,6 +458,7 @@ Global
 		{7345F0A2-AB3A-4B16-8EDD-C3D159C0B085} = {FEDA2CC6-81F6-4423-93DF-F8C520D17240}
 		{4F0AED1D-9D13-4C8E-B6DB-E43B96E3BDE7} = {527F899C-F2B0-4EB7-B9ED-B90CDAAF18E0}
 		{11A6BC55-3DD5-4FAF-BECD-6845AA2B0872} = {527F899C-F2B0-4EB7-B9ED-B90CDAAF18E0}
+		{A8DD2CB2-AC19-43D4-842C-592AB12E22EF} = {527F899C-F2B0-4EB7-B9ED-B90CDAAF18E0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}

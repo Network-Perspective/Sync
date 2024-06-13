@@ -66,7 +66,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
             }
         }
 
-        public async Task<IEnumerable<KeyValuePair<string,string>>> FindPropertiesAsync(Guid id, CancellationToken stoppingToken = default)
+        public async Task<IEnumerable<KeyValuePair<string, string>>> FindPropertiesAsync(Guid id, CancellationToken stoppingToken = default)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Repositories
                     .Where(x => x.Id == id)
                     .FirstOrDefaultAsync(stoppingToken);
 
-                return result is null ? null : result.Properties.Select(x => new KeyValuePair<string,string>(x.Key, x.Value));
+                return result is null ? null : result.Properties.Select(x => new KeyValuePair<string, string>(x.Key, x.Value));
             }
             catch (Exception ex)
             {

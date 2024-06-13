@@ -18,8 +18,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISecretRepository, HcpVaultClient>();
         services.AddTransient<ISecretRepositoryFactory, HcpVaultClientFactory>();
 
-
-        healthCheckBuilder.AddCheck<HcpVaultHealthCheck>("Key-Vault", HealthStatus.Unhealthy, [], TimeSpan.FromSeconds(30));
+        healthCheckBuilder.AddCheck<HcpVaultHealthCheck>("Hcp Key-Vault", HealthStatus.Unhealthy, [], TimeSpan.FromSeconds(30));
 
         return services;
     }

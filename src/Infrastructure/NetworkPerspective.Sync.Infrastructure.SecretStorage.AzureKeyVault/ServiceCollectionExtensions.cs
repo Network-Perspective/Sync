@@ -12,7 +12,7 @@ using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault;
 
-namespace NetworkPerspective.Sync.Infrastructure.SecretStorage;
+namespace NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault;
 
 public static class ServiceCollectionExtensions
 {
@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
 
         services.AddTransient<ISecretRepositoryFactory, AzureKeyVaultClientFactory>();
 
-        services.AddScoped<ISecretRepository>(sp =>
+        services.AddScoped(sp =>
         {
             var factory = sp.GetRequiredService<ISecretRepositoryFactory>();
             var connectorInfoProvider = sp.GetRequiredService<IConnectorInfoProvider>();
@@ -38,7 +38,7 @@ public static class ServiceCollectionExtensions
         });
 
         healthCheckBuilder
-            .AddAzureKeyVault(KeyVaultServiceUriFactory, azureCredentials, SetupChecks, "Key-Vault", HealthStatus.Unhealthy, [], TimeSpan.FromSeconds(30));
+            .AddAzureKeyVault(KeyVaultServiceUriFactory, azureCredentials, SetupChecks, "Azure Key-Vault", HealthStatus.Unhealthy, [], TimeSpan.FromSeconds(30));
 
         return services;
     }

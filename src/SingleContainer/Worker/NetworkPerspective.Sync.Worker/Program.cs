@@ -1,14 +1,13 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Contract.V1.Impl;
 using NetworkPerspective.Sync.Infrastructure.Core;
-using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Infrastructure.Slack;
-using NetworkPerspective.Sync.Application.Services;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
-using NetworkPerspective.Sync.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Worker.Application;
 
 namespace NetworkPerspective.Sync.Worker;
 
@@ -24,7 +23,7 @@ public class Program
         builder.Services
             .AddConnectorApplication(builder.Configuration.GetSection("App"))
             .AddNetworkPerspectiveCore(builder.Configuration.GetSection("Infrastructure:Core"), healthChecksBuilder)
-            .AddSecretRepositoryClient(builder.Configuration.GetSection("Infrastructure:Vaults"), healthChecksBuilder)
+            .AddVault(builder.Configuration.GetSection("Infrastructure:Vaults"), healthChecksBuilder)
             .AddSlack(builder.Configuration.GetSection("Infrastructure:DataSources:Slack"))
             .AddOrchestratorClient(builder.Configuration.GetSection("Infrastructure:Orchestrator"));
 

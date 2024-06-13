@@ -1,13 +1,7 @@
-﻿using System;
-using System.Security;
-using System.Threading;
-using System.Threading.Tasks;
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application;
@@ -33,37 +27,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISyncService, SyncService>();
         services.AddSingleton<ISyncServiceFactory, SyncServiceFactory>();
 
-        //services.AddScoped<ISecretRepository, SecretRepositoryStub>();
-        //services.AddScoped<ISecretRepositoryFactory, SecretRepositoryFactoryStub>();
-
         return services;
     }
 }
 
-//public class SecretRepositoryStub : ISecretRepository
-//{
-//    public Task<SecureString> GetSecretAsync(string key, CancellationToken stoppingToken = default)
-//    {
-//        throw new System.NotImplementedException();
-//    }
-
-//    public Task RemoveSecretAsync(string key, CancellationToken stoppingToken = default)
-//    {
-//        throw new System.NotImplementedException();
-//    }
-
-//    public Task SetSecretAsync(string key, SecureString secret, CancellationToken stoppingToken = default)
-//    {
-//        throw new System.NotImplementedException();
-//    }
-//}
-
-//public class SecretRepositoryFactoryStub : ISecretRepositoryFactory
-//{
-//    public ISecretRepository Create(Uri uri)
-//    {
-//        return new SecretRepositoryStub();
-//    }
-
-
-//}
