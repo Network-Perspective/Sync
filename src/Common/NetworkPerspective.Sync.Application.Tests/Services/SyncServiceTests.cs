@@ -29,11 +29,10 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
     public class SyncServiceTests
     {
         private readonly ILogger<SyncService> _logger = NullLogger<SyncService>.Instance;
-        private readonly Mock<INetworkPerspectiveCore> _networkPerspectiveCoreMock = new Mock<INetworkPerspectiveCore>();
-        private readonly Mock<IInteractionsFilterFactory> _interactionsFilterFactoryMock = new Mock<IInteractionsFilterFactory>();
-        private readonly Mock<IInteractionsFilter> _interactionsFilterMock = new Mock<IInteractionsFilter>();
-        private readonly Mock<IDataSourceFactory> _dataSourceFactoryMock = new Mock<IDataSourceFactory>();
-        private readonly Mock<IDataSource> _dataSourceMock = new Mock<IDataSource>();
+        private readonly Mock<INetworkPerspectiveCore> _networkPerspectiveCoreMock = new();
+        private readonly Mock<IInteractionsFilterFactory> _interactionsFilterFactoryMock = new();
+        private readonly Mock<IInteractionsFilter> _interactionsFilterMock = new();
+        private readonly Mock<IDataSource> _dataSourceMock = new();
         private readonly TestableInteractionStream _interactionsStream = new TestableInteractionStream();
 
         public SyncServiceTests()
@@ -41,7 +40,6 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             _networkPerspectiveCoreMock.Reset();
             _interactionsFilterFactoryMock.Reset();
             _interactionsFilterMock.Reset();
-            _dataSourceFactoryMock.Reset();
             _interactionsStream.Reset();
 
             _networkPerspectiveCoreMock
@@ -55,10 +53,6 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             _interactionsFilterMock
                 .Setup(x => x.Filter(It.IsAny<IEnumerable<Interaction>>()))
                 .Returns(new HashSet<Interaction>());
-
-            _dataSourceFactoryMock
-                .Setup(x => x.CreateDataSource())
-                .Returns(_dataSourceMock.Object);
         }
 
         [Fact]
@@ -74,7 +68,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             _dataSourceMock
                 .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new SyncResult(10, 100, Enumerable.Empty<Exception>()));
-            var syncService = new SyncService(_logger, _dataSourceFactoryMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
 
             // Act
             await syncService.SyncAsync(context);
@@ -97,7 +91,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception());
 
-            var syncService = new SyncService(_logger, _dataSourceFactoryMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
 
             // Act
             await syncService.SyncAsync(context);
@@ -116,7 +110,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var timeRange = new TimeRange(start, end);
             var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
 
-            var syncService = new SyncService(_logger, _dataSourceFactoryMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
 
             // Act
             await syncService.SyncAsync(context);
@@ -146,7 +140,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 .Setup(x => x.GetHashedEmployeesAsync(context, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new EmployeeCollection(new[] { employee }, HashFunction.Empty));
 
-            var syncService = new SyncService(_logger, _dataSourceFactoryMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
 
             // Act
             await syncService.SyncAsync(context);
@@ -175,7 +169,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 .Setup(x => x.OpenInteractionsStream(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .Returns(interactionsStreamMock.Object);
 
-            var syncService = new SyncService(_logger, _dataSourceFactoryMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
 
             // Act
             await syncService.SyncAsync(context);

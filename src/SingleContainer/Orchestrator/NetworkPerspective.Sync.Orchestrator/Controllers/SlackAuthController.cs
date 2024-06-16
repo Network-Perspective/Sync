@@ -17,7 +17,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 public class SlackAuthController : ControllerBase
 {
     private const string CallbackPath = "callback";
-    private const string AuthPath = "api/connectors/{connectorId:guid}/slack-auth";
+    private const string AuthPath = "api/connectors/slack-auth";
     private readonly IConnectorsService _connectorsService;
     private readonly ISlackAuthService _authService;
 
@@ -43,7 +43,7 @@ public class SlackAuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> SignIn([FromRoute] Guid connectorId, string callbackUrl = null, CancellationToken stoppingToken = default)
+    public async Task<IActionResult> SignIn([FromQuery] Guid connectorId, string callbackUrl = null, CancellationToken stoppingToken = default)
     {
         var connector = await _connectorsService.GetAsync(connectorId, stoppingToken);
 

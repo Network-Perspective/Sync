@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IConnectorsService, ConnectorsService>();
         services.AddTransient<ISyncHistoryService, SyncHistoryService>();
         services.AddTransient<IStatusLogger, StatusLogger>();
+        services.AddTransient<ITokenService, TokenService>();
 
         services.AddSingleton<IConnectionsLookupTable, ConnectionsLookupTable>();
 

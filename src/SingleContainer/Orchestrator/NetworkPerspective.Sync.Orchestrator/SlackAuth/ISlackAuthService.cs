@@ -28,11 +28,11 @@ public interface ISlackAuthService
 internal class SlackAuthService : ISlackAuthService
 {
     private const int SlackAuthorizationCodeExpirationTimeInMinutes = 10;
-    private const string SlackClientIdKey = "SlackClientId";
-    private const string SlackClientSecretKey = "SlackClientSecret";
-    private const string SlackBotTokenKeyPattern = "SlackBotToken-{0}";
-    private const string SlackUserTokenKeyPattern = "SlackUserToken-{0}";
-    private const string SlackRefreshTokenPattern = "SlackRefreshToken-{0}";
+    private const string SlackClientIdKey = "slack-client-id";
+    private const string SlackClientSecretKey = "slack-client-secret";
+    private const string SlackBotTokenKeyPattern = "slack-bot-token-{0}";
+    private const string SlackUserTokenKeyPattern = "slack-user-token-{0}";
+    private const string SlackRefreshTokenPattern = "slack-refresh-token-{0}";
 
     private readonly IVault _vault;
     private readonly IAuthStateKeyFactory _stateKeyFactory;
@@ -94,7 +94,7 @@ internal class SlackAuthService : ISlackAuthService
         var secrets = new Dictionary<string, SecureString>();
 
         var botTokenKey = string.Format(SlackBotTokenKeyPattern, authProcess.ConnectorId);
-        secrets.Add(botTokenKey, response.User.AccessToken.ToSecureString());
+        secrets.Add(botTokenKey, response.AccessToken.ToSecureString());
 
         // save refresh token if token rotation is enabled
         if (!string.IsNullOrEmpty(response.RefreshToken))
@@ -110,7 +110,7 @@ internal class SlackAuthService : ISlackAuthService
         }
 
         await _workerRouter.SetSecretsAsync(authProcess.WorkerName, secrets);
-        _logger.LogInformation("Authentication callback processed successfully. Network '{networkId}' is configured for synchronization", authProcess.ConnectorId);
+        _logger.LogInformation("Authentication callback processed successfully. Connector '{connectorId}' is configured for synchronization", authProcess.ConnectorId);
     }
 
     private string BuildSlackAuthUri(string state, SlackAuthProcess authProcess, SecureString slackClientId)

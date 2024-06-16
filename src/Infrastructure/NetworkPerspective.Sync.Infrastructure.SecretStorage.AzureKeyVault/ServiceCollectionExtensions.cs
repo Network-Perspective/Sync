@@ -29,12 +29,22 @@ public static class ServiceCollectionExtensions
         services.AddScoped(sp =>
         {
             var factory = sp.GetRequiredService<ISecretRepositoryFactory>();
-            var connectorInfoProvider = sp.GetRequiredService<IConnectorInfoProvider>();
-            var connectorService = sp.GetRequiredService<IConnectorService>();
 
-            var connectorInfo = connectorInfoProvider.Get();
-            var connector = connectorService.GetAsync<ConnectorProperties>(connectorInfo.Id).Result;
-            return factory.Create(connector.Properties.ExternalKeyVaultUri);
+            var syncContextAccessor = sp.GetRequiredService<ISyncContextAccessor>();
+            if (syncContextAccessor.IsAvailable)
+            {
+                var connectorProperties = syncContextAccessor.SyncContext.GetConnectorProperties();
+                return factory.Create(connectorProperties.ExternalKeyVaultUri);
+            }
+            else
+            {
+                var connectorInfoProvider = sp.GetRequiredService<IConnectorInfoProvider>();
+                var connectorService = sp.GetRequiredService<IConnectorService>();
+
+                var connectorInfo = connectorInfoProvider.Get();
+                var connector = connectorService.GetAsync<ConnectorProperties>(connectorInfo.Id).Result;
+                return factory.Create(connector.Properties.ExternalKeyVaultUri);
+            }
         });
 
         healthCheckBuilder

@@ -5,6 +5,11 @@ using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 
 namespace NetworkPerspective.Sync.Worker.Application;
 
+public interface IDataSourceFactory
+{
+    IDataSource CreateDataSource();
+}
+
 internal class DataSourceFactory : IDataSourceFactory
 {
     private readonly IEnumerable<IDataSource> _dataSources;

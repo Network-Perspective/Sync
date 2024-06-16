@@ -2,35 +2,63 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Contract.V1.Impl;
-using NetworkPerspective.Sync.Worker.Application;
+using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Worker;
 
-public class ConnectionHost(IWorkerHubClient hubClient, ISyncServiceFactory syncServiceFactory, ILogger<ConnectionHost> logger) : BackgroundService
+public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContextFactory syncContextFactory, IServiceProvider serviceProvider, ILogger<ConnectionHost> logger) : BackgroundService
 {
     private readonly ILogger<ConnectionHost> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        async Task OnStartSync(StartSyncDto startSyncDto)
+        async Task OnStartSync(StartSyncDto dto)
         {
             _logger.LogInformation("Syncing soooo... hard....");
 
-            var syncService = await syncServiceFactory.CreateAsync(stoppingToken);
-            await syncService.SyncAsync(null, stoppingToken);
+            var timeRange = new TimeRange(dto.Start, dto.End);
+            var accessToken = dto.AccessToken.ToSecureString();
+
+            var syncContext = await syncContextFactory.CreateAsync(dto.ConnectorId, dto.NetworkProperties, timeRange, accessToken, stoppingToken);
+
+            await using (var scope = serviceProvider.CreateAsyncScope())
+            {
+                var connectorInfo = scope.ServiceProvider.GetRequiredService<IConnectorInfoInitializer>();
+                connectorInfo.Initialize(new ConnectorInfo(dto.ConnectorId, dto.NetworkId));
+
+                var syncContextAccessor = scope.ServiceProvider.GetRequiredService<ISyncContextAccessor>();
+                syncContextAccessor.SyncContext = syncContext;
+
+                var syncService = scope.ServiceProvider.GetRequiredService<ISyncService>();
+                await syncService.SyncAsync(syncContext, stoppingToken);
+            };
 
             _logger.LogInformation("Sync completed");
         }
 
-        async Task OnSetSecrets(SetSecretsDto startSyncDto)
+        async Task OnSetSecrets(SetSecretsDto dto)
         {
-            _logger.LogInformation("Setting secrets");
-            await Task.Delay(1000);
+            _logger.LogInformation("Setting {count} secrets", dto.Secrets.Count);
+
+            await using (var scope = serviceProvider.CreateAsyncScope())
+            {
+                var secretRepositoryFactory = scope.ServiceProvider.GetRequiredService<ISecretRepositoryFactory>();
+                var secretRepository = secretRepositoryFactory.Create();
+
+                foreach (var secret in dto.Secrets)
+                    await secretRepository.SetSecretAsync(secret.Key, secret.Value.ToSecureString(), stoppingToken);
+            };
+
             _logger.LogInformation("Secrets has been set");
         }
 

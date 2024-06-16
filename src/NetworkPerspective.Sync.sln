@@ -143,8 +143,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault.csproj", "{2CCFBA14-FE76-422E-B1ED-25F60F012ABE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Stub.csproj", "{961F80B6-84C1-49F2-ACA6-55068A4480C1}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Contract.V1.Impl", "SingleContainer\NetworkPerspective.Sync.Contract.V1.Impl\NetworkPerspective.Sync.Contract.V1.Impl.csproj", "{A3F9AB6F-6056-4904-A86C-B7F83FEFCAB3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.Slack.Client", "Slack\NetworkPerspective.Sync.Infrastructure.Slack.Client\NetworkPerspective.Sync.Infrastructure.Slack.Client.csproj", "{996E3ECE-0503-4405-A25F-F59752CAC5B9}"
@@ -351,10 +349,6 @@ Global
 		{2CCFBA14-FE76-422E-B1ED-25F60F012ABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CCFBA14-FE76-422E-B1ED-25F60F012ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CCFBA14-FE76-422E-B1ED-25F60F012ABE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{961F80B6-84C1-49F2-ACA6-55068A4480C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{961F80B6-84C1-49F2-ACA6-55068A4480C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{961F80B6-84C1-49F2-ACA6-55068A4480C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{961F80B6-84C1-49F2-ACA6-55068A4480C1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A3F9AB6F-6056-4904-A86C-B7F83FEFCAB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A3F9AB6F-6056-4904-A86C-B7F83FEFCAB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3F9AB6F-6056-4904-A86C-B7F83FEFCAB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -452,7 +446,6 @@ Global
 		{C8C4F9FA-FB48-45CA-84E7-A7938D563462} = {4C21511C-5082-4B21-A1A4-F86D1FBCA8CC}
 		{EF13C43A-C710-4A50-80EB-93812FE37AF7} = {C8C4F9FA-FB48-45CA-84E7-A7938D563462}
 		{2CCFBA14-FE76-422E-B1ED-25F60F012ABE} = {C8C4F9FA-FB48-45CA-84E7-A7938D563462}
-		{961F80B6-84C1-49F2-ACA6-55068A4480C1} = {C8C4F9FA-FB48-45CA-84E7-A7938D563462}
 		{A3F9AB6F-6056-4904-A86C-B7F83FEFCAB3} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
 		{996E3ECE-0503-4405-A25F-F59752CAC5B9} = {DD479D9A-B342-4928-800C-3C466F73B62B}
 		{7345F0A2-AB3A-4B16-8EDD-C3D159C0B085} = {FEDA2CC6-81F6-4423-93DF-F8C520D17240}

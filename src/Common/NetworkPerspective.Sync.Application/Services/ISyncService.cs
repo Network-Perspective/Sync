@@ -21,17 +21,17 @@ namespace NetworkPerspective.Sync.Application.Services
     internal sealed class SyncService : ISyncService
     {
         private readonly ILogger<SyncService> _logger;
-        private readonly IDataSourceFactory _dataSourceFactory;
+        private readonly IDataSource _dataSource;
         private readonly INetworkPerspectiveCore _networkPerspectiveCore;
         private readonly IInteractionsFilterFactory _interactionFilterFactory;
 
         public SyncService(ILogger<SyncService> logger,
-                           IDataSourceFactory dataSourceFactory,
+                           IDataSource dataSource,
                            INetworkPerspectiveCore networkPerspectiveCore,
                            IInteractionsFilterFactory interactionFilterFactory)
         {
             _logger = logger;
-            _dataSourceFactory = dataSourceFactory;
+            _dataSource = dataSource;
             _networkPerspectiveCore = networkPerspectiveCore;
             _interactionFilterFactory = interactionFilterFactory;
         }
@@ -40,21 +40,19 @@ namespace NetworkPerspective.Sync.Application.Services
         {
             try
             {
-                var dataSource = _dataSourceFactory.CreateDataSource();
-
                 await context.StatusLogger.LogInfoAsync("Sync started", stoppingToken);
                 _logger.LogInformation("Executing synchronization for Connector '{connectorId}' for timerange '{timeRange}'", context.ConnectorId, context.TimeRange);
 
                 await _networkPerspectiveCore.ReportSyncStartAsync(context.AccessToken, context.TimeRange, stoppingToken);
 
                 if (context.GetConnectorProperties().SyncGroups)
-                    await SyncGroupsAsync(dataSource, context, stoppingToken);
+                    await SyncGroupsAsync(_dataSource, context, stoppingToken);
                 else
                     await context.StatusLogger.LogInfoAsync("Skipping sync groups", stoppingToken);
 
-                await SyncUsersAsync(dataSource, context, stoppingToken);
-                await SyncEntitiesAsync(dataSource, context, stoppingToken);
-                var syncResult = await SyncInteractionsAsync(dataSource, context, stoppingToken);
+                await SyncUsersAsync(_dataSource, context, stoppingToken);
+                await SyncEntitiesAsync(_dataSource, context, stoppingToken);
+                var syncResult = await SyncInteractionsAsync(_dataSource, context, stoppingToken);
 
                 await _networkPerspectiveCore.ReportSyncSuccessfulAsync(context.AccessToken, context.TimeRange, stoppingToken);
                 await context.StatusLogger.LogInfoAsync("Sync completed", stoppingToken);

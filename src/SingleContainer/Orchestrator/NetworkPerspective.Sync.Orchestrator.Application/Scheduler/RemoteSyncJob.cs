@@ -17,14 +17,16 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler
         private readonly IConnectorsService _connectorsService;
         private readonly IWorkerRouter _router;
         private readonly ISyncHistoryService _syncHistoryService;
+        private readonly ITokenService _tokenService;
         private readonly IClock _clock;
         private readonly ILogger<RemoteSyncJob> _logger;
 
-        public RemoteSyncJob(IConnectorsService connectorsService, IWorkerRouter router, ISyncHistoryService syncHistoryService, IClock clock, ILogger<RemoteSyncJob> logger)
+        public RemoteSyncJob(IConnectorsService connectorsService, IWorkerRouter router, ISyncHistoryService syncHistoryService, ITokenService tokenService, IClock clock, ILogger<RemoteSyncJob> logger)
         {
             _connectorsService = connectorsService;
             _router = router;
             _syncHistoryService = syncHistoryService;
+            _tokenService = tokenService;
             _clock = clock;
             _logger = logger;
         }
@@ -35,10 +37,14 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler
             var nextSyncStart = await _syncHistoryService.EvaluateSyncStartAsync(connectorId, context.CancellationToken);
 
             var connector = await _connectorsService.GetAsync(connectorId, context.CancellationToken);
+            var accessToken = await _tokenService.GetAsync(connector.Id, context.CancellationToken);
+
             var syncContext = new SyncContext
             {
                 ConnectorId = connectorId,
+                NetworkId = connector.NetworkId,
                 TimeRange = new TimeRange(nextSyncStart, _clock.UtcNow()),
+                AccessToken = accessToken,
                 NetworkProperties = connector.Properties
             };
 

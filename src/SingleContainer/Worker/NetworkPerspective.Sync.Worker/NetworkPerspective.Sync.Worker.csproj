@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Core.Stub\NetworkPerspective.Sync.Infrastructure.Core.Stub.csproj" />
     <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Core\NetworkPerspective.Sync.Infrastructure.Core.csproj" />
     <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault\NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault.csproj" />
     <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault\NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault.csproj" />

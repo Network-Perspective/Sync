@@ -29,8 +29,6 @@ namespace NetworkPerspective.Sync.Application
             services.AddScoped<IConnectorInfoProvider>(x => x.GetRequiredService<ConnectorInfoProvider>());
             services.AddScoped<IConnectorInfoInitializer>(x => x.GetRequiredService<ConnectorInfoProvider>());
 
-            services.AddScoped<ISyncContextProvider, SyncContextProvider>();
-
             services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<ICachedSecretRepository, CachedSecretRepository>();
 
@@ -42,7 +40,6 @@ namespace NetworkPerspective.Sync.Application
             services.AddTransient<ISyncContextFactory, SyncContextFactory>();
 
             services.AddSingleton<ITasksStatusesCache, TasksStatusesCache>();
-            services.AddScoped<IDataSourceFactory, DataSourceFactory>();
 
             return services;
         }

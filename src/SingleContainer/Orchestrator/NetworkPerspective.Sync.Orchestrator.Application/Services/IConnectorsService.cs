@@ -13,7 +13,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
 public interface IConnectorsService
 {
-    Task<Guid> CreateAsync(string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default);
+    Task CreateAsync(Guid id, Guid networkId, string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default);
     Task<Connector> GetAsync(Guid id, CancellationToken stoppingToken);
     Task<IEnumerable<Connector>> GetAllAsync(Guid workerId, CancellationToken stoppingToken);
     Task ValidateExists(Guid id, CancellationToken stoppingToken = default);
@@ -32,16 +32,14 @@ internal class ConnectorsService : IConnectorsService
         _logger = logger;
     }
 
-    public async Task<Guid> CreateAsync(string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default)
+    public async Task CreateAsync(Guid id, Guid networkId, string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default)
     {
-        var id = Guid.NewGuid();
         _logger.LogInformation("Creating new connector '{id}' of '{type}'...", id, type);
 
         var worker = await _unitOfWork
             .GetWorkerRepository()
             .GetAsync(workerId, stoppingToken);
 
-        var networkId = Guid.NewGuid();
         var now = _clock.UtcNow();
         var connector = new Connector(id, type, properties, worker, networkId, now);
 
@@ -52,7 +50,6 @@ internal class ConnectorsService : IConnectorsService
         await _unitOfWork.CommitAsync(stoppingToken);
 
         _logger.LogInformation("New connector '{id}' has been created", id);
-        return id;
     }
 
     public async Task<IEnumerable<Connector>> GetAllAsync(Guid workerId, CancellationToken stoppingToken)

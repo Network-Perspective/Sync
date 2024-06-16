@@ -14,20 +14,27 @@ namespace NetworkPerspective.Sync.Application.Scheduler
     internal class SyncJob : IJob
     {
         private readonly ISyncService _syncService;
-        private readonly ISyncContextProvider _syncContextProvider;
+        private readonly IConnectorInfoProvider _connectorInfoProvider;
+
+        private readonly ISyncContextFactory _syncContextFactory;
+        private readonly ISyncContextAccessor _syncContextAccessor;
         private readonly ISyncHistoryService _syncHistoryService;
         private readonly IClock _clock;
         private readonly ILogger<SyncJob> _logger;
 
         public SyncJob(
             ISyncService syncService,
-            ISyncContextProvider syncContextProvider,
+            IConnectorInfoProvider connectorInfoProvider,
+            ISyncContextFactory syncContextFactory,
+            ISyncContextAccessor syncContextAccessor,
             ISyncHistoryService syncHistoryService,
             IClock clock,
             ILogger<SyncJob> logger)
         {
             _syncService = syncService;
-            _syncContextProvider = syncContextProvider;
+            _connectorInfoProvider = connectorInfoProvider;
+            _syncContextFactory = syncContextFactory;
+            _syncContextAccessor = syncContextAccessor;
             _syncHistoryService = syncHistoryService;
             _clock = clock;
             _logger = logger;
@@ -37,7 +44,9 @@ namespace NetworkPerspective.Sync.Application.Scheduler
         {
             try
             {
-                var syncContext = await _syncContextProvider.GetAsync(context.CancellationToken);
+                var connectorInfo = _connectorInfoProvider.Get();
+                var syncContext = await _syncContextFactory.CreateForConnectorAsync(connectorInfo.Id, context.CancellationToken);
+                _syncContextAccessor.SyncContext = syncContext;
                 _logger.LogInformation("Triggered synchronization job for network '{network}'", syncContext.ConnectorId);
                 var syncResult = await _syncService.SyncAsync(syncContext, context.CancellationToken);
 

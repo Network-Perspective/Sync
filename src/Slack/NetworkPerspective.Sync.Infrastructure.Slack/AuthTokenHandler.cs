@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;

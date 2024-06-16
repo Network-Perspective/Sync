@@ -45,4 +45,39 @@ internal class AzureKeyVaultClient : IVault
             throw new VaultException(message, ex);
         }
     }
+
+    public async Task SetSecretAsync(string key, SecureString secret, CancellationToken stoppingToken = default)
+    {
+        try
+        {
+            _logger.LogDebug("Setting key '{key}' to internal key vault at {url}", key, _config.BaseUrl);
+            var keyVaultClient = new SecretClient(new Uri(_config.BaseUrl), _tokenCredential);
+            var vaultSecret = new KeyVaultSecret(key, secret.ToSystemString());
+            await keyVaultClient.SetSecretAsync(vaultSecret, stoppingToken);
+            _logger.LogDebug("Set key '{key}' to internal key vault at {url}", key, _config.BaseUrl);
+        }
+        catch (Exception ex)
+        {
+            var message = $"Unable to set '{key}' to internal key vault at '{_config.BaseUrl}'. Please see inner exception";
+            throw new VaultException(message, ex);
+        }
+    }
+
+    public async Task RemoveSecretAsync(string key, CancellationToken stoppingToken = default)
+    {
+        try
+        {
+            _logger.LogDebug("Removing key '{key}' from internal key vault at {url}", key, _config.BaseUrl);
+            var keyVaultClient = new SecretClient(new Uri(_config.BaseUrl), _tokenCredential);
+            var deleteOperation = await keyVaultClient.StartDeleteSecretAsync(key, stoppingToken);
+            await deleteOperation.WaitForCompletionAsync(stoppingToken);
+            var response = keyVaultClient.PurgeDeletedSecretAsync(key, stoppingToken);
+            _logger.LogDebug("Removed key '{key}' from internal key vault at {url}", key, _config.BaseUrl);
+        }
+        catch (Exception ex)
+        {
+            var message = $"Unable to remove '{key}' from internal key vault at '{_config.BaseUrl}'. Please see inner exception";
+            throw new VaultException(message, ex);
+        }
+    }
 }
