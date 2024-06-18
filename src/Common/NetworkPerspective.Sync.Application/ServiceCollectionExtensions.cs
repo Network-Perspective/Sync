@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Services;
 
 namespace NetworkPerspective.Sync.Application
@@ -31,6 +30,12 @@ namespace NetworkPerspective.Sync.Application
 
             services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<ICachedSecretRepository, CachedSecretRepository>();
+            services.AddScoped<IStatusLogger>(sp =>
+            {
+                var connectorInfo = sp.GetRequiredService<IConnectorInfoProvider>().Get();
+                var statusLogger = sp.GetRequiredService<IStatusLoggerFactory>().CreateForConnector(connectorInfo.Id);
+                return statusLogger;
+            });
 
             services.AddTransient<IConnectorService, ConnectorService>();
             services.AddTransient<IStatusLoggerFactory, StatusLoggerFactory>();

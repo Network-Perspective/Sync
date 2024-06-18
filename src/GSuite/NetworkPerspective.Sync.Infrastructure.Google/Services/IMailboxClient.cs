@@ -10,7 +10,6 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Extensions;
@@ -37,16 +36,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
         private readonly ITasksStatusesCache _tasksStatusesCache;
         private readonly ICredentialsProvider _credentialsProvider;
         private readonly IRetryPolicyProvider _retryPolicyProvider;
+        private readonly IStatusLogger _statusLogger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IClock _clock;
 
-        public MailboxClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, IRetryPolicyProvider retryPolicyProvider, ILoggerFactory loggerFactory, IClock clock)
+        public MailboxClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, IRetryPolicyProvider retryPolicyProvider, IStatusLogger statusLogger, ILoggerFactory loggerFactory, IClock clock)
         {
             _config = config.Value;
             _logger = loggerFactory.CreateLogger<MailboxClient>();
             _tasksStatusesCache = tasksStatusesCache;
             _credentialsProvider = credentialsProvider;
             _retryPolicyProvider = retryPolicyProvider;
+            _statusLogger = statusLogger;
             _loggerFactory = loggerFactory;
             _clock = clock;
         }
@@ -103,7 +104,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             }
             catch (TooManyMailsPerUserException tmmpuex)
             {
-                await context.StatusLogger.LogWarningAsync($"Skipping mailbox '***' too many messages", stoppingToken);
+                await _statusLogger.LogWarningAsync($"Skipping mailbox '***' too many messages", stoppingToken);
                 _logger.LogWarning("Skipping mailbox '{email}' too many messages", "***");
                 _logger.LogTrace("Skipping mailbox '{email}' too many messages", tmmpuex.Email);
                 return SingleTaskResult.Empty;

@@ -23,16 +23,19 @@ namespace NetworkPerspective.Sync.Application.Services
         private readonly ILogger<SyncService> _logger;
         private readonly IDataSource _dataSource;
         private readonly INetworkPerspectiveCore _networkPerspectiveCore;
+        private readonly IStatusLogger _statusLogger;
         private readonly IInteractionsFilterFactory _interactionFilterFactory;
 
         public SyncService(ILogger<SyncService> logger,
                            IDataSource dataSource,
                            INetworkPerspectiveCore networkPerspectiveCore,
+                           IStatusLogger statusLogger,
                            IInteractionsFilterFactory interactionFilterFactory)
         {
             _logger = logger;
             _dataSource = dataSource;
             _networkPerspectiveCore = networkPerspectiveCore;
+            _statusLogger = statusLogger;
             _interactionFilterFactory = interactionFilterFactory;
         }
 
@@ -40,7 +43,7 @@ namespace NetworkPerspective.Sync.Application.Services
         {
             try
             {
-                await context.StatusLogger.LogInfoAsync("Sync started", stoppingToken);
+                await _statusLogger.LogInfoAsync("Sync started", stoppingToken);
                 _logger.LogInformation("Executing synchronization for Connector '{connectorId}' for timerange '{timeRange}'", context.ConnectorId, context.TimeRange);
 
                 await _networkPerspectiveCore.ReportSyncStartAsync(context.AccessToken, context.TimeRange, stoppingToken);
@@ -48,14 +51,14 @@ namespace NetworkPerspective.Sync.Application.Services
                 if (context.GetConnectorProperties().SyncGroups)
                     await SyncGroupsAsync(_dataSource, context, stoppingToken);
                 else
-                    await context.StatusLogger.LogInfoAsync("Skipping sync groups", stoppingToken);
+                    await _statusLogger.LogInfoAsync("Skipping sync groups", stoppingToken);
 
                 await SyncUsersAsync(_dataSource, context, stoppingToken);
                 await SyncEntitiesAsync(_dataSource, context, stoppingToken);
                 var syncResult = await SyncInteractionsAsync(_dataSource, context, stoppingToken);
 
                 await _networkPerspectiveCore.ReportSyncSuccessfulAsync(context.AccessToken, context.TimeRange, stoppingToken);
-                await context.StatusLogger.LogInfoAsync("Sync completed", stoppingToken);
+                await _statusLogger.LogInfoAsync("Sync completed", stoppingToken);
                 _logger.LogInformation("Synchronization completed for Connector '{connectorId}'", context.ConnectorId);
 
                 return syncResult;
@@ -64,14 +67,14 @@ namespace NetworkPerspective.Sync.Application.Services
             {
                 await _networkPerspectiveCore.TryReportSyncFailedAsync(context.AccessToken, context.TimeRange, ex.Message, stoppingToken);
                 _logger.LogInformation("Synchronization Job cancelled for Connector '{connectorId}'", context.ConnectorId);
-                await context.StatusLogger.LogInfoAsync("Sync cancelled", CancellationToken.None);
+                await _statusLogger.LogInfoAsync("Sync cancelled", CancellationToken.None);
                 return SyncResult.Empty;
             }
             catch (Exception ex)
             {
                 await _networkPerspectiveCore.TryReportSyncFailedAsync(context.AccessToken, context.TimeRange, ex.Message, stoppingToken);
                 _logger.LogError(ex, "Cannot complete synchronization job for Connector {connectorId}.\n{exceptionMessage}", context.ConnectorId, ex.Message);
-                await context.StatusLogger.LogErrorAsync("Sync failed", CancellationToken.None);
+                await _statusLogger.LogErrorAsync("Sync failed", CancellationToken.None);
                 return SyncResult.Empty;
             }
         }
@@ -79,35 +82,35 @@ namespace NetworkPerspective.Sync.Application.Services
         private async Task SyncUsersAsync(IDataSource dataSource, SyncContext context, CancellationToken stoppingToken)
         {
             _logger.LogInformation("Synchronizing employees profiles for connector '{connectorId}'", context.ConnectorId);
-            await context.StatusLogger.LogInfoAsync($"Synchronizing employees profiles...", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Synchronizing employees profiles...", stoppingToken);
 
             var employees = await dataSource.GetEmployeesAsync(context, stoppingToken);
-            await context.StatusLogger.LogInfoAsync($"Received employees profiles", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Received employees profiles", stoppingToken);
             await _networkPerspectiveCore.PushUsersAsync(context.AccessToken, employees, stoppingToken);
-            await context.StatusLogger.LogInfoAsync($"Uploaded employees profiles", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Uploaded employees profiles", stoppingToken);
 
-            await context.StatusLogger.LogInfoAsync($"Synchronization of employees profiles completed", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Synchronization of employees profiles completed", stoppingToken);
             _logger.LogInformation("Synchronization of employees profiles for connector '{connectorId}' completed", context.ConnectorId);
         }
 
         private async Task SyncEntitiesAsync(IDataSource dataSource, SyncContext context, CancellationToken stoppingToken)
         {
             _logger.LogInformation("Synchronizing hashed employees profiles for connector '{connectorId}'", context.ConnectorId);
-            await context.StatusLogger.LogInfoAsync($"Synchronizing hashed employees profiles...", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Synchronizing hashed employees profiles...", stoppingToken);
 
             var employees = await dataSource.GetHashedEmployeesAsync(context, stoppingToken);
-            await context.StatusLogger.LogInfoAsync($"Received hashed employees profiles", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Received hashed employees profiles", stoppingToken);
             await _networkPerspectiveCore.PushEntitiesAsync(context.AccessToken, employees, context.TimeRange.Start, stoppingToken);
-            await context.StatusLogger.LogInfoAsync($"Uploaded hashed employees profiles", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Uploaded hashed employees profiles", stoppingToken);
 
-            await context.StatusLogger.LogInfoAsync($"Synchronization of hashed employees profiles completed", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Synchronization of hashed employees profiles completed", stoppingToken);
             _logger.LogInformation("Synchronization of hashed employees profiles for connector '{connectorId}' completed", context.ConnectorId);
         }
 
         private async Task SyncGroupsAsync(IDataSource dataSource, SyncContext context, CancellationToken stoppingToken)
         {
             _logger.LogInformation("Synchronizing groups for connector '{connectorId}'", context.ConnectorId);
-            await context.StatusLogger.LogInfoAsync($"Synchronizing groups...", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Synchronizing groups...", stoppingToken);
 
             var employees = await dataSource.GetHashedEmployeesAsync(context, stoppingToken);
 
@@ -123,19 +126,19 @@ namespace NetworkPerspective.Sync.Application.Services
                     .ToHashSet(Group.EqualityComparer);
             }
 
-            await context.StatusLogger.LogInfoAsync($"Received {groups.Count} groups", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Received {groups.Count} groups", stoppingToken);
 
             await _networkPerspectiveCore.PushGroupsAsync(context.AccessToken, groups, stoppingToken);
-            await context.StatusLogger.LogInfoAsync("Uploaded groups", stoppingToken);
+            await _statusLogger.LogInfoAsync("Uploaded groups", stoppingToken);
 
-            await context.StatusLogger.LogInfoAsync($"Synchronization of groups completed", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Synchronization of groups completed", stoppingToken);
             _logger.LogInformation("Synchronization of groups for connector '{connectorId}' completed", context.ConnectorId);
         }
 
         private async Task<SyncResult> SyncInteractionsAsync(IDataSource dataSource, SyncContext context, CancellationToken stoppingToken)
         {
             _logger.LogInformation("Synchronizing interactions for connector '{connectorId}' for period {period}", context.ConnectorId, context.TimeRange);
-            await context.StatusLogger.LogInfoAsync($"Synchronizing interactions for period '{context.TimeRange}'...", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Synchronizing interactions for period '{context.TimeRange}'...", stoppingToken);
 
             var filter = _interactionFilterFactory
                 .CreateInteractionsFilter(context.TimeRange);
@@ -145,7 +148,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             var result = await dataSource.SyncInteractionsAsync(filteredStream, context, stoppingToken);
 
-            await context.StatusLogger.LogInfoAsync($"Synchronization of interactions for period '{context.TimeRange}' completed", stoppingToken);
+            await _statusLogger.LogInfoAsync($"Synchronization of interactions for period '{context.TimeRange}' completed", stoppingToken);
             _logger.LogInformation("Synchronization of interactions for connector '{connectorId}' for {period} completed{newLine}{result}", context.ConnectorId, context.TimeRange, Environment.NewLine, result);
 
             foreach (var ex in result.Exceptions)

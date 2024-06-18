@@ -46,7 +46,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var usersClient = new UsersClient(_microsoftClientFixture.Client, _usersClientlogger);
 
             var timeRange = new TimeRange(new DateTime(2021, 12, 01), new DateTime(2021, 12, 02));
-            var syncContext = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], new SecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+            var syncContext = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], new SecureString(), timeRange, Mock.Of<IHashingService>());
             var users = await usersClient.GetUsersAsync(syncContext);
             var employees = EmployeesMapper.ToEmployees(users, syncContext.HashFunction, EmployeeFilter.Empty, true);
 

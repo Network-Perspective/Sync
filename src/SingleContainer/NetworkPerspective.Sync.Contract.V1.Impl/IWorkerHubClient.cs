@@ -64,6 +64,11 @@ internal class WorkerHubClient : IWorkerHubClient
         return _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.SyncCompletedAsync), syncCompleted);
     }
 
+    public Task<AckDto> AddLogAsync(AddLogDto addLog)
+    {
+        return _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.AddLogAsync), addLog);
+    }
+
     public async Task<PongDto> PingAsync(PingDto ping)
     {
         var result = await _connection.InvokeAsync<PongDto>(nameof(IOrchestratorClient.PingAsync), ping);

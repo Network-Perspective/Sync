@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Common\NetworkPerspective.Sync.Application\NetworkPerspective.Sync.Application.csproj" />
+    <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract.V1.Impl\NetworkPerspective.Sync.Contract.V1.Impl.csproj" />
   </ItemGroup>
 
 </Project>

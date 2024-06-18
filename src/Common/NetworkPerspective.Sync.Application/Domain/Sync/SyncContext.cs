@@ -19,17 +19,15 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
         public ConnectorConfig NetworkConfig { get; }
         public SecureString AccessToken { get; }
         public TimeRange TimeRange { get; }
-        public IStatusLogger StatusLogger { get; }
         public HashFunction.Delegate HashFunction { get; }
 
-        public SyncContext(Guid connectorId, ConnectorConfig networkConfig, IEnumerable<KeyValuePair<string, string>> connectorProperties, SecureString accessToken, TimeRange timeRange, IStatusLogger statusLogger, IHashingService hashingService)
+        public SyncContext(Guid connectorId, ConnectorConfig networkConfig, IEnumerable<KeyValuePair<string, string>> connectorProperties, SecureString accessToken, TimeRange timeRange, IHashingService hashingService)
         {
             ConnectorId = connectorId;
             NetworkConfig = networkConfig;
             _connectorProperties = connectorProperties;
             AccessToken = accessToken;
             TimeRange = timeRange;
-            StatusLogger = statusLogger;
             _hashingService = hashingService;
             HashFunction = hashingService.Hash;
         }

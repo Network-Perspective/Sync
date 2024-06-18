@@ -19,7 +19,6 @@ namespace NetworkPerspective.Sync.Application.Services
     {
         private readonly ITokenService _tokenService;
         private readonly INetworkPerspectiveCore _networkPerspectiveCore;
-        private readonly IStatusLoggerFactory _statusLoggerFactory;
         private readonly ISyncHistoryService _syncHistoryService;
         private readonly IConnectorService _connectorService;
         private readonly IHashingServiceFactory _hashingServiceFactory;
@@ -29,7 +28,6 @@ namespace NetworkPerspective.Sync.Application.Services
         public SyncContextFactory(
             ITokenService tokenService,
             INetworkPerspectiveCore networkPerspectiveCore,
-            IStatusLoggerFactory statusLoggerFactory,
             ISyncHistoryService syncHistoryService,
             IConnectorService connectorService,
             IHashingServiceFactory hashingServiceFactory,
@@ -38,7 +36,6 @@ namespace NetworkPerspective.Sync.Application.Services
         {
             _tokenService = tokenService;
             _networkPerspectiveCore = networkPerspectiveCore;
-            _statusLoggerFactory = statusLoggerFactory;
             _syncHistoryService = syncHistoryService;
             _connectorService = connectorService;
             _hashingServiceFactory = hashingServiceFactory;
@@ -52,7 +49,6 @@ namespace NetworkPerspective.Sync.Application.Services
             var networkConfig = await _networkPerspectiveCore.GetNetworkConfigAsync(token, stoppingToken);
             var properties = await _connectorService.GetProperties(connectorId, stoppingToken);
             var lastSyncedTimeStamp = await _syncHistoryService.EvaluateSyncStartAsync(connectorId, stoppingToken);
-            var statusLogger = _statusLoggerFactory.CreateForConnector(connectorId);
             var now = _clock.UtcNow();
 
 
@@ -62,7 +58,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             var timeRange = new TimeRange(lastSyncedTimeStamp, now);
 
-            return new SyncContext(connectorId, networkConfig, properties, token, timeRange, statusLogger, hashingService);
+            return new SyncContext(connectorId, networkConfig, properties, token, timeRange, hashingService);
         }
     }
 }

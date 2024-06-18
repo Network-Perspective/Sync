@@ -24,11 +24,13 @@ namespace NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient, IWorkerRouter
 {
     private readonly IConnectionsLookupTable _connectionsLookupTable;
+    private readonly IStatusLogger _statusLogger;
     private readonly ILogger<WorkerHubV1> _logger;
 
-    public WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, ILogger<WorkerHubV1> logger)
+    public WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatusLogger statusLogger, ILogger<WorkerHubV1> logger)
     {
         _connectionsLookupTable = connectionsLookupTable;
+        _statusLogger = statusLogger;
         _logger = logger;
     }
 
@@ -92,5 +94,20 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient, IWorkerRoute
         return new PongDto { CorrelationId = ping.CorrelationId, PingTimestamp = ping.Timestamp };
     }
 
+    public async Task<AckDto> AddLogAsync(AddLogDto dto)
+    {
+        var domainStatusLogLevel = ToDomainStatusLogLevel(dto.Level);
+        await _statusLogger.AddLogAsync(dto.ConnectorId, dto.Message, domainStatusLogLevel);
+        return new AckDto { CorrelationId = dto.CorrelationId };
+    }
 
+    private Sync.Application.Domain.Statuses.StatusLogLevel ToDomainStatusLogLevel(StatusLogLevel level)
+    {
+        return level switch
+        {
+            StatusLogLevel.Error => Sync.Application.Domain.Statuses.StatusLogLevel.Error,
+            StatusLogLevel.Warning => Sync.Application.Domain.Statuses.StatusLogLevel.Warning,
+            _ => Sync.Application.Domain.Statuses.StatusLogLevel.Info,
+        };
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+
 using NetworkPerspective.Sync.Application.Domain.Sync;
 
 namespace NetworkPerspective.Sync.Application.Services;
@@ -24,7 +25,7 @@ internal class SyncContextAccessor : ISyncContextAccessor
     }
 
 
-    public SyncContext SyncContext 
+    public SyncContext SyncContext
     {
         get
         {

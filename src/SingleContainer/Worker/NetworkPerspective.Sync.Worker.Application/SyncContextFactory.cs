@@ -23,14 +23,12 @@ internal class SyncContextFactory : ISyncContextFactory
     private readonly ISecretRepositoryFactory _secretRepositoryFactory;
     private readonly IHashingServiceFactory _hashingServiceFactory;
     private readonly INetworkPerspectiveCore _networkPerspectiveCore;
-    private readonly IStatusLogger _statusLogger;
 
-    public SyncContextFactory(ISecretRepositoryFactory secretRepositoryFactory, IHashingServiceFactory hashingServiceFactory, INetworkPerspectiveCore networkPerspectiveCore, IStatusLogger statusLogger)
+    public SyncContextFactory(ISecretRepositoryFactory secretRepositoryFactory, IHashingServiceFactory hashingServiceFactory, INetworkPerspectiveCore networkPerspectiveCore)
     {
         _secretRepositoryFactory = secretRepositoryFactory;
         _hashingServiceFactory = hashingServiceFactory;
         _networkPerspectiveCore = networkPerspectiveCore;
-        _statusLogger = statusLogger;
     }
 
     public async Task<SyncContext> CreateAsync(Guid connectorId, IDictionary<string, string> properties, TimeRange timeRange, SecureString accessToken, CancellationToken stoppingToken = default)
@@ -41,7 +39,6 @@ internal class SyncContextFactory : ISyncContextFactory
         var networkConfig = await _networkPerspectiveCore.GetNetworkConfigAsync(accessToken, stoppingToken);
         var hashingService = await _hashingServiceFactory.CreateAsync(secretRepository, stoppingToken);
 
-        return new SyncContext(connectorId, networkConfig, properties, accessToken, timeRange, _statusLogger, hashingService);
+        return new SyncContext(connectorId, networkConfig, properties, accessToken, timeRange, hashingService);
     }
 }
-

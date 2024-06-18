@@ -63,12 +63,12 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var start = new DateTime(2022, 01, 01);
             var end = new DateTime(2022, 01, 02);
             var timeRange = new TimeRange(start, end);
-            var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+            var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
 
             _dataSourceMock
                 .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new SyncResult(10, 100, Enumerable.Empty<Exception>()));
-            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _interactionsFilterFactoryMock.Object);
 
             // Act
             await syncService.SyncAsync(context);
@@ -85,13 +85,13 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var start = new DateTime(2022, 01, 01);
             var end = new DateTime(2022, 01, 02);
             var timeRange = new TimeRange(start, end);
-            var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+            var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
 
             _dataSourceMock
                 .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception());
 
-            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _interactionsFilterFactoryMock.Object);
 
             // Act
             await syncService.SyncAsync(context);
@@ -108,9 +108,9 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var start = new DateTime(2022, 01, 01);
             var end = new DateTime(2022, 01, 02);
             var timeRange = new TimeRange(start, end);
-            var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+            var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
 
-            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _interactionsFilterFactoryMock.Object);
 
             // Act
             await syncService.SyncAsync(context);
@@ -128,7 +128,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var end = new DateTime(2022, 01, 02);
             var timeRange = new TimeRange(start, end);
             var connectorProperties = new ConnectorProperties(true, false, null);
-            var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, connectorProperties.GetAll(), "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+            var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, connectorProperties.GetAll(), "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
 
             var employeeId = EmployeeId.Create("foo", "bar");
             var departmentGroup = Group.Create("group1Id", "groupName1", Group.DepartmentCatergory);
@@ -140,7 +140,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 .Setup(x => x.GetHashedEmployeesAsync(context, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new EmployeeCollection(new[] { employee }, HashFunction.Empty));
 
-            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _interactionsFilterFactoryMock.Object);
 
             // Act
             await syncService.SyncAsync(context);
@@ -162,14 +162,14 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var start = new DateTime(2022, 01, 01);
             var end = new DateTime(2022, 01, 02);
             var timeRange = new TimeRange(start, end);
-            var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IStatusLogger>(), Mock.Of<IHashingService>());
+            var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
 
             var interactionsStreamMock = new Mock<IInteractionsStream>();
             _networkPerspectiveCoreMock
                 .Setup(x => x.OpenInteractionsStream(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
                 .Returns(interactionsStreamMock.Object);
 
-            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, _interactionsFilterFactoryMock.Object);
+            var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _interactionsFilterFactoryMock.Object);
 
             // Act
             await syncService.SyncAsync(context);
