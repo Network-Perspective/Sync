@@ -19,7 +19,7 @@ public interface IWorkerHubClient : IOrchestratorClient
 internal class WorkerHubClient : IWorkerHubClient
 {
     private HubConnection _connection;
-    private readonly OrchestratorClientConfiguration _callbacks = new OrchestratorClientConfiguration();
+    private readonly OrchestratorClientConfiguration _callbacks = new();
     private readonly WorkerHubClientConfig _config;
     private readonly ILogger<IWorkerHubClient> _logger;
 
@@ -86,9 +86,10 @@ internal class WorkerHubClient : IWorkerHubClient
             _ = Task.Run(async () =>
             {
                 if (_callbacks.OnStartSync is not null)
-                    await _callbacks.OnStartSync.Invoke(x);
-
-                await SyncCompletedAsync(new SyncCompletedDto { CorrelationId = Guid.NewGuid() });
+                {
+                    var result = await _callbacks.OnStartSync(x);
+                    await SyncCompletedAsync(result);
+                }
             });
 
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
@@ -100,7 +101,7 @@ internal class WorkerHubClient : IWorkerHubClient
             _logger.LogInformation("Received request '{correlationId}' to set {count} secrets", x.CorrelationId, x.Secrets.Count);
 
             if (_callbacks.OnSetSecret is not null)
-                await _callbacks.OnSetSecret.Invoke(x);
+                await _callbacks.OnSetSecret(x);
 
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
             return new AckDto { CorrelationId = x.CorrelationId };

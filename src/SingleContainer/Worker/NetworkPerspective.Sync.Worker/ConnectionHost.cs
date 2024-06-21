@@ -22,7 +22,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContext
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        async Task OnStartSync(StartSyncDto dto)
+        async Task<SyncCompletedDto> OnStartSync(StartSyncDto dto)
         {
             _logger.LogInformation("Syncing soooo... hard....");
 
@@ -40,10 +40,22 @@ public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContext
                 syncContextAccessor.SyncContext = syncContext;
 
                 var syncService = scope.ServiceProvider.GetRequiredService<ISyncService>();
-                await syncService.SyncAsync(syncContext, stoppingToken);
+                var result = await syncService.SyncAsync(syncContext, stoppingToken);
+                _logger.LogInformation("Sync completed");
+
+                return new SyncCompletedDto
+                {
+                    CorrelationId = dto.CorrelationId,
+                    ConnectorId = dto.ConnectorId,
+                    Start = dto.Start,
+                    End = dto.End,
+                    TasksCount = result.TasksCount,
+                    FailedTasksCount = result.FailedTasksCount,
+                    SuccessRate = result.SuccessRate,
+                    TotalInteractionsCount = result.TotalInteractionsCount
+                };
             };
 
-            _logger.LogInformation("Sync completed");
         }
 
         async Task OnSetSecrets(SetSecretsDto dto)

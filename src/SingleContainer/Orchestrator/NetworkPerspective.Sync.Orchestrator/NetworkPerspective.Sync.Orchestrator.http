@@ -47,7 +47,7 @@ Accept: application/json
     "Id": "{{connector_id}}",
     "NetworkId": "{{network_id}}",
     "WorkerId": "{{worker_id}}",
-    "Type": "Google",
+    "Type": "Slack",
     "AccessToken": "access_token",
     "Properties": [
         { "Key": "key1", "Value": "value1" },
@@ -62,7 +62,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-
+    "OverrideSyncPeriodStart": "2024-01-01T00:00:00Z"
 }
 
 ### SCHEDULER REMOVE

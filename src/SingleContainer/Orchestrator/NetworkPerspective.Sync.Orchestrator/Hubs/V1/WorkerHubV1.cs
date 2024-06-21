@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Contract.V1;
@@ -17,6 +18,7 @@ using NetworkPerspective.Sync.Orchestrator.Auth.Worker;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 
@@ -25,12 +27,16 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient, IWorkerRoute
 {
     private readonly IConnectionsLookupTable _connectionsLookupTable;
     private readonly IStatusLogger _statusLogger;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IClock _clock;
     private readonly ILogger<WorkerHubV1> _logger;
 
-    public WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatusLogger statusLogger, ILogger<WorkerHubV1> logger)
+    public WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatusLogger statusLogger, IServiceProvider serviceProvider, IClock clock, ILogger<WorkerHubV1> logger)
     {
         _connectionsLookupTable = connectionsLookupTable;
         _statusLogger = statusLogger;
+        _serviceProvider = serviceProvider;
+        _clock = clock;
         _logger = logger;
     }
 
@@ -76,13 +82,19 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient, IWorkerRoute
         _logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
 
-    public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto syncCompleted)
+    public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto dto)
     {
         _logger.LogInformation("Received notification from worker '{id}' sync completed", Context.GetWorkerName());
 
-        await Task.Yield();
+        var now = _clock.UtcNow();
+        var timeRange = new TimeRange(dto.Start, dto.End);
+        var log = SyncHistoryEntry.Create(dto.ConnectorId, now, timeRange, dto.SuccessRate, dto.TasksCount, dto.TotalInteractionsCount);
 
-        return new AckDto { CorrelationId = syncCompleted.CorrelationId };
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var syncHistoryService = scope.ServiceProvider.GetService<ISyncHistoryService>();
+        await syncHistoryService.SaveLogAsync(log);
+
+        return new AckDto { CorrelationId = dto.CorrelationId };
     }
 
     public async Task<PongDto> PingAsync(PingDto ping)
