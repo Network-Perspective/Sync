@@ -1,6 +1,6 @@
 ﻿using Quartz;
 
-namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
+namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 
 public interface IJobDetailFactory
 {

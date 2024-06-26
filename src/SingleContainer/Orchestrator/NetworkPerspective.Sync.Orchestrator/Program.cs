@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Orchestrator.Application;
-using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
@@ -32,8 +31,7 @@ public class Program
 
         builder.Services
             .AddDocumentation(typeof(Program).Assembly)
-            .AddApplication()
-            .AddScheduler(builder.Configuration.GetSection("App:Scheduler"), dbConnectionString)
+            .AddApplication(builder.Configuration.GetSection("App"), dbConnectionString)
             .AddPersistence(healthcheckBuilder)
             .AddAzureKeyVault(builder.Configuration.GetSection("Infrastructure:Vault"), healthcheckBuilder)
             .AddAuth()

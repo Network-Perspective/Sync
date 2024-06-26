@@ -19,7 +19,6 @@ using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
-
 namespace NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 
 [Authorize(AuthenticationSchemes = WorkerAuthOptions.DefaultScheme)]
@@ -80,6 +79,21 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient, IWorkerRoute
         var connectionId = _connectionsLookupTable.Get(workerName);
         var response = await Clients.Client(connectionId).SetSecretsAsync(dto);
         _logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
+    }
+
+    public async Task RotateSecretsAsync(string workerName, Guid connectorId, IDictionary<string, string> networkProperties, string connectorType)
+    {
+        var dto = new RotateSecretsDto
+        {
+            CorrelationId = Guid.NewGuid(),
+            ConnectorId = connectorId,
+            NetworkProperties = networkProperties,
+            ConnectorType = connectorType
+        };
+        var connectionId = _connectionsLookupTable.Get(workerName);
+        var response = await Clients.Client(connectionId).RotateSecretsAsync(dto);
+        _logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
+
     }
 
     public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto dto)

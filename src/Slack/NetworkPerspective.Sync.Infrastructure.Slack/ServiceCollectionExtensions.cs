@@ -58,6 +58,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
             services.AddScoped<IDataSource, SlackFacade>();
             services.AddTransient<ISecretRotator, SlackSecretsRotator>();
+            services.AddTransient<ISecretRotationService, SlackSecretRoationService>();
 
             return services;
         }

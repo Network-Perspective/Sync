@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IConnectorInfoInitializer>(x => x.GetRequiredService<ConnectorInfoProvider>());
 
         services.AddScoped<ISyncContextAccessor, SyncContextAccessor>();
+        services.AddScoped<ISecretRotationContextAccessor, SecretRotationContextAccessor>();
 
         services.AddScoped<ICachedSecretRepository, CachedSecretRepository>();
 
@@ -28,7 +29,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDataSourceFactory, DataSourceFactory>();
         services.AddScoped<IDataSource>(sp => sp.GetRequiredService<IDataSourceFactory>().CreateDataSource());
 
+        services.AddScoped<ISecretRotationServiceFactory, SecretRotatorFactory>();
+        services.AddScoped<ISecretRotationService>(sp => sp.GetRequiredService<ISecretRotationServiceFactory>().CreateSecretRotator());
+
         services.AddSingleton<ISyncContextFactory, SyncContextFactory>();
+        services.AddSingleton<ISecretRotationContextFactory, SecretRotationContextFactory>();
 
         services.AddScoped<IStatusLogger, StatusLogger>();
         services.AddScoped<ISyncService, SyncService>();

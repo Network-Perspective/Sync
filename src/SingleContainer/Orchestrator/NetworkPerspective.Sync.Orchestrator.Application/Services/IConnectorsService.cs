@@ -15,7 +15,8 @@ public interface IConnectorsService
 {
     Task CreateAsync(Guid id, Guid networkId, string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default);
     Task<Connector> GetAsync(Guid id, CancellationToken stoppingToken);
-    Task<IEnumerable<Connector>> GetAllAsync(Guid workerId, CancellationToken stoppingToken);
+    Task<IEnumerable<Connector>> GetAllOfWorkerAsync(Guid workerId, CancellationToken stoppingToken = default);
+    Task<IEnumerable<Connector>> GetAllAsync(CancellationToken stoppingToken = default);
     Task ValidateExists(Guid id, CancellationToken stoppingToken = default);
 }
 
@@ -52,13 +53,22 @@ internal class ConnectorsService : IConnectorsService
         _logger.LogInformation("New connector '{id}' has been created", id);
     }
 
-    public async Task<IEnumerable<Connector>> GetAllAsync(Guid workerId, CancellationToken stoppingToken)
+    public async Task<IEnumerable<Connector>> GetAllAsync(CancellationToken stoppingToken = default)
+    {
+        _logger.LogInformation("Getting all connectors...");
+
+        return await _unitOfWork
+            .GetConnectorRepository()
+            .GetAllAsync(stoppingToken);
+    }
+
+    public async Task<IEnumerable<Connector>> GetAllOfWorkerAsync(Guid workerId, CancellationToken stoppingToken = default)
     {
         _logger.LogInformation("Getting all connectors of worker '{workerId}'...", workerId);
 
         return await _unitOfWork
             .GetConnectorRepository()
-            .GetAllAsync(workerId, stoppingToken);
+            .GetAllOfWorkerAsync(workerId, stoppingToken);
     }
 
     public async Task<Connector> GetAsync(Guid id, CancellationToken stoppingToken)

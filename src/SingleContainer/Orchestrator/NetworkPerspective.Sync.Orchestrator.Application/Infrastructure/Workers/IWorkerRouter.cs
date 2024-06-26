@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 
@@ -10,4 +11,5 @@ public interface IWorkerRouter
 {
     Task StartSyncAsync(string workerName, SyncContext syncContext);
     Task SetSecretsAsync(string workerName, IDictionary<string, SecureString> secrets);
+    Task RotateSecretsAsync(string workerName, Guid connectorId, IDictionary<string, string> networkProperties, string connectorType);
 }

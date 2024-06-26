@@ -74,10 +74,29 @@ public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContext
             _logger.LogInformation("Secrets has been set");
         }
 
+        async Task OnRotateSecrets(RotateSecretsDto dto)
+        {
+            _logger.LogInformation("Rotating secrets for connector '{connectorId}' of type '{type}'", dto.CorrelationId, dto.ConnectorType);
+
+            await using (var scope = serviceProvider.CreateAsyncScope())
+            {
+                var contextFactory = scope.ServiceProvider.GetRequiredService<ISecretRotationContextFactory>();
+                var contextAccesor = scope.ServiceProvider.GetRequiredService<ISecretRotationContextAccessor>();
+                var service = scope.ServiceProvider.GetRequiredService<ISecretRotationService>();
+
+                var context = await contextFactory.CreateAsync(dto.ConnectorId, dto.NetworkProperties, stoppingToken);
+                contextAccesor.SecretRotationContext = context;
+                await service.ExecuteAsync(context, stoppingToken);
+            };
+
+            _logger.LogInformation("Secrets has been rotated");
+        }
+
         await hubClient.ConnectAsync(configuration: x =>
         {
             x.OnStartSync = OnStartSync;
-            x.OnSetSecret = OnSetSecrets;
+            x.OnSetSecrets = OnSetSecrets;
+            x.OnRotateSecrets = OnRotateSecrets;
         }, stoppingToken: stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)

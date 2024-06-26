@@ -10,7 +10,7 @@ using Quartz;
 
 using IQuartzSchedulerFactory = Quartz.ISchedulerFactory;
 
-namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
+namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 
 public interface ISyncScheduler
 {
@@ -28,10 +28,10 @@ internal class SyncScheduler : ISyncScheduler
 {
     private readonly IQuartzSchedulerFactory _schedulerFactory;
     private readonly IJobDetailFactory _jobDetailFactory;
-    private readonly SchedulerConfig _config;
+    private readonly SyncSchedulerConfig _config;
     private readonly ILogger<SyncScheduler> _logger;
 
-    public SyncScheduler(IQuartzSchedulerFactory schedulerFactory, IJobDetailFactory jobDetailFactory, IOptions<SchedulerConfig> config, ILogger<SyncScheduler> logger)
+    public SyncScheduler(IQuartzSchedulerFactory schedulerFactory, IJobDetailFactory jobDetailFactory, IOptions<SyncSchedulerConfig> config, ILogger<SyncScheduler> logger)
     {
         _schedulerFactory = schedulerFactory;
         _jobDetailFactory = jobDetailFactory;

@@ -100,8 +100,19 @@ internal class WorkerHubClient : IWorkerHubClient
         {
             _logger.LogInformation("Received request '{correlationId}' to set {count} secrets", x.CorrelationId, x.Secrets.Count);
 
-            if (_callbacks.OnSetSecret is not null)
-                await _callbacks.OnSetSecret(x);
+            if (_callbacks.OnSetSecrets is not null)
+                await _callbacks.OnSetSecrets(x);
+
+            _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
+            return new AckDto { CorrelationId = x.CorrelationId };
+        });
+
+        _connection.On<RotateSecretsDto, AckDto>(nameof(IWorkerClient.RotateSecretsAsync), async x =>
+        {
+            _logger.LogInformation("Received request '{correlationId}' to rotate secrets for connector '{connectorId}' of type '{type}'", x.CorrelationId, x.ConnectorId, x.ConnectorType);
+
+            if (_callbacks.OnRotateSecrets is not null)
+                await _callbacks.OnRotateSecrets(x);
 
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
             return new AckDto { CorrelationId = x.CorrelationId };

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
+using NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 using NetworkPerspective.Sync.Orchestrator.Dtos;
@@ -53,7 +53,7 @@ public class ConnectorsController : ControllerBase
     {
         _logger.LogDebug("Received request to get all connectors of worker '{workerId}'", workerId);
 
-        var workers = await _connectorsService.GetAllAsync(workerId, stoppingToken);
+        var workers = await _connectorsService.GetAllOfWorkerAsync(workerId, stoppingToken);
         return workers.Select(ConnectorMapper.ToDto);
     }
 }

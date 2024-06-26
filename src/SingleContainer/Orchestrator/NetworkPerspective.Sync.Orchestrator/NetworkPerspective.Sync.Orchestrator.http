@@ -1,5 +1,5 @@
 @orchestrator_host = https://localhost:7191
-@worker_id = 3be13fdb-1a75-4ff2-91ea-01367ef59e43
+@worker_id = f0d39021-a738-4535-84d5-d5399564128f
 @network_id = bd1bc916-db78-4e1e-b93b-c6feb8cf729e
 @connector_id = 04C753D8-FF9A-479C-B857-5D28C1EAF6C1
 @api_key = api-key

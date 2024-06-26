@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using NetworkPerspective.Sync.Framework.Dtos;
 using NetworkPerspective.Sync.Orchestrator.Application.Extensions;
-using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
+using NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 

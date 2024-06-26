@@ -5,15 +5,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Quartz;
 
-namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
+namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 
-public static class ServiceCollectionExtensions
+internal static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddScheduler(this IServiceCollection services, IConfigurationSection configurationSection, string dbConnectionString)
+    public static IServiceCollection AddSyncScheduler(this IServiceCollection services, IConfigurationSection configurationSection, string dbConnectionString)
     {
-        var schedulerConfig = new SchedulerConfig();
+        var schedulerConfig = new SyncSchedulerConfig();
         configurationSection.Bind(schedulerConfig);
-        services.Configure<SchedulerConfig>(configurationSection);
+        services.Configure<SyncSchedulerConfig>(configurationSection);
 
         services.AddTransient<IJobDetailFactory, JobDetailFactory<RemoteSyncJob>>();
         services.AddTransient<ISyncScheduler, SyncScheduler>();

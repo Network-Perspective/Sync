@@ -10,7 +10,7 @@ using NetworkPerspective.Sync.Utils.Models;
 
 using Quartz;
 
-namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler
+namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync
 {
     internal class RemoteSyncJob : IJob
     {
