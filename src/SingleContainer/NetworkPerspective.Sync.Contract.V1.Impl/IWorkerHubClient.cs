@@ -29,15 +29,6 @@ internal class WorkerHubClient : IWorkerHubClient
         _logger = logger;
     }
 
-    private static Task<string> TokenFactory()
-    {
-        var name = "client_1";
-        var pass = "pass1";
-        var tokenBytes = Encoding.UTF8.GetBytes($"{name}:{pass}");
-        var tokenBase64 = Convert.ToBase64String(tokenBytes);
-        return Task.FromResult(tokenBase64);
-    }
-
     public async Task ConnectAsync(Action<OrchestratorClientConfiguration> configuration = null, Action<IHubConnectionBuilder> connectionConfiguration = null, CancellationToken stoppingToken = default)
     {
         configuration?.Invoke(_callbacks);
@@ -47,7 +38,7 @@ internal class WorkerHubClient : IWorkerHubClient
         var builder = new HubConnectionBuilder()
             .WithUrl(hubUrl, options =>
             {
-                options.AccessTokenProvider = TokenFactory;
+                options.AccessTokenProvider = _callbacks.TokenFactory;
             })
             .WithAutomaticReconnect();
 

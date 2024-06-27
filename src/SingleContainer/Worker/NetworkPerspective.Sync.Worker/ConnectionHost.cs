@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,15 +17,25 @@ using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Worker;
 
-public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContextFactory syncContextFactory, IServiceProvider serviceProvider, ILogger<ConnectionHost> logger) : BackgroundService
+public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContextFactory syncContextFactory, IServiceProvider serviceProvider, ISecretRepositoryFactory secretRepositoryFactory, ILogger<ConnectionHost> logger) : BackgroundService
 {
     private readonly ILogger<ConnectionHost> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        async Task<string> TokenFactory()
+        {
+            var secretRepository = secretRepositoryFactory.Create();
+            var name = await secretRepository.GetSecretAsync("orchestrator-client-name", stoppingToken);
+            var pass = await secretRepository.GetSecretAsync("orchestrator-client-secret", stoppingToken);
+            var tokenBytes = Encoding.UTF8.GetBytes($"{name.ToSystemString()}:{pass.ToSystemString()}");
+            var tokenBase64 = Convert.ToBase64String(tokenBytes);
+            return tokenBase64;
+        }
+
         async Task<SyncCompletedDto> OnStartSync(StartSyncDto dto)
         {
-            _logger.LogInformation("Syncing soooo... hard....");
+            _logger.LogInformation("Syncing started for connector '{connectorId}'", dto.ConnectorId);
 
             var timeRange = new TimeRange(dto.Start, dto.End);
             var accessToken = dto.AccessToken.ToSecureString();
@@ -41,7 +52,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContext
 
                 var syncService = scope.ServiceProvider.GetRequiredService<ISyncService>();
                 var result = await syncService.SyncAsync(syncContext, stoppingToken);
-                _logger.LogInformation("Sync completed");
+                _logger.LogInformation("Sync for connector '{connectorId}' completed", dto.ConnectorId);
 
                 return new SyncCompletedDto
                 {
@@ -94,6 +105,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContext
 
         await hubClient.ConnectAsync(configuration: x =>
         {
+            x.TokenFactory = TokenFactory;
             x.OnStartSync = OnStartSync;
             x.OnSetSecrets = OnSetSecrets;
             x.OnRotateSecrets = OnRotateSecrets;
