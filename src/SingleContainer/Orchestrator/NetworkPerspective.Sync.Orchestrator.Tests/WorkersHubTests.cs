@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -54,6 +55,11 @@ public class WorkersHubTests
         // Act
         await hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
         {
+            options.AccessTokenProvider = () =>
+            {
+                var bytes = Encoding.UTF8.GetBytes($"{workerName}:{workerSecret}");
+                return Task.FromResult(Convert.ToBase64String(bytes));
+            };
             options.HttpMessageHandlerFactory = _ => _service.Server.CreateHandler();
         }));
 
