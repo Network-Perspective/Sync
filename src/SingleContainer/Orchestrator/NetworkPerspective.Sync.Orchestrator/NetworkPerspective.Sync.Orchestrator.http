@@ -75,6 +75,11 @@ Accept: application/json
 
 }
 
+### CONNECTOR STATUS
+GET {{orchestrator_host}}/api/connectors/{{connector_id}}/status
+Authorization: Bearer {{api_key}}
+Accept: application/json
+
 ### START AUTH SLACK
 POST {{orchestrator_host}}/api/connectors/slack-auth?connectorId={{connector_id}}
 Authorization: Bearer {{api_key}}
