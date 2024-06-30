@@ -41,6 +41,8 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
 
             var connectorId = Guid.NewGuid();
+            var networkId = Guid.NewGuid();
+            var connectorInfo = new ConnectorInfo(connectorId, networkId);
             var taskStatus = new SingleTaskStatus("Task", "One of many tasks", 33.922);
             var status1 = StatusLog.Create(connectorId, "Dummy message Error", StatusLogLevel.Error, DateTime.UtcNow);
             var status2 = StatusLog.Create(connectorId, "Dummy message Info", StatusLogLevel.Info, DateTime.UtcNow);
@@ -56,11 +58,11 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
                 .ReturnsAsync(true);
 
             _schedulerMock
-                .Setup(x => x.IsScheduledAsync(connectorId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.IsScheduledAsync(connectorInfo, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             _schedulerMock
-                .Setup(x => x.IsRunningAsync(connectorId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.IsRunningAsync(connectorInfo, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             _tasksStatusesCache
@@ -70,7 +72,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             var statuService = new StatusService(unitOfWorkFactory, _tokenServiceMock.Object, _schedulerMock.Object, _tasksStatusesCache.Object, _authTesterMock.Object, NullLogger);
 
             // Act
-            var result = await statuService.GetStatusAsync(connectorId);
+            var result = await statuService.GetStatusAsync(connectorInfo);
 
             // Assert
             result.Authorized.Should().BeTrue();

@@ -65,7 +65,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                     .ReturnsAsync(connectorInfo);
 
                 _statusServiceMock
-                    .Setup(x => x.GetStatusAsync(connectorId, It.IsAny<CancellationToken>()))
+                    .Setup(x => x.GetStatusAsync(connectorInfo, It.IsAny<CancellationToken>()))
                     .ReturnsAsync(status);
 
                 var controller = Create(accessToken);
@@ -103,7 +103,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
 
                 // Act Assert
                 await func.Should().ThrowExactlyAsync<ConnectorNotFoundException>();
-                _statusServiceMock.Verify(x => x.GetStatusAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+                _statusServiceMock.Verify(x => x.GetStatusAsync(It.IsAny<ConnectorInfo>(), It.IsAny<CancellationToken>()), Times.Never);
             }
         }
 

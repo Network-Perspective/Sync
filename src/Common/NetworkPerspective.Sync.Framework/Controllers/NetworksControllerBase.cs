@@ -38,7 +38,7 @@ namespace NetworkPerspective.Sync.Framework.Controllers
 
             await _connectorService.AddOrReplace(connectorInfo.Id, properties, stoppingToken);
             await _tokenService.AddOrReplace(Request.GetServiceAccessToken(), connectorInfo.Id, stoppingToken);
-            await _syncScheduler.AddOrReplaceAsync(connectorInfo.Id, stoppingToken);
+            await _syncScheduler.AddOrReplaceAsync(connectorInfo, stoppingToken);
 
             await _statusLoggerFactory
                 .CreateForConnector(connectorInfo.Id)
@@ -64,7 +64,7 @@ namespace NetworkPerspective.Sync.Framework.Controllers
 
             await _connectorService.EnsureRemovedAsync(connectorInfo.Id, stoppingToken);
             await _tokenService.EnsureRemovedAsync(connectorInfo.Id, stoppingToken);
-            await _syncScheduler.EnsureRemovedAsync(connectorInfo.Id, stoppingToken);
+            await _syncScheduler.EnsureRemovedAsync(connectorInfo, stoppingToken);
 
             return Ok($"Removed connector '{connectorInfo.Id}'");
         }

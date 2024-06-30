@@ -48,7 +48,7 @@ namespace NetworkPerspective.Sync.Framework.Controllers
 
             await _connectorService.ValidateExists(connectorInfo.Id, stoppingToken);
 
-            var status = await _statusService.GetStatusAsync(connectorInfo.Id, stoppingToken);
+            var status = await _statusService.GetStatusAsync(connectorInfo, stoppingToken);
 
             return StatusMapper.DomainStatusToDto(status);
         }

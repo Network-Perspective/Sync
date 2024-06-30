@@ -73,7 +73,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 await controller.StartAsync(new SchedulerStartDto());
 
                 // Assert
-                _schduleFacadeMock.Verify(x => x.ScheduleAsync(connectorId, It.IsAny<CancellationToken>()), Times.Once);
+                _schduleFacadeMock.Verify(x => x.ScheduleAsync(connectionInfo, It.IsAny<CancellationToken>()), Times.Once);
                 _syncHistoryServiceMock.Verify(x => x.OverrideSyncStartAsync(connectorId, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Never);
             }
 
@@ -100,7 +100,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 await controller.StartAsync(new SchedulerStartDto());
 
                 // Assert
-                _schduleFacadeMock.Verify(x => x.TriggerNowAsync(connectorId, It.IsAny<CancellationToken>()), Times.Once);
+                _schduleFacadeMock.Verify(x => x.TriggerNowAsync(connectionInfo, It.IsAny<CancellationToken>()), Times.Once);
             }
 
             [Fact]
@@ -129,7 +129,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
 
                 // Act Assert
                 await func.Should().ThrowExactlyAsync<ConnectorNotFoundException>();
-                _schduleFacadeMock.Verify(x => x.ScheduleAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+                _schduleFacadeMock.Verify(x => x.ScheduleAsync(It.IsAny<ConnectorInfo>(), It.IsAny<CancellationToken>()), Times.Never);
             }
 
             [Fact]
@@ -185,7 +185,7 @@ namespace NetworkPerspective.Sync.Framework.Tests.Controllers
                 await controller.StopAsync();
 
                 // Assert
-                _schduleFacadeMock.Verify(x => x.UnscheduleAsync(connectorId, It.IsAny<CancellationToken>()), Times.Once);
+                _schduleFacadeMock.Verify(x => x.UnscheduleAsync(connectionInfo, It.IsAny<CancellationToken>()), Times.Once);
             }
         }
 

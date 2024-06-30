@@ -28,6 +28,8 @@ namespace NetworkPerspective.Sync.Application
             services.AddScoped<IConnectorInfoProvider>(x => x.GetRequiredService<ConnectorInfoProvider>());
             services.AddScoped<IConnectorInfoInitializer>(x => x.GetRequiredService<ConnectorInfoProvider>());
 
+            services.AddScoped<ISyncContextAccessor, SyncContextAccessor>();
+
             services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<ICachedSecretRepository, CachedSecretRepository>();
             services.AddScoped<IStatusLogger>(sp =>

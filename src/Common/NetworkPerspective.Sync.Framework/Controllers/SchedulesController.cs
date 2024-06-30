@@ -53,8 +53,8 @@ namespace NetworkPerspective.Sync.Framework.Controllers
             if (request.OverrideSyncPeriodStart is not null)
                 await _syncHistoryService.OverrideSyncStartAsync(connectorInfo.Id, request.OverrideSyncPeriodStart.Value.ToUniversalTime(), stoppingToken);
 
-            await _scheduler.ScheduleAsync(connectorInfo.Id, stoppingToken);
-            await _scheduler.TriggerNowAsync(connectorInfo.Id, stoppingToken);
+            await _scheduler.ScheduleAsync(connectorInfo, stoppingToken);
+            await _scheduler.TriggerNowAsync(connectorInfo, stoppingToken);
 
             await _statusLoggerFactory
                 .CreateForConnector(connectorInfo.Id)
@@ -82,8 +82,8 @@ namespace NetworkPerspective.Sync.Framework.Controllers
 
             await _connectorService.ValidateExists(connectorInfo.Id, stoppingToken);
 
-            await _scheduler.UnscheduleAsync(connectorInfo.Id, stoppingToken);
-            await _scheduler.InterruptNowAsync(connectorInfo.Id, stoppingToken);
+            await _scheduler.UnscheduleAsync(connectorInfo, stoppingToken);
+            await _scheduler.InterruptNowAsync(connectorInfo, stoppingToken);
 
             await _statusLoggerFactory
                 .CreateForConnector(connectorInfo.Id)

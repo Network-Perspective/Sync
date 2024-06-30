@@ -27,7 +27,7 @@ namespace NetworkPerspective.Sync.Scheduler
             initializer.Initialize(connectorInfo);
         }
 
-        private ConnectorInfo GetConnectorInfo(IJobDetail jobDetail)
+        private static ConnectorInfo GetConnectorInfo(IJobDetail jobDetail)
         {
             var value = jobDetail.Key.Name.Split(":");
 
@@ -37,7 +37,7 @@ namespace NetworkPerspective.Sync.Scheduler
             if (!Guid.TryParse(value[0], out Guid connectorId))
                 throw new Exception("Invalid Job Key Name. First part (separated by ':' sign) should be a Guid representing connector id");
 
-            if (!Guid.TryParse(value[0], out Guid networkId))
+            if (!Guid.TryParse(value[1], out Guid networkId))
                 throw new Exception("Invalid Job Key Name. Second part (separated by ':' sign) should be a Guid representing network id");
 
             return new ConnectorInfo(connectorId, networkId);

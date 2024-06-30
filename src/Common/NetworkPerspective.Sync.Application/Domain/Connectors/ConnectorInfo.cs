@@ -12,5 +12,10 @@ namespace NetworkPerspective.Sync.Application.Domain.Connectors
             Id = id;
             NetworkId = networkId;
         }
+
+        public override string ToString()
+        {
+            return $"{Id}:{NetworkId}";
+        }
     }
 }
