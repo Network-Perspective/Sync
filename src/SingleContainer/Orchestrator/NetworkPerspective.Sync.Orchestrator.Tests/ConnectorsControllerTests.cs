@@ -36,8 +36,6 @@ public class ConnectorsControllerTests
         var workerId = workers.Single().Id;
 
         // Act
-
-
         await connectorsClient.ConnectorsPostAsync(new CreateConnectorDto
         {
             WorkerId = workerId,

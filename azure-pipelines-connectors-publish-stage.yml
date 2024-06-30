@@ -79,6 +79,26 @@ stages:
         tags: |
           $(tag)
           latest
+    - task: Docker@2
+      displayName: Build and push Worker
+      inputs:
+        command: buildAndPush
+        repository: 'connectors/worker'
+        dockerfile: '$(Build.SourcesDirectory)/src/Worker.Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          latest
+    - task: Docker@2
+      displayName: Build and push Orchestrator
+      inputs:
+        command: buildAndPush
+        repository: 'connectors/orchestrator'
+        dockerfile: '$(Build.SourcesDirectory)/src/Orchestrator.Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          latest
     - script: |
         git tag v$(tag)
         git push origin v$(tag)
