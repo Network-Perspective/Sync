@@ -5,10 +5,15 @@ using Microsoft.Extensions.Hosting;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Contract.V1.Impl;
 using NetworkPerspective.Sync.Infrastructure.Core;
-using NetworkPerspective.Sync.Infrastructure.Core.Stub;
 using NetworkPerspective.Sync.Infrastructure.Slack;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
 using NetworkPerspective.Sync.Worker.Application;
+
+#if !DEBUG
+#else
+using NetworkPerspective.Sync.Infrastructure.Core.Stub;
+#endif
+
 
 namespace NetworkPerspective.Sync.Worker;
 
@@ -38,7 +43,7 @@ public class Program
         builder.Services.AddHostedService<ConnectionHost>();
 
 #if !DEBUG
-            services.RemoveHttpClientLogging();
+        builder.Services.RemoveHttpClientLogging();
 #else
         builder.Services.AddNetworkPerspectiveCoreStub(builder.Configuration.GetSection("Infrastructure:Core"));
 #endif

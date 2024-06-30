@@ -2,6 +2,8 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Http;
 
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault;
@@ -29,5 +31,8 @@ internal static class ServiceCollectionExtensions
 
         return services;
     }
+
+    public static IServiceCollection RemoveHttpClientLogging(this IServiceCollection services)
+        => services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
 
 }
