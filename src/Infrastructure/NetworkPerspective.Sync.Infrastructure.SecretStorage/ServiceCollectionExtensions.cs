@@ -22,9 +22,9 @@ public static class ServiceCollectionExtensions
         var hcpSection = configurationSection.GetSection(HcpVaultConfigSection);
         var dbSection = configurationSection.GetSection(DbVaultConfigSection);
 
-        var containsAzureKeyVault = !string.IsNullOrEmpty(azSection.GetChildren().FirstOrDefault(x => x.Key == "BaseUrl")?.Value);
-        var containsHcpVault = !string.IsNullOrEmpty(hcpSection.GetChildren().FirstOrDefault(x => x.Key == "BaseUrl")?.Value);
-        var containsDbVault = !string.IsNullOrEmpty(hcpSection.GetChildren().FirstOrDefault(x => x.Key == "SecretsPath")?.Value);
+        var containsAzureKeyVault = azSection.GetChildren().FirstOrDefault(x => x.Key == "BaseUrl") is not null;
+        var containsHcpVault = hcpSection.GetChildren().FirstOrDefault(x => x.Key == "BaseUrl") is not null;
+        var containsDbVault = hcpSection.GetChildren().FirstOrDefault(x => x.Key == "SecretsPath") is not null;
 
         if (containsAzureKeyVault)
             services.AddAzureKeyVault(configurationSection.GetSection(AzureKeyVaultConfigSection), healthCheckBuilder);
