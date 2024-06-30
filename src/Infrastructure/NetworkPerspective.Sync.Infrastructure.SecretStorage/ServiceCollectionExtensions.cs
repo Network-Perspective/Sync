@@ -18,10 +18,13 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddSecretRepositoryClient(this IServiceCollection services, IConfigurationSection configurationSection, IHealthChecksBuilder healthCheckBuilder)
     {
-        var configurationSections = configurationSection.GetChildren();
-        var containsAzureKeyVault = configurationSections.Any(x => x.Key == $"{AzureKeyVaultConfigSection}:BaseUrl");
-        var containsHcpVault = configurationSections.Any(x => x.Key == $"{HcpVaultConfigSection}:BaseUrl");
-        var containsDbVault = configurationSections.Any(x => x.Key == DbVaultConfigSection);
+        var azSection = configurationSection.GetSection(AzureKeyVaultConfigSection);
+        var hcpSection = configurationSection.GetSection(HcpVaultConfigSection);
+        var dbSection = configurationSection.GetSection(DbVaultConfigSection);
+
+        var containsAzureKeyVault = !string.IsNullOrEmpty(azSection.GetChildren().FirstOrDefault(x => x.Key == "BaseUrl")?.Value);
+        var containsHcpVault = !string.IsNullOrEmpty(hcpSection.GetChildren().FirstOrDefault(x => x.Key == "BaseUrl")?.Value);
+        var containsDbVault = !string.IsNullOrEmpty(hcpSection.GetChildren().FirstOrDefault(x => x.Key == "SecretsPath")?.Value);
 
         if (containsAzureKeyVault)
             services.AddAzureKeyVault(configurationSection.GetSection(AzureKeyVaultConfigSection), healthCheckBuilder);
