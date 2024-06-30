@@ -5,9 +5,9 @@ using NetworkPerspective.Sync.Infrastructure.Persistence.Entities;
 
 namespace NetworkPerspective.Sync.Infrastructure.Persistence.Configurations
 {
-    public class NetworkPropertyConfiguration : IEntityTypeConfiguration<NetworkPropertyEntity>
+    public class NetworkPropertyConfiguration : IEntityTypeConfiguration<ConnectorPropertyEntity>
     {
-        public void Configure(EntityTypeBuilder<NetworkPropertyEntity> builder)
+        public void Configure(EntityTypeBuilder<ConnectorPropertyEntity> builder)
         {
             builder
                 .ToTable("NetworkProperties");

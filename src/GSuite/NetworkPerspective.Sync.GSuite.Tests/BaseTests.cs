@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.GSuite.Client;
@@ -36,7 +36,7 @@ namespace NetworkPerspective.Sync.GSuite.Tests
         public async Task ShouldReturn401OnInvalidToken()
         {
             // Arrange
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
             var httpClient = _service.CreateDefaultClient();
 
             const string adminEmail = "admin@networkperspective.io";
@@ -57,14 +57,14 @@ namespace NetworkPerspective.Sync.GSuite.Tests
         public async Task ShouldSetupNetworkProperly()
         {
             // Arrange
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
             var httpClient = _service.CreateDefaultClient();
 
             const string adminEmail = "admin@networkperspective.io";
 
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+                .ReturnsAsync(new ConnectorInfo(connectorId, Guid.NewGuid()));
 
             var networkConfig = new NetworkConfigDto
             {
@@ -76,11 +76,11 @@ namespace NetworkPerspective.Sync.GSuite.Tests
                 .NetworksPostAsync(networkConfig);
 
             // Assert
-            _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-GSuite-{networkId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
+            _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-GSuite-{connectorId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
 
             using var unitOfWork = _service.UnitOfWorkFactory.Create();
-            var networksRepository = unitOfWork.GetNetworkRepository<GoogleNetworkProperties>();
-            var network = await networksRepository.FindAsync(networkId);
+            var networksRepository = unitOfWork.GetConnectorRepository<GoogleNetworkProperties>();
+            var network = await networksRepository.FindAsync(connectorId);
             network.Properties.AdminEmail.Should().Be(adminEmail);
             network.Properties.ExternalKeyVaultUri.Should().BeNull();
         }
@@ -89,14 +89,14 @@ namespace NetworkPerspective.Sync.GSuite.Tests
         public async Task ShouldSetupSchedulesProperly()
         {
             // Arrange
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
             var httpClient = _service.CreateDefaultClient();
 
             const string adminEmail = "admin@networkperspective.io";
 
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+                .ReturnsAsync(new ConnectorInfo(connectorId, Guid.NewGuid()));
 
             var networkConfig = new NetworkConfigDto
             {

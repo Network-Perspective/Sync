@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google
 {
-    public class GoogleNetworkProperties : NetworkProperties
+    public class GoogleNetworkProperties : ConnectorProperties
     {
         private new const bool DefaultSyncGroups = true;
 

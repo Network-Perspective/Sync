@@ -10,7 +10,7 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Services;
@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface IUsersClient
     {
-        Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, CancellationToken stoppingToken = default);
+        Task<IEnumerable<User>> GetUsersAsync(Connector<GoogleNetworkProperties> network, ConnectorConfig networkConfig, CancellationToken stoppingToken = default);
     }
 
     internal sealed class UsersClient : IUsersClient
@@ -45,26 +45,26 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<User>> GetUsersAsync(Network<GoogleNetworkProperties> network, NetworkConfig networkConfig, CancellationToken stoppingToken = default)
+        public async Task<IEnumerable<User>> GetUsersAsync(Connector<GoogleNetworkProperties> connector, ConnectorConfig connectorConfig, CancellationToken stoppingToken = default)
         {
-            _logger.LogDebug("Fetching users for network '{networkId}'...", network.NetworkId);
+            _logger.LogDebug("Fetching users for connector '{connectorId}'...", connector.Id);
 
-            await _tasksStatusesCache.SetStatusAsync(network.NetworkId, new SingleTaskStatus(TaskCaption, TaskDescription, null), stoppingToken);
+            await _tasksStatusesCache.SetStatusAsync(connector.Id, new SingleTaskStatus(TaskCaption, TaskDescription, null), stoppingToken);
 
             var retryPolicy = _retryPolicyProvider.GetSecretRotationRetryPolicy();
-            var users = await retryPolicy.ExecuteAsync(() => GetAllGoogleUsers(network, stoppingToken));
+            var users = await retryPolicy.ExecuteAsync(() => GetAllGoogleUsers(connector, stoppingToken));
 
-            var filteredUsers = FilterUsers(networkConfig.EmailFilter, users);
+            var filteredUsers = FilterUsers(connectorConfig.EmailFilter, users);
 
             if (!filteredUsers.Any())
-                _logger.LogWarning("No users found in network '{networkId}'", network.NetworkId);
+                _logger.LogWarning("No users found in connector '{connectorId}'", connector.Id);
             else
-                _logger.LogDebug("Fetching employees for network '{networkId}' completed. '{count}' employees found", network.NetworkId, filteredUsers.Count());
+                _logger.LogDebug("Fetching employees for network '{netwconnectorIdorkId}' completed. '{count}' employees found", connector.Id, filteredUsers.Count());
 
             return filteredUsers;
         }
 
-        private async Task<IList<User>> GetAllGoogleUsers(Network<GoogleNetworkProperties> network, CancellationToken stoppingToken)
+        private async Task<IList<User>> GetAllGoogleUsers(Connector<GoogleNetworkProperties> network, CancellationToken stoppingToken)
         {
             var credentials = await _credentialsProvider.GetForUserAsync(network.Properties.AdminEmail, stoppingToken);
 

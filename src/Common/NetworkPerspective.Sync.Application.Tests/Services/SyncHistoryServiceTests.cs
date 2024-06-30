@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 
 using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
@@ -30,22 +30,22 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             // Arrange
             var syncStart = DateTime.UtcNow;
             var syncEnd = DateTime.UtcNow.AddDays(1);
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
 
-            var record = SyncHistoryEntry.Create(networkId, DateTime.UtcNow, new TimeRange(syncStart, syncEnd));
+            var record = SyncHistoryEntry.Create(connectorId, DateTime.UtcNow, new TimeRange(syncStart, syncEnd));
 
             var unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
             using var unitOfWork = unitOfWorkFactory.Create();
 
-            var networkRepository = unitOfWork.GetNetworkRepository<TestableNetworkProperties>();
-            await networkRepository.AddAsync(Network<TestableNetworkProperties>.Create(networkId, new TestableNetworkProperties(), DateTime.UtcNow));
+            var networkRepository = unitOfWork.GetConnectorRepository<TestableNetworkProperties>();
+            await networkRepository.AddAsync(Connector<TestableNetworkProperties>.Create(connectorId, new TestableNetworkProperties(), DateTime.UtcNow));
             await unitOfWork.CommitAsync();
 
             var service = new SyncHistoryService(unitOfWork, new Clock(), CreateOptions(1), NullLogger);
             await service.SaveLogAsync(record);
 
             // Act
-            var result = await service.EvaluateSyncStartAsync(networkId);
+            var result = await service.EvaluateSyncStartAsync(connectorId);
 
             // Aseert
             result.Should().Be(syncEnd);
@@ -81,25 +81,25 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             // Arrange
             var syncStart = DateTime.UtcNow;
             var syncEnd = DateTime.UtcNow.AddDays(1);
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
             var overridenSyncStart = new DateTime(2020, 01, 01);
 
-            var record = SyncHistoryEntry.Create(networkId, DateTime.UtcNow, new TimeRange(syncStart, syncEnd));
+            var record = SyncHistoryEntry.Create(connectorId, DateTime.UtcNow, new TimeRange(syncStart, syncEnd));
 
             var unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
             using var unitOfWork = unitOfWorkFactory.Create();
 
-            var networkRepository = unitOfWork.GetNetworkRepository<TestableNetworkProperties>();
-            await networkRepository.AddAsync(Network<TestableNetworkProperties>.Create(networkId, new TestableNetworkProperties(), DateTime.UtcNow));
+            var networkRepository = unitOfWork.GetConnectorRepository<TestableNetworkProperties>();
+            await networkRepository.AddAsync(Connector<TestableNetworkProperties>.Create(connectorId, new TestableNetworkProperties(), DateTime.UtcNow));
             await unitOfWork.CommitAsync();
 
             var service = new SyncHistoryService(unitOfWork, new Clock(), CreateOptions(1), NullLogger);
             await service.SaveLogAsync(record);
 
-            await service.OverrideSyncStartAsync(networkId, overridenSyncStart);
+            await service.OverrideSyncStartAsync(connectorId, overridenSyncStart);
 
             // Act
-            var result = await service.EvaluateSyncStartAsync(networkId);
+            var result = await service.EvaluateSyncStartAsync(connectorId);
 
             // Aseert
             result.Should().Be(overridenSyncStart);

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
@@ -20,28 +19,28 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
     internal class UserTokenAuthHandler : AuthTokenHandler
     {
-        public UserTokenAuthHandler(INetworkIdProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, ILogger<AuthTokenHandler> logger)
+        public UserTokenAuthHandler(IConnectorInfoProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, ILogger<AuthTokenHandler> logger)
             : base(networkIdProvider, cachedSecretRepository, SlackKeys.UserTokenKeyPattern, logger)
         { }
     }
 
     internal class BotTokenAuthHandler : AuthTokenHandler
     {
-        public BotTokenAuthHandler(INetworkIdProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, ILogger<AuthTokenHandler> logger)
+        public BotTokenAuthHandler(IConnectorInfoProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, ILogger<AuthTokenHandler> logger)
             : base(networkIdProvider, cachedSecretRepository, SlackKeys.TokenKeyPattern, logger)
         { }
     }
 
     internal abstract class AuthTokenHandler : DelegatingHandler
     {
-        private readonly INetworkIdProvider _networkIdProvider;
+        private readonly IConnectorInfoProvider _connectorInfoProvider;
         private readonly ICachedSecretRepository _cachedSecretRepository;
         private readonly string _tokenPatern;
         private readonly ILogger<AuthTokenHandler> _logger;
 
-        public AuthTokenHandler(INetworkIdProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, string tokenPatern, ILogger<AuthTokenHandler> logger)
+        public AuthTokenHandler(IConnectorInfoProvider connectorInfoProvider, ICachedSecretRepository cachedSecretRepository, string tokenPatern, ILogger<AuthTokenHandler> logger)
         {
-            _networkIdProvider = networkIdProvider;
+            _connectorInfoProvider = connectorInfoProvider;
             _cachedSecretRepository = cachedSecretRepository;
             _tokenPatern = tokenPatern;
             _logger = logger;
@@ -70,8 +69,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
         private async Task<SecureString> GetAccessTokenAsync(CancellationToken stoppingToken)
         {
-            var networkId = _networkIdProvider.Get();
-            var tokenKey = string.Format(_tokenPatern, networkId);
+            var connectorInfo = _connectorInfoProvider.Get();
+            var tokenKey = string.Format(_tokenPatern, connectorInfo.Id);
             return await _cachedSecretRepository.GetSecretAsync(tokenKey, stoppingToken);
         }
 

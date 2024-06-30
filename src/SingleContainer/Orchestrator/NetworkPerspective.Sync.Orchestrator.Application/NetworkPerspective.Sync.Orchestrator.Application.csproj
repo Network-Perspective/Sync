@@ -20,6 +20,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj" />
+      <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract\NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract.csproj" />
     </ItemGroup>
 
 </Project>

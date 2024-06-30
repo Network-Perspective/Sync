@@ -9,11 +9,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
@@ -127,7 +125,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             }
         }
 
-        public async Task<NetworkConfig> GetNetworkConfigAsync(SecureString accessToken, CancellationToken stoppingToken = default)
+        public async Task<ConnectorConfig> GetNetworkConfigAsync(SecureString accessToken, CancellationToken stoppingToken = default)
         {
             try
             {
@@ -149,7 +147,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
                 _logger.LogDebug("Custom attributes: {customAttributes}", customAttributes.ToString());
 
 
-                return new NetworkConfig(emailFilter, customAttributes);
+                return new ConnectorConfig(emailFilter, customAttributes);
             }
             catch (Exception ex)
             {
@@ -157,13 +155,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             }
         }
 
-        public async Task<TokenValidationResponse> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default)
+        public async Task<ConnectorInfo> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default)
         {
             try
             {
                 var result = await _client.QueryAsync(accessToken.ToSystemString(), stoppingToken);
 
-                return new TokenValidationResponse(result.NetworkId.Value, result.ConnectorId.Value);
+                return new ConnectorInfo(result.ConnectorId.Value, result.NetworkId.Value);
             }
             catch (ApiException aex) when (aex.StatusCode == (int)HttpStatusCode.Forbidden)
             {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using FluentAssertions;
 
@@ -8,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
 using NetworkPerspective.Sync.Application;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
@@ -50,6 +52,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests
 
             // Assert
             var services = serviceCollection.BuildServiceProvider();
+            (services.GetRequiredService<IConnectorInfoProvider>() as IConnectorInfoInitializer)
+                .Initialize(new ConnectorInfo(Guid.NewGuid(), Guid.NewGuid()));
             var dataSource = services.GetRequiredService<IDataSource>();
             dataSource.Should().BeAssignableTo<GoogleFacade>();
         }

@@ -10,35 +10,34 @@ using NetworkPerspective.Sync.Application.Services;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.SecretStorage.Tests
+namespace NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault.Tests;
+
+public class ServiceCollectionExtensionsTests
 {
-    public class ServiceCollectionExtensionsTests
+    [Fact]
+    public void ShouldRegisterRequiredServices()
     {
-        [Fact]
-        public void ShouldRegisterRequiredServices()
-        {
-            // Arrange
-            var serviceCollection = new ServiceCollection();
+        // Arrange
+        var serviceCollection = new ServiceCollection();
 
-            var config = new ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string>
-                {
-                    { "Infrastructure:AzureKeyVault:BaseUrl", "https://nptestvault.vault.azure.net/" },
-                    { "Infrastructure:AzureKeyVault:TestSecretName", "test-key" }
-                })
-                .Build();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string>
+            {
+                { "Infrastructure:AzureKeyVault:BaseUrl", "https://nptestvault.vault.azure.net/" },
+                { "Infrastructure:AzureKeyVault:TestSecretName", "test-key" }
+            })
+            .Build();
 
-            serviceCollection.AddLogging();
+        serviceCollection.AddLogging();
 
-            var healthCheckBuilder = serviceCollection.AddHealthChecks();
-            serviceCollection.AddSingleton(Mock.Of<INetworkService>());
+        var healthCheckBuilder = serviceCollection.AddHealthChecks();
+        serviceCollection.AddSingleton(Mock.Of<IConnectorService>());
 
-            // Act
-            serviceCollection.AddSecretRepositoryClient(config.GetSection("Infrastructure"), healthCheckBuilder);
+        // Act
+        serviceCollection.AddSecretRepositoryClient(config.GetSection("Infrastructure"), healthCheckBuilder);
 
-            // Assert
-            var services = serviceCollection.BuildServiceProvider();
-            services.GetRequiredService<ISecretRepositoryFactory>();
-        }
+        // Assert
+        var services = serviceCollection.BuildServiceProvider();
+        services.GetRequiredService<ISecretRepositoryFactory>();
     }
 }

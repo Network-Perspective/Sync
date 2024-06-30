@@ -8,7 +8,7 @@ internal static class SyncHistoryEntryMapper
 {
     public static SyncHistoryEntry EntityToDomainModel(SyncHistoryEntryEntity entity)
     {
-        return SyncHistoryEntry.Create(entity.ConnectorId, entity.TimeStamp, new TimeRange(entity.SyncPeriodStart, entity.SyncPeriodEnd));
+        return SyncHistoryEntry.Create(entity.ConnectorId, entity.TimeStamp, new TimeRange(entity.SyncPeriodStart, entity.SyncPeriodEnd), entity.SuccessRate ?? 0, entity.TasksCount, entity.InteractionsCount);
     }
 
     public static SyncHistoryEntryEntity DomainModelToEntity(SyncHistoryEntry syncHistoryEntry)
@@ -19,9 +19,9 @@ internal static class SyncHistoryEntryMapper
             TimeStamp = syncHistoryEntry.TimeStamp,
             SyncPeriodStart = syncHistoryEntry.SyncPeriod.Start,
             SyncPeriodEnd = syncHistoryEntry.SyncPeriod.End,
-            SuccessRate = syncHistoryEntry.Result.SuccessRate,
-            TasksCount = syncHistoryEntry.Result.TasksCount,
-            InteractionsCount = syncHistoryEntry.Result.TotalInteractionsCount,
+            SuccessRate = syncHistoryEntry.SuccessRate,
+            TasksCount = syncHistoryEntry.TasksCount,
+            InteractionsCount = syncHistoryEntry.TotalInteractionsCount,
         };
     }
 }

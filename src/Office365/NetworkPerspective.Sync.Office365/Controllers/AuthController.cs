@@ -20,14 +20,14 @@ namespace NetworkPerspective.Sync.Office365.Controllers
         private const string AuthPath = "auth";
 
         private readonly IMicrosoftAuthService _authService;
-        private readonly INetworkService _networkService;
-        private readonly INetworkIdProvider _networkIdProvider;
+        private readonly IConnectorService _connectorService;
+        private readonly IConnectorInfoProvider _connectorInfoProvider;
 
-        public AuthController(IMicrosoftAuthService authService, INetworkService networkService, INetworkIdProvider networkIdProvider)
+        public AuthController(IMicrosoftAuthService authService, IConnectorService connectorService, IConnectorInfoProvider connectorInfoProvider)
         {
             _authService = authService;
-            _networkService = networkService;
-            _networkIdProvider = networkIdProvider;
+            _connectorService = connectorService;
+            _connectorInfoProvider = connectorInfoProvider;
         }
 
         /// <summary>
@@ -47,10 +47,11 @@ namespace NetworkPerspective.Sync.Office365.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AuthorizeAsync(string callbackUrl = null, CancellationToken stoppingToken = default)
         {
-            await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
+            var connectorInfo = _connectorInfoProvider.Get();
+            await _connectorService.ValidateExists(connectorInfo.Id, stoppingToken);
 
             var callbackUri = callbackUrl == null ? CreateCallbackUri() : new Uri(callbackUrl);
-            var authProcess = new AuthProcess(_networkIdProvider.Get(), callbackUri);
+            var authProcess = new AuthProcess(connectorInfo.Id, callbackUri);
 
             var result = await _authService.StartAuthProcessAsync(authProcess, stoppingToken);
 

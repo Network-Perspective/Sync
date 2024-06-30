@@ -14,8 +14,8 @@ namespace NetworkPerspective.Sync.Excel.Controllers
     public class NetworksController : NetworksControllerBase
     {
 
-        public NetworksController(INetworkService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLogger, INetworkIdProvider networkIdProvider)
-            : base(networkService, authService, syncScheduler, statusLogger, networkIdProvider)
+        public NetworksController(IConnectorService networkService, ITokenService authService, ISyncScheduler syncScheduler, IStatusLoggerFactory statusLogger, IConnectorInfoProvider connectorInfoProvider)
+            : base(networkService, authService, syncScheduler, statusLogger, connectorInfoProvider)
         { }
 
         /// <summary>
@@ -34,9 +34,9 @@ namespace NetworkPerspective.Sync.Excel.Controllers
         {
             var properties = new ExcelNetworkProperties(config.ExternalKeyVaultUri);
 
-            var networkId = await InitializeAsync(properties, stoppingToken);
+            var connectorId = await InitializeAsync(properties, stoppingToken);
 
-            return Ok($"Added network '{networkId}'");
+            return Ok($"Added connector '{connectorId}'");
         }
     }
 }

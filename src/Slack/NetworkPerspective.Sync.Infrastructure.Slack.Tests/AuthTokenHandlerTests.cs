@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Utils.Extensions;
@@ -44,18 +45,19 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
         {
             // Arrange
             var networkId = Guid.NewGuid();
-            var networkIdProviderMock = new Mock<INetworkIdProvider>();
-            networkIdProviderMock
+            var connectorId = Guid.NewGuid();
+            var connectorInfoProviderMock = new Mock<IConnectorInfoProvider>();
+            connectorInfoProviderMock
                 .Setup(x => x.Get())
-                .Returns(networkId);
+                .Returns(new ConnectorInfo(connectorId, networkId));
 
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedSecretRepository>();
             secretRepositoryMock
-                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, networkId.ToString()), It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token.ToSecureString());
 
-            var handler = new BotTokenAuthHandler(networkIdProviderMock.Object, secretRepositoryMock.Object, NullLogger<AuthTokenHandler>.Instance)
+            var handler = new BotTokenAuthHandler(connectorInfoProviderMock.Object, secretRepositoryMock.Object, NullLogger<AuthTokenHandler>.Instance)
             {
                 InnerHandler = new TestHandler(_successMessage)
             };
@@ -75,20 +77,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
         {
             // Arrange
             var networkId = Guid.NewGuid();
-            var networkIdProviderMock = new Mock<INetworkIdProvider>();
-            networkIdProviderMock
+            var connectorId = Guid.NewGuid();
+            var connectorInfoProviderMock = new Mock<IConnectorInfoProvider>();
+            connectorInfoProviderMock
                 .Setup(x => x.Get())
-                .Returns(networkId);
+                .Returns(new ConnectorInfo(connectorId, networkId));
 
             var token1 = Guid.NewGuid().ToString();
             var token2 = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedSecretRepository>();
             secretRepositoryMock
-                .SetupSequence(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, networkId.ToString()), It.IsAny<CancellationToken>()))
+                .SetupSequence(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token1.ToSecureString())
                 .ReturnsAsync(token2.ToSecureString());
 
-            var handler = new BotTokenAuthHandler(networkIdProviderMock.Object, secretRepositoryMock.Object, NullLogger<AuthTokenHandler>.Instance)
+            var handler = new BotTokenAuthHandler(connectorInfoProviderMock.Object, secretRepositoryMock.Object, NullLogger<AuthTokenHandler>.Instance)
             {
                 InnerHandler = new TestHandler(_tokenRevokedMessage, _successMessage)
             };
@@ -108,10 +111,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients
         {
             // Arrange
             var networkId = Guid.NewGuid();
-            var networkIdProviderMock = new Mock<INetworkIdProvider>();
+            var connectorId = Guid.NewGuid();
+            var networkIdProviderMock = new Mock<IConnectorInfoProvider>();
             networkIdProviderMock
                 .Setup(x => x.Get())
-                .Returns(networkId);
+                .Returns(new ConnectorInfo(connectorId, networkId));
 
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedSecretRepository>();

@@ -9,14 +9,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence.Mappers
     {
         public static SyncHistoryEntry EntityToDomainModel(SyncHistoryEntryEntity entity)
         {
-            return SyncHistoryEntry.Create(entity.NetworkId, entity.TimeStamp, new TimeRange(entity.SyncPeriodStart, entity.SyncPeriodEnd));
+            return SyncHistoryEntry.Create(entity.ConnectorId, entity.TimeStamp, new TimeRange(entity.SyncPeriodStart, entity.SyncPeriodEnd));
         }
 
         public static SyncHistoryEntryEntity DomainModelToEntity(SyncHistoryEntry syncHistoryEntry)
         {
             return new SyncHistoryEntryEntity
             {
-                NetworkId = syncHistoryEntry.NetworkId,
+                ConnectorId = syncHistoryEntry.ConnectorId,
                 TimeStamp = syncHistoryEntry.TimeStamp,
                 SyncPeriodStart = syncHistoryEntry.SyncPeriod.Start,
                 SyncPeriodEnd = syncHistoryEntry.SyncPeriod.End,

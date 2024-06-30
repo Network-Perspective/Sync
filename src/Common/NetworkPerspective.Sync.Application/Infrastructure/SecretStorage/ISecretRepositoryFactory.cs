@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace NetworkPerspective.Sync.Application.Infrastructure.SecretStorage
+namespace NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
+
+public interface ISecretRepositoryFactory
 {
-    public interface ISecretRepositoryFactory
-    {
-        Task<ISecretRepository> CreateAsync(Guid networkId, CancellationToken stoppingToken = default);
-        public ISecretRepository CreateDefault();
-    }
+    ISecretRepository Create(Uri externalKeyVaultUri = null);
 }

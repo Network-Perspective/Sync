@@ -2,8 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
@@ -13,16 +12,15 @@ namespace NetworkPerspective.Sync.Application.Services
 {
     public interface ISyncContextFactory
     {
-        Task<SyncContext> CreateForNetworkAsync(Guid networkId, CancellationToken stoppingToken = default);
+        Task<SyncContext> CreateForConnectorAsync(Guid connectorId, CancellationToken stoppingToken = default);
     }
 
     internal class SyncContextFactory : ISyncContextFactory
     {
         private readonly ITokenService _tokenService;
         private readonly INetworkPerspectiveCore _networkPerspectiveCore;
-        private readonly IStatusLoggerFactory _statusLoggerFactory;
         private readonly ISyncHistoryService _syncHistoryService;
-        private readonly INetworkService _networkService;
+        private readonly IConnectorService _connectorService;
         private readonly IHashingServiceFactory _hashingServiceFactory;
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
         private readonly IClock _clock;
@@ -30,38 +28,37 @@ namespace NetworkPerspective.Sync.Application.Services
         public SyncContextFactory(
             ITokenService tokenService,
             INetworkPerspectiveCore networkPerspectiveCore,
-            IStatusLoggerFactory statusLoggerFactory,
             ISyncHistoryService syncHistoryService,
-            INetworkService networkService,
+            IConnectorService connectorService,
             IHashingServiceFactory hashingServiceFactory,
             ISecretRepositoryFactory secretRepositoryFactory,
             IClock clock)
         {
             _tokenService = tokenService;
             _networkPerspectiveCore = networkPerspectiveCore;
-            _statusLoggerFactory = statusLoggerFactory;
             _syncHistoryService = syncHistoryService;
-            _networkService = networkService;
+            _connectorService = connectorService;
             _hashingServiceFactory = hashingServiceFactory;
             _secretRepositoryFactory = secretRepositoryFactory;
             _clock = clock;
         }
 
-        public async Task<SyncContext> CreateForNetworkAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task<SyncContext> CreateForConnectorAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
-            var token = await _tokenService.GetAsync(networkId, stoppingToken);
+            var token = await _tokenService.GetAsync(connectorId, stoppingToken);
             var networkConfig = await _networkPerspectiveCore.GetNetworkConfigAsync(token, stoppingToken);
-            var network = await _networkService.GetAsync<NetworkProperties>(networkId, stoppingToken);
-            var lastSyncedTimeStamp = await _syncHistoryService.EvaluateSyncStartAsync(networkId, stoppingToken);
-            var statusLogger = _statusLoggerFactory.CreateForNetwork(networkId);
+            var properties = await _connectorService.GetProperties(connectorId, stoppingToken);
+            var lastSyncedTimeStamp = await _syncHistoryService.EvaluateSyncStartAsync(connectorId, stoppingToken);
             var now = _clock.UtcNow();
 
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId, stoppingToken);
+
+            var connectorProperties = ConnectorProperties.Create<ConnectorProperties>(properties);
+            var secretRepository = _secretRepositoryFactory.Create(connectorProperties.ExternalKeyVaultUri);
             var hashingService = await _hashingServiceFactory.CreateAsync(secretRepository, stoppingToken);
 
             var timeRange = new TimeRange(lastSyncedTimeStamp, now);
 
-            return new SyncContext(networkId, networkConfig, network.Properties, token, timeRange, statusLogger, hashingService);
+            return new SyncContext(connectorId, networkConfig, properties, token, timeRange, hashingService);
         }
     }
 }

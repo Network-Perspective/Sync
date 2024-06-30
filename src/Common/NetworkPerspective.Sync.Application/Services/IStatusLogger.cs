@@ -20,11 +20,11 @@ namespace NetworkPerspective.Sync.Application.Services
         private readonly IClock _clock;
         private readonly ILogger<StatusLogger> _logger;
 
-        private readonly Guid _networkId;
+        private readonly Guid _connectorId;
 
-        public StatusLogger(Guid networkId, IUnitOfWorkFactory unitOfWorkFactory, IClock clock, ILogger<StatusLogger> logger)
+        public StatusLogger(Guid connectorId, IUnitOfWorkFactory unitOfWorkFactory, IClock clock, ILogger<StatusLogger> logger)
         {
-            _networkId = networkId;
+            _connectorId = connectorId;
             _unitOfWorkFactory = unitOfWorkFactory;
             _clock = clock;
             _logger = logger;
@@ -34,8 +34,8 @@ namespace NetworkPerspective.Sync.Application.Services
         {
             try
             {
-                _logger.LogDebug("Adding new {type} to network '{networkId}': '{log}'", typeof(StatusLog), _networkId, message);
-                var log = StatusLog.Create(_networkId, message, level, _clock.UtcNow());
+                _logger.LogDebug("Adding new {type} to connector '{connectorId}': '{log}'", typeof(StatusLog), _connectorId, message);
+                var log = StatusLog.Create(_connectorId, message, level, _clock.UtcNow());
 
                 using var unitOfWork = _unitOfWorkFactory
                     .Create();
@@ -46,11 +46,11 @@ namespace NetworkPerspective.Sync.Application.Services
 
                 await unitOfWork.CommitAsync(stoppingToken);
 
-                _logger.LogDebug("Added new {type} to persistence for network '{networkId}'", typeof(StatusLog), _networkId);
+                _logger.LogDebug("Added new {type} to persistence for connector '{connectorId}'", typeof(StatusLog), _connectorId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unable to add {type} to persistence for network '{networkId}'", typeof(StatusLog), _networkId);
+                _logger.LogError(ex, "Unable to add {type} to persistence for connector '{connectorId}'", typeof(StatusLog), _connectorId);
             }
         }
     }

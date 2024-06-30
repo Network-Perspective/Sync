@@ -2,6 +2,7 @@
 
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 
@@ -13,8 +14,10 @@ public static class StartSyncMapper
         {
             CorrelationId = Guid.NewGuid(),
             ConnectorId = syncContext.ConnectorId,
+            NetworkId = syncContext.NetworkId,
             Start = syncContext.TimeRange.Start,
             End = syncContext.TimeRange.End,
+            AccessToken = syncContext.AccessToken.ToSystemString(),
             NetworkProperties = syncContext.NetworkProperties,
         };
     }

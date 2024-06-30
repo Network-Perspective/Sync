@@ -1,8 +1,9 @@
 @orchestrator_host = https://localhost:7191
-@worker_id = 1b66c414-74fc-4e8a-8ca9-1cb96802a601
-@connector_id = b7b32c87-fb9c-41a6-b50f-fa1d149bd8cb
+@worker_id = f0d39021-a738-4535-84d5-d5399564128f
+@network_id = bd1bc916-db78-4e1e-b93b-c6feb8cf729e
+@connector_id = 04C753D8-FF9A-479C-B857-5D28C1EAF6C1
 @api_key = api-key
-
+##
 ### WORKERS GET ALL
 GET {{orchestrator_host}}/api/workers
 Authorization: Bearer {{api_key}}
@@ -32,9 +33,9 @@ Content-Type: application/json
 
 ### CONNECTORS GET ALL
 GET {{orchestrator_host}}/api/connectors?workerId={{worker_id}}
-Authorization: Bearer {{api_key}}
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {{api_key}}
 
 ### CONNECTORS CREATE
 POST {{orchestrator_host}}/api/connectors
@@ -43,8 +44,11 @@ Content-Type: application/json
 Accept: application/json
 
 {
+    "Id": "{{connector_id}}",
+    "NetworkId": "{{network_id}}",
     "WorkerId": "{{worker_id}}",
-    "Type": "Google",
+    "Type": "Slack",
+    "AccessToken": "access_token",
     "Properties": [
         { "Key": "key1", "Value": "value1" },
         { "Key": "key2", "Value": "value2" }
@@ -58,7 +62,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-
+    "OverrideSyncPeriodStart": "2024-01-01T00:00:00Z"
 }
 
 ### SCHEDULER REMOVE
@@ -71,7 +75,12 @@ Accept: application/json
 
 }
 
+### CONNECTOR STATUS
+GET {{orchestrator_host}}/api/connectors/{{connector_id}}/status
+Authorization: Bearer {{api_key}}
+Accept: application/json
+
 ### START AUTH SLACK
-POST {{orchestrator_host}}/api/connectors/{{connector_id}}/slack-auth
+POST {{orchestrator_host}}/api/connectors/slack-auth?connectorId={{connector_id}}
 Authorization: Bearer {{api_key}}
 Accept: application/json

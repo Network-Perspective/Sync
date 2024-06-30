@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Exceptions;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
@@ -30,7 +30,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
         private readonly Mock<IAuthStateKeyFactory> _authStateKeyFactory = new Mock<IAuthStateKeyFactory>();
         private readonly Mock<ISecretRepositoryFactory> _secretRepositoryFactoryMock = new Mock<ISecretRepositoryFactory>();
         private readonly Mock<ISecretRepository> _secretRepositoryMock = new Mock<ISecretRepository>();
-        private readonly Mock<INetworkService> _networkServiceMock = new Mock<INetworkService>();
+        private readonly Mock<IConnectorService> _networkServiceMock = new Mock<IConnectorService>();
         private readonly Mock<IStatusLoggerFactory> _statusLoggerFactoryMock = new Mock<IStatusLoggerFactory>();
         private readonly Mock<IStatusLogger> _statusLoggerMock = new Mock<IStatusLogger>();
         private readonly ILogger<MicrosoftAuthService> _logger = NullLogger<MicrosoftAuthService>.Instance;
@@ -45,11 +45,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             _statusLoggerMock.Reset();
 
             _secretRepositoryFactoryMock
-                .Setup(x => x.CreateAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(_secretRepositoryMock.Object);
+                .Setup(x => x.Create(It.IsAny<Uri>()))
+                .Returns(_secretRepositoryMock.Object);
 
             _statusLoggerFactoryMock
-                .Setup(x => x.CreateForNetwork(It.IsAny<Guid>()))
+                .Setup(x => x.CreateForConnector(It.IsAny<Guid>()))
                 .Returns(_statusLoggerMock.Object);
         }
 
@@ -60,7 +60,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             {
                 // Arrange
                 const string redirectUrl = "https://networkperspective.io:5001/callback";
-                var networkId = Guid.NewGuid();
+                var connectorId = Guid.NewGuid();
                 var clientId = Guid.NewGuid().ToString();
                 var state = Guid.NewGuid().ToString();
 
@@ -72,11 +72,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
                     .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, It.IsAny<CancellationToken>()))
                     .ReturnsAsync(clientId.ToSecureString());
 
-                var networkProperties = new MicrosoftNetworkProperties(false, false, false, false, null);
-                var network = Network<MicrosoftNetworkProperties>.Create(networkId, networkProperties, DateTime.UtcNow);
+                var connectorProperties = new MicrosoftNetworkProperties(false, false, false, false, null);
+                var connector = Connector<MicrosoftNetworkProperties>.Create(connectorId, connectorProperties, DateTime.UtcNow);
                 _networkServiceMock
-                    .Setup(x => x.GetAsync<MicrosoftNetworkProperties>(networkId, It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(network);
+                    .Setup(x => x.GetAsync<MicrosoftNetworkProperties>(connectorId, It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(connector);
 
                 var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
                 var service = new MicrosoftAuthService(
@@ -88,7 +88,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
                     _logger);
 
                 // Act
-                var result = await service.StartAuthProcessAsync(new AuthProcess(networkId, new Uri(redirectUrl)));
+                var result = await service.StartAuthProcessAsync(new AuthProcess(connectorId, new Uri(redirectUrl)));
 
                 // Assert
                 var resultUri = new Uri(result.MicrosoftAuthUri);
@@ -104,9 +104,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             public void ShouldPutStateToCache()
             {
                 // Arrange
-                var networkId = Guid.NewGuid();
+                var connectorId = Guid.NewGuid();
                 var callbackUri = new Uri("https://localhost:5001/callback");
-                var authProcess = new AuthProcess(networkId, callbackUri);
+                var authProcess = new AuthProcess(connectorId, callbackUri);
 
                 var state = Guid.NewGuid().ToString();
 

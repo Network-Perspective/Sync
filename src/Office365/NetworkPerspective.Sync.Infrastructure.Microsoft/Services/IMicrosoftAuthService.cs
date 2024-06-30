@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Exceptions;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
@@ -29,7 +30,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
         private readonly IMemoryCache _cache;
         private readonly IStatusLoggerFactory _statusLoggerFactory;
-        private readonly INetworkService _networkService;
+        private readonly IConnectorService _connectorService;
         private readonly ILogger<MicrosoftAuthService> _logger;
 
         public MicrosoftAuthService(
@@ -37,14 +38,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             ISecretRepositoryFactory secretRepositoryFactory,
             IMemoryCache cache,
             IStatusLoggerFactory statusLoggerFactory,
-            INetworkService networkService,
+            IConnectorService connectorService,
             ILogger<MicrosoftAuthService> logger)
         {
             _stateKeyFactory = stateKeyFactory;
             _secretRepositoryFactory = secretRepositoryFactory;
             _cache = cache;
             _statusLoggerFactory = statusLoggerFactory;
-            _networkService = networkService;
+            _connectorService = connectorService;
             _logger = logger;
         }
 
@@ -53,13 +54,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             _logger.LogInformation("Starting microsoft admin consent process...");
 
             await _statusLoggerFactory
-                .CreateForNetwork(authProcess.NetworkId)
+                .CreateForConnector(authProcess.ConnectorId)
                 .LogInfoAsync("Admin consent process started", stoppingToken);
 
             var stateKey = _stateKeyFactory.Create();
             _cache.Set(stateKey, authProcess, DateTimeOffset.UtcNow.AddMinutes(AuthorizationStateExpirationTimeInMinutes));
 
-            var clientId = await GetClientIdAsync(authProcess.NetworkId, stoppingToken);
+            var clientId = await GetClientIdAsync(authProcess.ConnectorId, stoppingToken);
             var authUri = BuildMicrosoftAuthUri(clientId, stateKey, authProcess.CallbackUri);
 
             _logger.LogInformation("Micorosoft admin consent process started. Unique state id: '{state}'", stateKey);
@@ -74,27 +75,28 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             if (!_cache.TryGetValue(state, out AuthProcess authProcess))
                 throw new OAuthException("State does not match initialized value");
 
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(authProcess.NetworkId, stoppingToken);
-            var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, authProcess.NetworkId);
+            var connector = await _connectorService.GetAsync<ConnectorProperties>(authProcess.ConnectorId);
+            var secretRepository = _secretRepositoryFactory.Create(connector.Properties.ExternalKeyVaultUri);
+            var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, authProcess.ConnectorId);
             await secretRepository.SetSecretAsync(tenantIdKey, tenant.ToString().ToSecureString(), stoppingToken);
         }
 
-        private async Task<SecureString> GetClientIdAsync(Guid networkId, CancellationToken stoppingToken)
+        private async Task<SecureString> GetClientIdAsync(Guid connectorId, CancellationToken stoppingToken)
         {
-            var network = await _networkService.GetAsync<MicrosoftNetworkProperties>(networkId, stoppingToken);
+            var connector = await _connectorService.GetAsync<MicrosoftNetworkProperties>(connectorId, stoppingToken);
 
-            var secretRepository = await _secretRepositoryFactory.CreateAsync(networkId, stoppingToken);
+            var secretRepository = _secretRepositoryFactory.Create(connector.Properties.ExternalKeyVaultUri);
 
-            if (network.Properties.SyncMsTeams == true)
+            if (connector.Properties.SyncMsTeams == true)
             {
                 _logger.LogInformation("Network property '{PropertyName}' is set to '{Value}'. Using Teams Microsoft Enterprise Application for authorization",
-                    nameof(MicrosoftNetworkProperties.SyncMsTeams), network.Properties.SyncMsTeams);
+                    nameof(MicrosoftNetworkProperties.SyncMsTeams), connector.Properties.SyncMsTeams);
                 return await secretRepository.GetSecretAsync(MicrosoftKeys.MicrosoftClientTeamsIdKey, stoppingToken);
             }
             else
             {
                 _logger.LogInformation("Network property '{PropertyName}' is set to '{Value}'. Using Basic Microsoft Enterprise Application for authorization",
-                    nameof(MicrosoftNetworkProperties.SyncMsTeams), network.Properties.SyncMsTeams);
+                    nameof(MicrosoftNetworkProperties.SyncMsTeams), connector.Properties.SyncMsTeams);
                 return await secretRepository.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, stoppingToken);
             }
         }

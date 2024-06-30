@@ -16,7 +16,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 {
     internal sealed class MicrosoftFacade : IDataSource
     {
-        private readonly INetworkService _networkService;
+        private readonly IConnectorService _networkService;
         private readonly IUsersClient _usersClient;
         private readonly IMailboxClient _mailboxClient;
         private readonly ICalendarClient _calendarClient;
@@ -26,7 +26,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         private readonly ILogger<MicrosoftFacade> _logger;
 
         public MicrosoftFacade(
-            INetworkService networkService,
+            IConnectorService networkService,
             IUsersClient usersClient,
             IMailboxClient mailboxClient,
             ICalendarClient calendarClient,
@@ -46,9 +46,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 
         public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
-            _logger.LogInformation("Getting employees for network '{networkId}'", context.NetworkId);
+            _logger.LogInformation("Getting employees for connector '{connectorId}'", context.ConnectorId);
 
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.NetworkId, stoppingToken));
+            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.ConnectorId, stoppingToken));
 
             var employees = await context.EnsureSetAsync(async () =>
             {
@@ -61,9 +61,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 
         public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
         {
-            _logger.LogInformation("Getting hashed employees for network '{networkId}'", context.NetworkId);
+            _logger.LogInformation("Getting hashed employees for connector '{connectorId}'", context.ConnectorId);
 
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.NetworkId, stoppingToken));
+            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.ConnectorId, stoppingToken));
 
             IEnumerable<Models.Channel> channels = network.Properties.SyncMsTeams == true
                 ? await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken))
@@ -75,8 +75,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 
         public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
-            _logger.LogInformation("Getting interactions for network '{networkId}' for period {timeRange}", context.NetworkId, context.TimeRange);
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.NetworkId, stoppingToken));
+            _logger.LogInformation("Getting interactions for connector '{connectorId}' for period {timeRange}", context.ConnectorId, context.TimeRange);
+            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.ConnectorId, stoppingToken));
 
             IEnumerable<Models.Channel> channels = network.Properties.SyncMsTeams == true
                 ? await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken))
@@ -114,7 +114,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
                 }
             }
 
-            _logger.LogInformation("Getting interactions for network '{networkId}' completed", context.NetworkId);
+            _logger.LogInformation("Getting interactions for connector '{connectorId}' completed", context.ConnectorId);
 
             return result;
         }

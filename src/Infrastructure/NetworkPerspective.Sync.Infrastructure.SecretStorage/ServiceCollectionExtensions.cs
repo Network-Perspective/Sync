@@ -1,55 +1,40 @@
-﻿using System;
+﻿using System.Linq;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
-using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage.Exceptions;
+using NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault;
+using NetworkPerspective.Sync.Infrastructure.SecretStorage.DbVault;
+using NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault;
 
-namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
+namespace NetworkPerspective.Sync.Infrastructure.SecretStorage;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    private const string AzureKeyVaultConfigSection = "AzureKeyVault";
+    private const string HcpVaultConfigSection = "HcpVault";
+    private const string DbVaultConfigSection = "DataProtection";
+
+    public static IServiceCollection AddSecretRepositoryClient(this IServiceCollection services, IConfigurationSection configurationSection, IHealthChecksBuilder healthCheckBuilder)
     {
-        private const string AzureKeyVaultConfigSection = "AzureKeyVault";
-        private const string HcpVaultConfigSection = "HcpVault";
-        private const string DataProtectionConfigSection = "DataProtection";
+        var azSection = configurationSection.GetSection(AzureKeyVaultConfigSection);
+        var hcpSection = configurationSection.GetSection(HcpVaultConfigSection);
+        var dbSection = configurationSection.GetSection(DbVaultConfigSection);
 
-        public static IServiceCollection AddSecretRepositoryClient(this IServiceCollection services, IConfigurationSection configurationSection, IHealthChecksBuilder healthCheckBuilder)
-        {
-            services.Configure<AzureKeyVaultConfig>(configurationSection.GetSection(AzureKeyVaultConfigSection));
-            services.Configure<HcpVaultConfig>(configurationSection.GetSection(HcpVaultConfigSection));
-            services.Configure<DbSecretRepositoryConfig>(configurationSection.GetSection(DataProtectionConfigSection));
+        var containsAzureKeyVault = azSection.GetChildren().FirstOrDefault(x => x.Key == "BaseUrl") is not null;
+        var containsHcpVault = hcpSection.GetChildren().FirstOrDefault(x => x.Key == "BaseUrl") is not null;
+        var containsDbVault = hcpSection.GetChildren().FirstOrDefault(x => x.Key == "SecretsPath") is not null;
 
-            services.AddSingleton(TokenCredentialFactory.Create());
-            services.AddTransient<DbSecretRepositoryClient>();
-            services.AddTransient<HcpVaultClient>();
-            services.AddTransient<ISecretRepositoryFactory, SecretRepositoryClientFactory>();
-            services.AddTransient<ISecretRepositoryHealthCheckFactory, SecretRepositoryClientFactory>();
+        if (containsAzureKeyVault)
+            services.AddAzureKeyVault(configurationSection.GetSection(AzureKeyVaultConfigSection), healthCheckBuilder);
+        else if (containsHcpVault)
+            services.AddHcpKeyVault(configurationSection.GetSection(AzureKeyVaultConfigSection), healthCheckBuilder);
+        else if (containsDbVault)
+            services.AddDbSecretStorage(configurationSection.GetSection(DbVaultConfigSection), healthCheckBuilder);
+        else
+            throw new SecretStorageException("At least one secret storage needs to be configured");
 
-            services.AddScoped<ISecretRepository>(sp =>
-            {
-                var factory = sp.GetRequiredService<ISecretRepositoryFactory>();
-                var networkIdProvider = sp.GetRequiredService<INetworkIdProvider>();
-
-                return factory.CreateAsync(networkIdProvider.Get()).Result;
-            });
-
-            services.AddTransient<HcpVaultHealthCheck>();
-            services.AddTransient<DbSecretRepositoryHealthCheck>();
-            healthCheckBuilder.Add(new HealthCheckRegistration(
-                "SecretRepository",
-                sp =>
-                {
-                    var factory = sp.GetRequiredService<ISecretRepositoryHealthCheckFactory>();
-                    return factory.CreateHealthCheck();
-                },
-                HealthStatus.Unhealthy,
-                Array.Empty<string>(),
-                TimeSpan.FromSeconds(30))
-            );
-
-            return services;
-        }
+        return services;
     }
 }

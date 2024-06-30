@@ -1,8 +1,8 @@
-﻿using NetworkPerspective.Sync.Application.Domain.Networks;
+﻿using NetworkPerspective.Sync.Application.Domain.Connectors;
 
 namespace NetworkPerspective.Sync.Infrastructure.Excel
 {
-    public class ExcelNetworkProperties : NetworkProperties
+    public class ExcelNetworkProperties : ConnectorProperties
     {
         private new const bool DefaultSyncGroups = true;
 

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 
@@ -11,7 +12,7 @@ namespace NetworkPerspective.Sync.Application.Services
 {
     public interface IStatusService
     {
-        public Task<Status> GetStatusAsync(Guid networkId, CancellationToken stoppingToken = default);
+        public Task<Status> GetStatusAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default);
     }
 
     internal class StatusService : IStatusService
@@ -33,33 +34,33 @@ namespace NetworkPerspective.Sync.Application.Services
             _logger = logger;
         }
 
-        public async Task<Status> GetStatusAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public async Task<Status> GetStatusAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default)
         {
-            _logger.LogDebug("Checking status of network '{networkId}'", networkId);
+            _logger.LogDebug("Checking status of connector '{connectorId}'", connectorInfo.Id);
 
             using var unitOfWork = _unitOfWorkFactory
                 .Create();
 
             var logs = await unitOfWork
                 .GetStatusLogRepository()
-                .GetListAsync(networkId, stoppingToken);
+                .GetListAsync(connectorInfo.Id, stoppingToken);
 
             var isAuthorizedToCoreApp = await _tokenService
-                .HasValidAsync(networkId, stoppingToken);
+                .HasValidAsync(connectorInfo.Id, stoppingToken);
 
-            _logger.LogDebug("Network '{networkId}' authorization status to Core app is '{status}'", networkId, isAuthorizedToCoreApp);
+            _logger.LogDebug("Connector '{connectorId}' authorization status to Core app is '{status}'", connectorInfo.Id, isAuthorizedToCoreApp);
 
             var isAuthorizedToDataSource = await _authTester.IsAuthorizedAsync(stoppingToken);
-            var isRunning = await _scheduler.IsRunningAsync(networkId, stoppingToken);
+            var isRunning = await _scheduler.IsRunningAsync(connectorInfo, stoppingToken);
 
-            _logger.LogDebug("Network '{networkId}' authorization status to data source is '{status}'", networkId, isAuthorizedToDataSource);
+            _logger.LogDebug("Connector '{connectorId}' authorization status to data source is '{status}'", connectorInfo.Id, isAuthorizedToDataSource);
 
             return new Status
             {
                 Authorized = isAuthorizedToCoreApp && isAuthorizedToDataSource,
-                Scheduled = await _scheduler.IsScheduledAsync(networkId, stoppingToken),
+                Scheduled = await _scheduler.IsScheduledAsync(connectorInfo, stoppingToken),
                 Running = isRunning,
-                CurrentTask = isRunning ? await _tasksStatusesCache.GetStatusAsync(networkId, stoppingToken) : null,
+                CurrentTask = isRunning ? await _tasksStatusesCache.GetStatusAsync(connectorInfo.Id, stoppingToken) : null,
                 Logs = logs
             };
         }

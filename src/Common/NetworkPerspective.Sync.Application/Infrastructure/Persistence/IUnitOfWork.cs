@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Repositories;
 
 namespace NetworkPerspective.Sync.Application.Infrastructure.Persistence
@@ -11,7 +11,7 @@ namespace NetworkPerspective.Sync.Application.Infrastructure.Persistence
     {
         Task MigrateAsync();
         ISyncHistoryRepository GetSyncHistoryRepository();
-        INetworkRepository<TProperties> GetNetworkRepository<TProperties>() where TProperties : NetworkProperties, new();
+        IConnectorRepository<TProperties> GetConnectorRepository<TProperties>() where TProperties : ConnectorProperties, new();
         IStatusLogRepository GetStatusLogRepository();
         Task CommitAsync(CancellationToken stoppingToken = default);
         IDbSecretRepository GetDbSecretRepository();

@@ -61,8 +61,8 @@ namespace NetworkPerspective.Sync.Common.Tests.Fixtures
             SecretRepositoryMock.Reset();
 
             SecretRepositoryFactoryMock
-                .Setup(x => x.CreateAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(SecretRepositoryMock.Object);
+                .Setup(x => x.Create(It.IsAny<Uri>()))
+                .Returns(SecretRepositoryMock.Object);
         }
 
         protected override void ConfigureClient(HttpClient client)

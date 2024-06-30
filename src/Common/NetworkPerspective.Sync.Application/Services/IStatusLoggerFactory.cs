@@ -8,7 +8,7 @@ namespace NetworkPerspective.Sync.Application.Services
 {
     public interface IStatusLoggerFactory
     {
-        IStatusLogger CreateForNetwork(Guid networkId);
+        IStatusLogger CreateForConnector(Guid connectorId);
     }
 
     internal class StatusLoggerFactory : IStatusLoggerFactory
@@ -24,7 +24,7 @@ namespace NetworkPerspective.Sync.Application.Services
             _loggerFactory = loggerFactory;
         }
 
-        public IStatusLogger CreateForNetwork(Guid networkId)
-            => new StatusLogger(networkId, _unitOfWorkFactory, _clock, _loggerFactory.CreateLogger<StatusLogger>());
+        public IStatusLogger CreateForConnector(Guid connectorInfo)
+            => new StatusLogger(connectorInfo, _unitOfWorkFactory, _clock, _loggerFactory.CreateLogger<StatusLogger>());
     }
 }

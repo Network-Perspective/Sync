@@ -15,22 +15,31 @@ namespace NetworkPerspective.Sync.Application
             services.Configure<SyncConfig>(config.GetSection(SyncConfigSection));
             services.Configure<MiscConfig>(config.GetSection(MiscConfigSection));
 
+            services.AddTransient<ISyncScheduler, NoOpSyncScheduler>();
+            services.AddScoped<IAuthTester, DummyAuthTester>();
+
             services.AddTransient<IClock, Clock>();
             services.AddTransient<IHashingServiceFactory, HashingServiceFactory>();
             services.AddTransient<IInteractionsFilterFactory, InteractionsFilterFactory>();
             services.AddTransient<IHashingServiceFactory, HashingServiceFactory>();
             services.AddTransient<IAuthStateKeyFactory, AuthStateKeyFactory>();
 
-            services.AddScoped<NetworkIdProvider>();
-            services.AddScoped<INetworkIdProvider>(x => x.GetRequiredService<NetworkIdProvider>());
-            services.AddScoped<INetworkIdInitializer>(x => x.GetRequiredService<NetworkIdProvider>());
+            services.AddScoped<ConnectorInfoProvider>();
+            services.AddScoped<IConnectorInfoProvider>(x => x.GetRequiredService<ConnectorInfoProvider>());
+            services.AddScoped<IConnectorInfoInitializer>(x => x.GetRequiredService<ConnectorInfoProvider>());
 
-            services.AddScoped<ISyncContextProvider, SyncContextProvider>();
+            services.AddScoped<ISyncContextAccessor, SyncContextAccessor>();
 
             services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<ICachedSecretRepository, CachedSecretRepository>();
+            services.AddScoped<IStatusLogger>(sp =>
+            {
+                var connectorInfo = sp.GetRequiredService<IConnectorInfoProvider>().Get();
+                var statusLogger = sp.GetRequiredService<IStatusLoggerFactory>().CreateForConnector(connectorInfo.Id);
+                return statusLogger;
+            });
 
-            services.AddTransient<INetworkService, NetworkService>();
+            services.AddTransient<IConnectorService, ConnectorService>();
             services.AddTransient<IStatusLoggerFactory, StatusLoggerFactory>();
             services.AddTransient<IStatusService, StatusService>();
             services.AddTransient<ITokenService, TokenService>();

@@ -8,11 +8,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
+using NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 using NetworkPerspective.Sync.Orchestrator.Dtos;
 using NetworkPerspective.Sync.Orchestrator.Mappers;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
@@ -22,12 +23,14 @@ public class ConnectorsController : ControllerBase
 {
     private readonly IConnectorsService _connectorsService;
     private readonly ISyncScheduler _syncScheduler;
+    private readonly ITokenService _tokenService;
     private readonly ILogger<ConnectorsController> _logger;
 
-    public ConnectorsController(IConnectorsService connectorsService, ISyncScheduler syncScheduler, ILogger<ConnectorsController> logger)
+    public ConnectorsController(IConnectorsService connectorsService, ISyncScheduler syncScheduler, ITokenService tokenService, ILogger<ConnectorsController> logger)
     {
         _connectorsService = connectorsService;
         _syncScheduler = syncScheduler;
+        _tokenService = tokenService;
         _logger = logger;
     }
 
@@ -37,8 +40,10 @@ public class ConnectorsController : ControllerBase
         _logger.LogDebug("Received request to create new connector '{type}' for worker '{workerId}'", request.Type, request.WorkerId);
 
         var properties = request.Properties.ToDictionary(p => p.Key, p => p.Value);
-        var connectorId = await _connectorsService.CreateAsync(request.Type, request.WorkerId, properties, stoppingToken);
-        await _syncScheduler.AddOrReplaceAsync(connectorId, stoppingToken);
+        await _connectorsService.CreateAsync(request.Id, request.NetworkId, request.Type, request.WorkerId, properties, stoppingToken);
+
+        await _tokenService.AddOrReplace(request.AccessToken.ToSecureString(), request.Id, stoppingToken);
+        await _syncScheduler.AddOrReplaceAsync(request.Id, stoppingToken);
 
         return Ok();
     }
@@ -48,7 +53,7 @@ public class ConnectorsController : ControllerBase
     {
         _logger.LogDebug("Received request to get all connectors of worker '{workerId}'", workerId);
 
-        var workers = await _connectorsService.GetAllAsync(workerId, stoppingToken);
+        var workers = await _connectorsService.GetAllOfWorkerAsync(workerId, stoppingToken);
         return workers.Select(ConnectorMapper.ToDto);
     }
 }

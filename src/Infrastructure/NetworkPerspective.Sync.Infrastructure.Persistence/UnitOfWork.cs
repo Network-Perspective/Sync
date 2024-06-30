@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Repositories;
 using NetworkPerspective.Sync.Infrastructure.Persistence.Repositories;
@@ -26,8 +26,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Persistence
         public ISyncHistoryRepository GetSyncHistoryRepository()
             => new SyncHistoryRepository(_dbContext.SyncHistoryEntities);
 
-        public INetworkRepository<TProperties> GetNetworkRepository<TProperties>() where TProperties : NetworkProperties, new()
-            => new NetworkRepository<TProperties>(_dbContext.NetworkEntities);
+        public IConnectorRepository<TProperties> GetConnectorRepository<TProperties>() where TProperties : ConnectorProperties, new()
+            => new ConnectorRepository<TProperties>(_dbContext.NetworkEntities);
 
         public IStatusLogRepository GetStatusLogRepository()
             => new StatusLogRepository(_dbContext.StatusLogEntities);

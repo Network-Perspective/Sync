@@ -1,63 +1,64 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 
 namespace NetworkPerspective.Sync.Application.Services
 {
     public interface ISyncScheduler
     {
-        Task AddOrReplaceAsync(Guid networkId, CancellationToken stoppingtoken = default);
-        Task EnsureRemovedAsync(Guid networkId, CancellationToken stoppingtoken = default);
-        Task TriggerNowAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task InterruptNowAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task ScheduleAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task UnscheduleAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task<bool> IsScheduledAsync(Guid networkId, CancellationToken stoppingToken = default);
-        Task<bool> IsRunningAsync(Guid networkId, CancellationToken stoppingToken = default);
+        Task AddOrReplaceAsync(ConnectorInfo connectorInfo, CancellationToken stoppingtoken = default);
+        Task EnsureRemovedAsync(ConnectorInfo connectorInfo, CancellationToken stoppingtoken = default);
+        Task TriggerNowAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default);
+        Task InterruptNowAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default);
+        Task ScheduleAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default);
+        Task UnscheduleAsync(ConnectorInfo connectorInfod, CancellationToken stoppingToken = default);
+        Task<bool> IsScheduledAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default);
+        Task<bool> IsRunningAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default);
     }
 
     /// <summary>
     /// Dummy implementation of <see cref="ISyncScheduler"/> that does nothing
     /// for connectors that don't need scheduling
     /// </summary>
-    public class DummySyncScheduler : ISyncScheduler
+    internal class NoOpSyncScheduler : ISyncScheduler
     {
-        public Task AddOrReplaceAsync(Guid networkId, CancellationToken stoppingtoken = default)
+        public Task AddOrReplaceAsync(ConnectorInfo connectorInfo, CancellationToken stoppingtoken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task EnsureRemovedAsync(Guid networkId, CancellationToken stoppingtoken = default)
+        public Task EnsureRemovedAsync(ConnectorInfo connectorInfo, CancellationToken stoppingtoken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task TriggerNowAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task TriggerNowAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task InterruptNowAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task InterruptNowAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task ScheduleAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task ScheduleAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task UnscheduleAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task UnscheduleAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task<bool> IsScheduledAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task<bool> IsScheduledAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default)
         {
             return Task.FromResult(true);
         }
 
-        public Task<bool> IsRunningAsync(Guid networkId, CancellationToken stoppingToken = default)
+        public Task<bool> IsRunningAsync(ConnectorInfo connectorInfo, CancellationToken stoppingToken = default)
         {
             return Task.FromResult(false);
         }

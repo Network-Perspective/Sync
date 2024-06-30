@@ -31,7 +31,7 @@ public class OrchestratorServiceFixture : WebApplicationFactory<Program>
     {
         var configOverride = new Dictionary<string, string>
         {
-            { "App:Scheduler:UsePersistentStore", "false" },
+            { "App:SyncScheduler:UsePersistentStore", "false" },
         };
 
         builder.ConfigureHostConfiguration(config =>

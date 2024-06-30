@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.Google.Services;
-using NetworkPerspective.Sync.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Fixtures
 {

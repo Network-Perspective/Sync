@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
+
 using Quartz;
 using Quartz.Impl;
 using Quartz.Impl.Matchers;
@@ -43,17 +45,19 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldReplaceJobIfAlreadyExist()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
 
                 // Act
-                await syncScheduler.AddOrReplaceAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
 
                 // Assert
                 var alljobs = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup());
-                alljobs.Should().BeEquivalentTo(new[] { new JobKey(networkId.ToString()) });
+                alljobs.Should().BeEquivalentTo(new[] { new JobKey(connectorInfo.ToString()) });
             }
         }
 
@@ -63,13 +67,15 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldRemoveJob()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
 
                 // Act
-                await syncScheduler.EnsureRemovedAsync(networkId);
+                await syncScheduler.EnsureRemovedAsync(connectorInfo);
 
                 // Assert
                 var alljobs = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup());
@@ -80,11 +86,13 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldNotThrowOnNotExisting()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
 
-                Func<Task> func = async () => await syncScheduler.EnsureRemovedAsync(networkId);
+                Func<Task> func = async () => await syncScheduler.EnsureRemovedAsync(connectorInfo);
 
                 // Act Assert
                 await func.Should().NotThrowAsync();
@@ -98,17 +106,19 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldTriggerWithCorrectNetworkId()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
 
                 // Act
                 await _scheduler.Start();
-                await syncScheduler.TriggerNowAsync(networkId);
+                await syncScheduler.TriggerNowAsync(connectorInfo);
 
                 // Assert
-                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == networkId), TimeoutInMs).Should().BeTrue();
+                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == connectorInfo.ToString()), TimeoutInMs).Should().BeTrue();
             }
         }
 
@@ -118,40 +128,47 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldInterruptCurrentJob()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
                 await _scheduler.Start();
-                await syncScheduler.TriggerNowAsync(networkId);
-                SpinWait.SpinUntil(() => syncScheduler.IsRunningAsync(networkId).Result, TimeoutInMs);
+                await syncScheduler.TriggerNowAsync(connectorInfo);
+                SpinWait.SpinUntil(() => syncScheduler.IsRunningAsync(connectorInfo).Result, TimeoutInMs);
 
                 // Act
-                await syncScheduler.InterruptNowAsync(networkId);
+                await syncScheduler.InterruptNowAsync(connectorInfo);
 
                 // Assert
                 var interruptionTimeout = TestableJob.JobExcecutionTimeInMs / 5;
-                SpinWait.SpinUntil(() => !syncScheduler.IsRunningAsync(networkId).Result, interruptionTimeout).Should().BeTrue();
+                SpinWait.SpinUntil(() => !syncScheduler.IsRunningAsync(connectorInfo).Result, interruptionTimeout).Should().BeTrue();
             }
 
             [Fact]
             public async Task ShouldNotInterfereWithOtherNetworksSync()
             {
                 // Arrange
+                var connectorId_1 = Guid.NewGuid();
                 var networkId_1 = Guid.NewGuid();
+                var connectorInfo_1 = new ConnectorInfo(connectorId_1, networkId_1);
+
+                var connectorId_2 = Guid.NewGuid();
                 var networkId_2 = Guid.NewGuid();
+                var connectorInfo_2 = new ConnectorInfo(connectorId_2, networkId_2);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId_1);
-                await syncScheduler.AddOrReplaceAsync(networkId_2);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo_1);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo_2);
                 await _scheduler.Start();
-                await syncScheduler.TriggerNowAsync(networkId_2);
+                await syncScheduler.TriggerNowAsync(connectorInfo_2);
 
                 // Act
-                await syncScheduler.InterruptNowAsync(networkId_1);
+                await syncScheduler.InterruptNowAsync(connectorInfo_1);
 
                 // Assert
-                SpinWait.SpinUntil(() => TestableJob.CompletedJobs.Contains(networkId_2), TimeoutInMs).Should().BeTrue();
+                SpinWait.SpinUntil(() => TestableJob.CompletedJobs.Contains(connectorInfo_2.ToString()), TimeoutInMs).Should().BeTrue();
             }
         }
 
@@ -161,17 +178,19 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldTriggerWithCorrectNetworkId()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
 
                 // Act
-                await syncScheduler.ScheduleAsync(networkId);
+                await syncScheduler.ScheduleAsync(connectorInfo);
                 await _scheduler.Start();
 
                 // Assert
-                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == networkId), TimeoutInMs).Should().BeTrue();
+                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == connectorInfo.ToString()), TimeoutInMs).Should().BeTrue();
             }
         }
 
@@ -181,41 +200,48 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldUnscheduleAllPendingJobs()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId);
-                await syncScheduler.ScheduleAsync(networkId);
-                await syncScheduler.TriggerNowAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
+                await syncScheduler.ScheduleAsync(connectorInfo);
+                await syncScheduler.TriggerNowAsync(connectorInfo);
 
                 // Act
-                await syncScheduler.UnscheduleAsync(networkId);
+                await syncScheduler.UnscheduleAsync(connectorInfo);
                 await _scheduler.Start();
 
                 // Assert
-                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == networkId), TimeoutInMs).Should().BeFalse();
+                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == connectorInfo.ToString()), TimeoutInMs).Should().BeFalse();
             }
 
             [Fact]
-            public async Task ShouldNotInterfereWithOtherNetworksSync()
+            public async Task ShouldNotInterfereWithOtherConnectorSync()
             {
                 // Arrange
+                var connectorId_1 = Guid.NewGuid();
                 var networkId_1 = Guid.NewGuid();
+                var connectorInfo_1 = new ConnectorInfo(connectorId_1, networkId_1);
+
+                var connectorId_2 = Guid.NewGuid();
                 var networkId_2 = Guid.NewGuid();
+                var connectorInfo_2 = new ConnectorInfo(connectorId_2, networkId_2);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId_1);
-                await syncScheduler.AddOrReplaceAsync(networkId_2);
-                await syncScheduler.ScheduleAsync(networkId_1);
-                await syncScheduler.ScheduleAsync(networkId_2);
-                await syncScheduler.TriggerNowAsync(networkId_1);
-                await syncScheduler.UnscheduleAsync(networkId_1);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo_1);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo_2);
+                await syncScheduler.ScheduleAsync(connectorInfo_1);
+                await syncScheduler.ScheduleAsync(connectorInfo_2);
+                await syncScheduler.TriggerNowAsync(connectorInfo_1);
+                await syncScheduler.UnscheduleAsync(connectorInfo_1);
 
                 // Act
                 await _scheduler.Start();
 
                 // Assert
-                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == networkId_2), TimeoutInMs).Should().BeTrue();
+                SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == connectorInfo_2.ToString()), TimeoutInMs).Should().BeTrue();
             }
         }
 
@@ -225,28 +251,32 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldReturnTrueForRunningJob()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
                 await _scheduler.Start();
-                await syncScheduler.TriggerNowAsync(networkId);
+                await syncScheduler.TriggerNowAsync(connectorInfo);
 
                 // Act Assert
-                SpinWait.SpinUntil(() => syncScheduler.IsRunningAsync(networkId).Result, TimeoutInMs).Should().BeTrue();
+                SpinWait.SpinUntil(() => syncScheduler.IsRunningAsync(connectorInfo).Result, TimeoutInMs).Should().BeTrue();
             }
 
             [Fact]
             public async Task ShouldReturnFalseForNotRunningJob()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
 
                 // Act
-                var result = await syncScheduler.IsRunningAsync(networkId);
+                var result = await syncScheduler.IsRunningAsync(connectorInfo);
 
                 // Assert
                 result.Should().BeFalse();
@@ -260,12 +290,14 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldReturnFalseForNotAddedJob()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
 
                 // Act
-                var result = await syncScheduler.IsScheduledAsync(networkId);
+                var result = await syncScheduler.IsScheduledAsync(connectorInfo);
 
                 // Assert
                 result.Should().BeFalse();
@@ -275,15 +307,17 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldReturnFalseForNotAddedTrigger()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
                 var quartzScheduler = await _schedulerFactory.GetScheduler();
-                await quartzScheduler.UnscheduleJob(new TriggerKey(networkId.ToString()));
+                await quartzScheduler.UnscheduleJob(new TriggerKey(connectorId.ToString()));
 
                 // Act
-                var result = await syncScheduler.IsScheduledAsync(networkId);
+                var result = await syncScheduler.IsScheduledAsync(connectorInfo);
 
                 // Assert
                 result.Should().BeFalse();
@@ -293,15 +327,17 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldReturnFalseForNotScheduledJob()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
 
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId);
-                await syncScheduler.ScheduleAsync(networkId);
-                await syncScheduler.UnscheduleAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
+                await syncScheduler.ScheduleAsync(connectorInfo);
+                await syncScheduler.UnscheduleAsync(connectorInfo);
 
                 // Act
-                var result = await syncScheduler.IsScheduledAsync(networkId);
+                var result = await syncScheduler.IsScheduledAsync(connectorInfo);
 
                 // Assert
                 result.Should().BeFalse();
@@ -311,13 +347,16 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             public async Task ShouldReturnTrueForScheduledJobs()
             {
                 // Arrange
+                var connectorId = Guid.NewGuid();
                 var networkId = Guid.NewGuid();
+                var connectorInfo = new ConnectorInfo(connectorId, networkId);
+
                 var syncScheduler = new SyncScheduler(_schedulerFactory, _jobDetailFactory, _defaultOptions, _logger);
-                await syncScheduler.AddOrReplaceAsync(networkId);
-                await syncScheduler.ScheduleAsync(networkId);
+                await syncScheduler.AddOrReplaceAsync(connectorInfo);
+                await syncScheduler.ScheduleAsync(connectorInfo);
 
                 // Act
-                var result = await syncScheduler.IsScheduledAsync(networkId);
+                var result = await syncScheduler.IsScheduledAsync(connectorInfo);
 
                 // Assert
                 result.Should().BeTrue();

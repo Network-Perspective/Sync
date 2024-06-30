@@ -12,19 +12,19 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
     public class TestableJob : IJob
     {
         public const int JobExcecutionTimeInMs = 1000;
-        private static readonly IList<Guid> InternalExecutedJobs = new List<Guid>();
-        private static readonly IList<Guid> InternalCompletedJobs = new List<Guid>();
+        private static readonly IList<string> InternalExecutedJobs = [];
+        private static readonly IList<string> InternalCompletedJobs = [];
 
-        private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim Semaphore = new(1, 1);
 
-        public static IReadOnlyCollection<Guid> ExecutedJobs
+        public static IReadOnlyCollection<string> ExecutedJobs
         {
             get
             {
                 try
                 {
                     Semaphore.Wait();
-                    return new ReadOnlyCollection<Guid>(InternalExecutedJobs.ToList());
+                    return new ReadOnlyCollection<string>(InternalExecutedJobs.ToList());
                 }
                 finally
                 {
@@ -33,14 +33,14 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             }
         }
 
-        public static IReadOnlyCollection<Guid> CompletedJobs
+        public static IReadOnlyCollection<string> CompletedJobs
         {
             get
             {
                 try
                 {
                     Semaphore.Wait();
-                    return new ReadOnlyCollection<Guid>(InternalCompletedJobs.ToList());
+                    return new ReadOnlyCollection<string>(InternalCompletedJobs.ToList());
                 }
                 finally
                 {
@@ -68,7 +68,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             try
             {
                 await Semaphore.WaitAsync();
-                InternalExecutedJobs.Add(Guid.Parse(context.JobDetail.Key.Name));
+                InternalExecutedJobs.Add(context.JobDetail.Key.Name);
             }
             finally
             {
@@ -80,7 +80,7 @@ namespace NetworkPerspective.Sync.Scheduler.Tests
             try
             {
                 await Semaphore.WaitAsync();
-                InternalCompletedJobs.Add(Guid.Parse(context.JobDetail.Key.Name));
+                InternalCompletedJobs.Add(context.JobDetail.Key.Name);
             }
             finally
             {

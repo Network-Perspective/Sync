@@ -10,7 +10,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
         public readonly static SyncResult Empty = new SyncResult(0, 0, Enumerable.Empty<Exception>());
 
         public int TasksCount { get; }
-        public int FailedCount { get; }
+        public int FailedTasksCount { get; }
         public long TotalInteractionsCount { get; }
         public double SuccessRate { get; }
         public IReadOnlyCollection<Exception> Exceptions { get; }
@@ -18,10 +18,10 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
         public SyncResult(int tasksCount, long totalInteractionsCount, IEnumerable<Exception> exceptions)
         {
             TasksCount = tasksCount;
-            FailedCount = exceptions.Count();
+            FailedTasksCount = exceptions.Count();
             TotalInteractionsCount = totalInteractionsCount;
             SuccessRate = tasksCount != 0
-                ? ((tasksCount - FailedCount) * 100.0 / tasksCount)
+                ? ((tasksCount - FailedTasksCount) * 100.0 / tasksCount)
                 : 0.0;
             Exceptions = exceptions.ToList();
         }
@@ -40,7 +40,7 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
             var stringBuilder = new StringBuilder();
 
             stringBuilder.AppendLine($"Tasks: {TasksCount}");
-            stringBuilder.AppendLine($"Failed: {FailedCount}");
+            stringBuilder.AppendLine($"Failed: {FailedTasksCount}");
             stringBuilder.AppendLine($"SuccessRate: {SuccessRate:0.00}%");
             stringBuilder.Append($"Total interactions: {TotalInteractionsCount}");
 

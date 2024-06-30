@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using NetworkPerspective.Sync.Application.Domain.Networks;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 
 namespace NetworkPerspective.Sync.Common.Tests
 {
-    public class TestableNetworkProperties : NetworkProperties
+    public class TestableNetworkProperties : ConnectorProperties
     {
         public TestableNetworkProperties() : base(true, true, null)
         { }

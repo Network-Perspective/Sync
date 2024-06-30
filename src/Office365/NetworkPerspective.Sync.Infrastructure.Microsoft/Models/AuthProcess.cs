@@ -4,12 +4,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Models
 {
     public class AuthProcess
     {
-        public Guid NetworkId { get; }
+        public Guid ConnectorId { get; }
         public Uri CallbackUri { get; }
 
-        public AuthProcess(Guid networkId, Uri callbackUri)
+        public AuthProcess(Guid connectorId, Uri callbackUri)
         {
-            NetworkId = networkId;
+            ConnectorId = connectorId;
             CallbackUri = callbackUri;
         }
     }

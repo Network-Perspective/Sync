@@ -4,13 +4,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Models
 {
     public class AuthProcess
     {
-        public Guid NetworkId { get; }
+        public Guid ConnectorId { get; }
         public Uri CallbackUri { get; }
         public bool RequireAdminPrivileges { get; }
 
-        public AuthProcess(Guid networkId, Uri callbackUri, bool requireAdminPrivileges)
+        public AuthProcess(Guid connectorId, Uri callbackUri, bool requireAdminPrivileges)
         {
-            NetworkId = networkId;
+            ConnectorId = connectorId;
             CallbackUri = callbackUri;
             RequireAdminPrivileges = requireAdminPrivileges;
         }

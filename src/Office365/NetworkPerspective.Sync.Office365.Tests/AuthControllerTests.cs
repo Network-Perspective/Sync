@@ -8,8 +8,7 @@ using FluentAssertions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Extensions;
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.Microsoft;
 using NetworkPerspective.Sync.Office365.Client;
@@ -37,13 +36,13 @@ namespace NetworkPerspective.Sync.Office365.Tests
         public async Task ShouldInitializeOAuthWithReturningUrlToMicrosoft()
         {
             // Arrange
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
             var clientId = Guid.NewGuid().ToString();
             var httpClient = _service.CreateDefaultClient();
 
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+                .ReturnsAsync(new ConnectorInfo(connectorId, Guid.NewGuid()));
 
             _service.SecretRepositoryMock
                 .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, It.IsAny<CancellationToken>()))
@@ -76,14 +75,14 @@ namespace NetworkPerspective.Sync.Office365.Tests
         public async Task ShouldHandleOnCorrectResponse()
         {
             // Arrange
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
             var tenantId = Guid.NewGuid();
             var clientId = Guid.NewGuid().ToString();
             var httpClient = _service.CreateDefaultClient();
 
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+                .ReturnsAsync(new ConnectorInfo(connectorId, Guid.NewGuid()));
 
             _service.SecretRepositoryMock
                 .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, It.IsAny<CancellationToken>()))
@@ -108,7 +107,7 @@ namespace NetworkPerspective.Sync.Office365.Tests
             var authCallbackResponse = await authClient
                 .CallbackAsync(tenantId, state, null, null);
 
-            var tenantKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, networkId.ToString());
+            var tenantKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, connectorId.ToString());
             _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync(tenantKey, It.Is<SecureString>(x => x.ToSystemString() == tenantId.ToString()), It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -118,13 +117,13 @@ namespace NetworkPerspective.Sync.Office365.Tests
             // Arrange
             var error = "error";
             var errorDescription = "error description";
-            var networkId = Guid.NewGuid();
+            var connectorId = Guid.NewGuid();
             var clientId = Guid.NewGuid().ToString();
             var httpClient = _service.CreateDefaultClient();
 
             _service.NetworkPerspectiveCoreMock
                 .Setup(x => x.ValidateTokenAsync(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new TokenValidationResponse(networkId, Guid.NewGuid()));
+                .ReturnsAsync(new ConnectorInfo(connectorId, Guid.NewGuid()));
 
             _service.SecretRepositoryMock
                 .Setup(x => x.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, It.IsAny<CancellationToken>()))

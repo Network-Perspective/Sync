@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
 
 namespace NetworkPerspective.Sync.Application.Services
 {

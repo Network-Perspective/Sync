@@ -11,15 +11,15 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {
     internal class AuthTester : IAuthTester
     {
-        private readonly INetworkService _networkService;
-        private readonly INetworkIdProvider _networkIdProvider;
+        private readonly IConnectorService _connectorService;
+        private readonly IConnectorInfoProvider _connectorInfoProvider;
         private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
         private readonly ILogger<AuthTester> _logger;
 
-        public AuthTester(INetworkService networkService, INetworkIdProvider networkIdProvider, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<AuthTester> logger)
+        public AuthTester(IConnectorService connectorService, IConnectorInfoProvider connectorInfoProvider, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<AuthTester> logger)
         {
-            _networkService = networkService;
-            _networkIdProvider = networkIdProvider;
+            _connectorService = connectorService;
+            _connectorInfoProvider = connectorInfoProvider;
             _slackClientFacadeFactory = slackClientFacadeFactory;
             _logger = logger;
         }
@@ -27,23 +27,23 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 
         public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
         {
-            var networkId = _networkIdProvider.Get();
-            var network = await _networkService.GetAsync<SlackNetworkProperties>(networkId, stoppingToken);
+            var connectorInfo = _connectorInfoProvider.Get();
+            var connector = await _connectorService.GetAsync<SlackConnectorProperties>(connectorInfo.Id, stoppingToken);
 
-            if (network.Properties.UsesAdminPrivileges)
+            if (connector.Properties.UsesAdminPrivileges)
             {
-                var isUserTokenOk = await TestUserTokenAsync(networkId, stoppingToken);
-                var isBotTokenOk = await TestBotTokenAsync(networkId, stoppingToken);
+                var isUserTokenOk = await TestUserTokenAsync(connectorInfo.Id, stoppingToken);
+                var isBotTokenOk = await TestBotTokenAsync(connectorInfo.Id, stoppingToken);
 
                 return isUserTokenOk && isBotTokenOk;
             }
             else
             {
-                return await TestBotTokenAsync(networkId, stoppingToken);
+                return await TestBotTokenAsync(connectorInfo.Id, stoppingToken);
             }
         }
 
-        private async Task<bool> TestBotTokenAsync(Guid networkId, CancellationToken stoppingToken)
+        private async Task<bool> TestBotTokenAsync(Guid connectorId, CancellationToken stoppingToken)
         {
             try
             {
@@ -54,7 +54,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "Network '{networkId}' is not authorized", networkId);
+                _logger.LogInformation(ex, "Connector '{connector}' is not authorized", connectorId);
                 return false;
             }
         }
@@ -70,7 +70,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "Network '{networkId}' is not authorized", networkId);
+                _logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", networkId);
                 return false;
             }
         }

@@ -23,7 +23,7 @@ namespace NetworkPerspective.Sync.Framework.Auth
     {
         private const string AuthenticationExceptionKey = "AuthenticationException";
         private readonly INetworkPerspectiveCore _networkPerspectiveCore;
-        private readonly INetworkIdInitializer _networkIdInitializer;
+        private readonly IConnectorInfoInitializer _connectorInfoInitializer;
         private readonly IErrorService _errorService;
 
         private readonly JsonSerializerSettings _jsonSerializerSettings = new()
@@ -33,11 +33,11 @@ namespace NetworkPerspective.Sync.Framework.Auth
             DefaultValueHandling = DefaultValueHandling.Ignore
         };
 
-        public ServiceAuthHandler(IOptionsMonitor<ServiceAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder, INetworkPerspectiveCore networkPerspectiveCore, INetworkIdInitializer networkIdInitializer, IErrorService errorService)
+        public ServiceAuthHandler(IOptionsMonitor<ServiceAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder, INetworkPerspectiveCore networkPerspectiveCore, IConnectorInfoInitializer connectorInfoInitializer, IErrorService errorService)
             : base(options, logger, encoder)
         {
             _networkPerspectiveCore = networkPerspectiveCore;
-            _networkIdInitializer = networkIdInitializer;
+            _connectorInfoInitializer = connectorInfoInitializer;
             _errorService = errorService;
         }
 
@@ -81,14 +81,14 @@ namespace NetworkPerspective.Sync.Framework.Auth
 
         private async Task<AuthenticateResult> AuthenticateInternalAsync()
         {
-            var tokenValidationResult = await _networkPerspectiveCore.ValidateTokenAsync(Request.GetServiceAccessToken(), Context.RequestAborted);
+            var connectorInfo = await _networkPerspectiveCore.ValidateTokenAsync(Request.GetServiceAccessToken(), Context.RequestAborted);
 
-            _networkIdInitializer.Initialize(tokenValidationResult.NetworkId);
+            _connectorInfoInitializer.Initialize(connectorInfo);
 
             var claims = new List<Claim>()
                 {
-                    new("NetworkId", tokenValidationResult.NetworkId.ToString()),
-                    new("ConnectorId", tokenValidationResult.ConnectorId.ToString())
+                    new("NetworkId", connectorInfo.NetworkId.ToString()),
+                    new("ConnectorId", connectorInfo.Id.ToString())
                 };
             var claimsIdentity = new ClaimsIdentity(claims, Scheme.Name);
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);

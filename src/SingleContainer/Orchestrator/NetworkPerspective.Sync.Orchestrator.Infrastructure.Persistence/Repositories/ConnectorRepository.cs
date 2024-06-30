@@ -73,6 +73,7 @@ internal class ConnectorRepository : IConnectorRepository
         {
             var entities = await _dbSet
                 .Include(x => x.Properties)
+                .Include(x => x.Worker)
                 .ToListAsync(stoppingToken);
 
             return entities.Select(ConnectorMapper.EntityToDomainModel);
@@ -83,7 +84,7 @@ internal class ConnectorRepository : IConnectorRepository
         }
     }
 
-    public async Task<IEnumerable<Connector>> GetAllAsync(Guid workerId, CancellationToken stoppingToken = default)
+    public async Task<IEnumerable<Connector>> GetAllOfWorkerAsync(Guid workerId, CancellationToken stoppingToken = default)
     {
         try
         {

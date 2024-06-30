@@ -29,7 +29,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
 
             // Assert
             result.TasksCount.Should().Be(usersCount);
-            result.FailedCount.Should().Be(2);
+            result.FailedTasksCount.Should().Be(2);
             result.TotalInteractionsCount.Should().Be(interactionsCount);
             result.SuccessRate.Should().Be(80.0);
             result.Exceptions.Should().BeEquivalentTo(exceptions);
@@ -63,7 +63,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
 
             // Assert
             result.TasksCount.Should().Be(usersCount1 + usersCount2);
-            result.FailedCount.Should().Be(5);
+            result.FailedTasksCount.Should().Be(5);
             result.TotalInteractionsCount.Should().Be(interactionsCount1 + interactionsCount2);
             result.SuccessRate.Should().Be(75.0);
             result.Exceptions.Should().BeEquivalentTo(exceptions1.Union(exceptions2));

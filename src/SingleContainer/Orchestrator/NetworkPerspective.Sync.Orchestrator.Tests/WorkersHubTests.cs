@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -52,8 +53,13 @@ public class WorkersHubTests
         var hubClient = new WorkerHubClient(config, NullLogger<IWorkerHubClient>.Instance);
 
         // Act
-        await hubClient.ConnectAsync(x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
+        await hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
         {
+            options.AccessTokenProvider = () =>
+            {
+                var bytes = Encoding.UTF8.GetBytes($"{workerName}:{workerSecret}");
+                return Task.FromResult(Convert.ToBase64String(bytes));
+            };
             options.HttpMessageHandlerFactory = _ => _service.Server.CreateHandler();
         }));
 
@@ -87,7 +93,7 @@ public class WorkersHubTests
         var hubClient = new WorkerHubClient(config, NullLogger<IWorkerHubClient>.Instance);
 
         // Act
-        Func<Task> func = () => hubClient.ConnectAsync(x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
+        Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
         {
             options.HttpMessageHandlerFactory = _ => _service.Server.CreateHandler();
         }));

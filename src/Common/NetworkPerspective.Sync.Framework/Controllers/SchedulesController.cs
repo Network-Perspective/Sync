@@ -15,16 +15,16 @@ namespace NetworkPerspective.Sync.Framework.Controllers
     [Authorize]
     public class SchedulesController : ControllerBase
     {
-        private readonly INetworkIdProvider _networkIdProvider;
-        private readonly INetworkService _networkService;
+        private readonly IConnectorInfoProvider _connectorInfoProvider;
+        private readonly IConnectorService _connectorService;
         private readonly ISyncScheduler _scheduler;
         private readonly ISyncHistoryService _syncHistoryService;
         private readonly IStatusLoggerFactory _statusLoggerFactory;
 
-        public SchedulesController(INetworkIdProvider networkIdProvider, INetworkService networkService, ISyncScheduler scheduler, ISyncHistoryService syncHistoryService, IStatusLoggerFactory statusLoggerFactory)
+        public SchedulesController(IConnectorInfoProvider connectorInfoProvider, IConnectorService connectorService, ISyncScheduler scheduler, ISyncHistoryService syncHistoryService, IStatusLoggerFactory statusLoggerFactory)
         {
-            _networkIdProvider = networkIdProvider;
-            _networkService = networkService;
+            _connectorInfoProvider = connectorInfoProvider;
+            _connectorService = connectorService;
             _scheduler = scheduler;
             _syncHistoryService = syncHistoryService;
             _statusLoggerFactory = statusLoggerFactory;
@@ -46,19 +46,21 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> StartAsync([FromBody] SchedulerStartDto request, CancellationToken stoppingToken = default)
         {
-            await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
+            var connectorInfo = _connectorInfoProvider.Get();
+
+            await _connectorService.ValidateExists(connectorInfo.Id, stoppingToken);
 
             if (request.OverrideSyncPeriodStart is not null)
-                await _syncHistoryService.OverrideSyncStartAsync(_networkIdProvider.Get(), request.OverrideSyncPeriodStart.Value.ToUniversalTime(), stoppingToken);
+                await _syncHistoryService.OverrideSyncStartAsync(connectorInfo.Id, request.OverrideSyncPeriodStart.Value.ToUniversalTime(), stoppingToken);
 
-            await _scheduler.ScheduleAsync(_networkIdProvider.Get(), stoppingToken);
-            await _scheduler.TriggerNowAsync(_networkIdProvider.Get(), stoppingToken);
+            await _scheduler.ScheduleAsync(connectorInfo, stoppingToken);
+            await _scheduler.TriggerNowAsync(connectorInfo, stoppingToken);
 
             await _statusLoggerFactory
-                .CreateForNetwork(_networkIdProvider.Get())
+                .CreateForConnector(connectorInfo.Id)
                 .LogInfoAsync("Schedule started", stoppingToken);
 
-            return Ok($"Scheduled sync {_networkIdProvider.Get()}");
+            return Ok($"Scheduled sync {connectorInfo.Id}");
         }
 
         /// <summary>
@@ -76,16 +78,18 @@ namespace NetworkPerspective.Sync.Framework.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> StopAsync(CancellationToken stoppingToken = default)
         {
-            await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
+            var connectorInfo = _connectorInfoProvider.Get();
 
-            await _scheduler.UnscheduleAsync(_networkIdProvider.Get(), stoppingToken);
-            await _scheduler.InterruptNowAsync(_networkIdProvider.Get(), stoppingToken);
+            await _connectorService.ValidateExists(connectorInfo.Id, stoppingToken);
+
+            await _scheduler.UnscheduleAsync(connectorInfo, stoppingToken);
+            await _scheduler.InterruptNowAsync(connectorInfo, stoppingToken);
 
             await _statusLoggerFactory
-                .CreateForNetwork(_networkIdProvider.Get())
+                .CreateForConnector(connectorInfo.Id)
                 .LogInfoAsync("Schedule stopped", stoppingToken);
 
-            return Ok($"Unscheduled sync {_networkIdProvider.Get()}");
+            return Ok($"Unscheduled sync {connectorInfo.Id}");
         }
     }
 }
