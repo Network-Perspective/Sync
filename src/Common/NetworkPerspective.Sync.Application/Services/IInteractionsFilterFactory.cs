@@ -2,8 +2,8 @@
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Interactions.Criterias;
+using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Application.Services
 {

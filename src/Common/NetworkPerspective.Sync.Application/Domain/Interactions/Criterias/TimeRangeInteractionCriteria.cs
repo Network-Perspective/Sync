@@ -3,6 +3,8 @@ using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Utils.Models;
+
 namespace NetworkPerspective.Sync.Application.Domain.Interactions.Criterias
 {
     internal class TimeRangeInteractionCriteria : IInteractionCritieria

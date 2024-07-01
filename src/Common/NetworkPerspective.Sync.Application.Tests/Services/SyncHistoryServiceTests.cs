@@ -14,6 +14,7 @@ using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
+using NetworkPerspective.Sync.Utils.Models;
 
 using Xunit;
 

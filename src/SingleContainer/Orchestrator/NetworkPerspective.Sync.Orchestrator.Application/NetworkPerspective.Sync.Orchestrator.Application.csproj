@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.3.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.8.1" />
+        <PackageReference Include="Quartz.Serialization.Json" Version="3.8.1" />
+        <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj" />
+    </ItemGroup>
+
+</Project>

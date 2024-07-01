@@ -10,6 +10,7 @@ using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Services
 {

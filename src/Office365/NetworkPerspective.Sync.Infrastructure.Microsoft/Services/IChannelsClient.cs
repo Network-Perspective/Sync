@@ -155,7 +155,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             return result;
         }
 
-        private async Task<SingleTaskResult> GetSingleChannelInteractionsAsync(SyncContext context, IInteractionsStream stream, InternalChannel channel, IChannelsInteractionFactory interactionFactory, Application.Domain.TimeRange timeRange, CancellationToken stoppingToken)
+        private async Task<SingleTaskResult> GetSingleChannelInteractionsAsync(SyncContext context, IInteractionsStream stream, InternalChannel channel, IChannelsInteractionFactory interactionFactory, Utils.Models.TimeRange timeRange, CancellationToken stoppingToken)
         {
             _logger.LogDebug("Getting interactions from channel...");
 

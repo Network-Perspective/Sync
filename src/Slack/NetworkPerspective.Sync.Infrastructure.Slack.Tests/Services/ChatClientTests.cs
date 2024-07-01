@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Services;
@@ -19,6 +18,7 @@ using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Tests.Fixtures;
+using NetworkPerspective.Sync.Utils.Models;
 
 using Xunit;
 

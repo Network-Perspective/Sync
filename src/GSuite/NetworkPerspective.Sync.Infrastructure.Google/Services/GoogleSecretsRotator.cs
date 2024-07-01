@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 using Newtonsoft.Json.Linq;
 

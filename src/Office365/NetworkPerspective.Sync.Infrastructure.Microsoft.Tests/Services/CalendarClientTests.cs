@@ -19,6 +19,7 @@ using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Fixtures;
+using NetworkPerspective.Sync.Utils.Models;
 
 using Xunit;
 

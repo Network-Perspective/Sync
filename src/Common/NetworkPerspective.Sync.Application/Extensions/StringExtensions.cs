@@ -1,6 +1,4 @@
 ﻿using System.Linq;
-using System.Net;
-using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -8,9 +6,6 @@ namespace NetworkPerspective.Sync.Application.Extensions
 {
     public static class StringExtensions
     {
-        public static SecureString ToSecureString(this string str)
-            => new NetworkCredential(string.Empty, str).SecurePassword;
-
         /// <summary>
         /// https://stackoverflow.com/a/36845864
         /// </summary>

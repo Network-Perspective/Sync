@@ -5,6 +5,7 @@ using Microsoft.Net.Http.Headers;
 
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Framework.Exceptions;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Framework.Extensions
 {

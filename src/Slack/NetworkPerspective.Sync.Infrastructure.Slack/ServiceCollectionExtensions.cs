@@ -5,13 +5,11 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.Pagination;
+
 using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
 
@@ -23,9 +21,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
     {
         public static IServiceCollection AddSlack(this IServiceCollection services, IConfigurationSection configurationSection)
         {
+            services.AddSlackClient(configurationSection.GetSection("Resiliency"));
+
             var slackBaseUrl = configurationSection.GetValue<string>("BaseUrl");
             services.Configure<AuthConfig>(configurationSection.GetSection("Auth"));
-            services.Configure<Resiliency>(configurationSection.GetSection("Resiliency"));
 
             services
                 .AddHttpClient(Consts.SlackApiHttpClientName, x =>
@@ -52,9 +51,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack
 
             services.AddScoped<IAuthTester, AuthTester>();
             services.AddScoped<ISlackAuthService, SlackAuthService>();
-            services.AddTransient<CursorPaginationHandler>();
-            services.AddScoped<ISlackClientFacadeFactory, SlackClientFacadeFactory>();
-            services.AddScoped<ISlackClientUnauthorizedFacade>(sp => sp.GetRequiredService<ISlackClientFacadeFactory>().CreateUnauthorized());
             services.AddMemoryCache();
 
             services.AddScoped<IMembersClient, MembersClient>();

@@ -7,6 +7,7 @@ using NetworkPerspective.Sync.Application.Domain.Batching;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
 {

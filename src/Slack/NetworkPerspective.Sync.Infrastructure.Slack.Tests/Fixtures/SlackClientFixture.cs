@@ -7,8 +7,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Infrastructure.Slack.Client.Configs;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
-using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Fixtures
 {

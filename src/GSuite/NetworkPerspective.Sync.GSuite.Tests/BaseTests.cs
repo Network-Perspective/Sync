@@ -6,18 +6,16 @@ using System.Threading.Tasks;
 using FluentAssertions;
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 using Moq;
 
 using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.GSuite.Client;
 using NetworkPerspective.Sync.GSuite.Tests.Fixtures;
-using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Google;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
 

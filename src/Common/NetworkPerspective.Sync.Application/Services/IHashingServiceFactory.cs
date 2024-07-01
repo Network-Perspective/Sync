@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Application.Services
 {

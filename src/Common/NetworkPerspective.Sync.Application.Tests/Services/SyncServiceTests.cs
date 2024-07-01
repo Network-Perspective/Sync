@@ -20,6 +20,8 @@ using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
+using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Utils.Models;
 
 using Xunit;
 

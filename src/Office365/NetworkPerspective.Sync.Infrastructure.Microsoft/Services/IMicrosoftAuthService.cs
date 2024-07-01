@@ -11,6 +11,7 @@ using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 {
