@@ -43,6 +43,8 @@ public class Program
             options.OutputFormatters.RemoveType<StringOutputFormatter>();
         });
 
+        builder.Services.AddApplicationInsightsTelemetry();
+
         var app = builder.Build();
         app.UseExceptionHandler(ErrorController.ErrorRoute);
         app.UseRouting();
@@ -50,7 +52,6 @@ public class Program
         app.UseAuthorization();
         app.MapDefaultControllerRoute();
         app.MapHub<WorkerHubV1>("/ws/v1/workers-hub");
-
 
         app.Run();
     }
