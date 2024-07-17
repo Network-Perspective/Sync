@@ -113,14 +113,25 @@ public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContext
 
         while (!stoppingToken.IsCancellationRequested)
         {
+
+            await Ping();
+            await Task.Delay(15000, stoppingToken);
+        }
+    }
+    private async Task Ping()
+    {
+        try
+        {
             var ping = new PingDto
             {
                 CorrelationId = Guid.NewGuid(),
                 Timestamp = DateTime.UtcNow,
             };
             _ = await hubClient.PingAsync(ping);
-
-            await Task.Delay(15000, stoppingToken);
+        }
+        catch (Exception)
+        {
+            _logger.LogWarning("Unable to ping orchestrator");
         }
     }
 }

@@ -8,6 +8,9 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 
+using Polly;
+using Polly.Retry;
+
 namespace NetworkPerspective.Sync.Contract.V1.Impl;
 
 public interface IWorkerHubClient : IOrchestratorClient
@@ -21,11 +24,20 @@ internal class WorkerHubClient : IWorkerHubClient
     private readonly OrchestratorClientConfiguration _callbacks = new();
     private readonly WorkerHubClientConfig _config;
     private readonly ILogger<IWorkerHubClient> _logger;
+    private readonly AsyncRetryPolicy _asyncRetryPolicy;
 
     public WorkerHubClient(IOptions<WorkerHubClientConfig> config, ILogger<IWorkerHubClient> logger)
     {
         _config = config.Value;
         _logger = logger;
+
+        _asyncRetryPolicy = Policy
+            .Handle<Exception>()
+            .WaitAndRetryAsync(_config.Resiliency.Retries,
+                (ex, timespan, retryCount, context) =>
+                {
+                    _logger.LogWarning(ex, "Unable to connect to orchestrator service at '{BaseUrl}'. Next attempt ({RetryCount}) in {Delay}s", _config.BaseUrl, retryCount + 1, timespan.TotalSeconds);
+                });
     }
 
     public async Task ConnectAsync(Action<OrchestratorClientConfiguration> configuration = null, Action<IHubConnectionBuilder> connectionConfiguration = null, CancellationToken stoppingToken = default)
@@ -39,24 +51,24 @@ internal class WorkerHubClient : IWorkerHubClient
             {
                 options.AccessTokenProvider = _callbacks.TokenFactory;
             })
-            .WithAutomaticReconnect();
+            .WithAutomaticReconnect(_config.Resiliency.Retries);
 
         connectionConfiguration?.Invoke(builder);
 
         _connection = builder.Build();
         InitializeConnection();
 
-        await _connection.StartAsync(stoppingToken);
+        await _asyncRetryPolicy.ExecuteAsync((ct) => _connection.StartAsync(ct), stoppingToken);
     }
 
-    public Task<AckDto> SyncCompletedAsync(SyncCompletedDto syncCompleted)
+    public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto syncCompleted)
     {
-        return _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.SyncCompletedAsync), syncCompleted);
+        return await _asyncRetryPolicy.ExecuteAsync(() => _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.SyncCompletedAsync), syncCompleted));
     }
 
-    public Task<AckDto> AddLogAsync(AddLogDto addLog)
+    public async Task<AckDto> AddLogAsync(AddLogDto addLog)
     {
-        return _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.AddLogAsync), addLog);
+        return  await _asyncRetryPolicy.ExecuteAsync(() => _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.AddLogAsync), addLog));
     }
 
     public async Task<PongDto> PingAsync(PingDto ping)
