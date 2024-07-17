@@ -42,8 +42,7 @@ public class Program
 
         builder.Services.AddHostedService<ConnectionHost>();
 
-        builder.Services
-            .AddApplicationInsightsTelemetry();
+        builder.Services.AddApplicationInsightsTelemetryWorkerService();
 
 #if !DEBUG
         builder.Services.RemoveHttpClientLogging();

@@ -104,4 +104,97 @@ public class WorkersHubTests
             .Where(x => x.StatusCode == HttpStatusCode.Unauthorized);
         await workersClient.WorkersDeleteAsync(worker.Id);
     }
+
+    [Fact]
+    public async Task ShouldNotConnectorNotAuthed()
+    {
+        // Arrange
+        var workerName = "client_1";
+        var workerSecret = "pass1";
+        var workersClient = new WorkersClient(_service.CreateDefaultClient());
+
+        await workersClient.WorkersPostAsync(new CreateWorkerDto
+        {
+            Name = workerName,
+            Secret = workerSecret,
+        });
+        var worker = await workersClient.WorkersGetAsync(workerName);
+
+        var config = Options.Create(new WorkerHubClientConfig
+        {
+            BaseUrl = _service.Server.BaseAddress.ToString()
+        });
+        var hubClient = new WorkerHubClient(config, NullLogger<IWorkerHubClient>.Instance);
+
+        // Act
+        Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
+        {
+            options.AccessTokenProvider = () =>
+            {
+                var bytes = Encoding.UTF8.GetBytes($"{workerName}:{workerSecret}");
+                return Task.FromResult(Convert.ToBase64String(bytes));
+            };
+            options.HttpMessageHandlerFactory = _ => _service.Server.CreateHandler();
+        }));
+
+        // Assert
+        await func.Should()
+            .ThrowAsync<HttpRequestException>()
+            .Where(x => x.StatusCode == HttpStatusCode.Unauthorized);
+        await workersClient.WorkersDeleteAsync(worker.Id);
+    }
+
+    //[Fact]
+    //public async Task ShouldRetryConnection()
+    //{
+    //    // Arrange
+    //    var workerName = "client_1";
+    //    var workerSecret = "pass1";
+    //    var workersClient = new WorkersClient(_service.CreateDefaultClient());
+
+    //    await workersClient.WorkersPostAsync(new CreateWorkerDto
+    //    {
+    //        Name = workerName,
+    //        Secret = workerSecret,
+    //    });
+    //    var worker = await workersClient.WorkersGetAsync(workerName);
+    //    await workersClient.AuthAsync(worker.Id);
+
+    //    var config = Options.Create(new WorkerHubClientConfig
+    //    {
+    //        BaseUrl = _service.Server.BaseAddress.ToString()
+    //    });
+    //    var hubClient = new WorkerHubClient(config, NullLogger<IWorkerHubClient>.Instance);
+
+    //    await _service.Server.Host.StopAsync();
+
+    //    // Act
+    //    Task connectionTask = hubClient.ConnectAsync(
+    //        connectionConfiguration: x => 
+    //        {
+    //            x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub",
+    //                options =>
+    //                {
+    //                    options.AccessTokenProvider = () =>
+    //                    {
+    //                        var bytes = Encoding.UTF8.GetBytes($"{workerName}:{workerSecret}");
+    //                        return Task.FromResult(Convert.ToBase64String(bytes));
+    //                    };
+    //                    options.HttpMessageHandlerFactory = _ => _service.Server.CreateHandler();
+    //                });
+    //            x.WithAutomaticReconnect([TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero]);
+    //        });
+
+    //    await Task.Delay(100);
+
+    //    await _service.Server.Host.StartAsync();
+
+    //    await connectionTask;
+
+    //    // Assert
+    //    var correlationId = Guid.NewGuid();
+    //    var pongResponse = await hubClient.PingAsync(new PingDto { CorrelationId = correlationId, Timestamp = DateTime.UtcNow });
+    //    pongResponse.CorrelationId.Should().Be(correlationId);
+    //    await workersClient.WorkersDeleteAsync(worker.Id);
+    //}
 }

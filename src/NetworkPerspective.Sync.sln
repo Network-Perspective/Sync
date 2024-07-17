@@ -155,6 +155,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Inf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.SecretStorage.DbVault", "Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage.DbVault\NetworkPerspective.Sync.Infrastructure.SecretStorage.DbVault.csproj", "{A8DD2CB2-AC19-43D4-842C-592AB12E22EF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Contract.V1.Impl.Tests", "SingleContainer\NetworkPerspective.Sync.Contract.V1.Impl.Tests\NetworkPerspective.Sync.Contract.V1.Impl.Tests.csproj", "{76E38C6F-AF7D-4F06-9724-A455223E6404}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -373,6 +375,10 @@ Global
 		{A8DD2CB2-AC19-43D4-842C-592AB12E22EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8DD2CB2-AC19-43D4-842C-592AB12E22EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8DD2CB2-AC19-43D4-842C-592AB12E22EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76E38C6F-AF7D-4F06-9724-A455223E6404}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76E38C6F-AF7D-4F06-9724-A455223E6404}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76E38C6F-AF7D-4F06-9724-A455223E6404}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76E38C6F-AF7D-4F06-9724-A455223E6404}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -452,6 +458,7 @@ Global
 		{4F0AED1D-9D13-4C8E-B6DB-E43B96E3BDE7} = {527F899C-F2B0-4EB7-B9ED-B90CDAAF18E0}
 		{11A6BC55-3DD5-4FAF-BECD-6845AA2B0872} = {527F899C-F2B0-4EB7-B9ED-B90CDAAF18E0}
 		{A8DD2CB2-AC19-43D4-842C-592AB12E22EF} = {527F899C-F2B0-4EB7-B9ED-B90CDAAF18E0}
+		{76E38C6F-AF7D-4F06-9724-A455223E6404} = {E63E2215-B67E-466F-BB8C-A90A29349EAA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}
