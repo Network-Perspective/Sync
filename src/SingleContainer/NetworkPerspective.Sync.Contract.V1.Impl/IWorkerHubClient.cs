@@ -68,7 +68,7 @@ internal class WorkerHubClient : IWorkerHubClient
 
     public async Task<AckDto> AddLogAsync(AddLogDto addLog)
     {
-        return  await _asyncRetryPolicy.ExecuteAsync(() => _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.AddLogAsync), addLog));
+        return await _asyncRetryPolicy.ExecuteAsync(() => _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.AddLogAsync), addLog));
     }
 
     public async Task<PongDto> PingAsync(PingDto ping)

@@ -35,8 +35,10 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="NLog" Version="5.2.8" />
         <PackageReference Include="PowerArgs" Version="4.0.3" />
+        <PackageReference Include="System.Formats.Asn1" Version="8.0.1" />
         <PackageReference Include="System.IO.Abstractions" Version="21.0.2" />
         <PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.0" />
+        <PackageReference Include="System.Text.Json" Version="8.0.4" />
     </ItemGroup>
 
     <ItemGroup>
