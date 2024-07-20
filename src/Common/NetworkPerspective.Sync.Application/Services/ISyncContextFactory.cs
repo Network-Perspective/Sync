@@ -58,7 +58,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             var timeRange = new TimeRange(lastSyncedTimeStamp, now);
 
-            return new SyncContext(connectorId, networkConfig, properties, token, timeRange, hashingService);
+            return new SyncContext(connectorId, string.Empty, networkConfig, properties, token, timeRange, hashingService);
         }
     }
 }

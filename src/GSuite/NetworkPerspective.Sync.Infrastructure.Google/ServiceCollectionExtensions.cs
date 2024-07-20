@@ -10,7 +10,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddGoogleDataSource(this IServiceCollection services, IConfigurationSection configurationSection)
+        public static IServiceCollection AddGoogle(this IServiceCollection services, IConfigurationSection configurationSection)
         {
             services.Configure<GoogleConfig>(configurationSection);
             services.AddScoped<IAuthTester, AuthTester>();

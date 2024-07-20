@@ -48,7 +48,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests
             serviceCollection.AddApplication(config.GetSection("Connector"));
 
             // Act
-            serviceCollection.AddGoogleDataSource(config.GetSection("Infrastructure:Google"));
+            serviceCollection.AddGoogle(config.GetSection("Infrastructure:Google"));
 
             // Assert
             var services = serviceCollection.BuildServiceProvider();

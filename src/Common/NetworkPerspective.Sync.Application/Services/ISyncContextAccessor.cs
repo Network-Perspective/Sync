@@ -1,6 +1,5 @@
-﻿using System;
-
-using NetworkPerspective.Sync.Application.Domain.Sync;
+﻿using NetworkPerspective.Sync.Application.Domain.Sync;
+using NetworkPerspective.Sync.Application.Exceptions;
 
 namespace NetworkPerspective.Sync.Application.Services;
 
@@ -32,7 +31,7 @@ internal class SyncContextAccessor : ISyncContextAccessor
             lock (_syncRoot)
             {
                 if (_syncContext is null)
-                    throw new NullReferenceException("Sync context is not set");
+                    throw new SyncContextNotAvailableException();
 
                 return _syncContext;
             }
@@ -42,7 +41,7 @@ internal class SyncContextAccessor : ISyncContextAccessor
             lock (_syncRoot)
             {
                 if (_syncContext is not null)
-                    throw new ArgumentException("Sync context is already set");
+                    throw new SyncContextAlreadyInitializedException();
 
                 _syncContext = value;
             }

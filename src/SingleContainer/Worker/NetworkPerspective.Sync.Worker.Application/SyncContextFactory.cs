@@ -15,7 +15,7 @@ namespace NetworkPerspective.Sync.Worker.Application;
 
 public interface ISyncContextFactory
 {
-    Task<SyncContext> CreateAsync(Guid connectorId, IDictionary<string, string> properties, TimeRange timeRange, SecureString accessToken, CancellationToken stoppingToken = default);
+    Task<SyncContext> CreateAsync(Guid connectorId, string type, IDictionary<string, string> properties, TimeRange timeRange, SecureString accessToken, CancellationToken stoppingToken = default);
 }
 
 internal class SyncContextFactory : ISyncContextFactory
@@ -31,7 +31,7 @@ internal class SyncContextFactory : ISyncContextFactory
         _networkPerspectiveCore = networkPerspectiveCore;
     }
 
-    public async Task<SyncContext> CreateAsync(Guid connectorId, IDictionary<string, string> properties, TimeRange timeRange, SecureString accessToken, CancellationToken stoppingToken = default)
+    public async Task<SyncContext> CreateAsync(Guid connectorId, string type, IDictionary<string, string> properties, TimeRange timeRange, SecureString accessToken, CancellationToken stoppingToken = default)
     {
         var connectorProperties = ConnectorProperties.Create<ConnectorProperties>(properties);
         var secretRepository = _secretRepositoryFactory.Create(connectorProperties.ExternalKeyVaultUri);
@@ -39,6 +39,6 @@ internal class SyncContextFactory : ISyncContextFactory
         var networkConfig = await _networkPerspectiveCore.GetNetworkConfigAsync(accessToken, stoppingToken);
         var hashingService = await _hashingServiceFactory.CreateAsync(secretRepository, stoppingToken);
 
-        return new SyncContext(connectorId, networkConfig, properties, accessToken, timeRange, hashingService);
+        return new SyncContext(connectorId, type, networkConfig, properties, accessToken, timeRange, hashingService);
     }
 }

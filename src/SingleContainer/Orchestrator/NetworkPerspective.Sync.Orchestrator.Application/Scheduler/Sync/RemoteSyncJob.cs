@@ -42,6 +42,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync
             var syncContext = new SyncContext
             {
                 ConnectorId = connectorId,
+                ConnectorType = connector.Type,
                 NetworkId = connector.NetworkId,
                 TimeRange = new TimeRange(nextSyncStart, _clock.UtcNow()),
                 AccessToken = accessToken,

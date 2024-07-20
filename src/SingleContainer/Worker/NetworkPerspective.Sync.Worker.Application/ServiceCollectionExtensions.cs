@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application;
@@ -27,7 +26,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITasksStatusesCache, TasksStatusesCache>();
 
         services.AddScoped<IDataSourceFactory, DataSourceFactory>();
-        services.AddScoped<IDataSource>(sp => sp.GetRequiredService<IDataSourceFactory>().CreateDataSource());
 
         services.AddScoped<ISecretRotationServiceFactory, SecretRotatorFactory>();
         services.AddScoped<ISecretRotationService>(sp => sp.GetRequiredService<ISecretRotationServiceFactory>().CreateSecretRotator());

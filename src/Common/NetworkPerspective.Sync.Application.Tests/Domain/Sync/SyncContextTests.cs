@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Domain.Sync
             // Arrange
             var mock = new Mock<IDisposable>();
             var hashingServiceMock = new Mock<IHashingService>();
-            var context = new SyncContext(Guid.NewGuid(), ConnectorConfig.Empty, [], new SecureString(), new TimeRange(DateTime.UtcNow, DateTime.Now), hashingServiceMock.Object);
+            var context = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), new TimeRange(DateTime.UtcNow, DateTime.Now), hashingServiceMock.Object);
             context.EnsureSet(() => mock.Object);
 
             // Act

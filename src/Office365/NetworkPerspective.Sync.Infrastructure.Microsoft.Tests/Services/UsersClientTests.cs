@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Domain.Sync;
@@ -42,7 +41,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
             var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
             var filter = new EmployeeFilter(new[] { "group:Sample Team Site" }, Array.Empty<string>());
             var networkConfig = new ConnectorConfig(filter, CustomAttributesConfig.Empty);
-            var syncContext = new SyncContext(Guid.NewGuid(), networkConfig, [], new SecureString(), timeRange, Mock.Of<IHashingService>());
+            var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, networkConfig, [], new SecureString(), timeRange, Mock.Of<IHashingService>());
 
             // Act
             var result = await client.GetUsersAsync(syncContext);

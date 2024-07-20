@@ -48,6 +48,7 @@ public class Program
         var app = builder.Build();
         app.UseExceptionHandler(ErrorController.ErrorRoute);
         app.UseRouting();
+        app.UseSwaggerUi();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapDefaultControllerRoute();

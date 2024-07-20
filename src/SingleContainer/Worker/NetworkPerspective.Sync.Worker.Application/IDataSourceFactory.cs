@@ -2,25 +2,37 @@
 using System.Linq;
 
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application;
 
-public interface IDataSourceFactory
-{
-    IDataSource CreateDataSource();
-}
-
 internal class DataSourceFactory : IDataSourceFactory
 {
+    private readonly ISyncContextAccessor _syncContextAccessor;
     private readonly IEnumerable<IDataSource> _dataSources;
 
-    public DataSourceFactory(IEnumerable<IDataSource> dataSources)
+    public DataSourceFactory(ISyncContextAccessor syncContextAccessor, IEnumerable<IDataSource> dataSources)
     {
+        _syncContextAccessor = syncContextAccessor;
         _dataSources = dataSources;
     }
 
     public IDataSource CreateDataSource()
     {
-        return _dataSources.Single();
+        var type = _syncContextAccessor.SyncContext.ConnectorType;
+
+        return ConnectorTypeToDataSource(type);
+    }
+
+    private IDataSource ConnectorTypeToDataSource(string connectorType)
+    {
+        if (string.Equals(connectorType, "slack", System.StringComparison.InvariantCultureIgnoreCase))
+            return _dataSources.Single(x => x.GetType().FullName == "NetworkPerspective.Sync.Infrastructure.Slack.SlackFacade");
+
+        else if (string.Equals(connectorType, "google", System.StringComparison.InvariantCultureIgnoreCase))
+            return _dataSources.Single(x => x.GetType().FullName == "NetworkPerspective.Sync.Infrastructure.Google.GoogleFacade");
+
+        else
+            throw new System.Exception();
     }
 }

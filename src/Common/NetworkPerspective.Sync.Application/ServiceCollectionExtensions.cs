@@ -39,6 +39,8 @@ namespace NetworkPerspective.Sync.Application
                 return statusLogger;
             });
 
+            services.AddScoped<IDataSourceFactory, DefaultDataSourceFactory>();
+
             services.AddTransient<IConnectorService, ConnectorService>();
             services.AddTransient<IStatusLoggerFactory, StatusLoggerFactory>();
             services.AddTransient<IStatusService, StatusService>();

@@ -27,13 +27,13 @@ namespace NetworkPerspective.Sync.Application.Services
         private readonly IInteractionsFilterFactory _interactionFilterFactory;
 
         public SyncService(ILogger<SyncService> logger,
-                           IDataSource dataSource,
+                           IDataSourceFactory dataSourceFactory,
                            INetworkPerspectiveCore networkPerspectiveCore,
                            IStatusLogger statusLogger,
                            IInteractionsFilterFactory interactionFilterFactory)
         {
             _logger = logger;
-            _dataSource = dataSource;
+            _dataSource = dataSourceFactory.CreateDataSource();
             _networkPerspectiveCore = networkPerspectiveCore;
             _statusLogger = statusLogger;
             _interactionFilterFactory = interactionFilterFactory;

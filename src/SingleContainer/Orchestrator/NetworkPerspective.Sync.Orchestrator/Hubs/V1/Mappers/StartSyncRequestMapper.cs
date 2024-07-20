@@ -14,6 +14,7 @@ public static class StartSyncMapper
         {
             CorrelationId = Guid.NewGuid(),
             ConnectorId = syncContext.ConnectorId,
+            ConnectorType = syncContext.ConnectorType,
             NetworkId = syncContext.NetworkId,
             Start = syncContext.TimeRange.Start,
             End = syncContext.TimeRange.End,

@@ -56,7 +56,7 @@ namespace NetworkPerspective.Sync.GSuite
             services
                 .AddDocumentation(typeof(Startup).Assembly)
                 .AddApplication(_config.GetSection(ConnectorConfigSection))
-                .AddGoogleDataSource(_config.GetSection(GoogleConfigSection))
+                .AddGoogle(_config.GetSection(GoogleConfigSection))
                 .AddSecretRepositoryClient(_config.GetSection(SecretRepositoryClientBaseConfigSection), healthChecksBuilder)
                 .AddNetworkPerspectiveCore(_config.GetSection(NetworkPerspectiveCoreConfigSection), healthChecksBuilder)
                 .AddScheduler(_config.GetSection(SchedulerConfigSection), _dbConnectionString)

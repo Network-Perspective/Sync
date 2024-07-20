@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 {
     internal interface IUsersClient
     {
-        Task<IEnumerable<User>> GetUsersAsync(Connector<GoogleNetworkProperties> network, ConnectorConfig networkConfig, CancellationToken stoppingToken = default);
+        Task<IEnumerable<User>> GetUsersAsync(Guid connectorId, GoogleNetworkProperties networkProperties, ConnectorConfig networkConfig, CancellationToken stoppingToken = default);
     }
 
     internal sealed class UsersClient : IUsersClient
@@ -45,28 +46,28 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<User>> GetUsersAsync(Connector<GoogleNetworkProperties> connector, ConnectorConfig connectorConfig, CancellationToken stoppingToken = default)
+        public async Task<IEnumerable<User>> GetUsersAsync(Guid connectorId, GoogleNetworkProperties connectorProperties, ConnectorConfig connectorConfig, CancellationToken stoppingToken = default)
         {
-            _logger.LogDebug("Fetching users for connector '{connectorId}'...", connector.Id);
+            _logger.LogDebug("Fetching users for connector '{connectorId}'...", connectorId);
 
-            await _tasksStatusesCache.SetStatusAsync(connector.Id, new SingleTaskStatus(TaskCaption, TaskDescription, null), stoppingToken);
+            await _tasksStatusesCache.SetStatusAsync(connectorId, new SingleTaskStatus(TaskCaption, TaskDescription, null), stoppingToken);
 
             var retryPolicy = _retryPolicyProvider.GetSecretRotationRetryPolicy();
-            var users = await retryPolicy.ExecuteAsync(() => GetAllGoogleUsers(connector, stoppingToken));
+            var users = await retryPolicy.ExecuteAsync(() => GetAllGoogleUsers(connectorProperties, stoppingToken));
 
             var filteredUsers = FilterUsers(connectorConfig.EmailFilter, users);
 
             if (!filteredUsers.Any())
-                _logger.LogWarning("No users found in connector '{connectorId}'", connector.Id);
+                _logger.LogWarning("No users found in connector '{connectorId}'", connectorId);
             else
-                _logger.LogDebug("Fetching employees for network '{netwconnectorIdorkId}' completed. '{count}' employees found", connector.Id, filteredUsers.Count());
+                _logger.LogDebug("Fetching employees for network '{netwconnectorIdorkId}' completed. '{count}' employees found", connectorId, filteredUsers.Count());
 
             return filteredUsers;
         }
 
-        private async Task<IList<User>> GetAllGoogleUsers(Connector<GoogleNetworkProperties> network, CancellationToken stoppingToken)
+        private async Task<IList<User>> GetAllGoogleUsers(GoogleNetworkProperties networkProperties, CancellationToken stoppingToken)
         {
-            var credentials = await _credentialsProvider.GetForUserAsync(network.Properties.AdminEmail, stoppingToken);
+            var credentials = await _credentialsProvider.GetForUserAsync(networkProperties.AdminEmail, stoppingToken);
 
             var service = new DirectoryService(new BaseClientService.Initializer
             {
@@ -80,7 +81,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             {
                 var request = service.Users.List();
                 request.MaxResults = 500;
-                request.Domain = network.Properties.Domain;
+                request.Domain = networkProperties.Domain;
                 request.OrderBy = UsersResource.ListRequest.OrderByEnum.Email;
                 request.PageToken = nextPageToken;
                 request.Projection = UsersResource.ListRequest.ProjectionEnum.Full; // we do NOT know upfront what kind of custom section is set, so we cannot use ProjectionEnum.Custom

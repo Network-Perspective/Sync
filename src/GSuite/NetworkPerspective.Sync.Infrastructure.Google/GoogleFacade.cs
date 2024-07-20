@@ -15,7 +15,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 {
     internal sealed class GoogleFacade : IDataSource
     {
-        private readonly IConnectorService _networkService;
         private readonly IMailboxClient _mailboxClient;
         private readonly ICalendarClient _calendarClient;
         private readonly IUsersClient _usersClient;
@@ -24,15 +23,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<GoogleFacade> _logger;
 
-        public GoogleFacade(IConnectorService networkService,
-                            IMailboxClient mailboxClient,
+        public GoogleFacade(IMailboxClient mailboxClient,
                             ICalendarClient calendarClient,
                             IUsersClient usersClient,
                             IUserCalendarTimeZoneReader userCalendarTimeZoneReader,
                             IClock clock,
                             ILoggerFactory loggerFactory)
         {
-            _networkService = networkService;
             _mailboxClient = mailboxClient;
             _calendarClient = calendarClient;
             _usersClient = usersClient;
@@ -46,9 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         {
             _logger.LogInformation("Getting interactions for connector '{connectorId}' for period {timeRange}", context.ConnectorId, context.TimeRange);
 
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.ConnectorId, stoppingToken));
-
-            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, stoppingToken);
+            var users = await _usersClient.GetUsersAsync(context.ConnectorId, context.GetConnectorProperties<GoogleNetworkProperties>(), context.NetworkConfig, stoppingToken);
 
             var mapper = new EmployeesMapper(
                 new CompanyStructureService(),
@@ -77,9 +72,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         {
             _logger.LogInformation("Getting employees for connector '{connectorId}'", context.ConnectorId);
 
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.ConnectorId, stoppingToken));
-
-            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, stoppingToken);
+            var users = await _usersClient.GetUsersAsync(context.ConnectorId, context.GetConnectorProperties<GoogleNetworkProperties>(), context.NetworkConfig, stoppingToken);
 
             var timezonesPropsSource = await _userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
 
@@ -98,10 +91,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
         {
             _logger.LogInformation("Getting hashed employees for connector '{connectorId}'", context.ConnectorId);
 
-            var network =
-                await context.EnsureSetAsync(() => _networkService.GetAsync<GoogleNetworkProperties>(context.ConnectorId, stoppingToken));
-
-            var users = await _usersClient.GetUsersAsync(network, context.NetworkConfig, stoppingToken);
+            var users = await _usersClient.GetUsersAsync(context.ConnectorId, context.GetConnectorProperties<GoogleNetworkProperties>(), context.NetworkConfig, stoppingToken);
 
             var timezonesPropsSource = await _userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
 

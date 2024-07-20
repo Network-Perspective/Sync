@@ -40,7 +40,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContext
             var timeRange = new TimeRange(dto.Start, dto.End);
             var accessToken = dto.AccessToken.ToSecureString();
 
-            var syncContext = await syncContextFactory.CreateAsync(dto.ConnectorId, dto.NetworkProperties, timeRange, accessToken, stoppingToken);
+            var syncContext = await syncContextFactory.CreateAsync(dto.ConnectorId, dto.ConnectorType, dto.NetworkProperties, timeRange, accessToken, stoppingToken);
 
             await using (var scope = serviceProvider.CreateAsyncScope())
             {

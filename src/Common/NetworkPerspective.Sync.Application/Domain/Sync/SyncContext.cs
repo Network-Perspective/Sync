@@ -16,14 +16,16 @@ namespace NetworkPerspective.Sync.Application.Domain.Sync
         private readonly IEnumerable<KeyValuePair<string, string>> _connectorProperties;
 
         public Guid ConnectorId { get; }
+        public string ConnectorType { get; }
         public ConnectorConfig NetworkConfig { get; }
         public SecureString AccessToken { get; }
         public TimeRange TimeRange { get; }
         public HashFunction.Delegate HashFunction { get; }
 
-        public SyncContext(Guid connectorId, ConnectorConfig networkConfig, IEnumerable<KeyValuePair<string, string>> connectorProperties, SecureString accessToken, TimeRange timeRange, IHashingService hashingService)
+        public SyncContext(Guid connectorId, string connectorType, ConnectorConfig networkConfig, IEnumerable<KeyValuePair<string, string>> connectorProperties, SecureString accessToken, TimeRange timeRange, IHashingService hashingService)
         {
             ConnectorId = connectorId;
+            ConnectorType = connectorType;
             NetworkConfig = networkConfig;
             _connectorProperties = connectorProperties;
             AccessToken = accessToken;
