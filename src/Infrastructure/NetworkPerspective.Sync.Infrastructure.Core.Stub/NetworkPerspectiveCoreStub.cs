@@ -43,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
             return Task.FromResult(new ConnectorConfig(EmployeeFilter.Empty, customAttributes));
         }
 
-        public async Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, DateTime changeDate, CancellationToken stoppingToken = default)
+        public async Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, DateTime changeDate, string dataSourceIdName, CancellationToken stoppingToken = default)
         {
             try
             {
@@ -51,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
 
                 foreach (var employee in employees.GetAllInternal())
                 {
-                    var entity = EntitiesMapper.ToEntity(employee, employees, changeDate, _config.DataSourceIdName);
+                    var entity = EntitiesMapper.ToEntity(employee, employees, changeDate, dataSourceIdName);
                     entities.Add(entity);
                 }
 
@@ -91,7 +91,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
             }
         }
 
-        public async Task PushUsersAsync(SecureString accessToken, EmployeeCollection employees, CancellationToken stoppingToken = default)
+        public async Task PushUsersAsync(SecureString accessToken, EmployeeCollection employees, string dataSourceIdName, CancellationToken stoppingToken = default)
         {
             try
             {
@@ -128,7 +128,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
             return Task.FromResult(new ConnectorInfo(ConnectorId, NetworkId));
         }
 
-        public IInteractionsStream OpenInteractionsStream(SecureString accessToken, CancellationToken stoppingToken = default)
-            => new InteractionStreamStub(accessToken, _fileWriter, _config);
+        public IInteractionsStream OpenInteractionsStream(SecureString accessToken, string dataSourceIdName, CancellationToken stoppingToken = default)
+            => new InteractionStreamStub(accessToken, _fileWriter, _config, dataSourceIdName);
     }
 }

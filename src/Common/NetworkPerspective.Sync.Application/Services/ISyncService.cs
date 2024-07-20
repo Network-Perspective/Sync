@@ -86,7 +86,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             var employees = await dataSource.GetEmployeesAsync(context, stoppingToken);
             await _statusLogger.LogInfoAsync($"Received employees profiles", stoppingToken);
-            await _networkPerspectiveCore.PushUsersAsync(context.AccessToken, employees, stoppingToken);
+            await _networkPerspectiveCore.PushUsersAsync(context.AccessToken, employees, $"{context.ConnectorType}Id", stoppingToken);
             await _statusLogger.LogInfoAsync($"Uploaded employees profiles", stoppingToken);
 
             await _statusLogger.LogInfoAsync($"Synchronization of employees profiles completed", stoppingToken);
@@ -100,7 +100,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             var employees = await dataSource.GetHashedEmployeesAsync(context, stoppingToken);
             await _statusLogger.LogInfoAsync($"Received hashed employees profiles", stoppingToken);
-            await _networkPerspectiveCore.PushEntitiesAsync(context.AccessToken, employees, context.TimeRange.Start, stoppingToken);
+            await _networkPerspectiveCore.PushEntitiesAsync(context.AccessToken, employees, context.TimeRange.Start, $"{context.ConnectorType}Id", stoppingToken);
             await _statusLogger.LogInfoAsync($"Uploaded hashed employees profiles", stoppingToken);
 
             await _statusLogger.LogInfoAsync($"Synchronization of hashed employees profiles completed", stoppingToken);
@@ -143,7 +143,7 @@ namespace NetworkPerspective.Sync.Application.Services
             var filter = _interactionFilterFactory
                 .CreateInteractionsFilter(context.TimeRange);
 
-            var stream = _networkPerspectiveCore.OpenInteractionsStream(context.AccessToken, stoppingToken);
+            var stream = _networkPerspectiveCore.OpenInteractionsStream(context.AccessToken, $"{context.ConnectorType}Id", stoppingToken);
             await using var filteredStream = new FilteredInteractionStreamDecorator(stream, filter);
 
             var result = await dataSource.SyncInteractionsAsync(filteredStream, context, stoppingToken);

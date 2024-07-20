@@ -36,16 +36,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             _logger = loggerFactory.CreateLogger<NetworkPerspectiveCoreFacade>();
         }
 
-        public IInteractionsStream OpenInteractionsStream(SecureString accessToken, CancellationToken stoppingToken = default)
-            => new InteractionsStream(accessToken.Copy(), _client, _npCoreConfig, _loggerFactory.CreateLogger<InteractionsStream>(), stoppingToken);
+        public IInteractionsStream OpenInteractionsStream(SecureString accessToken, string dataSourceIdName, CancellationToken stoppingToken = default)
+            => new InteractionsStream(accessToken.Copy(), _client, _npCoreConfig, dataSourceIdName, _loggerFactory.CreateLogger<InteractionsStream>(), stoppingToken);
 
-        public async Task PushUsersAsync(SecureString accessToken, EmployeeCollection employees, CancellationToken stoppingToken = default)
+        public async Task PushUsersAsync(SecureString accessToken, EmployeeCollection employees, string dataSourceIdName, CancellationToken stoppingToken = default)
         {
             try
             {
                 var employeesList = employees
                     .GetAllInternal()
-                    .Select(x => UsersMapper.ToUser(x, _npCoreConfig.DataSourceIdName));
+                    .Select(x => UsersMapper.ToUser(x, dataSourceIdName));
 
                 _logger.LogInformation("Pushing {count} users {url}", employeesList.Count(), _npCoreConfig.BaseUrl);
 
@@ -66,7 +66,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             }
         }
 
-        public async Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, DateTime changeDate, CancellationToken stoppingToken = default)
+        public async Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, DateTime changeDate, string dataSourceIdName, CancellationToken stoppingToken = default)
         {
             try
             {
@@ -78,7 +78,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
                 foreach (var employee in employeesList)
                 {
-                    var entity = EntitiesMapper.ToEntity(employee, employees, changeDate, _npCoreConfig.DataSourceIdName);
+                    var entity = EntitiesMapper.ToEntity(employee, employees, changeDate, dataSourceIdName);
                     entities.Add(entity);
                 }
 

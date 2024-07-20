@@ -75,7 +75,7 @@ namespace NetworkPerspective.Sync.Office365.Tests
                 .NetworksPostAsync(networkConfig);
 
             // Assert
-            _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-Office365-{connectorId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
+            _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-{connectorId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
 
             using var unitOfWork = _service.UnitOfWorkFactory.Create();
             var connectorRepository = unitOfWork.GetConnectorRepository<MicrosoftNetworkProperties>();

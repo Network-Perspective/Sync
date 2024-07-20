@@ -33,7 +33,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
         public async Task ShouldGetNonEmptyUserCollection()
         {
             // Arrange
-            var network = Connector<GoogleNetworkProperties>.Create(Guid.NewGuid(), new GoogleNetworkProperties("nptestuser12@worksmartona.com", null), DateTime.UtcNow);
+            var networkProperties = new GoogleNetworkProperties("nptestuser12@worksmartona.com", null);
             var googleConfig = new GoogleConfig
             {
                 ApplicationName = "gmail_app",
@@ -43,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Services
             var client = new UsersClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), Array.Empty<ICriteria>(), retryPolicyProvider, _googleClientFixture.CredentialProvider, NullLogger<UsersClient>.Instance);
 
             // Act
-            var result = await client.GetUsersAsync(network, ConnectorConfig.Empty);
+            var result = await client.GetUsersAsync(Guid.NewGuid(), networkProperties, ConnectorConfig.Empty);
 
             // Assert
             result.Should().NotBeNullOrEmpty();

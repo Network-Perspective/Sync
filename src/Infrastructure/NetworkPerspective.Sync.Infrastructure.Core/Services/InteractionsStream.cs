@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain.Batching;
 using NetworkPerspective.Sync.Application.Domain.Interactions;
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
 using NetworkPerspective.Sync.Utils.Extensions;
 
@@ -18,6 +17,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
     internal sealed class InteractionsStream : IInteractionsStream
     {
         private readonly NetworkPerspectiveCoreConfig _npCoreConfig;
+        private readonly string _dataSourceIdName;
         private readonly SecureString _accessToken;
         private readonly ISyncHashedClient _client;
         private readonly ILogger<IInteractionsStream> _logger;
@@ -25,9 +25,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
         private readonly Batcher<HashedInteraction> _batcher;
         private bool _disposed = false;
 
-        public InteractionsStream(SecureString accessToken, ISyncHashedClient client, NetworkPerspectiveCoreConfig npCoreConfig, ILogger<InteractionsStream> logger, CancellationToken stoppingToken)
+        public InteractionsStream(SecureString accessToken, ISyncHashedClient client, NetworkPerspectiveCoreConfig npCoreConfig, string dataSourceIdName, ILogger<InteractionsStream> logger, CancellationToken stoppingToken)
         {
             _npCoreConfig = npCoreConfig;
+            _dataSourceIdName = dataSourceIdName;
             _accessToken = accessToken;
             _client = client;
             _logger = logger;
@@ -50,7 +51,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Services
         public async Task<int> SendAsync(IEnumerable<Interaction> interactions)
         {
             var interactionsToPush = interactions
-                .Select(x => InteractionMapper.DomainIntractionToDto(x, _npCoreConfig.DataSourceIdName))
+                .Select(x => InteractionMapper.DomainIntractionToDto(x, _dataSourceIdName))
                 .ToList();
 
             await _batcher.AddRangeAsync(interactionsToPush, _stoppingToken);

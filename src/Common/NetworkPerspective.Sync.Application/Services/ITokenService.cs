@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
@@ -23,15 +22,13 @@ namespace NetworkPerspective.Sync.Application.Services
 
     internal class TokenService : ITokenService
     {
-        private readonly MiscConfig _config;
         private readonly ISecretRepositoryFactory _secretRepositoryFactory;
         private readonly IConnectorService _connectorService;
         private readonly INetworkPerspectiveCore _networkPerspectiveCore;
         private readonly ILogger<TokenService> _logger;
 
-        public TokenService(ISecretRepositoryFactory secretRepositoryFactory, IConnectorService connectorService, INetworkPerspectiveCore networkPerspectiveCore, IOptions<MiscConfig> config, ILogger<TokenService> logger)
+        public TokenService(ISecretRepositoryFactory secretRepositoryFactory, IConnectorService connectorService, INetworkPerspectiveCore networkPerspectiveCore, ILogger<TokenService> logger)
         {
-            _config = config.Value;
             _secretRepositoryFactory = secretRepositoryFactory;
             _connectorService = connectorService;
             _networkPerspectiveCore = networkPerspectiveCore;
@@ -91,6 +88,6 @@ namespace NetworkPerspective.Sync.Application.Services
         }
 
         private string GetAccessTokenKey(Guid connectorId)
-            => string.Format(Keys.TokenKeyPattern, _config.DataSourceName, connectorId.ToString());
+            => string.Format(Keys.TokenKeyPattern, connectorId.ToString());
     }
 }

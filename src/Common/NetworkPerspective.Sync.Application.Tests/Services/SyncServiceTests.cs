@@ -46,7 +46,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
             _dataSourceMock.Reset();
 
             _networkPerspectiveCoreMock
-                .Setup(x => x.OpenInteractionsStream(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.OpenInteractionsStream(It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Returns(_interactionsStream);
 
             _interactionsFilterFactoryMock
@@ -173,7 +173,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
 
             var interactionsStreamMock = new Mock<IInteractionsStream>();
             _networkPerspectiveCoreMock
-                .Setup(x => x.OpenInteractionsStream(It.IsAny<SecureString>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.OpenInteractionsStream(It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Returns(interactionsStreamMock.Object);
 
             var syncService = new SyncService(_logger, _dataSourceFactoryMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _interactionsFilterFactoryMock.Object);

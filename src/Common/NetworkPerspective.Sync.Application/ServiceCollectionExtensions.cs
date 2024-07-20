@@ -8,12 +8,10 @@ namespace NetworkPerspective.Sync.Application
     public static class ServiceCollectionExtensions
     {
         private const string SyncConfigSection = "Sync";
-        private const string MiscConfigSection = "Misc";
 
         public static IServiceCollection AddApplication(this IServiceCollection services, IConfigurationSection config)
         {
             services.Configure<SyncConfig>(config.GetSection(SyncConfigSection));
-            services.Configure<MiscConfig>(config.GetSection(MiscConfigSection));
 
             services.AddTransient<ISyncScheduler, NoOpSyncScheduler>();
             services.AddScoped<IAuthTester, DummyAuthTester>();

@@ -2,7 +2,7 @@
 
 namespace NetworkPerspective.Sync.Application.Services;
 
-internal interface IDataSourceFactory
+public interface IDataSourceFactory
 {
     IDataSource CreateDataSource();
 }

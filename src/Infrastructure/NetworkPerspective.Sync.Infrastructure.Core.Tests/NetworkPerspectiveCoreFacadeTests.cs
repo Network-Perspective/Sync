@@ -256,8 +256,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
             => Options.Create(new NetworkPerspectiveCoreConfig
             {
                 BaseUrl = url,
-                MaxInteractionsPerRequestCount = maxInteractionsPerRequestCount,
-                DataSourceIdName = dataSourceIdName
+                MaxInteractionsPerRequestCount = maxInteractionsPerRequestCount
             });
     }
 }

@@ -80,7 +80,7 @@ namespace NetworkPerspective.Sync.Slack.Tests
                 .NetworksPostAsync(networkConfig);
 
             // Assert
-            _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-Slack-{networkId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
+            _service.SecretRepositoryMock.Verify(x => x.SetSecretAsync($"np-token-{networkId}", It.Is<SecureString>(x => x.ToSystemString() == _service.ValidToken), It.IsAny<CancellationToken>()), Times.Once);
 
             using var unitOfWork = _service.UnitOfWorkFactory.Create();
             var networksRepository = unitOfWork.GetConnectorRepository<SlackConnectorProperties>();

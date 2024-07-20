@@ -26,10 +26,10 @@ internal class DataSourceFactory : IDataSourceFactory
 
     private IDataSource ConnectorTypeToDataSource(string connectorType)
     {
-        if (string.Equals(connectorType, "slack", System.StringComparison.InvariantCultureIgnoreCase))
+        if (string.Equals(connectorType, "Slack"))
             return _dataSources.Single(x => x.GetType().FullName == "NetworkPerspective.Sync.Infrastructure.Slack.SlackFacade");
 
-        else if (string.Equals(connectorType, "google", System.StringComparison.InvariantCultureIgnoreCase))
+        else if (string.Equals(connectorType, "GSuite"))
             return _dataSources.Single(x => x.GetType().FullName == "NetworkPerspective.Sync.Infrastructure.Google.GoogleFacade");
 
         else
