@@ -42,6 +42,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    // TODO: expose swagger
     public static IServiceCollection AddDocumentation(this IServiceCollection services, Assembly serviceAssembly)
     {
         services.AddOpenApiDocument(configure =>

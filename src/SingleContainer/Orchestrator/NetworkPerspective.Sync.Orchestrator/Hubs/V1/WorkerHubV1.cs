@@ -4,6 +4,8 @@ using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
 
+using Mapster;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,9 +18,9 @@ using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.Worker;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
-using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
+
 namespace NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 
 [Authorize(AuthenticationSchemes = WorkerAuthOptions.DefaultScheme)]
@@ -61,10 +63,10 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient, IWorkerRoute
 
     public async Task StartSyncAsync(string workerName, SyncContext syncContext)
     {
-        var dto = StartSyncMapper.ToDto(syncContext);
+        var dto = syncContext.Adapt<StartSyncDto>();
         _logger.LogInformation("Sending request '{correlationId}' to worker '{id}' to start sync...", dto.CorrelationId, workerName);
         var connectionId = _connectionsLookupTable.Get(workerName);
-        var response = await Clients.Client(connectionId).StartSyncAsync(dto);
+        var response = await Clients.Client(connectionId).PullSyncAsync(dto);
         _logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
 
@@ -81,6 +83,13 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient, IWorkerRoute
         _logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
 
+    public async Task PushSyncAsync(string workerName, SyncRequest syncRequest)
+    {
+        var connectionId = _connectionsLookupTable.Get(workerName);
+        var dto = syncRequest.Adapt<SyncRequestDto>();
+        var response = await Clients.Client(connectionId).PushSyncAsync(dto);
+    }
+
     public async Task RotateSecretsAsync(string workerName, Guid connectorId, IDictionary<string, string> networkProperties, string connectorType)
     {
         var dto = new RotateSecretsDto
@@ -93,7 +102,6 @@ public class WorkerHubV1 : Hub<IWorkerClient>, IOrchestratorClient, IWorkerRoute
         var connectionId = _connectionsLookupTable.Get(workerName);
         var response = await Clients.Client(connectionId).RotateSecretsAsync(dto);
         _logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
-
     }
 
     public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto dto)

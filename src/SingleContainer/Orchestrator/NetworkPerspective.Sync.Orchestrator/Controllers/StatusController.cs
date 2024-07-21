@@ -2,13 +2,14 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Mapster;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Dtos;
-using NetworkPerspective.Sync.Orchestrator.Mappers;
 
 namespace NetworkPerspective.Sync.Framework.Controllers;
 
@@ -44,6 +45,6 @@ public class StatusController : ControllerBase
     {
         var status = await _statusService.GetStatusAsync(connectorId, stoppingToken);
 
-        return StatusMapper.DomainStatusToDto(status);
+        return status.Adapt<StatusDto>();
     }
 }

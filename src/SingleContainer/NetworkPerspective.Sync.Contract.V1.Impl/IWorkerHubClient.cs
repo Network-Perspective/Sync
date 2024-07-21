@@ -81,7 +81,7 @@ internal class WorkerHubClient : IWorkerHubClient
 
     private void InitializeConnection()
     {
-        _connection.On<StartSyncDto, AckDto>(nameof(IWorkerClient.StartSyncAsync), x =>
+        _connection.On<StartSyncDto, AckDto>(nameof(IWorkerClient.PullSyncAsync), x =>
         {
             _logger.LogInformation("Received request '{correlationId}' to start sync '{connectorId}' from {start} to {end}", x.CorrelationId, x.ConnectorId, x.Start, x.End);
 
@@ -118,6 +118,13 @@ internal class WorkerHubClient : IWorkerHubClient
 
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
             return new AckDto { CorrelationId = x.CorrelationId };
+        });
+
+        _connection.On<SyncRequestDto, SyncCompletedDto>(nameof(IWorkerClient.PushSyncAsync), x =>
+        {
+            _logger.LogInformation("Received request '{correlationId}' to sync (push) for connector '{connectorId}'", x.CorrelationId, x.ConnectorId);
+
+            return new SyncCompletedDto { CorrelationId = x.CorrelationId };
         });
     }
 }

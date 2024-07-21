@@ -1,3 +1,5 @@
+using Mapster;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
@@ -8,8 +10,10 @@ using NetworkPerspective.Sync.Framework.Controllers;
 using NetworkPerspective.Sync.Orchestrator.Application;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
+using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault;
+using NetworkPerspective.Sync.Orchestrator.Mappers;
 using NetworkPerspective.Sync.Orchestrator.SlackAuth;
 
 namespace NetworkPerspective.Sync.Orchestrator;
@@ -18,6 +22,9 @@ public class Program
 {
     private static void Main(string[] args)
     {
+        ControllersMapsterConfig.RegisterMappings(TypeAdapterConfig.GlobalSettings);
+        HubV1MapsterConfig.RegisterMappings(TypeAdapterConfig.GlobalSettings);
+
         var builder = WebApplication.CreateBuilder(args);
         builder.Logging.ClearProviders().AddConsole();
 

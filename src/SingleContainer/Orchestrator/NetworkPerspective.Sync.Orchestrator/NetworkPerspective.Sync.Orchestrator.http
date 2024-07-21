@@ -1,8 +1,9 @@
-@orchestrator_host = https://localhost:7191
-@worker_id = f0d39021-a738-4535-84d5-d5399564128f
+# @orchestrator_host = https://orchestrator-webapp-a4dgjaexmpvcw.azurewebsites.net
+@orchestrator_host = https://localhost:8081
+@worker_id = b4eba1b4-ea6b-475d-a9e6-7640a57cc058
 @network_id = bd1bc916-db78-4e1e-b93b-c6feb8cf729e
-@connector_id = 04C753D8-FF9A-479C-B857-5D28C1EAF6C1
-@api_key = api-key
+@connector_id = 04C753D8-FF9A-479C-B857-5D28C1EAF6C3
+@api_key = 9nJ9tsMZgb2xAqdCVQ6p
 ##
 ### WORKERS GET ALL
 GET {{orchestrator_host}}/api/workers
@@ -16,8 +17,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "Name": "client_1",
-    "Secret": "pass1"
+    "Name": "np-azure-staging",
+    "Secret": "9nJ9tsMZgb2xAqdCVQ6p"
 }
 
 ### WORKERS AUTHORIZE
@@ -47,11 +48,11 @@ Accept: application/json
     "Id": "{{connector_id}}",
     "NetworkId": "{{network_id}}",
     "WorkerId": "{{worker_id}}",
-    "Type": "Slack",
+    "Type": "Excel",
     "AccessToken": "access_token",
     "Properties": [
-        { "Key": "key1", "Value": "value1" },
-        { "Key": "key2", "Value": "value2" }
+        { "Key": "AdminEmail", "Value": "nptestuser12@worksmartona.com" },
+        { "Key": "Domain", "Value": "worksmartona.com" }
     ]
 }
 
@@ -84,3 +85,39 @@ Accept: application/json
 POST {{orchestrator_host}}/api/connectors/slack-auth?connectorId={{connector_id}}
 Authorization: Bearer {{api_key}}
 Accept: application/json
+
+### SYNC PUSH
+POST {{orchestrator_host}}/api/connectors/{{connector_id}}/sync
+Authorization: Bearer {{api_key}}
+Accept: application/json
+Content-Type: application/json
+
+{
+    "Employees": [
+        {
+            "Email": "email@networkerspective.io",
+            "EmployeeId": "id1",
+            "Name": "name",
+            "EmploymentDate": "2022-01-01T00:00:00Z",
+            "Props": [
+                { "Name": "Key1", "Value": "value1" }
+            ],
+            "Groups": [
+                {
+                    "Category": "cat1",
+                    "Name": "group1",
+                    "Id": "group_id1",
+                    "ParentId": null
+                }
+            ],
+            "Relationships": [
+                {
+                    "Email": "mail2@networkperspective.io",
+                    "EmployeeId": "id3",
+                    "RelationshipName": "Boss"
+                }
+            ]
+        }
+
+    ]
+}

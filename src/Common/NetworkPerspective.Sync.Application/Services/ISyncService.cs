@@ -86,7 +86,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
             var employees = await dataSource.GetEmployeesAsync(context, stoppingToken);
             await _statusLogger.LogInfoAsync($"Received employees profiles", stoppingToken);
-            await _networkPerspectiveCore.PushUsersAsync(context.AccessToken, employees, $"{context.ConnectorType}Id", stoppingToken);
+            await _networkPerspectiveCore.PushUsersAsync(context.AccessToken, employees, $"{context.ConnectorType}Id", stoppingToken); // TODO mapping connector type to DataSourceIdName
             await _statusLogger.LogInfoAsync($"Uploaded employees profiles", stoppingToken);
 
             await _statusLogger.LogInfoAsync($"Synchronization of employees profiles completed", stoppingToken);

@@ -20,7 +20,7 @@ public class ExcelDataSource : IDataSource
 
     public Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
     {
-        return Task.FromResult(new SyncResult(0, 0, new List<Exception>()));
+        return Task.FromResult(SyncResult.Empty);
     }
 
     public Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)

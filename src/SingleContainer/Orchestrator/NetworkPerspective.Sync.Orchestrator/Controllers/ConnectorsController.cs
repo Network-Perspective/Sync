@@ -4,6 +4,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Mapster;
+
+using MapsterMapper;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,7 +16,6 @@ using NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 using NetworkPerspective.Sync.Orchestrator.Dtos;
-using NetworkPerspective.Sync.Orchestrator.Mappers;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers;
@@ -54,6 +57,6 @@ public class ConnectorsController : ControllerBase
         _logger.LogDebug("Received request to get all connectors of worker '{workerId}'", workerId);
 
         var workers = await _connectorsService.GetAllOfWorkerAsync(workerId, stoppingToken);
-        return workers.Select(ConnectorMapper.ToDto);
+        return workers.Adapt<IEnumerable<ConnectorDto>>();
     }
 }
