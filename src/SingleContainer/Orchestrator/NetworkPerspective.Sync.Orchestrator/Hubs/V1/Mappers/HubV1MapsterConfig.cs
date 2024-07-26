@@ -7,7 +7,6 @@ namespace NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers
         public static void RegisterMappings(TypeAdapterConfig config)
         {
             new StartSyncRequestConfig().Register(config);
-            new SyncRequestConfig().Register(config);
         }
     }
 }

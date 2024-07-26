@@ -13,4 +13,5 @@ public class StartSyncDto : IRequest
     public DateTime End { get; set; }
     public IDictionary<string, string> NetworkProperties { get; set; }
     public string AccessToken { get; set; }
+    public IEnumerable<EmployeeDto> Employees { get; set; }
 }

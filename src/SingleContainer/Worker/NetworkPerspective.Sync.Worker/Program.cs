@@ -9,6 +9,8 @@ using NetworkPerspective.Sync.Infrastructure.Slack;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
 using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Infrastructure.Google;
+using NetworkPerspective.Sync.Infrastructure.Excel;
+
 
 
 #if !DEBUG
@@ -33,7 +35,8 @@ public class Program
             .AddNetworkPerspectiveCore(builder.Configuration.GetSection("Infrastructure:Core"), healthChecksBuilder)
             .AddVault(builder.Configuration.GetSection("Infrastructure:Vaults"), healthChecksBuilder)
             .AddSlack(builder.Configuration.GetSection("Infrastructure:DataSources:Slack"))
-            .AddGoogle(builder.Configuration.GetSection("Infrastructure.DataSources.Google"))
+            .AddGoogle(builder.Configuration.GetSection("Infrastructure:DataSources:Google"))
+            .AddExcel(builder.Configuration.GetSection("Infrastructure:DataSources:Excel"))
             .AddOrchestratorClient(builder.Configuration.GetSection("Infrastructure:Orchestrator"));
 
         builder.Services.RemoveAll(typeof(IAuthTester));

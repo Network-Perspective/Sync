@@ -1,6 +1,4 @@
-﻿using System;
-
-using Mapster;
+﻿using Mapster;
 
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
@@ -16,7 +14,6 @@ public class StartSyncRequestConfig : IRegister
             .NewConfig<SyncContext, StartSyncDto>()
                 .Map(dest => dest.Start, src => src.TimeRange.Start)
                 .Map(dest => dest.End, src => src.TimeRange.End)
-                .Map(dest => dest.AccessToken, src => src.AccessToken.ToSystemString())
-                .AfterMapping(x => x.ConnectorId = Guid.NewGuid());
+                .Map(dest => dest.AccessToken, src => src.AccessToken.ToSystemString());
     }
 }

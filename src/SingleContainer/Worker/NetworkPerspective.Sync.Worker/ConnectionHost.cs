@@ -42,6 +42,9 @@ public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContext
 
             var syncContext = await syncContextFactory.CreateAsync(dto.ConnectorId, dto.ConnectorType, dto.NetworkProperties, timeRange, accessToken, stoppingToken);
 
+            if (dto.Employees is not null)
+                syncContext.Set(dto.Employees);
+
             await using (var scope = serviceProvider.CreateAsyncScope())
             {
                 var connectorInfo = scope.ServiceProvider.GetRequiredService<IConnectorInfoInitializer>();
@@ -66,7 +69,6 @@ public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContext
                     TotalInteractionsCount = result.TotalInteractionsCount
                 };
             };
-
         }
 
         async Task OnSetSecrets(SetSecretsDto dto)

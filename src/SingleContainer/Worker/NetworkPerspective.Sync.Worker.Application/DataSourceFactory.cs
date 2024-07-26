@@ -32,6 +32,9 @@ internal class DataSourceFactory : IDataSourceFactory
         else if (string.Equals(connectorType, "GSuite"))
             return _dataSources.Single(x => x.GetType().FullName == "NetworkPerspective.Sync.Infrastructure.Google.GoogleFacade");
 
+        else if (string.Equals(connectorType, "Excel"))
+            return _dataSources.Single(x => x.GetType().FullName == "NetworkPerspective.Sync.Infrastructure.Excel.ExcelFacade");
+
         else
             throw new System.Exception();
     }

@@ -1,9 +1,12 @@
+using System.Collections.Generic;
+using System.Linq;
+
 using NetworkPerspective.Sync.Application.Domain;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
-using NetworkPerspective.Sync.Infrastructure.Excel.Dtos;
+using NetworkPerspective.Sync.Contract.V1.Dtos;
 
-namespace NetworkPerspective.Sync.Infrastructure.Excel.Services;
+namespace NetworkPerspective.Sync.Worker.Mappers;
 
 public static class EmployeeDtoMapper
 {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,12 +14,13 @@ using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 using NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
+using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [Route("api/connectors/{connectorId:guid}/sync")]
 [Authorize(AuthenticationSchemes = ApiKeyAuthOptions.DefaultScheme)]
-public class SyncController(IConnectorsService connectorsService, IWorkerRouter workerRouter) : ControllerBase
+public class SyncController(IConnectorsService connectorsService, ITokenService tokenService, ISyncHistoryService syncHistoryService, IClock clock, IWorkerRouter workerRouter) : ControllerBase
 {
     /// <summary>
     /// Sync
@@ -37,18 +39,29 @@ public class SyncController(IConnectorsService connectorsService, IWorkerRouter 
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> SyncAsync([FromRoute] Guid connectorId, [FromBody] SyncRequestDto dto, CancellationToken stoppingToken = default)
     {
+        var nextSyncStart = await syncHistoryService.EvaluateSyncStartAsync(connectorId, stoppingToken);
+
         var connector = await connectorsService.GetAsync(connectorId, stoppingToken);
+        var accessToken = await tokenService.GetAsync(connector.Id, stoppingToken);
 
         if (connector.Type != "Excel")
             return BadRequest("Sync is available only for 'Excel' connectors");
 
-        var syncRequest = dto.Adapt<SyncRequest>();
-        syncRequest.ConnectorId = connectorId;
+        var employees = dto.Employees.Adapt<IEnumerable<Employee>>();
 
-        // TODO add constraints - minimum numer of emplyees
+        var syncContext = new SyncContext
+        {
+            ConnectorId = connectorId,
+            ConnectorType = connector.Type,
+            NetworkId = connector.NetworkId,
+            TimeRange = new TimeRange(nextSyncStart, clock.UtcNow()),
+            AccessToken = accessToken,
+            NetworkProperties = connector.Properties,
+            Employees = employees
+        };
 
-        await workerRouter.PushSyncAsync(connector.Worker.Name, syncRequest);
+        await workerRouter.StartSyncAsync(connector.Worker.Name, syncContext);
 
-        return Ok();
+        return Accepted();
     }
 }

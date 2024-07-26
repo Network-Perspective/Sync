@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-using NetworkPerspective.Sync.Infrastructure.Excel.Dtos;
+using NetworkPerspective.Sync.Contract.V1.Dtos;
 
 namespace NetworkPerspective.Sync.Excel.Controllers;
 

@@ -14,4 +14,5 @@ public class SyncContext
     public TimeRange TimeRange { get; set; }
     public SecureString AccessToken { get; set; }
     public IDictionary<string, string> NetworkProperties { get; set; }
+    public IEnumerable<Employee> Employees { get; set; } = null;
 }
