@@ -7,10 +7,11 @@ using NetworkPerspective.Sync.Contract.V1.Impl;
 using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Slack;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
-using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Infrastructure.Google;
 using NetworkPerspective.Sync.Infrastructure.Excel;
-
+using NetworkPerspective.Sync.Infrastructure.Microsoft;
+using NetworkPerspective.Sync.Worker.Application;
+using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
 
 
 #if !DEBUG
@@ -36,11 +37,13 @@ public class Program
             .AddVault(builder.Configuration.GetSection("Infrastructure:Vaults"), healthChecksBuilder)
             .AddSlack(builder.Configuration.GetSection("Infrastructure:DataSources:Slack"))
             .AddGoogle(builder.Configuration.GetSection("Infrastructure:DataSources:Google"))
+            .AddMicrosoft(builder.Configuration.GetSection("Infrastructure:DataSources:Microsoft"))
             .AddExcel(builder.Configuration.GetSection("Infrastructure:DataSources:Excel"))
             .AddOrchestratorClient(builder.Configuration.GetSection("Infrastructure:Orchestrator"));
 
         builder.Services.RemoveAll(typeof(IAuthTester));
         builder.Services.RemoveAll(typeof(ISlackAuthService));
+        builder.Services.RemoveAll(typeof(IMicrosoftAuthService));
         builder.Services.RemoveAll(typeof(ISecretRotator));
 
         builder.Services

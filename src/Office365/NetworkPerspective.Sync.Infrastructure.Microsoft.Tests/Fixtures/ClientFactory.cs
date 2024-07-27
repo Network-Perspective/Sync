@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -8,12 +7,14 @@ using Microsoft.Graph;
 using Moq;
 
 using NetworkPerspective.Sync.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests.Factories;
 
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Configs;
 
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Fixtures
 {
@@ -29,22 +30,24 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Fixtures
             var resiliency = Options.Create(
                 new Resiliency
                 {
-                    Retries = new[] { TimeSpan.FromMilliseconds(100) }
+                    Retries = [TimeSpan.FromMilliseconds(100)]
                 });
 
             var networkProperties = new MicrosoftNetworkProperties(syncMsTeams, true, true, true, null);
             var network = Connector<MicrosoftNetworkProperties>.Create(connectorId, networkProperties, DateTime.UtcNow);
-            var networkService = new Mock<IConnectorService>();
-            networkService
-                .Setup(x => x.GetAsync<MicrosoftNetworkProperties>(connectorId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(network);
+            var hashingService = new Mock<IHashingService>();
+            hashingService
+                .Setup(x => x.Hash(It.IsAny<string>()))
+                .Returns<string>(x => x);
 
-            var contextProviderMock = new Mock<IConnectorInfoProvider>();
+            var context = new SyncContext(connectorId, "Office365", ConnectorConfig.Empty, [], string.Empty.ToSecureString(), new Utils.Models.TimeRange(DateTime.UtcNow, DateTime.UtcNow), hashingService.Object);
+
+            var contextProviderMock = new Mock<ISyncContextAccessor>();
             contextProviderMock
-                .Setup(x => x.Get())
-                .Returns(new ConnectorInfo(connectorId, networkId));
+                .Setup(x => x.SyncContext)
+                .Returns(context);
 
-            var microsoftClientFactory = new MicrosoftClientFactory(secretRepository, contextProviderMock.Object, networkService.Object, resiliency, NullLoggerFactory.Instance);
+            var microsoftClientFactory = new MicrosoftClientFactory(secretRepository, contextProviderMock.Object, resiliency, NullLoggerFactory.Instance);
             return microsoftClientFactory.GetMicrosoftClientAsync().Result;
         }
     }

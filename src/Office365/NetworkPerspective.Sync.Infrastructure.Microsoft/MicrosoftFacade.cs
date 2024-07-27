@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Mappers;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
 
@@ -16,7 +15,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 {
     internal sealed class MicrosoftFacade : IDataSource
     {
-        private readonly IConnectorService _networkService;
         private readonly IUsersClient _usersClient;
         private readonly IMailboxClient _mailboxClient;
         private readonly ICalendarClient _calendarClient;
@@ -26,7 +24,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         private readonly ILogger<MicrosoftFacade> _logger;
 
         public MicrosoftFacade(
-            IConnectorService networkService,
             IUsersClient usersClient,
             IMailboxClient mailboxClient,
             ICalendarClient calendarClient,
@@ -34,7 +31,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
             IChatsClient chatsClient,
             ILoggerFactory loggerFactory)
         {
-            _networkService = networkService;
             _usersClient = usersClient;
             _mailboxClient = mailboxClient;
             _calendarClient = calendarClient;
@@ -48,12 +44,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         {
             _logger.LogInformation("Getting employees for connector '{connectorId}'", context.ConnectorId);
 
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.ConnectorId, stoppingToken));
+            var connectorProperties = context.GetConnectorProperties<MicrosoftNetworkProperties>();
 
             var employees = await context.EnsureSetAsync(async () =>
             {
                 var users = await _usersClient.GetUsersAsync(context, stoppingToken);
-                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter, network.Properties.SyncGroupAccess);
+                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter, connectorProperties.SyncGroupAccess);
             });
 
             return employees;
@@ -63,9 +59,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         {
             _logger.LogInformation("Getting hashed employees for connector '{connectorId}'", context.ConnectorId);
 
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.ConnectorId, stoppingToken));
+            var connectorProperties = context.GetConnectorProperties<MicrosoftNetworkProperties>();
 
-            IEnumerable<Models.Channel> channels = network.Properties.SyncMsTeams == true
+            IEnumerable<Models.Channel> channels = connectorProperties.SyncMsTeams == true
                 ? await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken))
                 : Enumerable.Empty<Models.Channel>();
 
@@ -76,16 +72,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
         public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
         {
             _logger.LogInformation("Getting interactions for connector '{connectorId}' for period {timeRange}", context.ConnectorId, context.TimeRange);
-            var network = await context.EnsureSetAsync(() => _networkService.GetAsync<MicrosoftNetworkProperties>(context.ConnectorId, stoppingToken));
+            var connectorProperties = context.GetConnectorProperties<MicrosoftNetworkProperties>();
 
-            IEnumerable<Models.Channel> channels = network.Properties.SyncMsTeams == true
+            IEnumerable<Models.Channel> channels = connectorProperties.SyncMsTeams == true
                 ? await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken))
                 : Enumerable.Empty<Models.Channel>();
 
             var employees = await context.EnsureSetAsync(async () =>
             {
                 var users = await _usersClient.GetUsersAsync(context, stoppingToken);
-                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter, network.Properties.SyncGroupAccess);
+                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter, connectorProperties.SyncGroupAccess);
             });
 
             var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<EmailInteractionFactory>());
@@ -100,13 +96,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft
 
             var result = SyncResult.Combine(resultEmails, resultCalendar);
 
-            if (network.Properties.SyncMsTeams)
+            if (connectorProperties.SyncMsTeams)
             {
                 var channelInteractionFactory = new ChannelInteractionFactory(context.HashFunction, employees);
                 var resultChannels = await _channelsClient.SyncInteractionsAsync(context, channels, stream, channelInteractionFactory, stoppingToken);
                 result = SyncResult.Combine(result, resultChannels);
 
-                if (network.Properties.SyncChats)
+                if (connectorProperties.SyncChats)
                 {
                     var chatInteractionFactory = new ChatInteractionFactory(context.HashFunction, employees);
                     var resultChat = await _chatsClient.SyncInteractionsAsync(context, stream, usersEmails, chatInteractionFactory, stoppingToken);

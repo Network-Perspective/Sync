@@ -14,6 +14,7 @@ using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault;
 using NetworkPerspective.Sync.Orchestrator.Mappers;
+using NetworkPerspective.Sync.Orchestrator.MicrosoftAuth;
 using NetworkPerspective.Sync.Orchestrator.SlackAuth;
 
 namespace NetworkPerspective.Sync.Orchestrator;
@@ -43,6 +44,7 @@ public class Program
             .AddAzureKeyVault(builder.Configuration.GetSection("Infrastructure:Vault"), healthcheckBuilder)
             .AddAuth()
             .AddSlackAuth(builder.Configuration.GetSection("DataSource:Slack"))
+            .AddMicrosoftAuth()
             .AddHub();
 
         builder.Services.AddControllers(options =>

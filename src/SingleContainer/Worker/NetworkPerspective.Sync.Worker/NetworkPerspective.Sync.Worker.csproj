@@ -16,6 +16,7 @@
     <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Core\NetworkPerspective.Sync.Infrastructure.Core.csproj" />
     <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault\NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault.csproj" />
     <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault\NetworkPerspective.Sync.Infrastructure.SecretStorage.HashiCorpVault.csproj" />
+    <ProjectReference Include="..\..\..\Office365\NetworkPerspective.Sync.Infrastructure.Microsoft\NetworkPerspective.Sync.Infrastructure.Microsoft.csproj" />
     <ProjectReference Include="..\..\..\Slack\NetworkPerspective.Sync.Infrastructure.Slack\NetworkPerspective.Sync.Infrastructure.Slack.csproj" />
     <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract.V1.Impl\NetworkPerspective.Sync.Contract.V1.Impl.csproj" />
     <ProjectReference Include="..\NetworkPerspective.Sync.Worker.Application\NetworkPerspective.Sync.Worker.Application.csproj" />

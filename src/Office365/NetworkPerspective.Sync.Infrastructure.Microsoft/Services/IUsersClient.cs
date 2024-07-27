@@ -8,7 +8,6 @@ using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Users;
 
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
