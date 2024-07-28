@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Dtos;
 
-namespace NetworkPerspective.Sync.Framework.Controllers;
+namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [Route("api/connectors/{connectorId:guid}/status")]
 [Authorize]

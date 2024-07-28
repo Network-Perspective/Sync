@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetworkPerspective.Sync.Framework.Dtos
+namespace NetworkPerspective.Sync.Orchestrator.Controllers.Dtos
 {
     /// <summary>
     /// Scheduler start request

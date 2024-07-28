@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 
-namespace NetworkPerspective.Sync.Framework.Controllers;
+namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [ApiController]
 [ApiExplorerSettings(IgnoreApi = true)]

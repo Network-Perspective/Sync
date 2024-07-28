@@ -1,7 +1,7 @@
 # @orchestrator_host = https://orchestrator-webapp-a4dgjaexmpvcw.azurewebsites.net
 @orchestrator_host = https://localhost:8081
-@worker_id = b4eba1b4-ea6b-475d-a9e6-7640a57cc058
-@network_id = bd1bc916-db78-4e1e-b93b-c6feb8cf729e
+@worker_id = cb4d20f8-431b-4cd4-bac8-d1e73cf2eacc
+@network_id = 1f36f126-5f25-4702-bece-df139218f679
 @connector_id = 04C753D8-FF9A-479C-B857-5D28C1EAF6C3
 @api_key = 9nJ9tsMZgb2xAqdCVQ6p
 ##
@@ -48,7 +48,7 @@ Accept: application/json
     "Id": "{{connector_id}}",
     "NetworkId": "{{network_id}}",
     "WorkerId": "{{worker_id}}",
-    "Type": "Excel",
+    "Type": "Office365",
     "AccessToken": "access_token",
     "Properties": [
         { "Key": "AdminEmail", "Value": "nptestuser12@worksmartona.com" },
@@ -83,6 +83,11 @@ Accept: application/json
 
 ### START AUTH SLACK
 POST {{orchestrator_host}}/api/connectors/slack-auth?connectorId={{connector_id}}
+Authorization: Bearer {{api_key}}
+Accept: application/json
+
+### START AUTH MICROSOFT
+POST {{orchestrator_host}}/api/connectors/microsoft-auth?connectorId={{connector_id}}
 Authorization: Bearer {{api_key}}
 Accept: application/json
 
