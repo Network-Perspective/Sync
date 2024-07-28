@@ -33,25 +33,32 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync
 
         public async Task Execute(IJobExecutionContext context)
         {
-            var connectorId = Guid.Parse(context.JobDetail.Key.Name);
-            var nextSyncStart = await _syncHistoryService.EvaluateSyncStartAsync(connectorId, context.CancellationToken);
-
-            var connector = await _connectorsService.GetAsync(connectorId, context.CancellationToken);
-            var accessToken = await _tokenService.GetAsync(connector.Id, context.CancellationToken);
-
-            var syncContext = new SyncContext
+            try
             {
-                ConnectorId = connectorId,
-                ConnectorType = connector.Type,
-                NetworkId = connector.NetworkId,
-                TimeRange = new TimeRange(nextSyncStart, _clock.UtcNow()),
-                AccessToken = accessToken,
-                NetworkProperties = connector.Properties
-            };
+                var connectorId = Guid.Parse(context.JobDetail.Key.Name);
+                var nextSyncStart = await _syncHistoryService.EvaluateSyncStartAsync(connectorId, context.CancellationToken);
 
-            await _router.StartSyncAsync(connector.Worker.Name, syncContext);
+                var connector = await _connectorsService.GetAsync(connectorId, context.CancellationToken);
+                var accessToken = await _tokenService.GetAsync(connector.Id, context.CancellationToken);
 
-            _logger.LogInformation("Triggered job to order sync connector {connectorId}", connectorId);
+                var syncContext = new SyncContext
+                {
+                    ConnectorId = connectorId,
+                    ConnectorType = connector.Type,
+                    NetworkId = connector.NetworkId,
+                    TimeRange = new TimeRange(nextSyncStart, _clock.UtcNow()),
+                    AccessToken = accessToken,
+                    NetworkProperties = connector.Properties
+                };
+
+                await _router.StartSyncAsync(connector.Worker.Name, syncContext);
+
+                _logger.LogInformation("Triggered job to order sync connector {connectorId}", connectorId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Synchronization job failed '{jobKey}'", context.JobDetail.Key.Name);
+            }
         }
     }
 }
