@@ -7,7 +7,7 @@ using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Repositories;
 using NetworkPerspective.Sync.Infrastructure.Persistence.Repositories;
-using NetworkPerspective.Sync.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Infrastructure.Vaults;
 
 namespace NetworkPerspective.Sync.Infrastructure.Persistence
 {

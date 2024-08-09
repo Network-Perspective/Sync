@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.Contract\NetworkPerspective.Sync.Infrastructure.Vaults.Contract.csproj" />
       <ProjectReference Include="..\..\SingleContainer\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj" />
     </ItemGroup>
 

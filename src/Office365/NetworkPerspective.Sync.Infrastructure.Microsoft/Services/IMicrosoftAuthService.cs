@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Exceptions;
 using NetworkPerspective.Sync.Application.Extensions;
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
@@ -27,7 +26,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
         private const int AuthorizationStateExpirationTimeInMinutes = 10;
 
         private readonly IAuthStateKeyFactory _stateKeyFactory;
-        private readonly ISecretRepositoryFactory _secretRepositoryFactory;
+        private readonly IVault _secretRepository;
         private readonly IMemoryCache _cache;
         private readonly IStatusLoggerFactory _statusLoggerFactory;
         private readonly IConnectorService _connectorService;
@@ -35,14 +34,14 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
         public MicrosoftAuthService(
             IAuthStateKeyFactory stateKeyFactory,
-            ISecretRepositoryFactory secretRepositoryFactory,
+            IVault secretRepository,
             IMemoryCache cache,
             IStatusLoggerFactory statusLoggerFactory,
             IConnectorService connectorService,
             ILogger<MicrosoftAuthService> logger)
         {
             _stateKeyFactory = stateKeyFactory;
-            _secretRepositoryFactory = secretRepositoryFactory;
+            _secretRepository = secretRepository;
             _cache = cache;
             _statusLoggerFactory = statusLoggerFactory;
             _connectorService = connectorService;
@@ -75,29 +74,25 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
             if (!_cache.TryGetValue(state, out AuthProcess authProcess))
                 throw new OAuthException("State does not match initialized value");
 
-            var connector = await _connectorService.GetAsync<ConnectorProperties>(authProcess.ConnectorId);
-            var secretRepository = _secretRepositoryFactory.Create(connector.Properties.ExternalKeyVaultUri);
             var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, authProcess.ConnectorId);
-            await secretRepository.SetSecretAsync(tenantIdKey, tenant.ToString().ToSecureString(), stoppingToken);
+            await _secretRepository.SetSecretAsync(tenantIdKey, tenant.ToString().ToSecureString(), stoppingToken);
         }
 
         private async Task<SecureString> GetClientIdAsync(Guid connectorId, CancellationToken stoppingToken)
         {
             var connector = await _connectorService.GetAsync<MicrosoftNetworkProperties>(connectorId, stoppingToken);
 
-            var secretRepository = _secretRepositoryFactory.Create(connector.Properties.ExternalKeyVaultUri);
-
             if (connector.Properties.SyncMsTeams == true)
             {
                 _logger.LogInformation("Network property '{PropertyName}' is set to '{Value}'. Using Teams Microsoft Enterprise Application for authorization",
                     nameof(MicrosoftNetworkProperties.SyncMsTeams), connector.Properties.SyncMsTeams);
-                return await secretRepository.GetSecretAsync(MicrosoftKeys.MicrosoftClientTeamsIdKey, stoppingToken);
+                return await _secretRepository.GetSecretAsync(MicrosoftKeys.MicrosoftClientTeamsIdKey, stoppingToken);
             }
             else
             {
                 _logger.LogInformation("Network property '{PropertyName}' is set to '{Value}'. Using Basic Microsoft Enterprise Application for authorization",
                     nameof(MicrosoftNetworkProperties.SyncMsTeams), connector.Properties.SyncMsTeams);
-                return await secretRepository.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, stoppingToken);
+                return await _secretRepository.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, stoppingToken);
             }
         }
 

@@ -44,7 +44,6 @@ public class Program
         builder.Services.RemoveAll(typeof(IAuthTester));
         builder.Services.RemoveAll(typeof(ISlackAuthService));
         builder.Services.RemoveAll(typeof(IMicrosoftAuthService));
-        builder.Services.RemoveAll(typeof(ISecretRotator));
 
         builder.Services
             .AddScoped<IAuthTester, DummyAuthTester>();

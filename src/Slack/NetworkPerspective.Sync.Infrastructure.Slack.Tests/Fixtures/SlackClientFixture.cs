@@ -6,9 +6,9 @@ using System.Net.Http.Headers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Configs;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
+using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Fixtures
 {
@@ -20,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Fixtures
         {
             var secretStorageOptions = Options.Create(new AzureKeyVaultConfig { BaseUrl = "https://nptestvault.vault.azure.net/" });
 
-            var secretRepository = new InternalAzureKeyVaultClient(TokenCredentialFactory.Create(), secretStorageOptions, NullLogger<InternalAzureKeyVaultClient>.Instance);
+            var secretRepository = new AzureKeyVaultClient(TokenCredentialFactory.Create(), secretStorageOptions, NullLogger<AzureKeyVaultClient>.Instance);
             var slackToken = secretRepository.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, "unit-test")).Result;
 
             var httpClient = new HttpClient

@@ -14,12 +14,12 @@ using Moq;
 
 using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Exceptions;
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Configs;
 using NetworkPerspective.Sync.Infrastructure.Slack.Models;
 using NetworkPerspective.Sync.Infrastructure.Slack.Services;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
@@ -35,8 +35,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
 
         private readonly Mock<IConnectorService> _connectorServiceMock = new();
         private readonly Mock<IAuthStateKeyFactory> _stateFactoryMock = new();
-        private readonly Mock<ISecretRepositoryFactory> _secretRepositoryFactoryMock = new();
-        private readonly Mock<ISecretRepository> _secretRepositoryMock = new();
+        private readonly Mock<IVault> _secretRepositoryMock = new();
         private readonly Mock<ISlackClientUnauthorizedFacade> _slackClientUnauthorizedFacadeMock = new();
         private readonly Mock<IStatusLoggerFactory> _statusLoggerFactoryMock = new();
         private readonly Mock<IStatusLogger> _statusLoggerMock = new();
@@ -46,15 +45,10 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
         {
             _connectorServiceMock.Reset();
             _stateFactoryMock.Reset();
-            _secretRepositoryFactoryMock.Reset();
             _secretRepositoryMock.Reset();
             _slackClientUnauthorizedFacadeMock.Reset();
             _statusLoggerFactoryMock.Reset();
             _statusLoggerMock.Reset();
-
-            _secretRepositoryFactoryMock
-                .Setup(x => x.Create(It.IsAny<Uri>()))
-                .Returns(_secretRepositoryMock.Object);
 
             _statusLoggerFactoryMock
                 .Setup(x => x.CreateForConnector(It.IsAny<Guid>()))
@@ -91,7 +85,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _connectorServiceMock.Object,
                     _stateFactoryMock.Object,
                     config,
-                    _secretRepositoryFactoryMock.Object,
+                    _secretRepositoryMock.Object,
                     _slackClientUnauthorizedFacadeMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
@@ -136,7 +130,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _connectorServiceMock.Object,
                     _stateFactoryMock.Object,
                     config,
-                    _secretRepositoryFactoryMock.Object,
+                    _secretRepositoryMock.Object,
                     _slackClientUnauthorizedFacadeMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
@@ -179,7 +173,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _connectorServiceMock.Object,
                     _stateFactoryMock.Object,
                     config,
-                    _secretRepositoryFactoryMock.Object,
+                    _secretRepositoryMock.Object,
                     _slackClientUnauthorizedFacadeMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
@@ -209,7 +203,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Slack.Tests.Services
                     _connectorServiceMock.Object,
                     _stateFactoryMock.Object,
                     config,
-                    _secretRepositoryFactoryMock.Object,
+                    _secretRepositoryMock.Object,
                     _slackClientUnauthorizedFacadeMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,

@@ -9,8 +9,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 
 using Xunit;
 
@@ -63,7 +63,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
         private async Task<IHashingService> CreateHashingServiceAsync(string hashingKey)
         {
             var connectorId = Guid.NewGuid();
-            var secretRepositoryMock = new Mock<ISecretRepository>();
+            var secretRepositoryMock = new Mock<IVault>();
 
             secretRepositoryMock
                 .Setup(x => x.GetSecretAsync(string.Format(Keys.HashingKey, connectorId), It.IsAny<CancellationToken>()))

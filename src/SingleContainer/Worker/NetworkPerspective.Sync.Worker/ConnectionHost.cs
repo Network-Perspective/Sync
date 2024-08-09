@@ -8,16 +8,16 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Contract.V1.Impl;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Worker;
 
-public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContextFactory syncContextFactory, IServiceProvider serviceProvider, ISecretRepositoryFactory secretRepositoryFactory, ILogger<ConnectionHost> logger) : BackgroundService
+public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContextFactory syncContextFactory, IServiceProvider serviceProvider, IVault secretRepository, ILogger<ConnectionHost> logger) : BackgroundService
 {
     private readonly ILogger<ConnectionHost> _logger = logger;
 
@@ -25,7 +25,6 @@ public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContext
     {
         async Task<string> TokenFactory()
         {
-            var secretRepository = secretRepositoryFactory.Create();
             var name = await secretRepository.GetSecretAsync("orchestrator-client-name", stoppingToken);
             var pass = await secretRepository.GetSecretAsync("orchestrator-client-secret", stoppingToken);
             var tokenBytes = Encoding.UTF8.GetBytes($"{name.ToSystemString()}:{pass.ToSystemString()}");
@@ -77,9 +76,6 @@ public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContext
 
             await using (var scope = serviceProvider.CreateAsyncScope())
             {
-                var secretRepositoryFactory = scope.ServiceProvider.GetRequiredService<ISecretRepositoryFactory>();
-                var secretRepository = secretRepositoryFactory.Create();
-
                 foreach (var secret in dto.Secrets)
                     await secretRepository.SetSecretAsync(secret.Key, secret.Value.ToSecureString(), stoppingToken);
             };

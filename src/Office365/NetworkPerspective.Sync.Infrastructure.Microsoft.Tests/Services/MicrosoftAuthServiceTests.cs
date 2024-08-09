@@ -14,11 +14,10 @@ using Moq;
 
 using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Exceptions;
-using NetworkPerspective.Sync.Application.Extensions;
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
@@ -27,26 +26,20 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
 {
     public class MicrosoftAuthServiceTests
     {
-        private readonly Mock<IAuthStateKeyFactory> _authStateKeyFactory = new Mock<IAuthStateKeyFactory>();
-        private readonly Mock<ISecretRepositoryFactory> _secretRepositoryFactoryMock = new Mock<ISecretRepositoryFactory>();
-        private readonly Mock<ISecretRepository> _secretRepositoryMock = new Mock<ISecretRepository>();
-        private readonly Mock<IConnectorService> _networkServiceMock = new Mock<IConnectorService>();
-        private readonly Mock<IStatusLoggerFactory> _statusLoggerFactoryMock = new Mock<IStatusLoggerFactory>();
-        private readonly Mock<IStatusLogger> _statusLoggerMock = new Mock<IStatusLogger>();
+        private readonly Mock<IAuthStateKeyFactory> _authStateKeyFactory = new();
+        private readonly Mock<IVault> _secretRepositoryMock = new();
+        private readonly Mock<IConnectorService> _networkServiceMock = new();
+        private readonly Mock<IStatusLoggerFactory> _statusLoggerFactoryMock = new();
+        private readonly Mock<IStatusLogger> _statusLoggerMock = new();
         private readonly ILogger<MicrosoftAuthService> _logger = NullLogger<MicrosoftAuthService>.Instance;
 
         public MicrosoftAuthServiceTests()
         {
             _authStateKeyFactory.Reset();
-            _secretRepositoryFactoryMock.Reset();
             _secretRepositoryMock.Reset();
             _networkServiceMock.Reset();
             _statusLoggerFactoryMock.Reset();
             _statusLoggerMock.Reset();
-
-            _secretRepositoryFactoryMock
-                .Setup(x => x.Create(It.IsAny<Uri>()))
-                .Returns(_secretRepositoryMock.Object);
 
             _statusLoggerFactoryMock
                 .Setup(x => x.CreateForConnector(It.IsAny<Guid>()))
@@ -81,7 +74,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
                 var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
                 var service = new MicrosoftAuthService(
                     _authStateKeyFactory.Object,
-                    _secretRepositoryFactoryMock.Object,
+                    _secretRepositoryMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
                     _networkServiceMock.Object,
@@ -117,7 +110,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
                 var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
                 var service = new MicrosoftAuthService(
                     _authStateKeyFactory.Object,
-                    _secretRepositoryFactoryMock.Object,
+                    _secretRepositoryMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
                     _networkServiceMock.Object,
@@ -143,7 +136,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services
 
                 var service = new MicrosoftAuthService(
                     _authStateKeyFactory.Object,
-                    _secretRepositoryFactoryMock.Object,
+                    _secretRepositoryMock.Object,
                     cache,
                     _statusLoggerFactoryMock.Object,
                     _networkServiceMock.Object,

@@ -27,7 +27,6 @@ namespace NetworkPerspective.Sync.Infrastructure.Google
 
             services.AddScoped<IDataSource, GoogleFacade>();
 
-            services.AddTransient<ISecretRotator, GoogleSecretsRotator>();
             return services;
         }
     }

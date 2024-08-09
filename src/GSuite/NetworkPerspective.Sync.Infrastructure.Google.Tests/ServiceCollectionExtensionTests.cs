@@ -13,8 +13,8 @@ using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 
 using Xunit;
 
@@ -40,7 +40,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests
                 .Build();
 
             serviceCollection.AddLogging();
-            serviceCollection.AddTransient(x => Mock.Of<ISecretRepository>());
+            serviceCollection.AddTransient(x => Mock.Of<IVault>());
             serviceCollection.AddSingleton(Mock.Of<IUnitOfWork>());
             serviceCollection.AddSingleton(Mock.Of<ISyncScheduler>());
             serviceCollection.AddSingleton(Mock.Of<IUnitOfWorkFactory>());

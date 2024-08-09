@@ -22,7 +22,8 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Common\NetworkPerspective.Sync.Application\NetworkPerspective.Sync.Application.csproj" />
         <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Persistence\NetworkPerspective.Sync.Infrastructure.Persistence.csproj" />
-        <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage\NetworkPerspective.Sync.Infrastructure.SecretStorage.csproj" />
+        <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.Contract\NetworkPerspective.Sync.Infrastructure.Vaults.Contract.csproj" />
+        <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault\NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault.csproj" />
     </ItemGroup>
 
 </Project>

@@ -5,23 +5,23 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 
 namespace NetworkPerspective.Sync.Application.Services
 {
-    public interface ICachedSecretRepository : ISecretRepository
+    public interface ICachedSecretRepository : IVault
     {
         Task ClearCacheAsync(CancellationToken stoppingToken = default);
     }
 
     internal class CachedSecretRepository : ICachedSecretRepository
     {
-        private readonly ISecretRepository _secretRepository;
+        private readonly IVault _secretRepository;
         private readonly ILogger<CachedSecretRepository> _logger;
         private readonly IDictionary<string, SecureString> _cachedSecrets = new Dictionary<string, SecureString>();
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
 
-        public CachedSecretRepository(ISecretRepository secretRepository, ILogger<CachedSecretRepository> logger)
+        public CachedSecretRepository(IVault secretRepository, ILogger<CachedSecretRepository> logger)
         {
             _secretRepository = secretRepository;
             _logger = logger;

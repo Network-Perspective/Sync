@@ -6,13 +6,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 using NetworkPerspective.Sync.Orchestrator.Application;
 using NetworkPerspective.Sync.Orchestrator.Controllers;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
-using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.AzureKeyVault;
 using NetworkPerspective.Sync.Orchestrator.Mappers;
 using NetworkPerspective.Sync.Orchestrator.MicrosoftAuth;
 using NetworkPerspective.Sync.Orchestrator.SlackAuth;

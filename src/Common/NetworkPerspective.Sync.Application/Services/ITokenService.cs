@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 
 namespace NetworkPerspective.Sync.Application.Services
 {
@@ -22,15 +21,13 @@ namespace NetworkPerspective.Sync.Application.Services
 
     internal class TokenService : ITokenService
     {
-        private readonly ISecretRepositoryFactory _secretRepositoryFactory;
-        private readonly IConnectorService _connectorService;
+        private readonly IVault _secretRepository;
         private readonly INetworkPerspectiveCore _networkPerspectiveCore;
         private readonly ILogger<TokenService> _logger;
 
-        public TokenService(ISecretRepositoryFactory secretRepositoryFactory, IConnectorService connectorService, INetworkPerspectiveCore networkPerspectiveCore, ILogger<TokenService> logger)
+        public TokenService(IVault secretRepository, INetworkPerspectiveCore networkPerspectiveCore, ILogger<TokenService> logger)
         {
-            _secretRepositoryFactory = secretRepositoryFactory;
-            _connectorService = connectorService;
+            _secretRepository = secretRepository;
             _networkPerspectiveCore = networkPerspectiveCore;
             _logger = logger;
         }
@@ -40,9 +37,7 @@ namespace NetworkPerspective.Sync.Application.Services
             _logger.LogDebug("Saving Access Token for connector '{connectorId}'...", connectorId);
 
             var tokenKey = GetAccessTokenKey(connectorId);
-            var props = await _connectorService.GetAsync<ConnectorProperties>(connectorId, stoppingToken);
-            var secretRepository = _secretRepositoryFactory.Create(props.Properties.ExternalKeyVaultUri);
-            await secretRepository.SetSecretAsync(tokenKey, accessToken, stoppingToken);
+            await _secretRepository.SetSecretAsync(tokenKey, accessToken, stoppingToken);
 
             _logger.LogDebug("Access Token for connector '{connectorId}' saved", connectorId);
         }
@@ -50,9 +45,7 @@ namespace NetworkPerspective.Sync.Application.Services
         public async Task<SecureString> GetAsync(Guid connectorId, CancellationToken stoppingToken = default)
         {
             var tokenKey = GetAccessTokenKey(connectorId);
-            var props = await _connectorService.GetAsync<ConnectorProperties>(connectorId, stoppingToken);
-            var secretRepository = _secretRepositoryFactory.Create(props.Properties.ExternalKeyVaultUri);
-            return await secretRepository.GetSecretAsync(tokenKey, stoppingToken);
+            return await _secretRepository.GetSecretAsync(tokenKey, stoppingToken);
         }
 
         public async Task EnsureRemovedAsync(Guid connectorId, CancellationToken stoppingToken = default)
@@ -61,9 +54,7 @@ namespace NetworkPerspective.Sync.Application.Services
             {
                 _logger.LogDebug("Removing Access Token for connector '{connectorId}'...", connectorId);
                 var tokenKey = GetAccessTokenKey(connectorId);
-                var props = await _connectorService.GetAsync<ConnectorProperties>(connectorId, stoppingToken);
-                var secretRepository = _secretRepositoryFactory.Create(props.Properties.ExternalKeyVaultUri);
-                await secretRepository.RemoveSecretAsync(tokenKey, stoppingToken);
+                await _secretRepository.RemoveSecretAsync(tokenKey, stoppingToken);
                 _logger.LogDebug("Removed Access Token for connector '{connectorId}'...", connectorId);
             }
             catch (Exception)
@@ -87,7 +78,7 @@ namespace NetworkPerspective.Sync.Application.Services
             }
         }
 
-        private string GetAccessTokenKey(Guid connectorId)
+        private static string GetAccessTokenKey(Guid connectorId)
             => string.Format(Keys.TokenKeyPattern, connectorId.ToString());
     }
 }

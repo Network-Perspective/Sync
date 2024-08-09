@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Models;
 
 namespace NetworkPerspective.Sync.Application.Services
@@ -22,7 +22,7 @@ namespace NetworkPerspective.Sync.Application.Services
         private readonly ISyncHistoryService _syncHistoryService;
         private readonly IConnectorService _connectorService;
         private readonly IHashingServiceFactory _hashingServiceFactory;
-        private readonly ISecretRepositoryFactory _secretRepositoryFactory;
+        private readonly IVault _secretRepository;
         private readonly IClock _clock;
 
         public SyncContextFactory(
@@ -31,7 +31,7 @@ namespace NetworkPerspective.Sync.Application.Services
             ISyncHistoryService syncHistoryService,
             IConnectorService connectorService,
             IHashingServiceFactory hashingServiceFactory,
-            ISecretRepositoryFactory secretRepositoryFactory,
+            IVault secretRepository,
             IClock clock)
         {
             _tokenService = tokenService;
@@ -39,7 +39,7 @@ namespace NetworkPerspective.Sync.Application.Services
             _syncHistoryService = syncHistoryService;
             _connectorService = connectorService;
             _hashingServiceFactory = hashingServiceFactory;
-            _secretRepositoryFactory = secretRepositoryFactory;
+            _secretRepository = secretRepository;
             _clock = clock;
         }
 
@@ -53,8 +53,7 @@ namespace NetworkPerspective.Sync.Application.Services
 
 
             var connectorProperties = ConnectorProperties.Create<ConnectorProperties>(properties);
-            var secretRepository = _secretRepositoryFactory.Create(connectorProperties.ExternalKeyVaultUri);
-            var hashingService = await _hashingServiceFactory.CreateAsync(secretRepository, stoppingToken);
+            var hashingService = await _hashingServiceFactory.CreateAsync(_secretRepository, stoppingToken);
 
             var timeRange = new TimeRange(lastSyncedTimeStamp, now);
 

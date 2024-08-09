@@ -10,33 +10,24 @@ using Grpc.Auth;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Extensions;
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 using Newtonsoft.Json.Linq;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Services;
 
-public class GoogleSecretsRotator : ISecretRotator
+public class GoogleSecretsRotator(ILogger<GoogleSecretsRotator> logger, IVault secretRepository) : ISecretRotator
 {
-    private readonly ILogger<GoogleSecretsRotator> _logger;
-    private readonly ISecretRepositoryFactory _secretRepositoryFactory;
-
-    public GoogleSecretsRotator(ILogger<GoogleSecretsRotator> logger, ISecretRepositoryFactory secretRepositoryFactory)
-    {
-        _logger = logger;
-        _secretRepositoryFactory = secretRepositoryFactory;
-    }
+    private readonly ILogger<GoogleSecretsRotator> _logger = logger;
+    private readonly IVault _secretRepository = secretRepository;
 
     public async Task RotateSecrets()
     {
         _logger.LogInformation("Rotating Google secrets");
         try
         {
-            var secretRepository = _secretRepositoryFactory.Create();
-
             var googleKey = await secretRepository.GetSecretAsync(GoogleKeys.TokenKey);
             var credential = GoogleCredential
                 .FromJson(googleKey.ToSystemString())

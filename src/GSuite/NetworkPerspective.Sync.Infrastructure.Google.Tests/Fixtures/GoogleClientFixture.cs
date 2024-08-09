@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.Google.Services;
-using NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault;
+using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Fixtures
 {
@@ -14,7 +14,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Tests.Fixtures
         public GoogleClientFixture()
         {
             var secretRepositoryOptions = Options.Create(new AzureKeyVaultConfig { BaseUrl = TestsConsts.InternalAzureKeyVaultBaseUrl });
-            var secretRepository = new InternalAzureKeyVaultClient(TokenCredentialFactory.Create(), secretRepositoryOptions, NullLogger<InternalAzureKeyVaultClient>.Instance);
+            var secretRepository = new AzureKeyVaultClient(TokenCredentialFactory.Create(), secretRepositoryOptions, NullLogger<AzureKeyVaultClient>.Instance);
             CredentialProvider = new CredentialsProvider(secretRepository);
         }
     }

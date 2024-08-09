@@ -23,7 +23,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\Common\NetworkPerspective.Sync.Common.Tests\NetworkPerspective.Sync.Common.Tests.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Microsoft\NetworkPerspective.Sync.Infrastructure.Microsoft.csproj" />
-      <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.SecretStorage\NetworkPerspective.Sync.Infrastructure.SecretStorage.csproj" />
+      <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.Contract\NetworkPerspective.Sync.Infrastructure.Vaults.Contract.csproj" />
     </ItemGroup>
 
 </Project>

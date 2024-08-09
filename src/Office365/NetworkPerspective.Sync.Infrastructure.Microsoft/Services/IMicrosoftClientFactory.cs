@@ -11,9 +11,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Kiota.Authentication.Azure;
 
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Microsoft.Configs;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 using Polly;
@@ -28,11 +28,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
 
     internal class MicrosoftClientFactory : IMicrosoftClientFactory
     {
-        private readonly ISecretRepository _secretRepository;
+        private readonly IVault _secretRepository;
         private readonly ISyncContextAccessor _syncContextAccessor;
         private readonly PolicyHttpMessageHandler _retryHandler;
 
-        public MicrosoftClientFactory(ISecretRepository secretRepository, ISyncContextAccessor syncContextAccessor, IOptions<Resiliency> resiliencyOptions, ILoggerFactory loggerFactory)
+        public MicrosoftClientFactory(IVault secretRepository, ISyncContextAccessor syncContextAccessor, IOptions<Resiliency> resiliencyOptions, ILoggerFactory loggerFactory)
         {
             _secretRepository = secretRepository;
             _syncContextAccessor = syncContextAccessor;

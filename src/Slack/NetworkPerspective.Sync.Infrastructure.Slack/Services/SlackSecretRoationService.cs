@@ -6,23 +6,23 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Application.Domain.SecretRotation;
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Slack.Services;
 
 internal class SlackSecretRoationService : ISecretRotationService
 {
-    private readonly ISecretRepositoryFactory _secretRepositoryFactory;
+    private readonly IVault _secretRepository;
     private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
     private readonly ILogger<SlackSecretRoationService> _logger;
 
-    public SlackSecretRoationService(ISecretRepositoryFactory secretRepositoryFactory, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<SlackSecretRoationService> logger)
+    public SlackSecretRoationService(IVault secretRepository, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<SlackSecretRoationService> logger)
     {
-        _secretRepositoryFactory = secretRepositoryFactory;
+        _secretRepository = secretRepository;
         _slackClientFacadeFactory = slackClientFacadeFactory;
         _logger = logger;
     }
@@ -33,21 +33,20 @@ internal class SlackSecretRoationService : ISecretRotationService
 
         var connectorProperties = context.GetConnectorProperties();
 
-        var secretRepository = _secretRepositoryFactory.Create(connectorProperties.ExternalKeyVaultUri);
         var slackClient = _slackClientFacadeFactory.CreateUnauthorized();
 
         var accessTokenKey = string.Format(SlackKeys.TokenKeyPattern, context.ConnectorId);
         var refreshTokenKey = string.Format(SlackKeys.RefreshTokenPattern, context.ConnectorId);
 
-        var clientId = await secretRepository.GetSecretAsync(SlackKeys.SlackClientIdKey, stoppingToken);
-        var clientSecret = await secretRepository.GetSecretAsync(SlackKeys.SlackClientSecretKey, stoppingToken);
+        var clientId = await _secretRepository.GetSecretAsync(SlackKeys.SlackClientIdKey, stoppingToken);
+        var clientSecret = await _secretRepository.GetSecretAsync(SlackKeys.SlackClientSecretKey, stoppingToken);
 
         // try to get access token for the network
         // the access token might be not yet there if the network is not yet authorized
         SecureString accessToken;
         try
         {
-            accessToken = await secretRepository.GetSecretAsync(accessTokenKey, stoppingToken);
+            accessToken = await _secretRepository.GetSecretAsync(accessTokenKey, stoppingToken);
         }
         catch
         {
@@ -59,7 +58,7 @@ internal class SlackSecretRoationService : ISecretRotationService
         SecureString refreshToken;
         try
         {
-            refreshToken = await secretRepository.GetSecretAsync(refreshTokenKey, stoppingToken);
+            refreshToken = await _secretRepository.GetSecretAsync(refreshTokenKey, stoppingToken);
         }
         catch (Exception)
         {
@@ -81,8 +80,8 @@ internal class SlackSecretRoationService : ISecretRotationService
                 return;
             }
 
-            await secretRepository.SetSecretAsync(refreshTokenKey, exchangeResult.RefreshToken.ToSecureString(), stoppingToken);
-            await secretRepository.SetSecretAsync(accessTokenKey, exchangeResult.AccessToken.ToSecureString(), stoppingToken);
+            await _secretRepository.SetSecretAsync(refreshTokenKey, exchangeResult.RefreshToken.ToSecureString(), stoppingToken);
+            await _secretRepository.SetSecretAsync(accessTokenKey, exchangeResult.AccessToken.ToSecureString(), stoppingToken);
 
             // no need to refresh token if we just exchanged it
             return;
@@ -106,8 +105,8 @@ internal class SlackSecretRoationService : ISecretRotationService
             _logger.LogError("Failed to exchange Slack token: {error}", refreshResult.Error);
             return;
         }
-        await secretRepository.SetSecretAsync(refreshTokenKey, refreshResult.RefreshToken.ToSecureString(), stoppingToken);
-        await secretRepository.SetSecretAsync(accessTokenKey, refreshResult.AccessToken.ToSecureString(), stoppingToken);
+        await _secretRepository.SetSecretAsync(refreshTokenKey, refreshResult.RefreshToken.ToSecureString(), stoppingToken);
+        await _secretRepository.SetSecretAsync(accessTokenKey, refreshResult.AccessToken.ToSecureString(), stoppingToken);
 
         _logger.LogInformation("Token rotated for connector {connectorId}", context.ConnectorId);
     }

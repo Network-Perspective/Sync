@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Application.Services
 {
     public interface IHashingServiceFactory
     {
-        Task<IHashingService> CreateAsync(ISecretRepository secretRepository, CancellationToken stoppingToken = default);
+        Task<IHashingService> CreateAsync(IVault secretRepository, CancellationToken stoppingToken = default);
     }
 
     internal sealed class HashingServiceFactory : IHashingServiceFactory
@@ -26,7 +26,7 @@ namespace NetworkPerspective.Sync.Application.Services
             _logger = loggerFactory.CreateLogger<HashingServiceFactory>();
         }
 
-        public async Task<IHashingService> CreateAsync(ISecretRepository secretRepository, CancellationToken stoppingToken = default)
+        public async Task<IHashingService> CreateAsync(IVault secretRepository, CancellationToken stoppingToken = default)
         {
             _logger.LogDebug("Creating {service} using hashing key in {secretRepository}", typeof(HashingService), secretRepository.GetType());
             using var hashingKey = await secretRepository.GetSecretAsync(Keys.HashingKey, stoppingToken);

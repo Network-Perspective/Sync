@@ -7,7 +7,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Gmail.v1;
 
-using NetworkPerspective.Sync.Application.Infrastructure.SecretStorage;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Google.Services
@@ -26,11 +26,11 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             CalendarService.Scope.CalendarReadonly
         };
 
-        private readonly ISecretRepository _secretRepository;
+        private readonly IVault _secretRepository;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private GoogleCredential _credential = null;
 
-        public CredentialsProvider(ISecretRepository secretRepository)
+        public CredentialsProvider(IVault secretRepository)
         {
             _secretRepository = secretRepository;
         }

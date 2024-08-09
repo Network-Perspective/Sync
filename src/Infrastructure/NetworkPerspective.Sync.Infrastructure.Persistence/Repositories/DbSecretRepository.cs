@@ -8,7 +8,7 @@ using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Exceptions;
 using NetworkPerspective.Sync.Application.Infrastructure.Persistence.Repositories;
 using NetworkPerspective.Sync.Infrastructure.Persistence.Entities;
 
-namespace NetworkPerspective.Sync.Infrastructure.SecretStorage
+namespace NetworkPerspective.Sync.Infrastructure.Vaults
 {
 
     internal class DbSecretRepository : IDbSecretRepository

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
