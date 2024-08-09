@@ -125,7 +125,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Vaults", "Vaults", "{F86DDA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.Vaults.ExternalAzureKeyVault.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.ExternalAzureKeyVault.Tests\NetworkPerspective.Sync.Infrastructure.Vaults.ExternalAzureKeyVault.Tests.csproj", "{814A7A71-D516-4DBE-A382-445F7132B974}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault.Tests\NetworkPerspective.Sync.Infrastructure.SecretStorage.AzureKeyVault.Tests.csproj", "{F7DE581A-B00F-4C1B-8570-C5CD88B9890E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault.Tests\NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault.Tests.csproj", "{F7DE581A-B00F-4C1B-8570-C5CD88B9890E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Worker.Tests", "SingleContainer\Worker\NetworkPerspective.Sync.Worker.Tests\NetworkPerspective.Sync.Worker.Tests.csproj", "{95ADAEC2-D310-48E1-B76F-5A4F8443E0F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -285,6 +287,10 @@ Global
 		{F7DE581A-B00F-4C1B-8570-C5CD88B9890E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7DE581A-B00F-4C1B-8570-C5CD88B9890E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7DE581A-B00F-4C1B-8570-C5CD88B9890E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95ADAEC2-D310-48E1-B76F-5A4F8443E0F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95ADAEC2-D310-48E1-B76F-5A4F8443E0F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95ADAEC2-D310-48E1-B76F-5A4F8443E0F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95ADAEC2-D310-48E1-B76F-5A4F8443E0F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -350,6 +356,7 @@ Global
 		{F86DDA1E-FB9B-437C-BEBA-FBA9F87163B1} = {16C83627-EA04-4E75-B191-139CF66AE880}
 		{814A7A71-D516-4DBE-A382-445F7132B974} = {F86DDA1E-FB9B-437C-BEBA-FBA9F87163B1}
 		{F7DE581A-B00F-4C1B-8570-C5CD88B9890E} = {F86DDA1E-FB9B-437C-BEBA-FBA9F87163B1}
+		{95ADAEC2-D310-48E1-B76F-5A4F8443E0F4} = {9CEE4228-1989-466B-8582-3B016B9B96B8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}

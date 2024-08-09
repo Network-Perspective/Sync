@@ -2,4 +2,6 @@
 
 internal class ExternalAzureKeyVaultConfig
 {
+    public string BaseUrl { get; set; }
+    public string TestSecretName { get; set; }
 }

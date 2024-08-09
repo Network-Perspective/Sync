@@ -1,22 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.12.0" />
-    <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.6.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Azure.Identity" Version="1.12.0" />
+        <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.6.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+        <PackageReference Include="Scrutor" Version="4.2.2" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\SingleContainer\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj" />
-    <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Vaults.Contract\NetworkPerspective.Sync.Infrastructure.Vaults.Contract.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\SingleContainer\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj" />
+        <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Vaults.Contract\NetworkPerspective.Sync.Infrastructure.Vaults.Contract.csproj" />
+    </ItemGroup>
 
 </Project>

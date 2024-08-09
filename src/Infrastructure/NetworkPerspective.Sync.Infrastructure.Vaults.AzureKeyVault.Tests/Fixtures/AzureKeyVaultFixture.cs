@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Common.Tests;
-using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 
 namespace NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault.Tests.Fixtures;
 

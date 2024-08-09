@@ -14,55 +14,42 @@ namespace NetworkPerspective.Sync.Worker;
 
 internal static class ServiceCollectionExtensions
 {
-    private const string AzureKeyVaultConfigSection = "AzureKeyVault";
-    private const string ExternalAzureKeyVaultConfigSection = "ExternalAzureKeyVault";
-    private const string HcpVaultConfigSection = "HcpVault";
-
     public static IServiceCollection AddVault(this IServiceCollection services, IConfigurationSection configuration, IHealthChecksBuilder healthChecksBuilder)
     {
+        const string azureKeyVaultConfigSection = "AzureKeyVault";
+        const string hcpVaultConfigSection = "HcpVault";
+
         var configurationSections = configuration.GetChildren();
 
-        var containsAzureKeyVault = configurationSections.Any(x => x.Key == AzureKeyVaultConfigSection);
-        var containsExternalAzureKeyVault = configurationSections.Any(x => x.Key == ExternalAzureKeyVaultConfigSection);
-        var containsHcpVault = configurationSections.Any(x => x.Key == HcpVaultConfigSection);
+        var containsAzureKeyVault = configurationSections.Any(x => x.Key == azureKeyVaultConfigSection);
+        var containsHcpVault = configurationSections.Any(x => x.Key == hcpVaultConfigSection);
 
         if (containsAzureKeyVault)
-            services.AddAzureKeyVault(configuration.GetSection(AzureKeyVaultConfigSection), healthChecksBuilder);
-        else if (containsExternalAzureKeyVault)
-            services.AddExternalAzureKeyVault(configuration.GetSection(ExternalAzureKeyVaultConfigSection), healthChecksBuilder);
+            services.AddAzureKeyVault(configuration.GetSection(azureKeyVaultConfigSection), healthChecksBuilder);
         else if (containsHcpVault)
-            services.AddHcpKeyVault(configuration.GetSection(AzureKeyVaultConfigSection), healthChecksBuilder);
+            services.AddHcpKeyVault(configuration.GetSection(azureKeyVaultConfigSection), healthChecksBuilder);
         else
             throw new InvalidVaultConfigurationException("Missing Vault configuration. At least one secret storage needs to be configured");
 
+        services.AddExternalKeyVaultIfApplicable(configuration);
+
         return services;
     }
 
-    public static IServiceCollection AddSecretRepositoryClient(this IServiceCollection services, IConfigurationSection configurationSection, IHealthChecksBuilder healthCheckBuilder)
+    private static IServiceCollection AddExternalKeyVaultIfApplicable(this IServiceCollection services, IConfigurationSection configuration)
     {
-        var azSection = configurationSection.GetSection(AzureKeyVaultConfigSection);
-        var hcpSection = configurationSection.GetSection(HcpVaultConfigSection);
+        const string externalAzureKeyVaultConfigSection = "ExternalAzureKeyVault";
 
-        var containsAzureKeyVault = azSection.GetChildren().FirstOrDefault(x => x.Key == "BaseUrl") is not null;
-        var containsHcpVault = hcpSection.GetChildren().FirstOrDefault(x => x.Key == "BaseUrl") is not null;
-        var containsDbVault = hcpSection.GetChildren().FirstOrDefault(x => x.Key == "SecretsPath") is not null;
+        var configurationSections = configuration.GetChildren();
 
-        if (containsAzureKeyVault)
-            services.AddAzureKeyVault(configurationSection.GetSection(AzureKeyVaultConfigSection), healthCheckBuilder);
-        else if (containsHcpVault)
-            services.AddHcpKeyVault(configurationSection.GetSection(AzureKeyVaultConfigSection), healthCheckBuilder);
-        else
-            throw new VaultException("At least one secret storage needs to be configured");
+        var containsExternalAzureKeyVault = configurationSections.Any(x => x.Key == externalAzureKeyVaultConfigSection);
+
+        if (containsExternalAzureKeyVault)
+            services.AddExternalAzureKeyVault(configuration.GetSection(externalAzureKeyVaultConfigSection));
 
         return services;
     }
-
-
-
-
-
 
     public static IServiceCollection RemoveHttpClientLogging(this IServiceCollection services)
         => services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
-
 }
