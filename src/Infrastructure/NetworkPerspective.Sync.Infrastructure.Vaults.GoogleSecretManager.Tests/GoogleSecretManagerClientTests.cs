@@ -4,33 +4,36 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+
 using NetworkPerspective.Sync.Common.Tests;
-using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract.Exceptions;
-using NetworkPerspective.Sync.Infrastructure.Vaults.ExternalAzureKeyVault.Tests.Fixtures;
+using NetworkPerspective.Sync.Infrastructure.Vaults.GoogleSecretManager.Tests.Fixtures;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.Vaults.ExternalAzureKeyVault.Tests;
+namespace NetworkPerspective.Sync.Infrastructure.Vaults.GoogleSecretManager.Tests;
 
-[Collection(ExternalAzureKeyVaultTestsCollection.Name)]
-public class ExternalAzureKeyVaultClientTests : IAsyncLifetime
+public class GoogleSecretManagerClientTests : GoogleSecretManagerTestsCollection, IAsyncLifetime
 {
     private const string KeyNameTemplate = "test-key-{0}";
+
     private readonly string _keyName;
 
-    private readonly IVault _client;
+    private readonly GoogleSecretManagerClient _client;
 
-    public ExternalAzureKeyVaultClientTests(ExternalAzureKeyVaultFixture fixture)
+    public GoogleSecretManagerClientTests()
     {
         _keyName = string.Format(KeyNameTemplate, Guid.NewGuid().ToString());
-        _client = fixture.Client;
+        var config = Options.Create(new GoogleSecretManagerConfig { ProjectId = "test-connectors-412712" });
+
+        _client = new GoogleSecretManagerClient(config, NullLogger<GoogleSecretManagerClient>.Instance);
     }
 
-
     public Task InitializeAsync()
-        => Task.CompletedTask;
+    => Task.CompletedTask;
 
     public async Task DisposeAsync()
     {
@@ -42,12 +45,8 @@ public class ExternalAzureKeyVaultClientTests : IAsyncLifetime
         { }
     }
 
-    public class GetSecret : ExternalAzureKeyVaultClientTests
+    public class GetSecret : GoogleSecretManagerClientTests
     {
-        public GetSecret(ExternalAzureKeyVaultFixture client) : base(client)
-        { }
-
-
         [Fact]
         [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
         public async Task ShouldReturnStoredKey()
@@ -75,11 +74,8 @@ public class ExternalAzureKeyVaultClientTests : IAsyncLifetime
         }
     }
 
-    public class SetSecret : ExternalAzureKeyVaultClientTests
+    public class SetSecret : GoogleSecretManagerClientTests
     {
-        public SetSecret(ExternalAzureKeyVaultFixture client) : base(client)
-        { }
-
         [Fact]
         [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
         public async Task ShouldOverrideExistingKey()
@@ -99,11 +95,8 @@ public class ExternalAzureKeyVaultClientTests : IAsyncLifetime
         }
     }
 
-    public class RemoveSecret : ExternalAzureKeyVaultClientTests
+    public class RemoveSecret : GoogleSecretManagerClientTests
     {
-        public RemoveSecret(ExternalAzureKeyVaultFixture client) : base(client)
-        { }
-
         [Fact]
         [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
         public async Task ShouldRemoveSecret()
@@ -133,5 +126,4 @@ public class ExternalAzureKeyVaultClientTests : IAsyncLifetime
             await func.Should().ThrowAsync<VaultException>();
         }
     }
-
 }

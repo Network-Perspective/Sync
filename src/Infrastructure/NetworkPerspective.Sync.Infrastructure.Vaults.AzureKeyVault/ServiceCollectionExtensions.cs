@@ -29,6 +29,18 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddAzureKeyVault(this IServiceCollection services, IConfigurationSection configurationSection)
+    {
+        services.Configure<AzureKeyVaultConfig>(configurationSection);
+
+        var azureCredentials = TokenCredentialFactory.Create();
+
+        services.AddSingleton(azureCredentials);
+        services.AddSingleton<IVault, AzureKeyVaultClient>();
+
+        return services;
+    }
+
     private static Uri KeyVaultServiceUriFactory(IServiceProvider serviceProvider)
     {
         var config = serviceProvider.GetService<IOptions<AzureKeyVaultConfig>>().Value;

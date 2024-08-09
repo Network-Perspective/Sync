@@ -1,16 +1,15 @@
-﻿using System;
-
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 
 namespace NetworkPerspective.Sync.Infrastructure.Vaults.ExternalAzureKeyVault.Tests.Fixtures;
 
 public class ExternalAzureKeyVaultFixture
 {
-    public ExternalAzureKeyVaultClient Client { get; }
+    public IVault Client { get; }
 
     public ExternalAzureKeyVaultFixture()
     {
@@ -19,8 +18,8 @@ public class ExternalAzureKeyVaultFixture
         var internalCredentials = TokenCredentialFactory.Create();
         var internalClient = new AzureKeyVaultClient(internalCredentials, secretRepositoryOptions, internalLogger);
 
-        var externalUri = new Uri(TestsConsts.ExternalAzureKeyVaultBaseUrl);
+        var externalOptions = Options.Create(new ExternalAzureKeyVaultConfig { BaseUrl = TestsConsts.ExternalAzureKeyVaultBaseUrl });
         var externalLogger = NullLogger<ExternalAzureKeyVaultClient>.Instance;
-        Client = new ExternalAzureKeyVaultClient(externalUri, internalClient, externalLogger);
+        Client = new ExternalAzureKeyVaultClient(internalClient, externalOptions, externalLogger);
     }
 }

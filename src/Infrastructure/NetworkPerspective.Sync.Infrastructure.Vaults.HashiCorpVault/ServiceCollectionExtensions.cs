@@ -10,14 +10,21 @@ namespace NetworkPerspective.Sync.Infrastructure.Vaults.HashiCorpVault;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddHcpKeyVault(this IServiceCollection services, IConfigurationSection configurationSection, IHealthChecksBuilder healthCheckBuilder)
+    public static IServiceCollection AddHcpKeyVault(this IServiceCollection services, IConfiguration configurationSection, IHealthChecksBuilder healthCheckBuilder)
+    {
+        services.AddHcpKeyVault(configurationSection, healthCheckBuilder);
+
+        healthCheckBuilder.AddCheck<HcpVaultHealthCheck>("Hcp Key-Vault", HealthStatus.Unhealthy, [], TimeSpan.FromSeconds(30));
+
+        return services;
+    }
+
+    public static IServiceCollection AddHcpKeyVault(this IServiceCollection services, IConfiguration configurationSection)
     {
         services.Configure<HcpVaultConfig>(configurationSection);
 
         services.AddTransient<HcpVaultClient>();
         services.AddSingleton<IVault, HcpVaultClient>();
-
-        healthCheckBuilder.AddCheck<HcpVaultHealthCheck>("Hcp Key-Vault", HealthStatus.Unhealthy, [], TimeSpan.FromSeconds(30));
 
         return services;
     }

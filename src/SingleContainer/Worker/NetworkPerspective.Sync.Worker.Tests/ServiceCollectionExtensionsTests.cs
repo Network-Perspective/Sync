@@ -13,7 +13,7 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.Contract.Exceptions;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Worker.Application.Tests;
+namespace NetworkPerspective.Sync.Worker.Tests;
 
 public class ServiceCollectionExtensionsTests
 {
@@ -106,6 +106,34 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void ShouldUseGoogleSecretManager()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string>
+            {
+                { "Infrastructure:GoogleSecretManager:ProjectId", "42" },
+
+            })
+            .Build();
+
+        var healthCheckBuilder = Mock.Of<IHealthChecksBuilder>();
+
+        services.AddVault(config.GetSection("Infrastructure"), healthCheckBuilder);
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        // Act
+        var vault = serviceProvider.GetRequiredService<IVault>();
+
+        // Assert
+        vault.GetType().Name.Should().Be("GoogleSecretManager");
+    }
+
+    [Fact]
     public void ShouldThrowOnNotConfigured()
     {
         // Arrange
@@ -123,4 +151,6 @@ public class ServiceCollectionExtensionsTests
         // Act Assert
         func.Should().Throw<InvalidVaultConfigurationException>();
     }
+
+
 }
