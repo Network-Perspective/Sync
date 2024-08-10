@@ -130,7 +130,7 @@ public class ServiceCollectionExtensionsTests
         var vault = serviceProvider.GetRequiredService<IVault>();
 
         // Assert
-        vault.GetType().Name.Should().Be("GoogleSecretManager");
+        vault.GetType().Name.Should().Be("GoogleSecretManagerClient");
     }
 
     [Fact]

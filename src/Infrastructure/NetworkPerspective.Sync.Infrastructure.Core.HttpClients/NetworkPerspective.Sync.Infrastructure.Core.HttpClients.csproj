@@ -4,14 +4,14 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
-    <ItemGroup>
-        <Compile Include="obj\v1Client.cs" />
-    </ItemGroup>
-
     <!--Temp workaround https://github.com/RicoSuter/NSwag/issues/4633-->
     <PropertyGroup>
         <NSwagGenerateExceptionClasses>true</NSwagGenerateExceptionClasses>
     </PropertyGroup>
+    
+    <ItemGroup>
+      <Compile Include="obj\v1Client.cs" />
+    </ItemGroup>
 
     <ItemGroup>
         <OpenApiReference Include="OpenAPIs\v1.json" CodeGenerator="NSwagCSharp" Namespace="NetworkPerspective.Sync.Infrastructure.Core.HttpClients" ClassName="{controller}Client">
@@ -30,6 +30,13 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="8.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+        
     </ItemGroup>
     
     <Target Name="DeleteIntermediateDir" BeforeTargets="AfterTargets">

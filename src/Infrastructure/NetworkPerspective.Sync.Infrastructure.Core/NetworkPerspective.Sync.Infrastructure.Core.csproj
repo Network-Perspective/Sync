@@ -18,8 +18,4 @@
       <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Core.HttpClients\NetworkPerspective.Sync.Infrastructure.Core.HttpClients.csproj" />
     </ItemGroup>
 
-    <Target Name="DeleteIntermediateDir" BeforeTargets="AfterTargets">
-        <RemoveDir Directories="$(BaseIntermediateOutputPath)" />
-    </Target>
-
 </Project>

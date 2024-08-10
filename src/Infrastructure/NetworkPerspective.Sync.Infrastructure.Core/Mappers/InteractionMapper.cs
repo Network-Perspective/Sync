@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Application.Domain.Meetings;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
 {

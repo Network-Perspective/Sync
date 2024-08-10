@@ -8,7 +8,7 @@ using Colors.Net.StringColorExtensions;
 using CsvHelper;
 using CsvHelper.Configuration;
 
-using NetworkPerspective.Sync.Infrastructure.Core;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 
 using Newtonsoft.Json;
 

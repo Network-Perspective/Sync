@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 using NetworkPerspective.Sync.Common.Tests.Factories;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Services;
 using NetworkPerspective.Sync.Utils.Extensions;
 

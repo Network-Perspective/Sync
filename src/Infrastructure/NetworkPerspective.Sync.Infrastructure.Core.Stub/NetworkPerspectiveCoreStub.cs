@@ -13,6 +13,7 @@ using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
