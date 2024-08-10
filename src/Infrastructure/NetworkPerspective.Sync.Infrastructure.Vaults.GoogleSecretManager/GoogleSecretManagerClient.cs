@@ -20,13 +20,13 @@ internal class GoogleSecretManagerClient : IVault
 {
     private readonly GoogleSecretManagerConfig _config;
     private readonly ILogger<GoogleSecretManagerClient> _logger;
-    private readonly SecretManagerServiceClient _client;
+    private readonly Lazy<SecretManagerServiceClient> _client;
 
     public GoogleSecretManagerClient(IOptions<GoogleSecretManagerConfig> config, ILogger<GoogleSecretManagerClient> logger)
     {
         _logger = logger;
         _config = config.Value;
-        _client = SecretManagerServiceClient.Create();
+        _client = new Lazy<SecretManagerServiceClient>(SecretManagerServiceClient.Create);
     }
 
     public async Task<SecureString> GetSecretAsync(string key, CancellationToken stoppingToken = default)
@@ -35,7 +35,7 @@ internal class GoogleSecretManagerClient : IVault
         {
             _logger.LogDebug("Getting key '{key}' from Google Secret Manager for project '{projectId}'", key, _config.ProjectId);
             var secretVersionName = new SecretVersionName(_config.ProjectId, key, "latest");
-            var result = await _client.AccessSecretVersionAsync(secretVersionName, stoppingToken);
+            var result = await _client.Value.AccessSecretVersionAsync(secretVersionName, stoppingToken);
             _logger.LogDebug("Got key '{key}' from Google Secret Manager for project '{projectId}'", key, _config.ProjectId);
             return result.Payload.Data.ToStringUtf8().ToSecureString();
         }
@@ -53,7 +53,7 @@ internal class GoogleSecretManagerClient : IVault
             _logger.LogDebug("Removing key '{key}' from Google Secret Manager for project '{projectId}'", key, _config.ProjectId);
 
             var secretName = new SecretName(_config.ProjectId, key);
-            await _client.DeleteSecretAsync(secretName, stoppingToken);
+            await _client.Value.DeleteSecretAsync(secretName, stoppingToken);
             _logger.LogDebug("Removed key '{key}' from Google Secret Manager for project '{projectId}'", key, _config.ProjectId);
         }
         catch (Exception ex)
@@ -82,14 +82,14 @@ internal class GoogleSecretManagerClient : IVault
                         Automatic = new Replication.Types.Automatic(),
                     }
                 };
-                await _client.CreateSecretAsync(projectName, key, gSecret);
+                await _client.Value.CreateSecretAsync(projectName, key, gSecret);
             }
 
             var secretPayload = new SecretPayload
             {
                 Data = ByteString.CopyFromUtf8(secret.ToSystemString())
             };
-            await _client.AddSecretVersionAsync(secretName, secretPayload);
+            await _client.Value.AddSecretVersionAsync(secretName, secretPayload);
             _logger.LogDebug("Set key '{key}' to Google Secret Manager for project '{projectId}'", key, _config.ProjectId);
         }
         catch (Exception ex)
@@ -103,7 +103,7 @@ internal class GoogleSecretManagerClient : IVault
     {
         try
         {
-            await _client.GetSecretAsync(secretName);
+            await _client.Value.GetSecretAsync(secretName);
             return true;
         }
         catch (Grpc.Core.RpcException e) when (e.Status.StatusCode == Grpc.Core.StatusCode.NotFound)
