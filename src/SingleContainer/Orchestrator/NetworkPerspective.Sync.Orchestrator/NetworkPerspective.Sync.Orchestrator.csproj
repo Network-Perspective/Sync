@@ -18,7 +18,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault\NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault.csproj" />
-      <ProjectReference Include="..\..\..\Slack\NetworkPerspective.Sync.Infrastructure.Slack.Client\NetworkPerspective.Sync.Infrastructure.Slack.Client.csproj" />
+      <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client\NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.csproj" />
       <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract\NetworkPerspective.Sync.Contract.csproj" />
       <ProjectReference Include="..\..\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Application\NetworkPerspective.Sync.Orchestrator.Application.csproj" />

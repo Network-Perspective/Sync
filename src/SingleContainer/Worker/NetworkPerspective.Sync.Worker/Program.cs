@@ -5,13 +5,19 @@ using Microsoft.Extensions.Hosting;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Contract.V1.Impl;
 using NetworkPerspective.Sync.Infrastructure.Core;
-using NetworkPerspective.Sync.Infrastructure.Slack;
-using NetworkPerspective.Sync.Infrastructure.Slack.Services;
-using NetworkPerspective.Sync.Infrastructure.Google;
-using NetworkPerspective.Sync.Infrastructure.Excel;
-using NetworkPerspective.Sync.Infrastructure.Microsoft;
 using NetworkPerspective.Sync.Worker.Application;
-using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Excel;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
+
+
+
+
+
+
 
 
 #if !DEBUG

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NetworkPerspective.Sync.Infrastructure.Slack.Client;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 
 using Polly;
 
