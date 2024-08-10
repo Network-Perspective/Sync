@@ -15,11 +15,10 @@ using Moq;
 using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Exceptions;
 using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Configs;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Models;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
-using NetworkPerspective.Sync.Infrastructure.Slack.Models;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 

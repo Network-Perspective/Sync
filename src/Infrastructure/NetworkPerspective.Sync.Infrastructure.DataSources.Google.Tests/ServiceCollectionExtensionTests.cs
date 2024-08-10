@@ -19,7 +19,7 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests
 {
     public class ServiceCollectionExtensionTests
     {

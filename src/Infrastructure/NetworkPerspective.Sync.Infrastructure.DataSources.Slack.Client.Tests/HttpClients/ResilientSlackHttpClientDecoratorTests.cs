@@ -13,7 +13,6 @@ using Moq;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.HttpClients;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.HttpClients;
 
 using Xunit;
 

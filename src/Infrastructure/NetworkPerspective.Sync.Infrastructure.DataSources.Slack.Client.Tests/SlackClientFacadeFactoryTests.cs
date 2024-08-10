@@ -14,11 +14,10 @@ using Moq;
 
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Configs;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Pagination;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
-using NetworkPerspective.Sync.Infrastructure.Slack.Tests.Client.HttpClients;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Tests.HttpClients;
 
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;

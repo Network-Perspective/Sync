@@ -17,7 +17,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests.Services
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Services
 {
     public class EmailInteractionFactoryTests
     {

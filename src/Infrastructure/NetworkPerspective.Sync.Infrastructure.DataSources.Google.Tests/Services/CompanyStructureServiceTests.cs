@@ -1,11 +1,11 @@
 ﻿using FluentAssertions;
 
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Infrastructure.Google.Services;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests.Services
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Services
 {
     public class CompanyStructureServiceTests
     {

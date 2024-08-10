@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Application.Domain.SecretRotation;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 

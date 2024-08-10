@@ -123,7 +123,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Inf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client", "Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client\NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.csproj", "{EF3297A2-ECD5-470B-A07E-859F94ECD808}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests\NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests.csproj", "{7A4C5485-FD57-404A-A48B-627D78246386}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests\NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.csproj", "{7A4C5485-FD57-404A-A48B-627D78246386}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests\NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.csproj", "{9EEE64B4-9BE5-433A-B505-D6E4D1A627EA}"
 EndProject

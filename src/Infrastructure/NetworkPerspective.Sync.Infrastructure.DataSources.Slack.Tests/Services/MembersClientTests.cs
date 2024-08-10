@@ -1,18 +1,16 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using FluentAssertions;
 
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Common.Tests;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Pagination;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.Fixtures;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client;
 
 using Xunit;
 

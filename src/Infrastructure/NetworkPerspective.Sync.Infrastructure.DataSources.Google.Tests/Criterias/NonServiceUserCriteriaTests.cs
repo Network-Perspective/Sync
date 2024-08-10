@@ -9,7 +9,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Criterias;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests.Criterias
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Criterias
 {
     public class NonServiceUserCriteriaTests
     {

@@ -8,17 +8,16 @@ using Google.Apis.Admin.Directory.directory_v1.Data;
 
 using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
 using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Infrastructure.Google.Mappers;
-using NetworkPerspective.Sync.Infrastructure.Google.Services;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Mappers;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 
 using Xunit;
 
 using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests.Mappers
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Mappers
 {
     public class EmployeesMapperTests
     {

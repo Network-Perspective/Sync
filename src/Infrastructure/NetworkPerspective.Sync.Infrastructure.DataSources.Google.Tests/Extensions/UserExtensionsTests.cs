@@ -14,7 +14,7 @@ using Xunit;
 
 using DomainGroup = NetworkPerspective.Sync.Application.Domain.Employees.Group;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests.Extensions
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Extensions
 {
     public class UserExtensionsTests
     {

@@ -1,3 +1,3 @@
 ﻿using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("NetworkPerspective.Sync.Infrastructure.Google.Tests")]
+[assembly: InternalsVisibleTo("NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests")]

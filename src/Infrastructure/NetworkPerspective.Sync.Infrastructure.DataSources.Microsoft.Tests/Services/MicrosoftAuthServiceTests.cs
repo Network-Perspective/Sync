@@ -15,9 +15,8 @@ using Moq;
 using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Exceptions;
 using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
-using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 

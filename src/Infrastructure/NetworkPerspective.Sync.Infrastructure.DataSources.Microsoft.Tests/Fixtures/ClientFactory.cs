@@ -10,10 +10,8 @@ using NetworkPerspective.Sync.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests.Factories;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
-using NetworkPerspective.Sync.Infrastructure.Microsoft.Configs;
-
-using NetworkPerspective.Sync.Infrastructure.Microsoft.Services;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Fixtures

@@ -10,7 +10,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Extensions;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests.Extensions
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Extensions
 {
     public class EventExtensionsTests
     {

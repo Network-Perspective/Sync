@@ -5,7 +5,7 @@ using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests.Fixtures
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Fixtures
 {
     public class GoogleClientFixture
     {

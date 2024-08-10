@@ -5,8 +5,8 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
-using NetworkPerspective.Sync.Infrastructure.Microsoft.Models;
 
 using Xunit;
 

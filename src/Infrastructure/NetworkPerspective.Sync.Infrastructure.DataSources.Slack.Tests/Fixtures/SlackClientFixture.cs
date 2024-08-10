@@ -6,9 +6,8 @@ using System.Net.Http.Headers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.HttpClients;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.Configs;
 using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.Fixtures

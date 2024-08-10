@@ -19,13 +19,13 @@ using NetworkPerspective.Sync.Application.Domain.Sync;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
-using NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests.Fixtures;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Fixtures;
 using NetworkPerspective.Sync.Utils.Models;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSource.Google.Tests.Services
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Services
 {
     public class CalendarClientTests : IClassFixture<GoogleClientFixture>
     {

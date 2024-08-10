@@ -9,8 +9,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Pagination;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client.Dtos;
 
 using Xunit;
 

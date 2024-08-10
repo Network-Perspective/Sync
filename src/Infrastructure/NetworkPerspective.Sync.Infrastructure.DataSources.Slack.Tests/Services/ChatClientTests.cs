@@ -12,12 +12,11 @@ using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Pagination;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.Fixtures;
-using NetworkPerspective.Sync.Infrastructure.Slack.Client;
-using NetworkPerspective.Sync.Infrastructure.Slack.Services;
 using NetworkPerspective.Sync.Utils.Models;
 
 using Xunit;
