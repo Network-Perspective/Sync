@@ -30,7 +30,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISecretRotationServiceFactory, SecretRotatorFactory>();
         services.AddScoped<ISecretRotationService>(sp => sp.GetRequiredService<ISecretRotationServiceFactory>().CreateSecretRotator());
 
-        services.AddSingleton<ISyncContextFactory, ISyncContextFactory>();
+        services.AddSingleton<ISyncContextFactory, SyncContextFactory>();
         services.AddSingleton<ISecretRotationContextFactory, SecretRotationContextFactory>();
 
         services.AddScoped<IStatusLogger, StatusLogger>();

@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Moq;
 
+using NetworkPerspective.Sync.Contract.V1.Impl;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
@@ -41,6 +42,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests
             serviceCollection.AddLogging();
             serviceCollection.AddTransient(x => Mock.Of<IVault>());
             serviceCollection.AddSingleton(Mock.Of<INetworkPerspectiveCore>());
+            serviceCollection.AddSingleton(Mock.Of<IWorkerHubClient>());
             serviceCollection.AddConnectorApplication(config.GetSection("Connector"));
 
             // Act
