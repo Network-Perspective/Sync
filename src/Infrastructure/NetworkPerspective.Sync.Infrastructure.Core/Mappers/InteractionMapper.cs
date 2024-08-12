@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using NetworkPerspective.Sync.Application.Domain.Interactions;
-using NetworkPerspective.Sync.Application.Domain.Meetings;
 using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
+using NetworkPerspective.Sync.Worker.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Meetings;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
 {

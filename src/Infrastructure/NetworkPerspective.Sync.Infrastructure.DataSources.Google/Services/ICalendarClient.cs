@@ -11,12 +11,11 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain.Meetings;
-using NetworkPerspective.Sync.Application.Domain.Statuses;
-using NetworkPerspective.Sync.Application.Domain.Sync;
-using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Google;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Meetings;
+using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services
 {

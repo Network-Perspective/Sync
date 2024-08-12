@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
-using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
 using NetworkPerspective.Sync.Infrastructure.Core.Services;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core.Exceptions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core
 {

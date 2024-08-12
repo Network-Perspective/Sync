@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft
 {
@@ -14,7 +13,6 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft
         {
             services.Configure<Resiliency>(configurationSection.GetSection("Resiliency"));
 
-            services.AddScoped<IMicrosoftAuthService, MicrosoftAuthService>();
             services.AddScoped<IMicrosoftClientFactory, MicrosoftClientFactory>();
 
             services.AddScoped(sp => sp.GetRequiredService<IMicrosoftClientFactory>().GetMicrosoftClientAsync().Result);
@@ -26,7 +24,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft
             services.AddScoped<IChatsClient, ChatsClient>();
 
             services.AddScoped<IDataSource, MicrosoftFacade>();
-            services.AddScoped<IAuthTester, AuthTester>();
+            //services.AddScoped<IAuthTester, AuthTester>();
 
             services.AddMemoryCache();
 

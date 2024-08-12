@@ -5,14 +5,14 @@ using FluentAssertions;
 
 using Google.Apis.Admin.Directory.directory_v1.Data;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 
 using Newtonsoft.Json.Linq;
 
 using Xunit;
 
-using DomainGroup = NetworkPerspective.Sync.Application.Domain.Employees.Group;
+using DomainGroup = NetworkPerspective.Sync.Worker.Application.Domain.Employees.Group;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Extensions
 {

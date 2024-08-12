@@ -3,8 +3,8 @@ using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
 {

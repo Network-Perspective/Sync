@@ -1,30 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Contract.V1.Impl;
 using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Excel;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
-
-
-
-
-
-
-
 
 #if !DEBUG
 #else
 using NetworkPerspective.Sync.Infrastructure.Core.Stub;
 #endif
-
 
 namespace NetworkPerspective.Sync.Worker;
 
@@ -46,13 +34,6 @@ public class Program
             .AddMicrosoft(builder.Configuration.GetSection("Infrastructure:DataSources:Microsoft"))
             .AddExcel(builder.Configuration.GetSection("Infrastructure:DataSources:Excel"))
             .AddOrchestratorClient(builder.Configuration.GetSection("Infrastructure:Orchestrator"));
-
-        builder.Services.RemoveAll(typeof(IAuthTester));
-        builder.Services.RemoveAll(typeof(ISlackAuthService));
-        builder.Services.RemoveAll(typeof(IMicrosoftAuthService));
-
-        builder.Services
-            .AddScoped<IAuthTester, DummyAuthTester>();
 
         builder.Services.AddHostedService<ConnectionHost>();
 

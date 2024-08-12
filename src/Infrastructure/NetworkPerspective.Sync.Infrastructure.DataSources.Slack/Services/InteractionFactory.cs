@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Combinations;
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Mappers;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain;
+using NetworkPerspective.Sync.Worker.Application.Domain.Combinations;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Worker.Application.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services
 {

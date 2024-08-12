@@ -8,14 +8,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application;
-using NetworkPerspective.Sync.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
-using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
-using NetworkPerspective.Sync.Application.Infrastructure.Persistence;
-using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Google;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
+using NetworkPerspective.Sync.Worker.Application;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Xunit;
 
@@ -42,11 +40,8 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests
 
             serviceCollection.AddLogging();
             serviceCollection.AddTransient(x => Mock.Of<IVault>());
-            serviceCollection.AddSingleton(Mock.Of<IUnitOfWork>());
-            serviceCollection.AddSingleton(Mock.Of<ISyncScheduler>());
-            serviceCollection.AddSingleton(Mock.Of<IUnitOfWorkFactory>());
             serviceCollection.AddSingleton(Mock.Of<INetworkPerspectiveCore>());
-            serviceCollection.AddApplication(config.GetSection("Connector"));
+            serviceCollection.AddConnectorApplication(config.GetSection("Connector"));
 
             // Act
             serviceCollection.AddGoogle(config.GetSection("Infrastructure:Google"));

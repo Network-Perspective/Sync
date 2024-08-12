@@ -11,11 +11,10 @@ using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Kiota.Authentication.Azure;
 
-using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Polly;
 using Polly.Extensions.Http;

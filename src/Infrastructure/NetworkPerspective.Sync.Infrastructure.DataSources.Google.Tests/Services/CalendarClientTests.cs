@@ -11,17 +11,15 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
-using NetworkPerspective.Sync.Application.Domain.Sync;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Fixtures;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Xunit;
 

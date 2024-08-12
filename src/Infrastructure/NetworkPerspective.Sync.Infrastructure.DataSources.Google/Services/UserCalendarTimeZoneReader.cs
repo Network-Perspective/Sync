@@ -13,8 +13,8 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 

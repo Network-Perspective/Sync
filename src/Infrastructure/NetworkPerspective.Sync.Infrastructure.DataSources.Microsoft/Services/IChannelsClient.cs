@@ -9,10 +9,10 @@ using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Teams.Item.Channels.Item.Messages.Delta;
 
-using NetworkPerspective.Sync.Application.Domain.Statuses;
-using NetworkPerspective.Sync.Application.Domain.Sync;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using ChatMessage = Microsoft.Graph.Models.ChatMessage;
 using GraphChannel = Microsoft.Graph.Models.Channel;

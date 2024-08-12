@@ -5,9 +5,9 @@ using FluentAssertions;
 
 using Microsoft.Graph.Models;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Mappers;
+using NetworkPerspective.Sync.Worker.Application.Domain;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 
 using Xunit;
 

@@ -8,12 +8,12 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Criterias;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Fixtures;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Xunit;
 

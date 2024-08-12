@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 using FluentAssertions;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 
 using Xunit;
 

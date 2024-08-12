@@ -4,12 +4,12 @@ using System.Linq;
 
 using Microsoft.Graph.Models;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 
-using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
+using Group = NetworkPerspective.Sync.Worker.Application.Domain.Employees.Group;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Mappers
 {

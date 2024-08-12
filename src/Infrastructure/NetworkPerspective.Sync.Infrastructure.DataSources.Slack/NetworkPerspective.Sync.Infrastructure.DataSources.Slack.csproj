@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Common\NetworkPerspective.Sync.Application\NetworkPerspective.Sync.Application.csproj" />
+        <ProjectReference Include="..\..\SingleContainer\Worker\NetworkPerspective.Sync.Worker.Application\NetworkPerspective.Sync.Worker.Application.csproj" />
         <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client\NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.csproj" />
     </ItemGroup>
 

@@ -2,10 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Sync;
-using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Contract.V1.Dtos;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Mappers;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Excel;

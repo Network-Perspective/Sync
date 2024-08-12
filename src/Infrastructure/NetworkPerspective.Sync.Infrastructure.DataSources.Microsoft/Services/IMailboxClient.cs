@@ -9,10 +9,9 @@ using Microsoft.Graph.Models;
 using Microsoft.Graph.Models.ODataErrors;
 using Microsoft.Graph.Users.Item.Messages;
 
-using NetworkPerspective.Sync.Application.Domain.Statuses;
-using NetworkPerspective.Sync.Application.Domain.Sync;
-using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
+using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
 {

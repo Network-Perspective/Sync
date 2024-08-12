@@ -5,9 +5,9 @@ using FluentAssertions;
 
 using Microsoft.Graph.Models;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Mappers;
+using NetworkPerspective.Sync.Worker.Application.Domain;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 
 using Xunit;
 
@@ -27,8 +27,8 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Map
 
             var channels = new[]
             {
-                new DomainChannel("ChannelId1", "ChannelName1", new DomainTeam("TeamId1", "TeamName1"), new[] { userId1, userId2 } ),
-                new DomainChannel("ChannelId2", "ChannelName2", new DomainTeam("TeamId1", "TeamName1"), new[] { userId1, Guid.NewGuid().ToString() } ),
+                new DomainChannel("ChannelId1", "ChannelName1", new DomainTeam("TeamId1", "TeamName1"), [userId1, userId2] ),
+                new DomainChannel("ChannelId2", "ChannelName2", new DomainTeam("TeamId1", "TeamName1"), [userId1, Guid.NewGuid().ToString()] ),
             };
 
             var users = new[]

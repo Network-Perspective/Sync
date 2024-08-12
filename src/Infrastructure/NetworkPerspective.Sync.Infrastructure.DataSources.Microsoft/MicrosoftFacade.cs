@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Sync;
-using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Mappers;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft
 {

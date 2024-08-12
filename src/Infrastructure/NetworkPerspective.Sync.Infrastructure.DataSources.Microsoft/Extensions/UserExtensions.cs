@@ -2,7 +2,7 @@
 
 using Microsoft.Graph.Models;
 
-using DomainGroup = NetworkPerspective.Sync.Application.Domain.Employees.Group;
+using DomainGroup = NetworkPerspective.Sync.Worker.Application.Domain.Employees.Group;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Extensions
 {

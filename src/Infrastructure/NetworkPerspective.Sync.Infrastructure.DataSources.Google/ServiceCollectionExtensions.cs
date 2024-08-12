@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Criterias;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google
 {
@@ -13,7 +12,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google
         public static IServiceCollection AddGoogle(this IServiceCollection services, IConfigurationSection configurationSection)
         {
             services.Configure<GoogleConfig>(configurationSection);
-            services.AddScoped<IAuthTester, AuthTester>();
+            //services.AddScoped<IAuthTester, AuthTester>();
 
             services.AddTransient<IRetryPolicyProvider, RetryPolicyProvider>();
 

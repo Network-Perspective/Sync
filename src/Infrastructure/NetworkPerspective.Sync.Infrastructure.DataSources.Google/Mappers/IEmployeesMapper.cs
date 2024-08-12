@@ -2,7 +2,7 @@
 
 using Google.Apis.Admin.Directory.directory_v1.Data;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Mappers
 {

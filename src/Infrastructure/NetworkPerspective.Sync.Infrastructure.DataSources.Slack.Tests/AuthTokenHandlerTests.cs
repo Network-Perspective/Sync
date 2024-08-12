@@ -12,11 +12,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Newtonsoft.Json;
 

@@ -7,23 +7,23 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
-using NetworkPerspective.Sync.Application.Extensions;
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
-using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core.Exceptions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
 {
     internal class NetworkPerspectiveCoreStub : INetworkPerspectiveCore
     {
-        private static readonly Guid NetworkId = new Guid("bd1bc916-db78-4e1e-b93b-c6feb8cf729e");
-        private static readonly Guid ConnectorId = new Guid("04C753D8-FF9A-479C-B857-5D28C1EAF6C1");
+        private static readonly Guid NetworkId = new("bd1bc916-db78-4e1e-b93b-c6feb8cf729e");
+        private static readonly Guid ConnectorId = new("04C753D8-FF9A-479C-B857-5D28C1EAF6C1");
 
         private readonly FileDataWriter _fileWriter;
         private readonly NetworkPerspectiveCoreConfig _config;

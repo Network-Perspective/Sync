@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace NetworkPerspective.Sync.Application.Extensions;
+namespace NetworkPerspective.Sync.Utils.Extensions;
 
 public static class ExceptionExtensions
 {
@@ -16,6 +16,6 @@ public static class ExceptionExtensions
         if (ex.InnerException is TaskCanceledException)
             return true;
 
-        return IndicatesTaskCanceled(ex.InnerException);
+        return ex.InnerException.IndicatesTaskCanceled();
     }
 }

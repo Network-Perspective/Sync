@@ -3,14 +3,14 @@ using System.Linq;
 
 using FluentAssertions;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Contract.V1.Dtos;
+using NetworkPerspective.Sync.Worker.Application.Domain;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Mappers;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.Excel.Tests;
+namespace NetworkPerspective.Sync.Worker.Application.Tests.Mappers;
 
 public class EmployeeDtoMapperTests
 {

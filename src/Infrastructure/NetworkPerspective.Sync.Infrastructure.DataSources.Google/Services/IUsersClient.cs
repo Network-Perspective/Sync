@@ -11,12 +11,11 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
-using NetworkPerspective.Sync.Application.Domain.Statuses;
-using NetworkPerspective.Sync.Application.Services;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Google;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Criterias;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
+using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services
 {

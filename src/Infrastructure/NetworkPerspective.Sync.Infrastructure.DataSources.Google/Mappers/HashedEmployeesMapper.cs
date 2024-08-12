@@ -3,14 +3,14 @@ using System.Linq;
 
 using Google.Apis.Admin.Directory.directory_v1.Data;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Extensions;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
+using NetworkPerspective.Sync.Worker.Application.Domain;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
-using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
+using Group = NetworkPerspective.Sync.Worker.Application.Domain.Employees.Group;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Mappers
 {

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Interactions;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
 {

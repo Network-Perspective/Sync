@@ -5,16 +5,16 @@ using FluentAssertions;
 
 using Google.Apis.Admin.Directory.directory_v1.Data;
 
-using NetworkPerspective.Sync.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Mappers;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Xunit;
 
-using Group = NetworkPerspective.Sync.Application.Domain.Employees.Group;
+using Group = NetworkPerspective.Sync.Worker.Application.Domain.Employees.Group;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Mappers
 {

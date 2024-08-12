@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 
 using Xunit;
@@ -31,7 +30,6 @@ public class ServiceCollectionExtensionsTests
         serviceCollection.AddLogging();
 
         var healthCheckBuilder = serviceCollection.AddHealthChecks();
-        serviceCollection.AddSingleton(Mock.Of<IConnectorService>());
 
         // Act
         serviceCollection

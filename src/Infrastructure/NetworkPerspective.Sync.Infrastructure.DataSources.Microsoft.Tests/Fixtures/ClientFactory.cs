@@ -6,13 +6,13 @@ using Microsoft.Graph;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Application.Domain.Sync;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Common.Tests.Factories;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Fixtures
 {

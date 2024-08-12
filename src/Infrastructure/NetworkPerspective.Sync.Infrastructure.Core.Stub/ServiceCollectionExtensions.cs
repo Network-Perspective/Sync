@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
 {

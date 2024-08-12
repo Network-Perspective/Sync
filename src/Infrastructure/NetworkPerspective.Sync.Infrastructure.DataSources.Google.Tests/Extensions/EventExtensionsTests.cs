@@ -4,9 +4,9 @@ using FluentAssertions;
 
 using Google.Apis.Calendar.v3.Data;
 
-using NetworkPerspective.Sync.Application.Domain.Meetings;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Meetings;
 
 using Xunit;
 

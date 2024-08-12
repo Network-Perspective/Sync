@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Excel;
 

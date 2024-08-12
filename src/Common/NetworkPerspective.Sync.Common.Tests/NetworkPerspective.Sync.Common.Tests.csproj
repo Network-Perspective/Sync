@@ -20,10 +20,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Common\NetworkPerspective.Sync.Application\NetworkPerspective.Sync.Application.csproj" />
-        <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Persistence\NetworkPerspective.Sync.Infrastructure.Persistence.csproj" />
         <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.Contract\NetworkPerspective.Sync.Infrastructure.Vaults.Contract.csproj" />
         <ProjectReference Include="..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault\NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault.csproj" />
+        <ProjectReference Include="..\..\SingleContainer\Worker\NetworkPerspective.Sync.Worker.Application\NetworkPerspective.Sync.Worker.Application.csproj" />
     </ItemGroup>
 
 </Project>

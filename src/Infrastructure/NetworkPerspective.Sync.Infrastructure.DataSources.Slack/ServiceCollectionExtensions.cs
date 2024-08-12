@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NetworkPerspective.Sync.Application.Infrastructure.DataSources;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Polly;
 
@@ -48,8 +48,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy())
                 .AddScopeAwareHttpHandler<UserTokenAuthHandler>();
 
-            services.AddScoped<IAuthTester, AuthTester>();
-            services.AddScoped<ISlackAuthService, SlackAuthService>();
+            //services.AddScoped<IAuthTester, AuthTester>();
             services.AddMemoryCache();
 
             services.AddScoped<IMembersClient, MembersClient>();

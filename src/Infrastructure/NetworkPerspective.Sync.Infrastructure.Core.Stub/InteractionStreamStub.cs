@@ -3,12 +3,12 @@ using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
 
-using NetworkPerspective.Sync.Application.Domain.Interactions;
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
 using NetworkPerspective.Sync.Utils.Batching;
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Worker.Application.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
 {

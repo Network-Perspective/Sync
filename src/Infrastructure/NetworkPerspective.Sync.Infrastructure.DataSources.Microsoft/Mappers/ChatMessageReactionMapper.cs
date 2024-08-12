@@ -2,8 +2,8 @@
 
 using Microsoft.Graph.Models;
 
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Exceptions;
+using NetworkPerspective.Sync.Worker.Application.Extensions;
 
 using InternalChatMessage = NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models.ChatMessage;
 using InternalChatMessageReaction = NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models.ChatMessageReaction;

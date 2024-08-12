@@ -13,7 +13,7 @@ public static class StatusLogMapper
     {
         return new StatusLogEntity
         {
-            ConnectorId = log.DataSourceId,
+            ConnectorId = log.ConnectorId,
             TimeStamp = log.TimeStamp,
             Level = (int)log.Level,
             Message = log.Message

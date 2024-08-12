@@ -5,10 +5,10 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Models;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
-using NetworkPerspective.Sync.Application.Domain.Meetings;
+using NetworkPerspective.Sync.Worker.Application.Domain;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Meetings;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
 {

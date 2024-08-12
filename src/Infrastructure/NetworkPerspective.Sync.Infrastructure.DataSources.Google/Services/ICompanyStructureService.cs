@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services
 {

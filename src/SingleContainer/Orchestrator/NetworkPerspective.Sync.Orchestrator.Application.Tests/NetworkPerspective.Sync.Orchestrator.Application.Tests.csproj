@@ -6,6 +6,7 @@
 
     <ItemGroup>
         <PackageReference Include="Azure.Identity" Version="1.12.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.7" />
         <PackageReference Include="coverlet.collector" Version="6.0.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -25,6 +26,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Application\NetworkPerspective.Sync.Orchestrator.Application.csproj" />
+      <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence\NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿using NetworkPerspective.Sync.Application.Domain.Connectors;
+﻿using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Excel
 {

@@ -4,7 +4,7 @@ using System.Linq;
 
 using Google.Apis.Gmail.v1.Data;
 
-using NetworkPerspective.Sync.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Extensions
 {

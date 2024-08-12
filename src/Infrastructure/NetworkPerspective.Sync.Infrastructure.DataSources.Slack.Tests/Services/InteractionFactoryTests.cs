@@ -4,13 +4,13 @@ using System.Linq;
 
 using FluentAssertions;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Mappers;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Interactions;
 
 using Xunit;
 

@@ -7,10 +7,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 
-using NetworkPerspective.Sync.Application.Domain.Statuses;
-using NetworkPerspective.Sync.Application.Domain.Sync;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Mappers;
+using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using InternalChat = NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models.Chat;
 using InternalChatMessageReaction = NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models.ChatMessageReaction;

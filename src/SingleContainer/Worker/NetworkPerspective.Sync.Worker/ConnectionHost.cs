@@ -7,17 +7,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Contract.V1.Impl;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker;
 
-public class ConnectionHost(IWorkerHubClient hubClient, Application.ISyncContextFactory syncContextFactory, IServiceProvider serviceProvider, IVault secretRepository, ILogger<ConnectionHost> logger) : BackgroundService
+public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory syncContextFactory, IServiceProvider serviceProvider, IVault secretRepository, ILogger<ConnectionHost> logger) : BackgroundService
 {
     private readonly ILogger<ConnectionHost> _logger = logger;
 

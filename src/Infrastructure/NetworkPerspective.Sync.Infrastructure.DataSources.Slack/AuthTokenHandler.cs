@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.HttpClients;
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Newtonsoft.Json;
 

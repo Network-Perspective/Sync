@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Domain.SecretRotation;
-using NetworkPerspective.Sync.Application.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.SecretRotation;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 

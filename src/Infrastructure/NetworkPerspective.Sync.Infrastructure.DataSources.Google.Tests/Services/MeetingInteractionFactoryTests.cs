@@ -8,11 +8,11 @@ using Google.Apis.Calendar.v3.Data;
 
 using Microsoft.Extensions.Logging.Abstractions;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
 using NetworkPerspective.Sync.Common.Tests.Extensions;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Interactions;
 
 using Xunit;
 

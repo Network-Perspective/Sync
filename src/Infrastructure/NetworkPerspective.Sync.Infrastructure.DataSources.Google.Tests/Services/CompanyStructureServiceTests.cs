@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 
 using Xunit;
 
