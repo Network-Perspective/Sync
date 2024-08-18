@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 
+using NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager;
 using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Vaults.ExternalAzureKeyVault;
@@ -20,12 +21,14 @@ internal static class ServiceCollectionExtensions
         const string azureKeyVaultConfigSection = "AzureKeyVault";
         const string hcpVaultConfigSection = "HcpVault";
         const string googleSecretManagerConfigSection = "GoogleSecretManager";
+        const string amazonSecretsManagerConfigSection = "AmazonSecretsManager";
 
         var configurationSections = configuration.GetChildren();
 
         var containsAzureKeyVault = configurationSections.Any(x => x.Key == azureKeyVaultConfigSection);
         var containsHcpVault = configurationSections.Any(x => x.Key == hcpVaultConfigSection);
         var containsGoogleSecretManagerConfigSection = configurationSections.Any(x => x.Key == googleSecretManagerConfigSection);
+        var containsAmazonSecretsManager = configurationSections.Any(x => x.Key == amazonSecretsManagerConfigSection);
 
         if (containsAzureKeyVault)
             services.AddAzureKeyVault(configuration.GetSection(azureKeyVaultConfigSection));
@@ -33,6 +36,8 @@ internal static class ServiceCollectionExtensions
             services.AddHcpKeyVault(configuration.GetSection(azureKeyVaultConfigSection));
         else if (containsGoogleSecretManagerConfigSection)
             services.AddGoogleSecretManager(configuration.GetSection(googleSecretManagerConfigSection));
+        else if (containsAmazonSecretsManager)
+            services.AddAmazonSecretsManager(configuration.GetSection(amazonSecretsManagerConfigSection));
         else
             throw new InvalidVaultConfigurationException("Missing Vault configuration. At least one secret storage needs to be configured");
 

@@ -16,6 +16,7 @@
         <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Google\NetworkPerspective.Sync.Infrastructure.DataSources.Google.csproj" />
         <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft\NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.csproj" />
         <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Slack\NetworkPerspective.Sync.Infrastructure.DataSources.Slack.csproj" />
+        <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.csproj" />
         <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault\NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault.csproj" />
         <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.ExternalAzureKeyVault\NetworkPerspective.Sync.Infrastructure.Vaults.ExternalAzureKeyVault.csproj" />
         <ProjectReference Include="..\..\..\Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.GoogleSecretManager\NetworkPerspective.Sync.Infrastructure.Vaults.GoogleSecretManager.csproj" />

@@ -134,6 +134,35 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void ShouldUseAmazonSecretsManager()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string>
+            {
+                { "Infrastructure:AmazonSecretsManager:Region", "eu-central-1" },
+                { "Infrastructure:AmazonSecretsManager:SecretsPrefix", "test/connectors" },
+
+            })
+            .Build();
+
+        var healthCheckBuilder = Mock.Of<IHealthChecksBuilder>();
+
+        services.AddVault(config.GetSection("Infrastructure"), healthCheckBuilder);
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        // Act
+        var vault = serviceProvider.GetRequiredService<IVault>();
+
+        // Assert
+        vault.GetType().Name.Should().Be("AmazonSecretsManagerClient");
+    }
+
+    [Fact]
     public void ShouldThrowOnNotConfigured()
     {
         // Arrange

@@ -16,18 +16,11 @@ using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Vaults.GoogleSecretManager;
 
-internal class GoogleSecretManagerClient : IVault
+internal class GoogleSecretManagerClient(IOptions<GoogleSecretManagerConfig> config, ILogger<GoogleSecretManagerClient> logger) : IVault
 {
-    private readonly GoogleSecretManagerConfig _config;
-    private readonly ILogger<GoogleSecretManagerClient> _logger;
-    private readonly Lazy<SecretManagerServiceClient> _client;
-
-    public GoogleSecretManagerClient(IOptions<GoogleSecretManagerConfig> config, ILogger<GoogleSecretManagerClient> logger)
-    {
-        _logger = logger;
-        _config = config.Value;
-        _client = new Lazy<SecretManagerServiceClient>(SecretManagerServiceClient.Create);
-    }
+    private readonly GoogleSecretManagerConfig _config = config.Value;
+    private readonly ILogger<GoogleSecretManagerClient> _logger = logger;
+    private readonly Lazy<SecretManagerServiceClient> _client = new(SecretManagerServiceClient.Create);
 
     public async Task<SecureString> GetSecretAsync(string key, CancellationToken stoppingToken = default)
     {
@@ -94,7 +87,7 @@ internal class GoogleSecretManagerClient : IVault
         }
         catch (Exception ex)
         {
-            var message = $"Unable to get '{key}' from Google Secret Manager for project '{_config.ProjectId}'. Please see inner exception";
+            var message = $"Unable to set '{key}' to Google Secret Manager for project '{_config.ProjectId}'. Please see inner exception";
             throw new VaultException(message, ex);
         }
     }

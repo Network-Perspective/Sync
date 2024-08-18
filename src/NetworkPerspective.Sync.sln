@@ -121,6 +121,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Inf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests\NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.csproj", "{66DCBD22-3AB1-44A5-9389-B576F3790820}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.csproj", "{DFC19317-B9C7-4B0A-94DA-4FDB2A390004}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.Tests\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.Tests.csproj", "{39323281-2F7B-422A-B4A8-ACF10FFE7321}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -287,6 +291,14 @@ Global
 		{66DCBD22-3AB1-44A5-9389-B576F3790820}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66DCBD22-3AB1-44A5-9389-B576F3790820}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66DCBD22-3AB1-44A5-9389-B576F3790820}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFC19317-B9C7-4B0A-94DA-4FDB2A390004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFC19317-B9C7-4B0A-94DA-4FDB2A390004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFC19317-B9C7-4B0A-94DA-4FDB2A390004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFC19317-B9C7-4B0A-94DA-4FDB2A390004}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39323281-2F7B-422A-B4A8-ACF10FFE7321}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39323281-2F7B-422A-B4A8-ACF10FFE7321}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39323281-2F7B-422A-B4A8-ACF10FFE7321}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39323281-2F7B-422A-B4A8-ACF10FFE7321}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -349,6 +361,8 @@ Global
 		{9EEE64B4-9BE5-433A-B505-D6E4D1A627EA} = {F9CC8C52-66E0-4CD0-A7CD-344C61247C07}
 		{37BBF961-8352-44CE-87A5-2C341025FB82} = {F9CC8C52-66E0-4CD0-A7CD-344C61247C07}
 		{66DCBD22-3AB1-44A5-9389-B576F3790820} = {F9CC8C52-66E0-4CD0-A7CD-344C61247C07}
+		{DFC19317-B9C7-4B0A-94DA-4FDB2A390004} = {C7761533-4943-4C61-91AB-7252DF221527}
+		{39323281-2F7B-422A-B4A8-ACF10FFE7321} = {F86DDA1E-FB9B-437C-BEBA-FBA9F87163B1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}
