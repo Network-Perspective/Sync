@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 using Mapster;
 
-using MapsterMapper;
-
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -37,7 +36,20 @@ public class ConnectorsController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Creates new connector for selected worker instance with specified properties
+    /// </summary>
+    /// <param name="request">Connector parameters</param>
+    /// <param name="stoppingToken">Stopping Token</param>
+    /// <response code="200">Connector created</response>
+    /// <response code="401">Missing or invalid authorization token</response>
+    /// <response code="404">Worker doesnt exist</response>
+    /// <response code="500">Internal server error</response>
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateAsync([FromBody] CreateConnectorDto request, CancellationToken stoppingToken = default)
     {
         _logger.LogDebug("Received request to create new connector '{type}' for worker '{workerId}'", request.Type, request.WorkerId);
@@ -51,7 +63,21 @@ public class ConnectorsController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Get list of connectors of given worker
+    /// </summary>
+    /// <param name="workerId">Worker Id</param>
+    /// <param name="stoppingToken">Stopping token</param>
+    /// <returns>List of connectors of given worker</returns>
+    /// <response code="200">Ok</response>
+    /// <response code="401">Missing or invalid authorization token</response>
+    /// <response code="404">Worker doesnt exist</response>
+    /// <response code="500">Internal server error</response>
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<ConnectorDto>> GetAllAsync([FromQuery] Guid workerId, CancellationToken stoppingToken = default)
     {
         _logger.LogDebug("Received request to get all connectors of worker '{workerId}'", workerId);

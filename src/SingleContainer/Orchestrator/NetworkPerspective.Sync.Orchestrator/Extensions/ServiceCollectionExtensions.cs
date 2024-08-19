@@ -1,13 +1,19 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 using NetworkPerspective.Sync.Orchestrator.Auth.Worker;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
+
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace NetworkPerspective.Sync.Orchestrator.Extensions;
 
@@ -42,7 +48,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    // TODO: expose swagger
     public static IServiceCollection AddDocumentation(this IServiceCollection services, Assembly serviceAssembly)
     {
         services.AddOpenApiDocument(configure =>
@@ -50,75 +55,70 @@ public static class ServiceCollectionExtensions
             configure.Title = "Service ";
         });
 
-        //services.AddSwaggerGen(options =>
-        //{
-        //    options.AddSecurity();
-        //    options.AddMetadata();
-        //    options.AddXmlComments(serviceAssembly);
-        //    options.EnableAnnotations();
-        //    options.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["action"]}");
-        //    options.IgnoreObsoleteActions();
-        //});
+        services.AddSwaggerGen(options =>
+        {
+            options.AddSecurity();
+            options.AddMetadata();
+            options.AddXmlComments();
+            options.EnableAnnotations();
+            options.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["action"]}");
+            options.IgnoreObsoleteActions();
+        });
 
-        //services.AddSwaggerGenNewtonsoftSupport();
-        //services.AddFluentValidationRulesToSwagger();
+        services.AddSwaggerGenNewtonsoftSupport();
 
         return services;
     }
 
-    //private static void AddSecurity(this SwaggerGenOptions options)
-    //{
-    //    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    //    {
-    //        Name = "Authorization",
-    //        In = ParameterLocation.Header,
-    //        Type = SecuritySchemeType.ApiKey,
-    //        Scheme = "Bearer"
-    //    });
+    private static void AddSecurity(this SwaggerGenOptions options)
+    {
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer"
+        });
 
-    //    options.AddSecurityRequirement(new OpenApiSecurityRequirement()
-    //    {
-    //        {
-    //            new OpenApiSecurityScheme
-    //            {
-    //                Reference = new OpenApiReference
-    //                {
-    //                    Type = ReferenceType.SecurityScheme,
-    //                    Id = "Bearer"
-    //                },
-    //                Scheme = "oauth2",
-    //                Name = "Bearer",
-    //                In = ParameterLocation.Header,
-    //            },
-    //            new List<string>()
-    //        }
-    //    });
-    //}
+        options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    },
+                    Scheme = "oauth2",
+                    Name = "Bearer",
+                    In = ParameterLocation.Header,
+                },
+                new List<string>()
+            }
+        });
+    }
 
-    //private static void AddMetadata(this SwaggerGenOptions options)
-    //{
-    //    options.SwaggerDoc("v1", new OpenApiInfo
-    //    {
-    //        Version = "v1",
-    //        Title = "REST API Connector",
-    //        Description = "Network Perspective REST API Connector",
-    //        Contact = new OpenApiContact
-    //        {
-    //            Name = "Network Perspective Team",
-    //            Email = string.Empty,
-    //            Url = new Uri("https://www.networkperspective.io/contact"),
-    //        }
-    //    });
-    //}
+    private static void AddMetadata(this SwaggerGenOptions options)
+    {
+        options.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Version = "v1",
+            Title = "REST API Orchestrator",
+            Description = "Network Perspective REST API Orchestrator",
+            Contact = new OpenApiContact
+            {
+                Name = "Network Perspective Team",
+                Email = string.Empty,
+                Url = new Uri("https://www.networkperspective.io/contact"),
+            }
+        });
+    }
 
-    //private static void AddXmlComments(this SwaggerGenOptions options, Assembly serviceAssembly)
-    //{
-    //    var xmlFileApplication = $"{serviceAssembly.GetName().Name}.xml";
-    //    var xmlPathApplication = Path.Combine(AppContext.BaseDirectory, xmlFileApplication);
-    //    options.IncludeXmlComments(xmlPathApplication);
-
-    //    var xmlFileFramework = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    //    var xmlPathFramework = Path.Combine(AppContext.BaseDirectory, xmlFileFramework);
-    //    options.IncludeXmlComments(xmlPathFramework);
-    //}
+    private static void AddXmlComments(this SwaggerGenOptions options)
+    {
+        var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFileName);
+        options.IncludeXmlComments(xmlFilePath);
+    }
 }
