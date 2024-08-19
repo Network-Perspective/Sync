@@ -11,6 +11,7 @@ using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Worker.Application.Mappers;
 
 namespace NetworkPerspective.Sync.Worker.Application.Services;
 
@@ -87,7 +88,8 @@ internal sealed class SyncService : ISyncService
 
         var employees = await dataSource.GetEmployeesAsync(context, stoppingToken);
         await _statusLogger.LogInfoAsync($"Received employees profiles", stoppingToken);
-        await _networkPerspectiveCore.PushUsersAsync(context.AccessToken, employees, $"{context.ConnectorType}Id", stoppingToken); // TODO mapping connector type to DataSourceIdName
+        var dataSourceIdName = ConnectorTypeMapper.ToDataSourceId(context.ConnectorType);
+        await _networkPerspectiveCore.PushUsersAsync(context.AccessToken, employees, dataSourceIdName, stoppingToken);
         await _statusLogger.LogInfoAsync($"Uploaded employees profiles", stoppingToken);
 
         await _statusLogger.LogInfoAsync($"Synchronization of employees profiles completed", stoppingToken);
@@ -101,7 +103,8 @@ internal sealed class SyncService : ISyncService
 
         var employees = await dataSource.GetHashedEmployeesAsync(context, stoppingToken);
         await _statusLogger.LogInfoAsync($"Received hashed employees profiles", stoppingToken);
-        await _networkPerspectiveCore.PushEntitiesAsync(context.AccessToken, employees, context.TimeRange.Start, $"{context.ConnectorType}Id", stoppingToken);
+        var dataSourceIdName = ConnectorTypeMapper.ToDataSourceId(context.ConnectorType);
+        await _networkPerspectiveCore.PushEntitiesAsync(context.AccessToken, employees, context.TimeRange.Start, dataSourceIdName, stoppingToken);
         await _statusLogger.LogInfoAsync($"Uploaded hashed employees profiles", stoppingToken);
 
         await _statusLogger.LogInfoAsync($"Synchronization of hashed employees profiles completed", stoppingToken);

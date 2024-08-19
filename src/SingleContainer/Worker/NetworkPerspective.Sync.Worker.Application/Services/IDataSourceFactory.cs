@@ -33,7 +33,7 @@ internal class DataSourceFactory : IDataSourceFactory
         if (string.Equals(connectorType, "Slack"))
             return _dataSources.Single(x => x.GetType().FullName == "NetworkPerspective.Sync.Infrastructure.Slack.SlackFacade");
 
-        else if (string.Equals(connectorType, "GSuite"))
+        else if (string.Equals(connectorType, "Google"))
             return _dataSources.Single(x => x.GetType().FullName == "NetworkPerspective.Sync.Infrastructure.Google.GoogleFacade");
 
         else if (string.Equals(connectorType, "Excel"))
