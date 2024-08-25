@@ -85,7 +85,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
 
         async Task OnRotateSecrets(RotateSecretsDto dto)
         {
-            _logger.LogInformation("Rotating secrets for connector '{connectorId}' of type '{type}'", dto.CorrelationId, dto.ConnectorType);
+            _logger.LogInformation("Rotating secrets for connector '{connectorId}' of type '{type}'", dto.ConnectorId, dto.ConnectorType);
 
             await using (var scope = serviceProvider.CreateAsyncScope())
             {
@@ -101,12 +101,35 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
             _logger.LogInformation("Secrets has been rotated");
         }
 
+        async Task<ConnectorStatusDto> OnGetConnectorStatus(GetConnectorStatusDto dto)
+        {
+            _logger.LogInformation("Checking connector '{connectorID}' status", dto.ConnectorId);
+
+            await using (var scope = serviceProvider.CreateAsyncScope())
+            {
+                var authTester = scope.ServiceProvider.GetRequiredService<IAuthTester>();
+
+                var isAuthorized = await authTester.IsAuthorizedAsync(dto.ConnectorProperties, stoppingToken);
+
+                _logger.LogInformation("Status check for connector '{connectorId}' completed", dto.ConnectorId);
+
+                return new ConnectorStatusDto
+                {
+                    IsAuthorized = isAuthorized,
+                    // Todo: implement check if its running
+                    IsRunning = true
+                };
+            };
+
+        }
+
         await hubClient.ConnectAsync(configuration: x =>
         {
             x.TokenFactory = TokenFactory;
             x.OnStartSync = OnStartSync;
             x.OnSetSecrets = OnSetSecrets;
             x.OnRotateSecrets = OnRotateSecrets;
+            x.OnGetConnectrStatus = OnGetConnectorStatus;
         }, stoppingToken: stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)

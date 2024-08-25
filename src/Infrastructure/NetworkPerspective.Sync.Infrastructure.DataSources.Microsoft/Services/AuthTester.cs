@@ -1,16 +1,18 @@
-﻿//using System;
-//using System.Threading;
-//using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
-//using NetworkPerspective.Sync.Worker.Application.Services;
+using Microsoft.Extensions.Logging;
 
-//namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
-//{
-//    internal class AuthTester : IAuthTester
-//    {
-//        public Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
-//            => Task.FromResult(true);
-//    }
-//}
+using NetworkPerspective.Sync.Worker.Application.Services;
 
-// TODO Implement new auth tester
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
+
+internal class AuthTester(ILogger<AuthTester> logger) : IAuthTester
+{
+    public Task<bool> IsAuthorizedAsync(IDictionary<string, string> networkProperties, CancellationToken stoppingToken = default)
+    {
+        logger.LogWarning($"{nameof(AuthTester)} for Microsoft has no implementation yet. Returning true, but it's not a real check.");
+        return Task.FromResult(true);
+    }
+}

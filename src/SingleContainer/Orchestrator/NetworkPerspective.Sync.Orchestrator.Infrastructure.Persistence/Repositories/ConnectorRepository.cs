@@ -49,17 +49,36 @@ internal class ConnectorRepository : IConnectorRepository
         }
     }
 
-    public async Task<Connector> FindAsync(Guid connectorId, CancellationToken stoppingToken = default)
+    public async Task<Connector> FindAsync(Guid id, CancellationToken stoppingToken = default)
     {
         try
         {
             var result = await _dbSet
                 .Include(x => x.Properties)
                 .Include(x => x.Worker)
-                .Where(x => x.Id == connectorId)
-                .FirstOrDefaultAsync(stoppingToken);
+                .SingleOrDefaultAsync(x => x.Id == id, stoppingToken);
 
             return result is null ? null : ConnectorMapper.EntityToDomainModel(result);
+        }
+        catch (Exception ex)
+        {
+            throw new DbException(ex);
+        }
+    }
+
+    public async Task<Connector> GetAsync(Guid id, CancellationToken stoppingToken = default)
+    {
+        if (!await ExistsAsync(id, stoppingToken))
+            throw new EntityNotFoundException<Connector>();
+
+        try
+        {
+            var result = await _dbSet
+                .Include(x => x.Properties)
+                .Include(x => x.Worker)
+                .SingleAsync(x => x.Id == id, stoppingToken);
+
+            return ConnectorMapper.EntityToDomainModel(result);
         }
         catch (Exception ex)
         {
@@ -95,6 +114,21 @@ internal class ConnectorRepository : IConnectorRepository
                 .ToListAsync(stoppingToken);
 
             return entities.Select(ConnectorMapper.EntityToDomainModel);
+        }
+        catch (Exception ex)
+        {
+            throw new DbException(ex);
+        }
+    }
+
+    private async Task<bool> ExistsAsync(Guid id, CancellationToken stoppingToken = default)
+    {
+        try
+        {
+            var result = await _dbSet
+                .SingleOrDefaultAsync(x => x.Id == id, stoppingToken);
+
+            return result is not null;
         }
         catch (Exception ex)
         {

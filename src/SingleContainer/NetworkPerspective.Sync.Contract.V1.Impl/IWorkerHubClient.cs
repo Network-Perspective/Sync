@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Contract.V1.Dtos;
+using NetworkPerspective.Sync.Contract.V1.Exceptions;
 
 using Polly;
 using Polly.Retry;
@@ -87,11 +88,11 @@ internal class WorkerHubClient : IWorkerHubClient
 
             _ = Task.Run(async () =>
             {
-                if (_callbacks.OnStartSync is not null)
-                {
-                    var result = await _callbacks.OnStartSync(x);
-                    await SyncCompletedAsync(result);
-                }
+                if (_callbacks.OnStartSync is null)
+                    throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnStartSync));
+
+                var result = await _callbacks.OnStartSync(x);
+                await SyncCompletedAsync(result);
             });
 
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
@@ -102,8 +103,10 @@ internal class WorkerHubClient : IWorkerHubClient
         {
             _logger.LogInformation("Received request '{correlationId}' to set {count} secrets", x.CorrelationId, x.Secrets.Count);
 
-            if (_callbacks.OnSetSecrets is not null)
-                await _callbacks.OnSetSecrets(x);
+            if (_callbacks.OnSetSecrets is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnSetSecrets));
+
+            await _callbacks.OnSetSecrets(x);
 
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
             return new AckDto { CorrelationId = x.CorrelationId };
@@ -113,11 +116,25 @@ internal class WorkerHubClient : IWorkerHubClient
         {
             _logger.LogInformation("Received request '{correlationId}' to rotate secrets for connector '{connectorId}' of type '{type}'", x.CorrelationId, x.ConnectorId, x.ConnectorType);
 
-            if (_callbacks.OnRotateSecrets is not null)
-                await _callbacks.OnRotateSecrets(x);
+            if (_callbacks.OnRotateSecrets is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnRotateSecrets));
+
+            await _callbacks.OnRotateSecrets(x);
 
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
             return new AckDto { CorrelationId = x.CorrelationId };
+        });
+
+        _connection.On<GetConnectorStatusDto, ConnectorStatusDto>(nameof(IWorkerClient.GetConnectorStatusAsync), async x =>
+        {
+            _logger.LogInformation("Received request '{correlationId}' to get connector '{connectorId}' status ", x.CorrelationId, x.ConnectorId);
+
+            if (_callbacks.OnGetConnectrStatus is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetConnectrStatus));
+
+            var result = await _callbacks.OnGetConnectrStatus(x);
+            _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
+            return result;
         });
     }
 }

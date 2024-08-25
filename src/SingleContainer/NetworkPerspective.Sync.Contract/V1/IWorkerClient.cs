@@ -9,4 +9,5 @@ public interface IWorkerClient
     Task<AckDto> SyncAsync(StartSyncDto startSyncRequestDto);
     Task<AckDto> SetSecretsAsync(SetSecretsDto setSecretsRequestDto);
     Task<AckDto> RotateSecretsAsync(RotateSecretsDto rotateSecretsDto);
+    Task<ConnectorStatusDto> GetConnectorStatusAsync(GetConnectorStatusDto getConnectorStatusDto);
 }
