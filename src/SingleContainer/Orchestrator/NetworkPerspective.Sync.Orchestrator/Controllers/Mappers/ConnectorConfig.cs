@@ -1,7 +1,7 @@
 ﻿using Mapster;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
-using NetworkPerspective.Sync.Orchestrator.Dtos;
+using NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
 
 namespace NetworkPerspective.Sync.Orchestrator.Mappers;
 

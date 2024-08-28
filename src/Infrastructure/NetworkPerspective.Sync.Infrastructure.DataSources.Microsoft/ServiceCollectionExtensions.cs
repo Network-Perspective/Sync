@@ -24,8 +24,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IChannelsClient, ChannelsClient>();
         services.AddScoped<IChatsClient, ChatsClient>();
 
-        services.AddScoped<IDataSource, MicrosoftFacade>();
-        services.AddScoped<IAuthTester, AuthTester>();
+        services.AddKeyedScoped<IAuthTester, AuthTester>(typeof(AuthTester).FullName);
+        services.AddKeyedScoped<IDataSource, MicrosoftFacade>(typeof(MicrosoftFacade).FullName);
 
         services.AddMemoryCache();
 

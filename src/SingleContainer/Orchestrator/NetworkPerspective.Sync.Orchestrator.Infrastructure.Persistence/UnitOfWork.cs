@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 
-using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence.Repositories;
 using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Repositories;

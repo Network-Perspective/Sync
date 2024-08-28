@@ -1,9 +1,8 @@
-﻿namespace NetworkPerspective.Sync.Worker.Application.Domain.Statuses
+﻿namespace NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
+
+public enum StatusLogLevel
 {
-    public enum StatusLogLevel
-    {
-        Info,
-        Warning,
-        Error
-    }
+    Info,
+    Warning,
+    Error
 }

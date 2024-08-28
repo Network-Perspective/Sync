@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NetworkPerspective.Sync.Orchestrator.Dtos;
+namespace NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
 
 public class EmployeeDto
 {

@@ -1,15 +1,14 @@
 ﻿using System;
 
-namespace NetworkPerspective.Sync.Orchestrator.Controllers.Dtos
+namespace NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
+
+/// <summary>
+/// Scheduler start request
+/// </summary>
+public class SchedulerStartDto
 {
     /// <summary>
-    /// Scheduler start request
+    /// Overrides when synchronization should start (optional)
     /// </summary>
-    public class SchedulerStartDto
-    {
-        /// <summary>
-        /// Overrides when synchronization should start (optional)
-        /// </summary>
-        public DateTime? OverrideSyncPeriodStart { get; set; }
-    }
+    public DateTime? OverrideSyncPeriodStart { get; set; }
 }

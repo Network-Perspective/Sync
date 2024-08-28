@@ -10,7 +10,6 @@ using Microsoft.Graph.Models.ODataErrors;
 using Microsoft.Graph.Users.Item.Calendar.CalendarView;
 using Microsoft.Graph.Users.Item.Calendar.Events.Item;
 
-using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Services;

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NetworkPerspective.Sync.Orchestrator.Dtos;
+namespace NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
 
 /// <summary>
 /// Connector status
@@ -16,10 +16,10 @@ public class StatusDto
     /// Define if connector is authorized in Network Perspective Core and Data Source, available only if connector is connected
     /// </summary>
     /// <example>true</example>
-    public bool Authorized { get; set; }
+    public bool? Authorized { get; set; }
 
     /// <summary>
-    /// Define if connector has active scheduler, available only if connector is connected
+    /// Define if connector has active scheduler
     /// </summary>
     /// <example>true</example>
     public bool Scheduled { get; set; }
@@ -28,10 +28,10 @@ public class StatusDto
     /// Define if synchronization is currently running, available only if connector is connected
     /// </summary>
     /// <example>false</example>
-    public bool Running { get; set; }
+    public bool? Running { get; set; }
 
     /// <summary>
-    /// Current task status, available only if connector is connected
+    /// Current task status, available only if connector is connected and currently is running
     /// </summary>
     public SynchronizationTaskStatusDto CurrentTask { get; set; }
 

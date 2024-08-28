@@ -1,24 +1,23 @@
-﻿namespace NetworkPerspective.Sync.Worker.Application.Domain.Statuses
+﻿namespace NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
+
+public class SingleTaskStatus
 {
-    public class SingleTaskStatus
+    public static readonly SingleTaskStatus Empty = new SingleTaskStatus(string.Empty, string.Empty, null);
+
+    public string Caption { get; set; }
+    public string Description { get; set; }
+    public double? CompletionRate { get; set; }
+
+    public SingleTaskStatus(string caption, string description, double? completionRate)
     {
-        public static readonly SingleTaskStatus Empty = new SingleTaskStatus(string.Empty, string.Empty, null);
+        Caption = caption;
+        Description = description;
+        CompletionRate = completionRate;
+    }
 
-        public string Caption { get; set; }
-        public string Description { get; set; }
-        public double? CompletionRate { get; set; }
-
-        public SingleTaskStatus(string caption, string description, double? completionRate)
-        {
-            Caption = caption;
-            Description = description;
-            CompletionRate = completionRate;
-        }
-
-        public override string ToString()
-        {
-            var completionRate = CompletionRate is null ? "???" : $"{CompletionRate: 0.##}%";
-            return $"{Caption}: {completionRate} ({Description})";
-        }
+    public override string ToString()
+    {
+        var completionRate = CompletionRate is null ? "???" : $"{CompletionRate: 0.##}%";
+        return $"{Caption}: {completionRate} ({Description})";
     }
 }

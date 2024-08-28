@@ -37,7 +37,7 @@ internal class StatusService(IWorkerRouter workerRouter, IUnitOfWork unitOfWork,
             return Status.Disconnected(isScheduled, logs);
 
         var connectorStatus = await workerRouter
-            .GetConnectorStatusAsync(connector.Worker.Name, connectorId, connector.Properties, connector.Type);
+            .GetConnectorStatusAsync(connector.Worker.Name, connectorId, connector.NetworkId, connector.Properties, connector.Type);
 
         return Status.Connected(isScheduled, connectorStatus, logs);
 

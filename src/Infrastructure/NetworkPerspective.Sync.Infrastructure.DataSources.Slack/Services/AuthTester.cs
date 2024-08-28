@@ -13,13 +13,13 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 
 internal class AuthTester : IAuthTester
 {
-    private readonly IConnectorInfoProvider _connectorInfoProvider;
+    private readonly IAuthTesterContextAccessor _contextAccessor;
     private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
     private readonly ILogger<AuthTester> _logger;
 
-    public AuthTester(IConnectorInfoProvider connectorInfoProvider, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<AuthTester> logger)
+    public AuthTester(IAuthTesterContextAccessor contextAccessor, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<AuthTester> logger)
     {
-        _connectorInfoProvider = connectorInfoProvider;
+        _contextAccessor = contextAccessor;
         _slackClientFacadeFactory = slackClientFacadeFactory;
         _logger = logger;
     }
@@ -27,19 +27,18 @@ internal class AuthTester : IAuthTester
 
     public async Task<bool> IsAuthorizedAsync(IDictionary<string, string> networkProperties, CancellationToken stoppingToken = default)
     {
-        var connectorInfo = _connectorInfoProvider.Get();
         var connectorProperties = ConnectorProperties.Create<SlackConnectorProperties>(networkProperties);
 
         if (connectorProperties.UsesAdminPrivileges)
         {
-            var isUserTokenOk = await TestUserTokenAsync(connectorInfo.Id, stoppingToken);
-            var isBotTokenOk = await TestBotTokenAsync(connectorInfo.Id, stoppingToken);
+            var isUserTokenOk = await TestUserTokenAsync(_contextAccessor.Context.ConnectorId, stoppingToken);
+            var isBotTokenOk = await TestBotTokenAsync(_contextAccessor.Context.ConnectorId, stoppingToken);
 
             return isUserTokenOk && isBotTokenOk;
         }
         else
         {
-            return await TestBotTokenAsync(connectorInfo.Id, stoppingToken);
+            return await TestBotTokenAsync(_contextAccessor.Context.ConnectorId, stoppingToken);
         }
     }
 
@@ -54,12 +53,12 @@ internal class AuthTester : IAuthTester
         }
         catch (Exception ex)
         {
-            _logger.LogInformation(ex, "Connector '{connector}' is not authorized", connectorId);
+            _logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", connectorId);
             return false;
         }
     }
 
-    private async Task<bool> TestUserTokenAsync(Guid networkId, CancellationToken stoppingToken)
+    private async Task<bool> TestUserTokenAsync(Guid connectorId, CancellationToken stoppingToken)
     {
         try
         {
@@ -70,7 +69,7 @@ internal class AuthTester : IAuthTester
         }
         catch (Exception ex)
         {
-            _logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", networkId);
+            _logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", connectorId);
             return false;
         }
     }

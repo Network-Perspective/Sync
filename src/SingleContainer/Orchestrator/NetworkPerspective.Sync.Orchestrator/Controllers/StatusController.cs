@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
-using NetworkPerspective.Sync.Orchestrator.Dtos;
+using NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 

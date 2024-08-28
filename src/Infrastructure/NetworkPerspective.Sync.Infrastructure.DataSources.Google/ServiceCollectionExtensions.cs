@@ -13,7 +13,6 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddGoogle(this IServiceCollection services, IConfigurationSection configurationSection)
     {
         services.Configure<GoogleConfig>(configurationSection);
-        services.AddScoped<IAuthTester, AuthTester>();
 
         services.AddTransient<IRetryPolicyProvider, RetryPolicyProvider>();
 
@@ -25,7 +24,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUsersClient, UsersClient>();
         services.AddScoped<IUserCalendarTimeZoneReader, UserCalendarTimeZoneReader>();
 
-        services.AddScoped<IDataSource, GoogleFacade>();
+        services.AddKeyedScoped<IAuthTester, AuthTester>((typeof(AuthTester).FullName));
+        services.AddKeyedScoped<IDataSource, GoogleFacade>((typeof(GoogleFacade).FullName));
 
         return services;
     }

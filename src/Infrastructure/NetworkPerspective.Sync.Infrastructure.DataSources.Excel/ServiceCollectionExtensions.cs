@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
     private const string SyncConstraintsConfigSection = "SyncConstraints";
     public static IServiceCollection AddExcel(this IServiceCollection services, IConfigurationSection config)
     {
-        services.AddScoped<IDataSource, ExcelFacade>();
+        services.AddKeyedScoped<IDataSource, ExcelFacade>(typeof(ExcelFacade).FullName);
 
         services.Configure<ExcelSyncConstraints>(config.GetSection(SyncConstraintsConfigSection));
         return services;

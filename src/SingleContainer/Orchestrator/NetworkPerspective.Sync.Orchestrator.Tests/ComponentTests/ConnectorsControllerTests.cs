@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -25,18 +26,20 @@ public class ConnectorsControllerTests
     public async Task ShouldReturnCreatedConnectors()
     {
         // Arrange
+        var workerName = Guid.NewGuid().ToString();
         var httpClient = _service.CreateDefaultClient();
 
         var wokrersClient = new WorkersClient(httpClient);
         var connectorsClient = new ConnectorsClient(httpClient);
-        await wokrersClient.WorkersPostAsync(new CreateWorkerDto { Name = "worker", Secret = "secret1" });
+        await wokrersClient.WorkersPostAsync(new CreateWorkerDto { Name = workerName, Secret = "secret1" });
 
         var workers = await wokrersClient.WorkersGetAsync();
-        var workerId = workers.Single().Id;
+        var workerId = workers.Single(x => x.Name == workerName).Id;
 
         // Act
         await connectorsClient.ConnectorsPostAsync(new CreateConnectorDto
         {
+            Id = Guid.NewGuid(),
             WorkerId = workerId,
             Type = "Google",
             Properties =

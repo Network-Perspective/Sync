@@ -17,6 +17,7 @@ using NetworkPerspective.Sync.Worker.Application.Domain;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
@@ -32,8 +33,8 @@ public class SyncServiceTests
     private readonly Mock<INetworkPerspectiveCore> _networkPerspectiveCoreMock = new();
     private readonly Mock<IInteractionsFilterFactory> _interactionsFilterFactoryMock = new();
     private readonly Mock<IInteractionsFilter> _interactionsFilterMock = new();
-    private readonly Mock<IDataSourceFactory> _dataSourceFactoryMock = new();
     private readonly Mock<IDataSource> _dataSourceMock = new();
+    private readonly Mock<ITasksStatusesCache> _tasksStatusesCache = new();
     private readonly TestableInteractionStream _interactionsStream = new();
 
     public SyncServiceTests()
@@ -42,8 +43,8 @@ public class SyncServiceTests
         _interactionsFilterFactoryMock.Reset();
         _interactionsFilterMock.Reset();
         _interactionsStream.Reset();
-        _dataSourceFactoryMock.Reset();
         _dataSourceMock.Reset();
+        _tasksStatusesCache.Reset();
 
         _networkPerspectiveCoreMock
             .Setup(x => x.OpenInteractionsStream(It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -56,10 +57,6 @@ public class SyncServiceTests
         _interactionsFilterMock
             .Setup(x => x.Filter(It.IsAny<IEnumerable<Interaction>>()))
             .Returns(new HashSet<Interaction>());
-
-        _dataSourceFactoryMock
-            .Setup(x => x.CreateDataSource())
-            .Returns(_dataSourceMock.Object);
     }
 
     [Fact]
@@ -75,7 +72,7 @@ public class SyncServiceTests
         _dataSourceMock
             .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SyncResult(10, 100, Enumerable.Empty<Exception>()));
-        var syncService = new SyncService(_logger, _dataSourceFactoryMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _interactionsFilterFactoryMock.Object);
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
 
         // Act
         await syncService.SyncAsync(context);
@@ -98,7 +95,7 @@ public class SyncServiceTests
             .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception());
 
-        var syncService = new SyncService(_logger, _dataSourceFactoryMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _interactionsFilterFactoryMock.Object);
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
 
         // Act
         await syncService.SyncAsync(context);
@@ -117,7 +114,7 @@ public class SyncServiceTests
         var timeRange = new TimeRange(start, end);
         var context = new SyncContext(Guid.NewGuid(), "Slack", ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
 
-        var syncService = new SyncService(_logger, _dataSourceFactoryMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _interactionsFilterFactoryMock.Object);
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
 
         // Act
         await syncService.SyncAsync(context);
@@ -147,7 +144,7 @@ public class SyncServiceTests
             .Setup(x => x.GetHashedEmployeesAsync(context, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new EmployeeCollection([employee], HashFunction.Empty));
 
-        var syncService = new SyncService(_logger, _dataSourceFactoryMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _interactionsFilterFactoryMock.Object);
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
 
         // Act
         await syncService.SyncAsync(context);
@@ -176,12 +173,30 @@ public class SyncServiceTests
             .Setup(x => x.OpenInteractionsStream(It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns(interactionsStreamMock.Object);
 
-        var syncService = new SyncService(_logger, _dataSourceFactoryMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _interactionsFilterFactoryMock.Object);
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
 
         // Act
         await syncService.SyncAsync(context);
 
         // Assert
         interactionsStreamMock.Verify(x => x.DisposeAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task ShouldSetTaskStatusToEmptyOnExit()
+    {
+        // Arrange
+        var start = new DateTime(2022, 01, 01);
+        var end = new DateTime(2022, 01, 02);
+        var timeRange = new TimeRange(start, end);
+        var context = new SyncContext(Guid.NewGuid(), "Slack", ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
+
+        // Act
+        await syncService.SyncAsync(context);
+
+        // Assert
+        _tasksStatusesCache.Verify(x => x.SetStatusAsync(context.ConnectorId, SingleTaskStatus.Empty, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

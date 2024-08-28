@@ -13,6 +13,7 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker;
@@ -74,11 +75,8 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
         {
             _logger.LogInformation("Setting {count} secrets", dto.Secrets.Count);
 
-            await using (var scope = serviceProvider.CreateAsyncScope())
-            {
-                foreach (var secret in dto.Secrets)
-                    await secretRepository.SetSecretAsync(secret.Key, secret.Value.ToSecureString(), stoppingToken);
-            };
+            foreach (var secret in dto.Secrets)
+                await secretRepository.SetSecretAsync(secret.Key, secret.Value.ToSecureString(), stoppingToken);
 
             _logger.LogInformation("Secrets has been set");
         }
@@ -93,7 +91,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
                 var contextAccesor = scope.ServiceProvider.GetRequiredService<ISecretRotationContextAccessor>();
                 var service = scope.ServiceProvider.GetRequiredService<ISecretRotationService>();
 
-                var context = await contextFactory.CreateAsync(dto.ConnectorId, dto.NetworkProperties, stoppingToken);
+                var context = contextFactory.Create(dto.ConnectorId, dto.NetworkProperties);
                 contextAccesor.SecretRotationContext = context;
                 await service.ExecuteAsync(context, stoppingToken);
             };
@@ -107,17 +105,32 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
 
             await using (var scope = serviceProvider.CreateAsyncScope())
             {
-                var authTester = scope.ServiceProvider.GetRequiredService<IAuthTester>();
+                var contextFactory = scope.ServiceProvider.GetRequiredService<IAuthTesterContextFactory>();
+                var contextAccesor = scope.ServiceProvider.GetRequiredService<IAuthTesterContextAccessor>();
 
+                var context = contextFactory.Create(dto.ConnectorId, dto.ConnectorType, dto.ConnectorProperties);
+                contextAccesor.Context = context;
+
+                var connectorInfo = scope.ServiceProvider.GetRequiredService<IConnectorInfoInitializer>();
+                connectorInfo.Initialize(new ConnectorInfo(dto.ConnectorId, dto.NetworkId));
+
+                var authTester = scope.ServiceProvider.GetRequiredService<IAuthTester>();
                 var isAuthorized = await authTester.IsAuthorizedAsync(dto.ConnectorProperties, stoppingToken);
+
+                var taskStatusCache = scope.ServiceProvider.GetRequiredService<ITasksStatusesCache>();
+                var taskStatus = await taskStatusCache.GetStatusAsync(dto.ConnectorId, stoppingToken);
+
+                var isRunning = !ReferenceEquals(taskStatus, SingleTaskStatus.Empty); // check if simple '==' is not enough here
 
                 _logger.LogInformation("Status check for connector '{connectorId}' completed", dto.ConnectorId);
 
                 return new ConnectorStatusDto
                 {
                     IsAuthorized = isAuthorized,
-                    // Todo: implement check if its running
-                    IsRunning = true
+                    IsRunning = isRunning,
+                    CurrentTaskCaption = taskStatus.Caption,
+                    CurrentTaskDescription = taskStatus.Description,
+                    CurrentTaskCompletionRate = taskStatus.CompletionRate
                 };
             };
 

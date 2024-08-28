@@ -48,13 +48,14 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack
                 .AddPolicyHandler(GetRetryAfterDelayOnThrottlingPolicy())
                 .AddScopeAwareHttpHandler<UserTokenAuthHandler>();
 
-            //services.AddScoped<IAuthTester, AuthTester>();
             services.AddMemoryCache();
 
             services.AddScoped<IMembersClient, MembersClient>();
             services.AddScoped<IChatClient, ChatClient>();
 
-            services.AddScoped<IDataSource, SlackFacade>();
+            services.AddKeyedScoped<IAuthTester, AuthTester>(typeof(AuthTester).FullName);
+            services.AddKeyedScoped<IDataSource, SlackFacade>(typeof(SlackFacade).FullName);
+
             services.AddTransient<ISecretRotationService, SlackSecretRoationService>();
 
             return services;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetworkPerspective.Sync.Orchestrator.Dtos;
+namespace NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
 
 public class ConnectorDto
 {

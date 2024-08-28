@@ -15,8 +15,8 @@ public interface ITasksStatusesCache
 
 internal class TasksStatusesCache : ITasksStatusesCache
 {
-    private readonly IDictionary<Guid, SingleTaskStatus> _statuses = new Dictionary<Guid, SingleTaskStatus>();
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    private readonly Dictionary<Guid, SingleTaskStatus> _statuses = [];
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public async Task<SingleTaskStatus> GetStatusAsync(Guid connectorId, CancellationToken stoppingToken = default)
     {

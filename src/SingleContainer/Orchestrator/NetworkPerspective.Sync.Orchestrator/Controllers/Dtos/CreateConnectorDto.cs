@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
+
 namespace NetworkPerspective.Sync.Orchestrator.Dtos
 {
     public class CreateConnectorDto

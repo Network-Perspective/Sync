@@ -47,5 +47,4 @@ internal class SecretRotationContextAccessor : ISecretRotationContextAccessor
             }
         }
     }
-
 }

@@ -85,12 +85,14 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
         logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
 
-    public async Task<ConnectorStatus> GetConnectorStatusAsync(string workerName, Guid connectorId, IDictionary<string, string> networkProperties, string connectorType)
+    public async Task<ConnectorStatus> GetConnectorStatusAsync(string workerName, Guid connectorId, Guid networkId, IDictionary<string, string> networkProperties, string connectorType)
     {
         var requestDto = new GetConnectorStatusDto
         {
             CorrelationId = Guid.NewGuid(),
             ConnectorId = connectorId,
+            NetworkId = networkId,
+            ConnectorType = connectorType,
             ConnectorProperties = networkProperties
         };
 

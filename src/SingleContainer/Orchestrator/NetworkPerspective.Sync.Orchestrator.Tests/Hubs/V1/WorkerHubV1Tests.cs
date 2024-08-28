@@ -72,7 +72,7 @@ public class WorkerHubV1Tests
                 });
 
             // Act
-            var actualStatus = await hub.GetConnectorStatusAsync("worker-name", Guid.NewGuid(), new Dictionary<string, string>(), "Slack");
+            var actualStatus = await hub.GetConnectorStatusAsync("worker-name", Guid.NewGuid(), Guid.NewGuid(), new Dictionary<string, string>(), "Slack");
 
             // Assert
             var expectedStatus = ConnectorStatus.Idle(isAuthorized);
@@ -105,7 +105,7 @@ public class WorkerHubV1Tests
                 });
 
             // Act
-            var actualStatus = await hub.GetConnectorStatusAsync("worker-name", Guid.NewGuid(), new Dictionary<string, string>(), "Slack");
+            var actualStatus = await hub.GetConnectorStatusAsync("worker-name", Guid.NewGuid(), Guid.NewGuid(), new Dictionary<string, string>(), "Slack");
 
             // Assert
             var expectedTaskStatus = new ConnectorTaskStatus(caption, description, completionRate);

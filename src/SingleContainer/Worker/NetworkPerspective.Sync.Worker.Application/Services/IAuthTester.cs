@@ -8,11 +8,3 @@ public interface IAuthTester
 {
     Task<bool> IsAuthorizedAsync(IDictionary<string, string> networkProperties, CancellationToken stoppingToken = default);
 }
-
-public class DummyAuthTester : IAuthTester
-{
-    public Task<bool> IsAuthorizedAsync(IDictionary<string, string> networkProperties, CancellationToken stoppingToken = default)
-    {
-        return Task.FromResult(true);
-    }
-}

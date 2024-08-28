@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
@@ -26,18 +27,21 @@ internal sealed class SyncService : ISyncService
     private readonly IDataSource _dataSource;
     private readonly INetworkPerspectiveCore _networkPerspectiveCore;
     private readonly IStatusLogger _statusLogger;
+    private readonly ITasksStatusesCache _tasksStatusesCache;
     private readonly IInteractionsFilterFactory _interactionFilterFactory;
 
     public SyncService(ILogger<SyncService> logger,
-                       IDataSourceFactory dataSourceFactory,
+                       IDataSource dataSource,
                        INetworkPerspectiveCore networkPerspectiveCore,
                        IStatusLogger statusLogger,
+                       ITasksStatusesCache tasksStatusesCache,
                        IInteractionsFilterFactory interactionFilterFactory)
     {
         _logger = logger;
-        _dataSource = dataSourceFactory.CreateDataSource();
+        _dataSource = dataSource;
         _networkPerspectiveCore = networkPerspectiveCore;
         _statusLogger = statusLogger;
+        _tasksStatusesCache = tasksStatusesCache;
         _interactionFilterFactory = interactionFilterFactory;
     }
 
@@ -78,6 +82,10 @@ internal sealed class SyncService : ISyncService
             _logger.LogError(ex, "Cannot complete synchronization job for Connector {connectorId}.\n{exceptionMessage}", context.ConnectorId, ex.Message);
             await _statusLogger.LogErrorAsync("Sync failed", CancellationToken.None);
             return SyncResult.Empty;
+        }
+        finally
+        {
+            await _tasksStatusesCache.SetStatusAsync(context.ConnectorId, SingleTaskStatus.Empty, stoppingToken);
         }
     }
 
