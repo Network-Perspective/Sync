@@ -70,12 +70,15 @@ public class ConnectorTaskStatus
     public string Description { get; set; }
     public double? CompletionRate { get; set; }
 
-    public ConnectorTaskStatus(string caption, string description, double? completionRate)
+    private ConnectorTaskStatus(string caption, string description, double? completionRate)
     {
         Caption = caption;
         Description = description;
         CompletionRate = completionRate;
     }
+
+    public static ConnectorTaskStatus Create(string caption, string description, double? completionRate)
+        => new(caption, description, completionRate);
 
     public override string ToString()
     {

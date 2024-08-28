@@ -127,7 +127,7 @@ public class StatusServiceTests
             .Setup(x => x.IsConnected(worker.Name))
             .Returns(true);
 
-        var currentTask = new ConnectorTaskStatus("caption", "description", 33);
+        var currentTask = ConnectorTaskStatus.Create("caption", "description", 33);
         var connectorStatus = ConnectorStatus.Running(true, currentTask);
         _workerRouterMock
             .Setup(x => x.GetConnectorStatusAsync(worker.Name, connector.Id, connector.NetworkId, connector.Properties, connector.Type))

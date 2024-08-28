@@ -44,7 +44,7 @@ public class StatusControllerTests
             var description = "description";
             var completionRate = 42.42;
 
-            var taskStatus = new ConnectorTaskStatus(caption, description, completionRate);
+            var taskStatus = ConnectorTaskStatus.Create(caption, description, completionRate);
             var status = Status.Connected(isScheduled, ConnectorStatus.Running(isAuthorized, taskStatus), []);
 
             _statusServiceMock

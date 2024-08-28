@@ -120,7 +120,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
                 var taskStatusCache = scope.ServiceProvider.GetRequiredService<ITasksStatusesCache>();
                 var taskStatus = await taskStatusCache.GetStatusAsync(dto.ConnectorId, stoppingToken);
 
-                var isRunning = !ReferenceEquals(taskStatus, SingleTaskStatus.Empty); // check if simple '==' is not enough here
+                var isRunning = taskStatus != SingleTaskStatus.Empty;
 
                 _logger.LogInformation("Status check for connector '{connectorId}' completed", dto.ConnectorId);
 

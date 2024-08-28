@@ -108,7 +108,7 @@ public class WorkerHubV1Tests
             var actualStatus = await hub.GetConnectorStatusAsync("worker-name", Guid.NewGuid(), Guid.NewGuid(), new Dictionary<string, string>(), "Slack");
 
             // Assert
-            var expectedTaskStatus = new ConnectorTaskStatus(caption, description, completionRate);
+            var expectedTaskStatus = ConnectorTaskStatus.Create(caption, description, completionRate);
             var expectedStatus = ConnectorStatus.Running(isAuthorized, expectedTaskStatus);
             actualStatus.Should().BeEquivalentTo(expectedStatus);
         }

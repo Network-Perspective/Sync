@@ -103,7 +103,7 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
 
         if (responseDto.IsRunning)
         {
-            var currentTask = new ConnectorTaskStatus(responseDto.CurrentTaskCaption, responseDto.CurrentTaskDescription, responseDto.CurrentTaskCompletionRate);
+            var currentTask = ConnectorTaskStatus.Create(responseDto.CurrentTaskCaption, responseDto.CurrentTaskDescription, responseDto.CurrentTaskCompletionRate);
             return ConnectorStatus.Running(responseDto.IsAuthorized, currentTask);
         }
         else
