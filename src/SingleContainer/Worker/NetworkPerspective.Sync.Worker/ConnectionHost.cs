@@ -20,7 +20,6 @@ namespace NetworkPerspective.Sync.Worker;
 
 public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory syncContextFactory, IServiceProvider serviceProvider, IVault secretRepository, ILogger<ConnectionHost> logger) : BackgroundService
 {
-    private readonly ILogger<ConnectionHost> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -35,7 +34,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
 
         async Task<SyncCompletedDto> OnStartSync(StartSyncDto dto)
         {
-            _logger.LogInformation("Syncing started for connector '{connectorId}'", dto.ConnectorId);
+            logger.LogInformation("Syncing started for connector '{connectorId}'", dto.ConnectorId);
 
             var timeRange = new TimeRange(dto.Start, dto.End);
             var accessToken = dto.AccessToken.ToSecureString();
@@ -55,7 +54,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
 
                 var syncService = scope.ServiceProvider.GetRequiredService<ISyncService>();
                 var result = await syncService.SyncAsync(syncContext, stoppingToken);
-                _logger.LogInformation("Sync for connector '{connectorId}' completed", dto.ConnectorId);
+                logger.LogInformation("Sync for connector '{connectorId}' completed", dto.ConnectorId);
 
                 return new SyncCompletedDto
                 {
@@ -73,17 +72,17 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
 
         async Task OnSetSecrets(SetSecretsDto dto)
         {
-            _logger.LogInformation("Setting {count} secrets", dto.Secrets.Count);
+            logger.LogInformation("Setting {count} secrets", dto.Secrets.Count);
 
             foreach (var secret in dto.Secrets)
                 await secretRepository.SetSecretAsync(secret.Key, secret.Value.ToSecureString(), stoppingToken);
 
-            _logger.LogInformation("Secrets has been set");
+            logger.LogInformation("Secrets has been set");
         }
 
         async Task OnRotateSecrets(RotateSecretsDto dto)
         {
-            _logger.LogInformation("Rotating secrets for connector '{connectorId}' of type '{type}'", dto.ConnectorId, dto.ConnectorType);
+            logger.LogInformation("Rotating secrets for connector '{connectorId}' of type '{type}'", dto.ConnectorId, dto.ConnectorType);
 
             await using (var scope = serviceProvider.CreateAsyncScope())
             {
@@ -96,12 +95,12 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
                 await service.ExecuteAsync(context, stoppingToken);
             };
 
-            _logger.LogInformation("Secrets has been rotated");
+            logger.LogInformation("Secrets has been rotated");
         }
 
         async Task<ConnectorStatusDto> OnGetConnectorStatus(GetConnectorStatusDto dto)
         {
-            _logger.LogInformation("Checking connector '{connectorID}' status", dto.ConnectorId);
+            logger.LogInformation("Checking connector '{connectorID}' status", dto.ConnectorId);
 
             await using (var scope = serviceProvider.CreateAsyncScope())
             {
@@ -122,7 +121,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
 
                 var isRunning = taskStatus != SingleTaskStatus.Empty;
 
-                _logger.LogInformation("Status check for connector '{connectorId}' completed", dto.ConnectorId);
+                logger.LogInformation("Status check for connector '{connectorId}' completed", dto.ConnectorId);
 
                 return new ConnectorStatusDto
                 {
@@ -147,7 +146,6 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
 
         while (!stoppingToken.IsCancellationRequested)
         {
-
             await Ping();
             await Task.Delay(15000, stoppingToken);
         }
@@ -165,7 +163,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
         }
         catch (Exception)
         {
-            _logger.LogWarning("Unable to ping orchestrator");
+            logger.LogWarning("Unable to ping orchestrator");
         }
     }
 }

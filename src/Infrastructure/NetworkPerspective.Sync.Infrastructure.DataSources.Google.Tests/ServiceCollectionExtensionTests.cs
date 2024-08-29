@@ -10,8 +10,11 @@ using Moq;
 
 using NetworkPerspective.Sync.Contract.V1.Impl;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
+using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
@@ -50,8 +53,9 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests
 
             // Assert
             var services = serviceCollection.BuildServiceProvider();
-            (services.GetRequiredService<IConnectorInfoProvider>() as IConnectorInfoInitializer)
-                .Initialize(new ConnectorInfo(Guid.NewGuid(), Guid.NewGuid()));
+            var timeRange = new TimeRange(DateTime.UtcNow, DateTime.UtcNow);
+            var syncContext = new SyncContext(Guid.NewGuid(), "Google", ConnectorConfig.Empty, [], "".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+            services.GetRequiredService<ISyncContextAccessor>().SyncContext = syncContext;
             var dataSource = services.GetRequiredService<IDataSource>();
             dataSource.Should().BeAssignableTo<GoogleFacade>();
         }
