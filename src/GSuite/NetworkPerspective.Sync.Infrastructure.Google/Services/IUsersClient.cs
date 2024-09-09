@@ -66,6 +66,8 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
 
         private async Task<IList<User>> GetAllGoogleUsers(Network<GoogleNetworkProperties> network, CancellationToken stoppingToken)
         {
+            const string currentAccountCustomer = "my_customer";
+
             var credentials = await _credentialsProvider.GetForUserAsync(network.Properties.AdminEmail, stoppingToken);
 
             var service = new DirectoryService(new BaseClientService.Initializer
@@ -80,7 +82,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Google.Services
             {
                 var request = service.Users.List();
                 request.MaxResults = 500;
-                request.Domain = network.Properties.Domain;
+                request.Customer = currentAccountCustomer;
                 request.OrderBy = UsersResource.ListRequest.OrderByEnum.Email;
                 request.PageToken = nextPageToken;
                 request.Projection = UsersResource.ListRequest.ProjectionEnum.Full; // we do NOT know upfront what kind of custom section is set, so we cannot use ProjectionEnum.Custom
