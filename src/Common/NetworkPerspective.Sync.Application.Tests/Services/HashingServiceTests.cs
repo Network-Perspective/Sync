@@ -21,7 +21,7 @@ namespace NetworkPerspective.Sync.Application.Tests.Services
         [Theory]
         [InlineData("foo")]
         [InlineData("bar")]
-        public async void ShouldBeDeterministic(string input)
+        public async Task ShouldBeDeterministic(string input)
         {
             // Arrange
             var hashingKey = Guid.NewGuid().ToString();
