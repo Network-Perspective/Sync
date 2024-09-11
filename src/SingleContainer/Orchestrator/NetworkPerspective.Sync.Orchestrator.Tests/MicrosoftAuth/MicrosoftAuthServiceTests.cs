@@ -20,7 +20,7 @@ using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Tests.Services;
+namespace NetworkPerspective.Sync.Orchestrator.Tests.MicrosoftAuth;
 
 public class MicrosoftAuthServiceTests
 {

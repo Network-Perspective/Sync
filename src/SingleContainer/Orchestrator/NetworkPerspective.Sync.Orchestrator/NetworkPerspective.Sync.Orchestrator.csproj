@@ -25,7 +25,7 @@
       <ProjectReference Include="..\..\NetworkPerspective.Sync.Contract\NetworkPerspective.Sync.Contract.csproj" />
       <ProjectReference Include="..\..\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj" />
       <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Application\NetworkPerspective.Sync.Orchestrator.Application.csproj" />
-      <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence\NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.csproj" />
+      <ProjectReference Include="..\NetworkPerspective.Sync.Orchestrator.Persistence\NetworkPerspective.Sync.Orchestrator.Persistence.csproj" />
     </ItemGroup>
 
 </Project>

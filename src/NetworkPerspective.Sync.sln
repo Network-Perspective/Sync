@@ -17,8 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Com
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.Core.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Core.Tests\NetworkPerspective.Sync.Infrastructure.Core.Tests.csproj", "{AC4FEB94-B839-4DBE-B151-9E7A4B6DCABA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Persistence.Tests\NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.Tests.csproj", "{852433EA-2FBA-4856-823F-1F7E57EB91BA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.Core.Stub", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Core.Stub\NetworkPerspective.Sync.Infrastructure.Core.Stub.csproj", "{51619BB3-6F56-4584-96DD-6232EEC858D6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.RegressionTests", "Common\NetworkPerspective.Sync.RegressionTests\NetworkPerspective.Sync.RegressionTests.csproj", "{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A}"
@@ -44,8 +42,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Application", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Application\NetworkPerspective.Sync.Orchestrator.Application.csproj", "{185A300E-11E6-464C-9644-90CF105244CA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Contract", "SingleContainer\NetworkPerspective.Sync.Contract\NetworkPerspective.Sync.Contract.csproj", "{280AFED3-F178-4226-9B93-8A4BE0BC0E2F}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence\NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence.csproj", "{0420F70B-C106-4BC2-A148-D07436D563DD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Utils", "SingleContainer\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj", "{DA203A8A-90CA-4B70-802E-36A93DD999D0}"
 EndProject
@@ -121,9 +117,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Inf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests\NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.csproj", "{66DCBD22-3AB1-44A5-9389-B576F3790820}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.csproj", "{DFC19317-B9C7-4B0A-94DA-4FDB2A390004}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.csproj", "{DFC19317-B9C7-4B0A-94DA-4FDB2A390004}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.Tests\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.Tests.csproj", "{39323281-2F7B-422A-B4A8-ACF10FFE7321}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.Tests\NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager.Tests.csproj", "{39323281-2F7B-422A-B4A8-ACF10FFE7321}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Persistence", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Persistence\NetworkPerspective.Sync.Orchestrator.Persistence.csproj", "{FCF888F3-B8AF-49A8-8999-7F5CE6E39433}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orchestrator.Persistence.Tests", "SingleContainer\Orchestrator\NetworkPerspective.Sync.Orchestrator.Persistence.Tests\NetworkPerspective.Sync.Orchestrator.Persistence.Tests.csproj", "{C5F8CB7F-B3B3-4A52-98E9-70A27962D020}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -143,10 +143,6 @@ Global
 		{AC4FEB94-B839-4DBE-B151-9E7A4B6DCABA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC4FEB94-B839-4DBE-B151-9E7A4B6DCABA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC4FEB94-B839-4DBE-B151-9E7A4B6DCABA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{852433EA-2FBA-4856-823F-1F7E57EB91BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{852433EA-2FBA-4856-823F-1F7E57EB91BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{852433EA-2FBA-4856-823F-1F7E57EB91BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{852433EA-2FBA-4856-823F-1F7E57EB91BA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{51619BB3-6F56-4584-96DD-6232EEC858D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{51619BB3-6F56-4584-96DD-6232EEC858D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51619BB3-6F56-4584-96DD-6232EEC858D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -175,10 +171,6 @@ Global
 		{280AFED3-F178-4226-9B93-8A4BE0BC0E2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{280AFED3-F178-4226-9B93-8A4BE0BC0E2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{280AFED3-F178-4226-9B93-8A4BE0BC0E2F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0420F70B-C106-4BC2-A148-D07436D563DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0420F70B-C106-4BC2-A148-D07436D563DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0420F70B-C106-4BC2-A148-D07436D563DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0420F70B-C106-4BC2-A148-D07436D563DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DA203A8A-90CA-4B70-802E-36A93DD999D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DA203A8A-90CA-4B70-802E-36A93DD999D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA203A8A-90CA-4B70-802E-36A93DD999D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -299,6 +291,14 @@ Global
 		{39323281-2F7B-422A-B4A8-ACF10FFE7321}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39323281-2F7B-422A-B4A8-ACF10FFE7321}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39323281-2F7B-422A-B4A8-ACF10FFE7321}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCF888F3-B8AF-49A8-8999-7F5CE6E39433}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCF888F3-B8AF-49A8-8999-7F5CE6E39433}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCF888F3-B8AF-49A8-8999-7F5CE6E39433}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCF888F3-B8AF-49A8-8999-7F5CE6E39433}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5F8CB7F-B3B3-4A52-98E9-70A27962D020}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5F8CB7F-B3B3-4A52-98E9-70A27962D020}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5F8CB7F-B3B3-4A52-98E9-70A27962D020}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5F8CB7F-B3B3-4A52-98E9-70A27962D020}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -309,7 +309,6 @@ Global
 		{E9C7FEE5-ABC0-4877-9533-5A698EF20CAE} = {519B396D-6008-42C4-82D5-DF74F9289B45}
 		{3D3E649B-C3F1-4E5A-848D-B382B8924A95} = {A22C4002-2152-4182-871A-30B4032669FE}
 		{AC4FEB94-B839-4DBE-B151-9E7A4B6DCABA} = {740CC8D7-CB15-4A2C-A9E1-16A87BF558C4}
-		{852433EA-2FBA-4856-823F-1F7E57EB91BA} = {E7335FC0-BA6F-43A2-A10F-72C827499A2F}
 		{51619BB3-6F56-4584-96DD-6232EEC858D6} = {519B396D-6008-42C4-82D5-DF74F9289B45}
 		{E2ED43D0-4CAC-4D61-9E38-53CBD3AD5A4A} = {A22C4002-2152-4182-871A-30B4032669FE}
 		{7B737300-0C48-493A-861D-C90EDB7DFF35} = {9AC2B900-B353-4879-A540-108F67D429C1}
@@ -323,7 +322,6 @@ Global
 		{B5DBCA59-072C-40B8-8C8C-D18C7C1626D2} = {36F00875-0996-4F8C-89AE-893B756BBCB8}
 		{185A300E-11E6-464C-9644-90CF105244CA} = {36F00875-0996-4F8C-89AE-893B756BBCB8}
 		{280AFED3-F178-4226-9B93-8A4BE0BC0E2F} = {AEF09F39-990F-4CAA-A980-E3457D78DFFC}
-		{0420F70B-C106-4BC2-A148-D07436D563DD} = {36F00875-0996-4F8C-89AE-893B756BBCB8}
 		{DA203A8A-90CA-4B70-802E-36A93DD999D0} = {9AC2B900-B353-4879-A540-108F67D429C1}
 		{BF0A8939-5057-4B6C-A050-DA8F384B37B6} = {2C1709C1-20E7-4BF2-857F-D21195218B64}
 		{81307E87-5B2E-4867-9798-1B6912EE87C9} = {2C1709C1-20E7-4BF2-857F-D21195218B64}
@@ -363,6 +361,8 @@ Global
 		{66DCBD22-3AB1-44A5-9389-B576F3790820} = {F9CC8C52-66E0-4CD0-A7CD-344C61247C07}
 		{DFC19317-B9C7-4B0A-94DA-4FDB2A390004} = {C7761533-4943-4C61-91AB-7252DF221527}
 		{39323281-2F7B-422A-B4A8-ACF10FFE7321} = {F86DDA1E-FB9B-437C-BEBA-FBA9F87163B1}
+		{FCF888F3-B8AF-49A8-8999-7F5CE6E39433} = {36F00875-0996-4F8C-89AE-893B756BBCB8}
+		{C5F8CB7F-B3B3-4A52-98E9-70A27962D020} = {E7335FC0-BA6F-43A2-A10F-72C827499A2F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}

@@ -4,7 +4,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
-using NetworkPerspective.Sync.Orchestrator.Infrastructure.Persistence;
+using NetworkPerspective.Sync.Orchestrator.Persistence;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Tests;
 
