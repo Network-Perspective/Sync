@@ -11,12 +11,10 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google
         private new const bool DefaultSyncGroups = true;
 
         public string AdminEmail { get; set; }
-        public string Domain { get; set; }
 
         public GoogleNetworkProperties(string adminEmail, Uri externalKeyVaultUri) : base(DefaultSyncGroups, DefaultSyncChannelsNames, externalKeyVaultUri)
         {
             AdminEmail = adminEmail;
-            Domain = AdminEmail.Split('@').Skip(1).Single();
         }
 
         public GoogleNetworkProperties() : base(DefaultSyncGroups, DefaultSyncChannelsNames, null)
@@ -28,10 +26,6 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google
 
             if (properties.Any(x => x.Key == nameof(AdminEmail)))
                 AdminEmail = properties.Single(x => x.Key == nameof(AdminEmail)).Value;
-
-            if (properties.Any(x => x.Key == nameof(Domain)))
-                Domain = properties.Single(x => x.Key == nameof(Domain)).Value;
-
         }
 
         public override IEnumerable<KeyValuePair<string, string>> GetAll()
@@ -39,7 +33,6 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google
             var props = new List<KeyValuePair<string, string>>
             {
                 new(nameof(AdminEmail), AdminEmail),
-                new(nameof(Domain), Domain.ToString())
             };
 
             props.AddRange(base.GetAll());

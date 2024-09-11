@@ -20,6 +20,8 @@ internal class AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider cr
 
     public async Task<bool> IsAuthorizedAsync(IDictionary<string, string> networkProperties, CancellationToken stoppingToken = default)
     {
+        const string currentAccountCustomer = "my_customer";
+
         var connectorInfo = connectorInfoProvider.Get();
         try
         {
@@ -36,7 +38,7 @@ internal class AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider cr
 
             var request = service.Users.List();
             request.MaxResults = 10;
-            request.Domain = googleNetworkProperties.Domain;
+            request.Customer = currentAccountCustomer;
             var response = await request.ExecuteAsync();
             return response.UsersValue != null;
         }
