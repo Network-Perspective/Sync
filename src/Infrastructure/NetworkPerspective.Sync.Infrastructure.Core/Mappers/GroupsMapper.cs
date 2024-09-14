@@ -1,4 +1,5 @@
-﻿using NetworkPerspective.Sync.Application.Domain.Employees;
+﻿using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
 {

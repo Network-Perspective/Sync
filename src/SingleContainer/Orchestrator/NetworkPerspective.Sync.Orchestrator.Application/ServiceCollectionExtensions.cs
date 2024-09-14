@@ -1,13 +1,19 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
+using NetworkPerspective.Sync.Orchestrator.Application.Scheduler.SecretRotation;
+using NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    public static IServiceCollection AddApplication(this IServiceCollection services, IConfigurationSection config, string dbConnectionString)
     {
+        services.AddSyncScheduler(config.GetSection("SyncScheduler"), dbConnectionString);
+        services.AddSecretRotationScheduler(config.GetSection("SecretRotationScheduler"));
+
         services.AddTransient<IClock, Clock>();
 
         services.AddTransient<IAuthStateKeyFactory, AuthStateKeyFactory>();
@@ -16,6 +22,8 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IConnectorsService, ConnectorsService>();
         services.AddTransient<ISyncHistoryService, SyncHistoryService>();
         services.AddTransient<IStatusLogger, StatusLogger>();
+        services.AddTransient<ITokenService, TokenService>();
+        services.AddTransient<IStatusService, StatusService>();
 
         services.AddSingleton<IConnectionsLookupTable, ConnectionsLookupTable>();
 

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
+
 namespace NetworkPerspective.Sync.Infrastructure.Core.HealthChecks
 {
     internal class NetworkPerspectiveCoreHealthCheck : IHealthCheck

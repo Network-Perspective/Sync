@@ -1,54 +1,50 @@
-﻿//using System;
-//using System.Threading;
-//using System.Threading.Tasks;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-//using Microsoft.AspNetCore.Authorization;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
+using Mapster;
 
-//using NetworkPerspective.Sync.Application.Services;
-//using NetworkPerspective.Sync.Framework.Dtos;
-//using NetworkPerspective.Sync.Framework.Mappers;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-//namespace NetworkPerspective.Sync.Framework.Controllers;
+using NetworkPerspective.Sync.Orchestrator.Application.Services;
+using NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
 
-//[Route("data-sources/{id:guid}/status")]
-//[Authorize]
-//public class StatusController : ControllerBase
-//{
-//    private readonly INetworkService _networkService;
-//    private readonly IStatusService _statusService;
-//    private readonly INetworkIdProvider _networkIdProvider;
+namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
-//    public StatusController(INetworkService networkService, IStatusService statusService, INetworkIdProvider networkIdProvider)
-//    {
-//        _networkService = networkService;
-//        _statusService = statusService;
-//        _networkIdProvider = networkIdProvider;
-//    }
+[Route("api/connectors/{connectorId:guid}/status")]
+[Authorize]
+public class StatusController : ControllerBase
+{
+    private readonly IStatusService _statusService;
 
-//    /// <summary>
-//    /// Current network status
-//    /// </summary>
-//    /// <param name="stoppingToken">Stopping token</param>
-//    /// <response code="200">Status</response>
-//    /// <response code="400">Request cancelled</response>
-//    /// <response code="401">Missing or invalid authorization token</response>
-//    /// <response code="404">Network doesn't exist</response>
-//    /// <response code="500">Internal server error</response>
-//    [HttpGet]
-//    [ProducesResponseType(typeof(StatusDto), StatusCodes.Status200OK)]
-//    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-//    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-//    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-//    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-//    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-//    public async Task<StatusDto> GetStatus(Guid id, CancellationToken stoppingToken = default)
-//    {
-//        await _networkService.ValidateExists(_networkIdProvider.Get(), stoppingToken);
+    public StatusController(IStatusService statusService)
+    {
+        _statusService = statusService;
+    }
 
-//        var status = await _statusService.GetStatusAsync(_networkIdProvider.Get(), stoppingToken);
+    /// <summary>
+    /// Connector status
+    /// </summary>
+    /// <param name="connectorId">Connector Id</param>
+    /// <param name="stoppingToken">Stopping token</param>
+    /// <response code="200">Status</response>
+    /// <response code="400">Request cancelled</response>
+    /// <response code="401">Missing or invalid authorization token</response>
+    /// <response code="404">Connector doesn't exist</response>
+    /// <response code="500">Internal server error</response>
+    [HttpGet]
+    [ProducesResponseType(typeof(StatusDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<StatusDto> GetStatus([FromRoute] Guid connectorId, CancellationToken stoppingToken = default)
+    {
+        var status = await _statusService.GetStatusAsync(connectorId, stoppingToken);
 
-//        return StatusMapper.DomainStatusToDto(status);
-//    }
-//}
+        return status.Adapt<StatusDto>();
+    }
+}

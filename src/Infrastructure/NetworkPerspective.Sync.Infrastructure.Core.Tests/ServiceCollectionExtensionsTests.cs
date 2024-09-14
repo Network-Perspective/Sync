@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
 using NetworkPerspective.Sync.Common.Tests.Fixtures;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;

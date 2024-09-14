@@ -13,9 +13,9 @@ using Microsoft.Extensions.Hosting;
 
 using Moq;
 
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
-using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Tests.Fixtures;
@@ -31,7 +31,7 @@ public class OrchestratorServiceFixture : WebApplicationFactory<Program>
     {
         var configOverride = new Dictionary<string, string>
         {
-            { "App:Scheduler:UsePersistentStore", "false" },
+            { "App:SyncScheduler:UsePersistentStore", "false" },
         };
 
         builder.ConfigureHostConfiguration(config =>
