@@ -1,7 +1,7 @@
 ﻿
 using Colors.Net;
 
-using NetworkPerspective.Sync.Infrastructure.Core;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 
 using PowerArgs;
 

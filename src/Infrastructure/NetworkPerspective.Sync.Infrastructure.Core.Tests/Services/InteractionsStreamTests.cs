@@ -9,8 +9,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Common.Tests.Factories;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Services;
 using NetworkPerspective.Sync.Utils.Extensions;
 
@@ -36,7 +36,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Services
             var config = CreateConfig(2);
             var interactions = InteractionFactory.CreateSet(10);
 
-            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, _logger, CancellationToken.None);
+            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, "TestId", _logger, CancellationToken.None);
 
             // Act
             await stream.SendAsync(interactions);
@@ -58,7 +58,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Services
             var config = CreateConfig(10);
             var interactions = InteractionFactory.CreateSet(5);
 
-            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, _logger, CancellationToken.None);
+            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, "TestId", _logger, CancellationToken.None);
             await stream.SendAsync(interactions);
 
             // Act
@@ -79,7 +79,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Services
             var accessToken = "foo".ToSecureString();
             var config = CreateConfig(10);
 
-            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, _logger, CancellationToken.None);
+            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, "TestId", _logger, CancellationToken.None);
 
             // Act
             await stream.DisposeAsync();
@@ -101,7 +101,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Services
                 .Setup(x => x.SyncInteractionsAsync(It.IsAny<SyncHashedInteractionsCommand>(), It.IsAny<CancellationToken>()))
                 .Throws(new Exception());
 
-            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, _logger, CancellationToken.None);
+            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, "TestId", _logger, CancellationToken.None);
             await stream.SendAsync(interactions);
 
             // Act
@@ -119,7 +119,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Services
             var config = CreateConfig(10);
             var interactions = InteractionFactory.CreateSet(5);
 
-            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, _logger, CancellationToken.None);
+            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, "TestId", _logger, CancellationToken.None);
             await stream.SendAsync(interactions);
 
             // Act
@@ -152,7 +152,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Services
                 })
                 .ReturnsAsync("bar");
 
-            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, _logger, cancellationTokenSource.Token);
+            var stream = new InteractionsStream(accessToken, _clientMock.Object, config, "TestId", _logger, cancellationTokenSource.Token);
 
             // Act
             await stream.SendAsync(interactions);
@@ -169,8 +169,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests.Services
         private NetworkPerspectiveCoreConfig CreateConfig(int batchSize)
             => new NetworkPerspectiveCoreConfig
             {
-                DataSourceIdName = "test",
-                MaxInteractionsPerRequestCount = batchSize
+                MaxInteractionsPerRequestCount = batchSize,
             };
 
 

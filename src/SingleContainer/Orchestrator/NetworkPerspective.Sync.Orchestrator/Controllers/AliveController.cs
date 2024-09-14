@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace NetworkPerspective.Sync.Framework.Controllers;
+namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [Route("/")]
 [AllowAnonymous]
