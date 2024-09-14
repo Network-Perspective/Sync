@@ -1,3 +1,5 @@
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
+
 namespace NetworkPerspective.Sync.Cli.Tests
 {
     public class SignalTest

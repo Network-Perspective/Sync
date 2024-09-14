@@ -1,10 +1,7 @@
-﻿using System;
+﻿namespace NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence.Exceptions;
 
-namespace NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence.Exceptions;
-
-public class EntityNotFoundException : DbException
+public class EntityNotFoundException<TType> : DbException
 {
-    public EntityNotFoundException(Type type) : base($"Entity of type '{type}' cannot be found")
-    {
-    }
+    public EntityNotFoundException() : base($"Entity of type {typeof(TType)} cannot be found")
+    { }
 }

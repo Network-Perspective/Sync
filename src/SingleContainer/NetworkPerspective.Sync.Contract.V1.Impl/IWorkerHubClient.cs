@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,57 +7,69 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Contract.V1.Dtos;
+using NetworkPerspective.Sync.Contract.V1.Exceptions;
+
+using Polly;
+using Polly.Retry;
 
 namespace NetworkPerspective.Sync.Contract.V1.Impl;
 
 public interface IWorkerHubClient : IOrchestratorClient
 {
-    Task ConnectAsync(Action<IHubConnectionBuilder> configureConnection = null, CancellationToken stoppingToken = default);
+    Task ConnectAsync(Action<OrchestratorClientConfiguration> configuration = null, Action<IHubConnectionBuilder> connectionConfiguration = null, CancellationToken stoppingToken = default);
 }
 
 internal class WorkerHubClient : IWorkerHubClient
 {
     private HubConnection _connection;
+    private readonly OrchestratorClientConfiguration _callbacks = new();
     private readonly WorkerHubClientConfig _config;
     private readonly ILogger<IWorkerHubClient> _logger;
+    private readonly AsyncRetryPolicy _asyncRetryPolicy;
 
     public WorkerHubClient(IOptions<WorkerHubClientConfig> config, ILogger<IWorkerHubClient> logger)
     {
         _config = config.Value;
         _logger = logger;
+
+        _asyncRetryPolicy = Policy
+            .Handle<Exception>()
+            .WaitAndRetryAsync(_config.Resiliency.Retries,
+                (ex, timespan, retryCount, context) =>
+                {
+                    _logger.LogWarning(ex, "Unable to connect to orchestrator service at '{BaseUrl}'. Next attempt ({RetryCount}) in {Delay}s", _config.BaseUrl, retryCount + 1, timespan.TotalSeconds);
+                });
     }
 
-    private static Task<string> TokenFactory()
+    public async Task ConnectAsync(Action<OrchestratorClientConfiguration> configuration = null, Action<IHubConnectionBuilder> connectionConfiguration = null, CancellationToken stoppingToken = default)
     {
-        var name = "client_1";
-        var pass = "pass1";
-        var tokenBytes = Encoding.UTF8.GetBytes($"{name}:{pass}");
-        var tokenBase64 = Convert.ToBase64String(tokenBytes);
-        return Task.FromResult(tokenBase64);
-    }
+        configuration?.Invoke(_callbacks);
 
-    public async Task ConnectAsync(Action<IHubConnectionBuilder> configureConnection = null, CancellationToken stoppingToken = default)
-    {
         var hubUrl = $"{_config.BaseUrl}ws/v1/workers-hub";
 
         var builder = new HubConnectionBuilder()
             .WithUrl(hubUrl, options =>
             {
-                options.AccessTokenProvider = TokenFactory;
+                options.AccessTokenProvider = _callbacks.TokenFactory;
             })
-            .WithAutomaticReconnect();
+            .WithAutomaticReconnect(_config.Resiliency.Retries);
 
-        configureConnection?.Invoke(builder);
+        connectionConfiguration?.Invoke(builder);
 
         _connection = builder.Build();
         InitializeConnection();
 
-        await _connection.StartAsync(stoppingToken);
+        await _asyncRetryPolicy.ExecuteAsync((ct) => _connection.StartAsync(ct), stoppingToken);
     }
 
-    public Task<AckDto> SyncCompletedAsync(SyncCompletedDto syncCompleted)
+    public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto syncCompleted)
     {
-        return _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.SyncCompletedAsync), syncCompleted);
+        return await _asyncRetryPolicy.ExecuteAsync(() => _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.SyncCompletedAsync), syncCompleted));
+    }
+
+    public async Task<AckDto> AddLogAsync(AddLogDto addLog)
+    {
+        return await _asyncRetryPolicy.ExecuteAsync(() => _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.AddLogAsync), addLog));
     }
 
     public async Task<PongDto> PingAsync(PingDto ping)
@@ -71,16 +82,17 @@ internal class WorkerHubClient : IWorkerHubClient
 
     private void InitializeConnection()
     {
-        _connection.On<StartSyncDto, AckDto>(nameof(IWorkerClient.StartSyncAsync), async x =>
+        _connection.On<StartSyncDto, AckDto>(nameof(IWorkerClient.SyncAsync), x =>
         {
             _logger.LogInformation("Received request '{correlationId}' to start sync '{connectorId}' from {start} to {end}", x.CorrelationId, x.ConnectorId, x.Start, x.End);
 
-            await Task.Yield();
-
             _ = Task.Run(async () =>
             {
-                await Task.Delay(TimeSpan.FromSeconds(10));
-                await SyncCompletedAsync(new SyncCompletedDto { CorrelationId = Guid.NewGuid() });
+                if (_callbacks.OnStartSync is null)
+                    throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnStartSync));
+
+                var result = await _callbacks.OnStartSync(x);
+                await SyncCompletedAsync(result);
             });
 
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
@@ -91,10 +103,38 @@ internal class WorkerHubClient : IWorkerHubClient
         {
             _logger.LogInformation("Received request '{correlationId}' to set {count} secrets", x.CorrelationId, x.Secrets.Count);
 
-            await Task.Yield();
+            if (_callbacks.OnSetSecrets is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnSetSecrets));
+
+            await _callbacks.OnSetSecrets(x);
 
             _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
             return new AckDto { CorrelationId = x.CorrelationId };
+        });
+
+        _connection.On<RotateSecretsDto, AckDto>(nameof(IWorkerClient.RotateSecretsAsync), async x =>
+        {
+            _logger.LogInformation("Received request '{correlationId}' to rotate secrets for connector '{connectorId}' of type '{type}'", x.CorrelationId, x.ConnectorId, x.ConnectorType);
+
+            if (_callbacks.OnRotateSecrets is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnRotateSecrets));
+
+            await _callbacks.OnRotateSecrets(x);
+
+            _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
+            return new AckDto { CorrelationId = x.CorrelationId };
+        });
+
+        _connection.On<GetConnectorStatusDto, ConnectorStatusDto>(nameof(IWorkerClient.GetConnectorStatusAsync), async x =>
+        {
+            _logger.LogInformation("Received request '{correlationId}' to get connector '{connectorId}' status ", x.CorrelationId, x.ConnectorId);
+
+            if (_callbacks.OnGetConnectrStatus is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetConnectrStatus));
+
+            var result = await _callbacks.OnGetConnectrStatus(x);
+            _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
+            return result;
         });
     }
 }

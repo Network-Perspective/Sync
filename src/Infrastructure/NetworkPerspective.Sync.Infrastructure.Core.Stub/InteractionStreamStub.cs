@@ -3,11 +3,12 @@ using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
 
-using NetworkPerspective.Sync.Application.Domain.Batching;
-using NetworkPerspective.Sync.Application.Domain.Interactions;
-using NetworkPerspective.Sync.Application.Extensions;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
+using NetworkPerspective.Sync.Utils.Batching;
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Interactions;
+using NetworkPerspective.Sync.Worker.Application.Extensions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
 {
@@ -16,14 +17,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
         private readonly SecureString _accessToken;
         private readonly FileDataWriter _fileWriter;
         private readonly Batcher<HashedInteraction> _batcher;
-        private readonly NetworkPerspectiveCoreConfig _npCoreConfig;
+        private readonly string _dataSourceIdName;
 
-        public InteractionStreamStub(SecureString accessToken, FileDataWriter fileWriter, NetworkPerspectiveCoreConfig npCoreConfig)
+        public InteractionStreamStub(SecureString accessToken, FileDataWriter fileWriter, NetworkPerspectiveCoreConfig npCoreConfig, string dataSourceIdName)
         {
             _accessToken = accessToken;
             _fileWriter = fileWriter;
-            _npCoreConfig = npCoreConfig;
-
+            _dataSourceIdName = dataSourceIdName;
             _batcher = new Batcher<HashedInteraction>(npCoreConfig.MaxInteractionsPerRequestCount);
             _batcher.OnBatchReady(PushAsync);
         }
@@ -36,12 +36,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
         public async Task<int> SendAsync(IEnumerable<Interaction> interactions)
         {
             var interactionsToPush = interactions
-                .Select(x => InteractionMapper.DomainIntractionToDto(x, _npCoreConfig.DataSourceIdName))
+                .Select(x => InteractionMapper.DomainIntractionToDto(x, _dataSourceIdName))
                 .ToList();
 
             await _batcher.AddRangeAsync(interactionsToPush);
 
-            return interactionsToPush.Count;
+            return interactionsToPush.Count();
         }
 
         private async Task PushAsync(BatchReadyEventArgs<HashedInteraction> args)

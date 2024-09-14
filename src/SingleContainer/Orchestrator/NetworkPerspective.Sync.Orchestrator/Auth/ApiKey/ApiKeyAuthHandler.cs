@@ -11,9 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
-using NetworkPerspective.Sync.Orchestrator.Infrastructure.Vault.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 using Newtonsoft.Json;

@@ -17,14 +17,14 @@ public interface IStatusLogger
 
 internal class StatusLogger : IStatusLogger
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
     private readonly IClock _clock;
     private readonly ILogger<StatusLogger> _logger;
 
 
-    public StatusLogger(IUnitOfWork unitOfWork, IClock clock, ILogger<StatusLogger> logger)
+    public StatusLogger(IUnitOfWorkFactory unitOfWorkFactory, IClock clock, ILogger<StatusLogger> logger)
     {
-        _unitOfWork = unitOfWork;
+        _unitOfWorkFactory = unitOfWorkFactory;
         _clock = clock;
         _logger = logger;
     }
@@ -36,11 +36,14 @@ internal class StatusLogger : IStatusLogger
             _logger.LogDebug("Adding new {type} to connector '{connectorId}': '{log}'", typeof(StatusLog), connectorId, message);
             var log = StatusLog.Create(connectorId, message, level, _clock.UtcNow());
 
-            await _unitOfWork
+            using var unitOtWork = _unitOfWorkFactory
+                .Create();
+
+            await unitOtWork
                 .GetStatusLogRepository()
                 .AddAsync(log, stoppingToken);
 
-            await _unitOfWork.CommitAsync(stoppingToken);
+            await unitOtWork.CommitAsync(stoppingToken);
 
             _logger.LogDebug("Added new {type} to persistence for connector '{connectorId}'", typeof(StatusLog), connectorId);
         }

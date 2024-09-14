@@ -12,7 +12,8 @@ public interface IConnectorRepository
     Task AddAsync(Connector connector, CancellationToken stoppingToken = default);
     Task RemoveAsync(Guid connectorId, CancellationToken stoppingToken = default);
     Task<Connector> FindAsync(Guid connectorId, CancellationToken stoppingToken = default);
+    Task<Connector> GetAsync(Guid connectorId, CancellationToken stoppingToken = default);
     Task<IEnumerable<Connector>> GetAllAsync(CancellationToken stoppingToken = default);
-    Task<IEnumerable<Connector>> GetAllAsync(Guid workerId, CancellationToken stoppingToken = default);
+    Task<IEnumerable<Connector>> GetAllOfWorkerAsync(Guid workerId, CancellationToken stoppingToken = default);
 
 }

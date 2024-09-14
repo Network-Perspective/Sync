@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-using NetworkPerspective.Sync.Framework.Dtos;
 using NetworkPerspective.Sync.Orchestrator.Application.Extensions;
-using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
+using NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
+using NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
 
-namespace NetworkPerspective.Sync.Framework.Controllers;
+namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [Route("api/connectors/{connectorId:guid}/schedules")]
 [Authorize(AuthenticationSchemes = ApiKeyAuthOptions.DefaultScheme)]

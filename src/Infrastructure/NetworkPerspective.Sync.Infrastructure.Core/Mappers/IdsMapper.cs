@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using NetworkPerspective.Sync.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core.Mappers
 {
