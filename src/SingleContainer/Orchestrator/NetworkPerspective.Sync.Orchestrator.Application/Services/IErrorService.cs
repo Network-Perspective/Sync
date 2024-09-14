@@ -2,9 +2,9 @@
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Services
 {

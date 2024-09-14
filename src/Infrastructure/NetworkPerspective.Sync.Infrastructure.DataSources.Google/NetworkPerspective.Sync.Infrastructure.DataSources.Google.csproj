@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Google.Apis.Admin.Directory.directory_v1" Version="1.68.0.3477" />
+        <PackageReference Include="Google.Apis.Calendar.v3" Version="1.68.0.3473" />
+        <PackageReference Include="Google.Apis.Gmail.v1" Version="1.68.0.3427" />
+        <PackageReference Include="Google.Cloud.Iam.Admin.V1" Version="2.4.0" />
+        <PackageReference Include="Google.Cloud.Iam.V1" Version="3.3.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+        <PackageReference Include="MimeKit" Version="4.7.1" />
+        <PackageReference Include="Polly" Version="8.4.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\SingleContainer\Worker\NetworkPerspective.Sync.Worker.Application\NetworkPerspective.Sync.Worker.Application.csproj" />
+    </ItemGroup>
+
+</Project>

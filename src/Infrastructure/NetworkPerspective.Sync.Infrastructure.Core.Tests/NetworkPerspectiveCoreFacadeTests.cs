@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,16 +14,14 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
-using NetworkPerspective.Sync.Application.Extensions;
-using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
-using NetworkPerspective.Sync.Common.Tests.Factories;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core.Exceptions;
 
 using Xunit;
 
@@ -55,7 +52,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, CreateNpCoreOptions(), _loggerFactory);
 
                 // Act
-                Func<Task<TokenValidationResponse>> func = async () => await facade.ValidateTokenAsync(new NetworkCredential(string.Empty, token).SecurePassword);
+                Func<Task<ConnectorInfo>> func = async () => await facade.ValidateTokenAsync(new NetworkCredential(string.Empty, token).SecurePassword);
 
                 // Assert
                 await func.Should().ThrowExactlyAsync<InvalidTokenException>();
@@ -118,7 +115,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var result = await facade.GetNetworkConfigAsync("foo".ToSecureString());
 
                 // Assert
-                var expectedResult = new NetworkConfig(EmployeeFilter.Empty, CustomAttributesConfig.Empty);
+                var expectedResult = new ConnectorConfig(EmployeeFilter.Empty, CustomAttributesConfig.Empty);
 
             }
         }
@@ -260,8 +257,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
             => Options.Create(new NetworkPerspectiveCoreConfig
             {
                 BaseUrl = url,
-                MaxInteractionsPerRequestCount = maxInteractionsPerRequestCount,
-                DataSourceIdName = dataSourceIdName
+                MaxInteractionsPerRequestCount = maxInteractionsPerRequestCount
             });
     }
 }

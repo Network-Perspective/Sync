@@ -8,4 +8,5 @@ public interface IOrchestratorClient
 {
     Task<PongDto> PingAsync(PingDto syncCompleted);
     Task<AckDto> SyncCompletedAsync(SyncCompletedDto syncCompleted);
+    Task<AckDto> AddLogAsync(AddLogDto addLog);
 }

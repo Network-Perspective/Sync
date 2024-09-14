@@ -9,17 +9,16 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Application.Domain;
-using NetworkPerspective.Sync.Application.Domain.Employees;
-using NetworkPerspective.Sync.Application.Domain.Networks;
-using NetworkPerspective.Sync.Application.Domain.Networks.Filters;
-using NetworkPerspective.Sync.Application.Extensions;
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
-using NetworkPerspective.Sync.Application.Infrastructure.Core.Exceptions;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
 using NetworkPerspective.Sync.Infrastructure.Core.Services;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core.Exceptions;
 
 namespace NetworkPerspective.Sync.Infrastructure.Core
 {
@@ -38,16 +37,16 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             _logger = loggerFactory.CreateLogger<NetworkPerspectiveCoreFacade>();
         }
 
-        public IInteractionsStream OpenInteractionsStream(SecureString accessToken, CancellationToken stoppingToken = default)
-            => new InteractionsStream(accessToken.Copy(), _client, _npCoreConfig, _loggerFactory.CreateLogger<InteractionsStream>(), stoppingToken);
+        public IInteractionsStream OpenInteractionsStream(SecureString accessToken, string dataSourceIdName, CancellationToken stoppingToken = default)
+            => new InteractionsStream(accessToken.Copy(), _client, _npCoreConfig, dataSourceIdName, _loggerFactory.CreateLogger<InteractionsStream>(), stoppingToken);
 
-        public async Task PushUsersAsync(SecureString accessToken, EmployeeCollection employees, CancellationToken stoppingToken = default)
+        public async Task PushUsersAsync(SecureString accessToken, EmployeeCollection employees, string dataSourceIdName, CancellationToken stoppingToken = default)
         {
             try
             {
                 var employeesList = employees
                     .GetAllInternal()
-                    .Select(x => UsersMapper.ToUser(x, _npCoreConfig.DataSourceIdName));
+                    .Select(x => UsersMapper.ToUser(x, dataSourceIdName));
 
                 _logger.LogInformation("Pushing {count} users {url}", employeesList.Count(), _npCoreConfig.BaseUrl);
 
@@ -68,7 +67,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             }
         }
 
-        public async Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, DateTime changeDate, CancellationToken stoppingToken = default)
+        public async Task PushEntitiesAsync(SecureString accessToken, EmployeeCollection employees, DateTime changeDate, string dataSourceIdName, CancellationToken stoppingToken = default)
         {
             try
             {
@@ -80,7 +79,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
 
                 foreach (var employee in employeesList)
                 {
-                    var entity = EntitiesMapper.ToEntity(employee, employees, changeDate, _npCoreConfig.DataSourceIdName);
+                    var entity = EntitiesMapper.ToEntity(employee, employees, changeDate, dataSourceIdName);
                     entities.Add(entity);
                 }
 
@@ -127,7 +126,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             }
         }
 
-        public async Task<NetworkConfig> GetNetworkConfigAsync(SecureString accessToken, CancellationToken stoppingToken = default)
+        public async Task<ConnectorConfig> GetNetworkConfigAsync(SecureString accessToken, CancellationToken stoppingToken = default)
         {
             try
             {
@@ -149,7 +148,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
                 _logger.LogDebug("Custom attributes: {customAttributes}", customAttributes.ToString());
 
 
-                return new NetworkConfig(emailFilter, customAttributes);
+                return new ConnectorConfig(emailFilter, customAttributes);
             }
             catch (Exception ex)
             {
@@ -157,13 +156,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             }
         }
 
-        public async Task<TokenValidationResponse> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default)
+        public async Task<ConnectorInfo> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default)
         {
             try
             {
                 var result = await _client.QueryAsync(accessToken.ToSystemString(), stoppingToken);
 
-                return new TokenValidationResponse(result.NetworkId.Value, result.ConnectorId.Value);
+                return new ConnectorInfo(result.ConnectorId.Value, result.NetworkId.Value);
             }
             catch (ApiException aex) when (aex.StatusCode == (int)HttpStatusCode.Forbidden)
             {

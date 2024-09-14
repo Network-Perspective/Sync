@@ -4,8 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-using NetworkPerspective.Sync.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Core.HealthChecks;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
+using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
 
 using Polly;
 

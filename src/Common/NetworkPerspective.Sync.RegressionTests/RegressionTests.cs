@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 
 using NetworkPerspective.Sync.Common.Tests;
-using NetworkPerspective.Sync.Infrastructure.Core;
+using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.RegressionTests.Interactions;
 using NetworkPerspective.Sync.RegressionTests.Services;
 
