@@ -97,7 +97,7 @@ public class SyncSchedulerTest
     public class TriggerNow : SyncSchedulerTest
     {
         [Fact]
-        public async Task ShouldTriggerWithCorrectNetworkId()
+        public async Task ShouldTriggerWithCorrectConnectorId()
         {
             // Arrange
             var connectorId = Guid.NewGuid();
