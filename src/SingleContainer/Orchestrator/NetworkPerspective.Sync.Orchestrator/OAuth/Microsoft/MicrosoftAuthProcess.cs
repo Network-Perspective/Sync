@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetworkPerspective.Sync.Orchestrator.MicrosoftAuth;
+namespace NetworkPerspective.Sync.Orchestrator.OAuth.Microsoft;
 
 public class MicrosoftAuthProcess
 {

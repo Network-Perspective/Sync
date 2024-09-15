@@ -20,12 +20,12 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
-using NetworkPerspective.Sync.Orchestrator.SlackAuth;
+using NetworkPerspective.Sync.Orchestrator.OAuth.Slack;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Orchestrator.Tests.SlackAuth;
+namespace NetworkPerspective.Sync.Orchestrator.Tests.OAuth.Slack;
 
 public class SlackAuthServiceTests
 {

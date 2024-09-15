@@ -9,23 +9,15 @@ using Microsoft.AspNetCore.Mvc;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
-using NetworkPerspective.Sync.Orchestrator.SlackAuth;
+using NetworkPerspective.Sync.Orchestrator.OAuth.Slack;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [Route(AuthPath)]
-public class SlackAuthController : ControllerBase
+public class SlackAuthController(IConnectorsService connectorsService, ISlackAuthService authService) : ControllerBase
 {
     private const string CallbackPath = "callback";
     private const string AuthPath = "api/connectors/slack-auth";
-    private readonly IConnectorsService _connectorsService;
-    private readonly ISlackAuthService _authService;
-
-    public SlackAuthController(IConnectorsService connectorsService, ISlackAuthService authService)
-    {
-        _connectorsService = connectorsService;
-        _authService = authService;
-    }
 
     /// <summary>
     /// Initialize OAuth process
@@ -43,15 +35,15 @@ public class SlackAuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> SignIn([FromQuery] Guid connectorId, string callbackUrl = null, CancellationToken stoppingToken = default)
+    public async Task<IActionResult> Authorize([FromQuery] Guid connectorId, string callbackUrl = null, CancellationToken stoppingToken = default)
     {
-        var connector = await _connectorsService.GetAsync(connectorId, stoppingToken);
+        var connector = await connectorsService.GetAsync(connectorId, stoppingToken);
 
         var useAdminPrivileges = UseAdminPrivileges(connector.Properties);
         var callbackUri = callbackUrl == null ? CreateCallbackUri() : new Uri(callbackUrl);
         var authProcess = new SlackAuthProcess(connectorId, connector.Worker.Name, callbackUri, useAdminPrivileges);
 
-        var result = await _authService.StartAuthProcessAsync(authProcess, stoppingToken);
+        var result = await authService.StartAuthProcessAsync(authProcess, stoppingToken);
 
         return Ok(result.SlackAuthUri);
     }
@@ -72,7 +64,7 @@ public class SlackAuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> HandleCallback(string code, string state, CancellationToken stoppingToken = default)
     {
-        await _authService.HandleAuthorizationCodeCallbackAsync(code, state, stoppingToken);
+        await authService.HandleAuthorizationCodeCallbackAsync(code, state, stoppingToken);
 
         return Ok("Auth completed!");
     }
@@ -89,11 +81,15 @@ public class SlackAuthController : ControllerBase
 
     private Uri CreateCallbackUri()
     {
-        var callbackUrlBuilder = new UriBuilder();
-        callbackUrlBuilder.Scheme = "https";
-        callbackUrlBuilder.Host = HttpContext.Request.Host.Host;
+        var callbackUrlBuilder = new UriBuilder
+        {
+            Scheme = "https",
+            Host = HttpContext.Request.Host.Host
+        };
+
         if (HttpContext.Request.Host.Port.HasValue)
             callbackUrlBuilder.Port = HttpContext.Request.Host.Port.Value;
+
         callbackUrlBuilder.Path = string.Join('/', AuthPath, CallbackPath);
         return callbackUrlBuilder.Uri;
     }

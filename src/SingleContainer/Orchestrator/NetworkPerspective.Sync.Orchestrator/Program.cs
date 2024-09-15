@@ -13,9 +13,10 @@ using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 using NetworkPerspective.Sync.Orchestrator.Mappers;
-using NetworkPerspective.Sync.Orchestrator.MicrosoftAuth;
+using NetworkPerspective.Sync.Orchestrator.OAuth.Jira;
+using NetworkPerspective.Sync.Orchestrator.OAuth.Microsoft;
+using NetworkPerspective.Sync.Orchestrator.OAuth.Slack;
 using NetworkPerspective.Sync.Orchestrator.Persistence;
-using NetworkPerspective.Sync.Orchestrator.SlackAuth;
 
 namespace NetworkPerspective.Sync.Orchestrator;
 
@@ -43,8 +44,9 @@ public class Program
             .AddPersistence(healthcheckBuilder)
             .AddAzureKeyVault(builder.Configuration.GetSection("Infrastructure:Vault"), healthcheckBuilder)
             .AddAuth()
-            .AddSlackAuth(builder.Configuration.GetSection("DataSource:Slack"))
+            .AddSlackAuth(builder.Configuration.GetSection("DataSources:Slack"))
             .AddMicrosoftAuth()
+            .AddJiraAuth(builder.Configuration.GetSection("DataSources:Jira"))
             .AddHub();
 
         builder.Services.AddControllers(options =>

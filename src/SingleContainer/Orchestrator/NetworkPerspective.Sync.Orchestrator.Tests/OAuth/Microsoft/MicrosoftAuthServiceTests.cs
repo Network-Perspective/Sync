@@ -15,12 +15,12 @@ using Moq;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
-using NetworkPerspective.Sync.Orchestrator.MicrosoftAuth;
+using NetworkPerspective.Sync.Orchestrator.OAuth.Microsoft;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Orchestrator.Tests.MicrosoftAuth;
+namespace NetworkPerspective.Sync.Orchestrator.Tests.OAuth.Microsoft;
 
 public class MicrosoftAuthServiceTests
 {
