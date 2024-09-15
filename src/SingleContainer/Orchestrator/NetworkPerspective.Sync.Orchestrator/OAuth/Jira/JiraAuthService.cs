@@ -40,7 +40,7 @@ public class JiraAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory,
         var stateKey = stateKeyFactory.Create();
         cache.Set(stateKey, authProcess, DateTimeOffset.UtcNow.AddMinutes(JiraAuthorizationCodeExpirationTimeInMinutes));
 
-        var authUri = BuildSlackAuthUri(stateKey, authProcess, clientId);
+        var authUri = BuildAuthUri(stateKey, authProcess, clientId);
 
         logger.LogInformation("Jira authentication process started. Unique state id: '{state}'", stateKey);
 
@@ -60,7 +60,7 @@ public class JiraAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory,
         await workerRouter.SetSecretsAsync(authProcess.WorkerName, secrets);
     }
 
-    private string BuildSlackAuthUri(string state, JiraAuthProcess authProcess, SecureString clientId)
+    private string BuildAuthUri(string state, JiraAuthProcess authProcess, SecureString clientId)
     {
         logger.LogDebug("Building jira auth path...'");
 
