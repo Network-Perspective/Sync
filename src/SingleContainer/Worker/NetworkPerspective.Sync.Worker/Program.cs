@@ -7,6 +7,7 @@ using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Excel;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Jira;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
 
 using System;
@@ -42,6 +43,7 @@ public class Program
                 .AddSlack(builder.Configuration.GetSection("Infrastructure:DataSources:Slack"))
                 .AddGoogle(builder.Configuration.GetSection("Infrastructure:DataSources:Google"))
                 .AddMicrosoft(builder.Configuration.GetSection("Infrastructure:DataSources:Microsoft"))
+                .AddJira(builder.Configuration.GetSection("Infrastructure:DataSources:Jira"))
                 .AddExcel(builder.Configuration.GetSection("Infrastructure:DataSources:Excel"))
                 .AddOrchestratorClient(builder.Configuration.GetSection("Infrastructure:Orchestrator"));
 

@@ -6,5 +6,5 @@ namespace NetworkPerspective.Sync.Worker.Application.Services;
 
 public interface IAuthTester
 {
-    Task<bool> IsAuthorizedAsync(IDictionary<string, string> networkProperties, CancellationToken stoppingToken = default);
+    Task<bool> IsAuthorizedAsync(IDictionary<string, string> connectorProperties, CancellationToken stoppingToken = default);
 }
