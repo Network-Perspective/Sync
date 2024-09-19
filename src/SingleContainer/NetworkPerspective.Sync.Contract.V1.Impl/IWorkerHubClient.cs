@@ -50,7 +50,7 @@ internal class WorkerHubClient : IWorkerHubClient
         var builder = new HubConnectionBuilder()
             .WithUrl(hubUrl, options =>
             {
-                options.AccessTokenProvider = _callbacks.TokenFactory;
+                options.AccessTokenProvider = _callbacks.TokenFactory; // todo: it's getting called twice at startup because of the negotiation protocol request. enforce websocket protocol or implement cache for credentials?
             })
             .WithAutomaticReconnect(_config.Resiliency.Retries);
 

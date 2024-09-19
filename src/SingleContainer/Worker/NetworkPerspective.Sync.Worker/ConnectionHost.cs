@@ -25,9 +25,12 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
     {
         async Task<string> TokenFactory()
         {
-            var name = await secretRepository.GetSecretAsync("orchestrator-client-name", stoppingToken);
-            var pass = await secretRepository.GetSecretAsync("orchestrator-client-secret", stoppingToken);
-            var tokenBytes = Encoding.UTF8.GetBytes($"{name.ToSystemString()}:{pass.ToSystemString()}");
+            var nameTask = secretRepository.GetSecretAsync("orchestrator-client-name", stoppingToken);
+            var passTask = secretRepository.GetSecretAsync("orchestrator-client-secret", stoppingToken);
+
+            await Task.WhenAll(nameTask, passTask);
+
+            var tokenBytes = Encoding.UTF8.GetBytes($"{nameTask.Result.ToSystemString()}:{passTask.Result.ToSystemString()}");
             var tokenBase64 = Convert.ToBase64String(tokenBytes);
             return tokenBase64;
         }
@@ -132,7 +135,6 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
                     CurrentTaskCompletionRate = taskStatus.CompletionRate
                 };
             };
-
         }
 
         await hubClient.ConnectAsync(configuration: x =>

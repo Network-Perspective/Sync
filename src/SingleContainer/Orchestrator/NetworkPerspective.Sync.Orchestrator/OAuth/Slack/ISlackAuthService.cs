@@ -17,7 +17,7 @@ using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Utils.Extensions;
 
-namespace NetworkPerspective.Sync.Orchestrator.SlackAuth;
+namespace NetworkPerspective.Sync.Orchestrator.OAuth.Slack;
 
 public interface ISlackAuthService
 {
@@ -113,5 +113,4 @@ internal class SlackAuthService(IVault vault, IAuthStateKeyFactory stateKeyFacto
 
         return uriBuilder.ToString();
     }
-
 }

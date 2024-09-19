@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetworkPerspective.Sync.Orchestrator.SlackAuth;
+namespace NetworkPerspective.Sync.Orchestrator.OAuth.Slack;
 
 public class SlackAuthProcess
 {
