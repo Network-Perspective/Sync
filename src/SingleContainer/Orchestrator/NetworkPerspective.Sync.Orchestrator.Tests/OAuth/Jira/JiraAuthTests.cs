@@ -14,12 +14,13 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
-using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Dtos;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.OAuth.Jira;
+using NetworkPerspective.Sync.Orchestrator.OAuth.Jira.Client;
+using NetworkPerspective.Sync.Orchestrator.OAuth.Jira.Client.Model;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 using Xunit;
@@ -34,14 +35,15 @@ public class JiraAuthTests
 
     private readonly Mock<IVault> _vaultMock = new();
     private readonly Mock<IAuthStateKeyFactory> _stateFactoryMock = new();
-    private readonly Mock<IWorkerRouter> _workerRouter = new();
+    private readonly Mock<IWorkerRouter> _workerRouterMock = new();
+    private readonly Mock<IJiraClient> _jiraClientMock = new();
     private readonly ILogger<JiraAuthService> _logger = NullLogger<JiraAuthService>.Instance;
 
     public JiraAuthTests()
     {
         _vaultMock.Reset();
         _stateFactoryMock.Reset();
-        _workerRouter.Reset();
+        _workerRouterMock.Reset();
     }
 
 
@@ -60,16 +62,17 @@ public class JiraAuthTests
                 .Returns(state);
 
             _vaultMock
-                .Setup(x => x.GetSecretAsync(JiraAuthService.JiraClientIdKey, It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(JiraKeys.JiraClientIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ClientId.ToSecureString());
 
             var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
 
             var service = new JiraAuthService(
                 _vaultMock.Object,
+                _jiraClientMock.Object,
                 _stateFactoryMock.Object,
                 cache,
-                _workerRouter.Object,
+                _workerRouterMock.Object,
                 config,
                 _logger);
 
@@ -101,9 +104,10 @@ public class JiraAuthTests
             var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
             var service = new JiraAuthService(
                 _vaultMock.Object,
+                _jiraClientMock.Object,
                 _stateFactoryMock.Object,
                 cache,
-                _workerRouter.Object,
+                _workerRouterMock.Object,
                 config,
                 _logger);
 
@@ -129,9 +133,10 @@ public class JiraAuthTests
 
             var service = new JiraAuthService(
                 _vaultMock.Object,
+                _jiraClientMock.Object,
                 _stateFactoryMock.Object,
                 cache,
-                _workerRouter.Object,
+                _workerRouterMock.Object,
                 config,
                 _logger);
 
@@ -147,6 +152,7 @@ public class JiraAuthTests
         {
             // Arrange
             var state = "state-key";
+            var code = "code";
             var workerName = "worker-name";
 
             var config = CreateDefaultOptions();
@@ -155,19 +161,24 @@ public class JiraAuthTests
             var authState = new JiraAuthProcess(Guid.NewGuid(), workerName, new Uri("https://networkperspective.io/"));
             cache.Set(state, authState);
 
+            _jiraClientMock
+                .Setup(x => x.ExchangeCodeForTokenAsync(code, It.IsAny<Uri>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new TokenResponse { AccessToken = "access-token", RefreshToken = "refresh-token" });
+
             var service = new JiraAuthService(
                 _vaultMock.Object,
+                _jiraClientMock.Object,
                 _stateFactoryMock.Object,
                 cache,
-                _workerRouter.Object,
+                _workerRouterMock.Object,
                 config,
                 _logger);
 
             // Act
-            await service.HandleCallbackAsync("foo", state);
+            await service.HandleCallbackAsync(code, state);
 
             // Assert
-            _workerRouter.Verify(x => x.SetSecretsAsync(workerName, It.IsAny<IDictionary<string, SecureString>>()), Times.Once);
+            _workerRouterMock.Verify(x => x.SetSecretsAsync(workerName, It.IsAny<IDictionary<string, SecureString>>()), Times.Once);
         }
     }
 

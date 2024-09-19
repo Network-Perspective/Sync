@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Security;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -15,27 +13,21 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
-using NetworkPerspective.Sync.Orchestrator.OAuth.Jira.Model;
+using NetworkPerspective.Sync.Orchestrator.OAuth.Jira.Client;
+using NetworkPerspective.Sync.Orchestrator.OAuth.Jira.Client.Model;
 using NetworkPerspective.Sync.Utils.Extensions;
-
-using Newtonsoft.Json;
-
 
 namespace NetworkPerspective.Sync.Orchestrator.OAuth.Jira;
 
-public class JiraAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, IMemoryCache cache, IWorkerRouter workerRouter, IOptions<JiraConfig> config, ILogger<JiraAuthService> logger) : IJiraAuthService
+public class JiraAuthService(IVault vault, IJiraClient jiraClient, IAuthStateKeyFactory stateKeyFactory, IMemoryCache cache, IWorkerRouter workerRouter, IOptions<JiraConfig> config, ILogger<JiraAuthService> logger) : IJiraAuthService
 {
     private const int JiraAuthorizationCodeExpirationTimeInMinutes = 10;
-    public const string JiraClientIdKey = "jira-client-id";
-    private const string JiraClientSecretKey = "jira-client-secret";
-    private const string JiraAccessTokenKeyPattern = "jira-access-token-{0}";
-    private const string JiraRefreshTokenPattern = "jira-refresh-token-{0}";
 
     public async Task<JiraAuthStartProcessResult> StartAuthProcessAsync(JiraAuthProcess authProcess, CancellationToken stoppingToken = default)
     {
         logger.LogInformation("Starting jira autentication process...");
 
-        var clientId = await vault.GetSecretAsync(JiraClientIdKey, stoppingToken);
+        var clientId = await vault.GetSecretAsync(JiraKeys.JiraClientIdKey, stoppingToken);
 
         var stateKey = stateKeyFactory.Create();
         cache.Set(stateKey, authProcess, DateTimeOffset.UtcNow.AddMinutes(JiraAuthorizationCodeExpirationTimeInMinutes));
@@ -54,7 +46,7 @@ public class JiraAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory,
         if (!cache.TryGetValue(state, out JiraAuthProcess authProcess))
             throw new OAuthException("State does not match initialized value");
 
-        var tokenResponse = await ExchangeCodeForTokenAsync(code, authProcess.CallbackUri, stoppingToken);
+        var tokenResponse = await jiraClient.ExchangeCodeForTokenAsync(code, authProcess.CallbackUri, stoppingToken);
         var secrets = GetSecrets(tokenResponse, authProcess.ConnectorId);
 
         await workerRouter.SetSecretsAsync(authProcess.WorkerName, secrets);
@@ -84,41 +76,15 @@ public class JiraAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory,
         return uriBuilder.ToString();
     }
 
-    private async Task<TokenResponse> ExchangeCodeForTokenAsync(string code, Uri callbackUri, CancellationToken stoppingToken)
-    {
-        var clientId = await vault.GetSecretAsync(JiraClientIdKey, stoppingToken);
-        var clientSecret = await vault.GetSecretAsync(JiraClientSecretKey, stoppingToken);
-
-        using var httpclient = new HttpClient
-        {
-            BaseAddress = new Uri(config.Value.BaseUrl)
-        };
-
-        var requestObject = new TokenRequest
-        {
-            GrantType = "authorization_code",
-            ClientId = clientId.ToSystemString(),
-            ClientSecret = clientSecret.ToSystemString(),
-            Code = code,
-            RedirectUri = callbackUri.ToString()
-        };
-        var requestPayload = JsonConvert.SerializeObject(requestObject);
-        var requestContent = new StringContent(requestPayload, Encoding.UTF8, "application/json");
-        var response = await httpclient.PostAsync("oauth/token", requestContent, stoppingToken);
-
-        var responsePayload = await response.Content.ReadAsStringAsync(stoppingToken);
-        var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(responsePayload);
-        return tokenResponse;
-    }
 
     private static Dictionary<string, SecureString> GetSecrets(TokenResponse tokenResponse, Guid connectorId)
     {
         var secrets = new Dictionary<string, SecureString>();
 
-        var accessTokenKey = string.Format(JiraAccessTokenKeyPattern, connectorId);
+        var accessTokenKey = string.Format(JiraKeys.JiraAccessTokenKeyPattern, connectorId);
         secrets.Add(accessTokenKey, tokenResponse.AccessToken.ToSecureString());
 
-        var refreshTokenKey = string.Format(JiraRefreshTokenPattern, connectorId);
+        var refreshTokenKey = string.Format(JiraKeys.JiraRefreshTokenPattern, connectorId);
         secrets.Add(refreshTokenKey, tokenResponse.RefreshToken.ToSecureString());
 
         return secrets;

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace NetworkPerspective.Sync.Orchestrator.OAuth.Jira.Model;
+namespace NetworkPerspective.Sync.Orchestrator.OAuth.Jira.Client.Model;
 
 public class TokenResponse
 {
