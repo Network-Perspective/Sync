@@ -10,7 +10,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 
 using Polly;
 
-namespace NetworkPerspective.Sync.Orchestrator.SlackAuth;
+namespace NetworkPerspective.Sync.Orchestrator.OAuth.Slack;
 
 public static class ServiceCollectionExtensions
 {

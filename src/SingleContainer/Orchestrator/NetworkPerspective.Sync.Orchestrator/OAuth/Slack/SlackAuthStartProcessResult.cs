@@ -1,4 +1,4 @@
-﻿namespace NetworkPerspective.Sync.Orchestrator.SlackAuth;
+﻿namespace NetworkPerspective.Sync.Orchestrator.OAuth.Slack;
 
 public class SlackAuthStartProcessResult
 {

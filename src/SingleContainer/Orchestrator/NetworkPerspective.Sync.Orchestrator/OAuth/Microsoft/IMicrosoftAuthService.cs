@@ -11,7 +11,7 @@ using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Utils.Extensions;
 
-namespace NetworkPerspective.Sync.Orchestrator.MicrosoftAuth;
+namespace NetworkPerspective.Sync.Orchestrator.OAuth.Microsoft;
 
 public interface IMicrosoftAuthService
 {

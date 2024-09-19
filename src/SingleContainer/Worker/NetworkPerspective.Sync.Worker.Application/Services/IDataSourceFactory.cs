@@ -31,6 +31,8 @@ internal class DataSourceFactory(ISyncContextAccessor syncContextAccessor, IServ
             return serviceProvider.GetRequiredKeyedService<IDataSource>("NetworkPerspective.Sync.Infrastructure.DataSources.Excel.ExcelFacade");
         else if (string.Equals(connectorType, "Office365"))
             return serviceProvider.GetRequiredKeyedService<IDataSource>("NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.MicrosoftFacade");
+        else if (string.Equals(connectorType, "Jira"))
+            return serviceProvider.GetRequiredKeyedService<IDataSource>("NetworkPerspective.Sync.Infrastructure.DataSources.Jira.JiraFacade");
         else
             throw new InvalidConnectorTypeException(connectorType);
     }
