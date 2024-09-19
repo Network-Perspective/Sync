@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using NetworkPerspective.Sync.Orchestrator.OAuth.Jira.Client;
+
 namespace NetworkPerspective.Sync.Orchestrator.OAuth.Jira;
 
 public static class ServiceCollectionExtensions
@@ -9,6 +11,7 @@ public static class ServiceCollectionExtensions
     {
         services.Configure<JiraConfig>(configuration);
 
+        services.AddScoped<IJiraClient, JiraClient>();
         services.AddScoped<IJiraAuthService, JiraAuthService>();
 
         return services;
