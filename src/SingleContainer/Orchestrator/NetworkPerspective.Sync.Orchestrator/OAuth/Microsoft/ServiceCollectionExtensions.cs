@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace NetworkPerspective.Sync.Orchestrator.MicrosoftAuth;
+namespace NetworkPerspective.Sync.Orchestrator.OAuth.Microsoft;
 
 public static class ServiceCollectionExtensions
 {
