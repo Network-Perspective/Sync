@@ -11,7 +11,7 @@ All secrets (API keys, hashing key) are stored in a Key Vault enabling secure ac
 ## Privacy & data protection
 All personally identifiable information is hashed using irreversible HMAC algorithm with a key that is only in your possession.
 
-<img src="docs/images/dataflow.png"  width="100%">
+<img src="docs/sec/privacy.png" width="100%">
 
 NP_Sync accesses only metadata to extract employee interaction graph. No content of communication is ever processed.
 
