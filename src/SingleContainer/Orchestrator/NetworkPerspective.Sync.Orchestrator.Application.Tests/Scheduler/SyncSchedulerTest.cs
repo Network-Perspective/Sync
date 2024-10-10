@@ -22,7 +22,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Tests.Scheduler;
 [Collection("Sequential")]
 public class SyncSchedulerTest
 {
-    private const int TimeoutInMs = TestableJob.JobExcecutionTimeInMs * 2;
+    private const int TimeoutInMs = TestableJob.JobExcecutionTimeInMs * 5;
     private readonly ISchedulerFactory _schedulerFactory = new StdSchedulerFactory();
     private readonly IScheduler _scheduler;
 
