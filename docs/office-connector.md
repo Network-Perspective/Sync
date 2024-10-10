@@ -41,18 +41,9 @@ The main purpose of Office 365 Connector is to retrieve data collected in Office
 ## System Scope and Context
 This chapter describes the environment and context of Office Connector. Who uses the system and on which other system does Office Connector depend.
 
-### Business Context
-This chapter describes the environment and context of Office Connector. Who uses the system and on which other system does Office Connector depend.
-<img src="office365/office365-system-scope.png" />
-
 #### Administrator
 
 Privileged user responsible for managing secrets such as Office 365 Access Token, Hashing Key
-
-### Key Vault
-
-* [Azure Keyvault](https://docs.microsoft.com/en-us/azure/key-vault/general/basic-concepts) - Secure storage for secrets in Azure Cloud. 
-* [HCP Keyvault](https://www.vaultproject.io/) - cloud agnostic secret storage
 
 ### Office 365 Connector
 
@@ -76,32 +67,11 @@ Pushes hashed data to Network Perspective. Connector never processes content nor
 Exposes API for incoming data.
 
 ## Deployment
-There are multiple deployment scenarios for the Office 365 Connector. Depending on the client’s architecture and security constraints The application may be deployed on the public cloud or on-premise. Below are described two of the most common deployment scenarios.
-
-### SaaS
-In this scenario, the customer doesn’t administer services and secrets on his own. All services are hosted on the Network Perspective’s Azure Cloud.
-<img src="office365/office365-deployement-saas.png" />
-
-### Private Azure Key Vault
-In this scenario Azure Key Vault is deployed in customer's infrastructure to hold all secrets securely in private infrastructure. 
-<img src="office365/office365-private-key-vault-deployment.png" />
-
-### Kubernetes deployment 
-The deployment and updates are automated with a Helm chart provided that provisions all the connector’s components (Connector, MSSQL Express, Ingress) included  on the diagram. Sensitive secrets such us Office365 access token are managed securely with HCP Vault subchart.
-This model is described in depth on a [separate page](../infra/readme.md).
-
-<img src="office365/office365-k8s-deployment.png" alt="Kubernetes Deployment Diagram" >
-
-
-### Private Cloud (Azure)
-In this scenario, the customer has his own private cloud and wants to administer services and secrets on his own. Azure Key Vault and Office 365 Connector are hosted in the customer’s private cloud and the Network Perspective System is hosted in the public Cloud.
-<img src="office365/office365-deployement-azure.png" />
+There are multiple deployment scenarios for the Office 365 Connector. Depending on the client’s architecture and security constraints The application may be deployed on the public cloud or on-premise. 
 
 ## Concepts
 ### Persistency
-Office 365 Connector stores only configurations such as, for example, scheduled synchronization jobs.
-
-Data retrieved from Office 365 are stored only in-memory for processing time.
+Office 365 Connector stores only configurations such as, for example, scheduled synchronization jobs. Data retrieved from Office 365 are stored only in-memory for processing time.
 
 ### User Interface
 Office 365 Connector is Headless and does not provide any Graphical User Interface. The only exposed interface is a simple REST API with endpoints such as creating a network, starting, stopping, and reading the synchronization status (enabled / disabled / error) of the connector.
