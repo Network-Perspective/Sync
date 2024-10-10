@@ -38,21 +38,6 @@ The main purpose of G-Suite Connector is to retrieve data collected in Google Co
 | 1  | Coding conventions  | The project uses [Code Convention for C#](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions) The conventions are defined through .editorconfig file, and enforced by Continuous Integration Pipeline.  |
 | 2  | Language | English. The project targets an international audience, so only English should be used thought the whole project.|
 
-## System Scope and Context
-This chapter describes the environment and context of G-Suite Connector. Who uses the system and on which other system does G-Suite Connector depend.
-
-### Business Context
-This chapter describes the environment and context of G-Suite Connector. Who uses the system and on which other system does G-Suite Connector depend.
-<img src="google/google-system-scope.png" />
-
-#### Administrator
-
-Privileged user responsible for managing secrets such as G-Suite Access Token, Hashing Key
-
-### Key Vault
-
-* [Azure Keyvault](https://docs.microsoft.com/en-us/azure/key-vault/general/basic-concepts) - Secure storage for secrets in Azure Cloud. 
-* [HCP Keyvault](https://www.vaultproject.io/) - cloud agnostic secret storage
 
 ### G-Suite-Connector
 
@@ -70,33 +55,9 @@ Formal structure - UserId, Email addresses, ManagerId, Team, Department
 
 Exposes API for incoming data.
 
-## Deployment
-There are multiple deployment scenarios for the G-suite Connector. Depending on the client’s architecture and security constraints The application may be deployed on the public cloud or on-premise. Below are described two of the most common deployment scenarios.
-
-### SaaS
-In this scenario, the customer doesn’t administer services and secrets on his own. All services are hosted on the Network Perspective’s Azure Cloud.
-<img src="google/gsuite-deployement-saas.png" />
-
-### Kubernetes deployment 
-The deployment and updates are automated with a Helm chart provided that provisions all the connector’s components (Connector, MSSQL Express, Ingress) included  on the diagram. Sensitive secrets such us Google API keys are managed with built in HCP Vault or Kubernetes Secrets mechanisms.
-This model is described in depth on a [separate page](../infra/readme.md).
-
-<img src="images/k8s-deployment.png" alt="Kubernetes Deployment Diagram" >
-
-
-### Private Cloud (Azure)
-In this scenario customer has his own private cloud and want’s to administer services and secrets on his own.  G-Suite Connector are hosted in the customer’s private cloud and the Network Perspective System is hosted in the public Cloud.
-<img src="google/gsuite-deployement-azure.png" />
-
-### Azure deployement details
-The diagram below illustrates detailed deployment on Azure cloud services. Client is provided with bicep scripts that automate the deployment. Sensitive secrets such us Google API keys are managed with Azure Key Vault service.
-<img src="google/gsuite-deployement-azure-details.png" />
-
 ## Concepts
 ### Persistency
-G-Suite Connector stores only configurations such as, for example, scheduled synchronization jobs.
-
-Data retrieved from Google Collaboration Tools are stored only in-memory for processing time.
+G-Suite Connector stores only configurations such as, for example, scheduled synchronization jobs. Data retrieved from Google Collaboration Tools are stored only in-memory for processing time.
 
 ### User Interface
 G-Suite Connector is Headless and does not provide any Graphical User Interface. The only exposed interface is a simple REST API with endpoints that allow starting, stopping, and reading synchronization status (enabled / disabled / error) of the connector. 
