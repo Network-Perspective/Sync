@@ -12,6 +12,7 @@ public static class ConnectorTypeMapper
             "Google" => "GSuiteId",
             "Excel" => "ExcelId",
             "Office365" => "Office365Id",
+            "Jira" => "JiraId",
             _ => throw new InvalidConnectorTypeException(connectorType),
         };
     }

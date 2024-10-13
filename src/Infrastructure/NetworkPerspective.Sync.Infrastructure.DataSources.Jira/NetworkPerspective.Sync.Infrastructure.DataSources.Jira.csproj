@@ -5,6 +5,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\SingleContainer\Worker\NetworkPerspective.Sync.Worker.Application\NetworkPerspective.Sync.Worker.Application.csproj" />
     </ItemGroup>
 
