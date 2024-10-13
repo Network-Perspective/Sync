@@ -8,7 +8,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client.HttpClients
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client.ApiClients;
 
-public interface IProjectsClient
+internal interface IProjectsClient
 {
     Task<GetProjectsPaginatedResponse> GetProjectsAsync(Guid cloudId, int startAt, int maxResults, CancellationToken stoppingToken = default);
 }

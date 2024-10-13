@@ -10,7 +10,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client.HttpClients
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client.ApiClients;
 
-public interface IUsersClient
+internal interface IUsersClient
 {
     Task<GetBulkUsersPaginatedResponse> GetUsersDetailsAsync(Guid cloudId, int startAt, int maxResults, IEnumerable<string> usersIds, CancellationToken stoppingToken = default);
     Task<IReadOnlyCollection<JiraUser>> GetProjectsUsers(Guid cloudId, string projectKey, CancellationToken stoppingToken = default);

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using NetworkPerspective.Sync.Worker.Application.Domain;
-
 namespace NetworkPerspective.Sync.Worker.Application.Domain.Employees
 {
     public class Group
@@ -11,6 +9,7 @@ namespace NetworkPerspective.Sync.Worker.Application.Domain.Employees
         public const string TeamCatergory = "OrgUnitTeam";
         public const string DepartmentCatergory = "Department";
         public const string ChannelCategory = "Channel";
+        public const string ProjectCategory = "Project";
 
         public static IEqualityComparer<Group> EqualityComparer = new GroupEqualityComparer();
 
