@@ -127,6 +127,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Orc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkPerspective.Sync.Infrastructure.DataSources.Jira", "Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Jira\NetworkPerspective.Sync.Infrastructure.DataSources.Jira.csproj", "{3A9C6C17-21AE-4967-8BC7-66621B795BCE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Tests", "Infrastructure\NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Tests\NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Tests.csproj", "{F8A8B83D-9499-4839-BB87-EBE1B2D368DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -305,6 +307,10 @@ Global
 		{3A9C6C17-21AE-4967-8BC7-66621B795BCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A9C6C17-21AE-4967-8BC7-66621B795BCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A9C6C17-21AE-4967-8BC7-66621B795BCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8A8B83D-9499-4839-BB87-EBE1B2D368DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8A8B83D-9499-4839-BB87-EBE1B2D368DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8A8B83D-9499-4839-BB87-EBE1B2D368DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8A8B83D-9499-4839-BB87-EBE1B2D368DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -370,6 +376,7 @@ Global
 		{FCF888F3-B8AF-49A8-8999-7F5CE6E39433} = {36F00875-0996-4F8C-89AE-893B756BBCB8}
 		{C5F8CB7F-B3B3-4A52-98E9-70A27962D020} = {E7335FC0-BA6F-43A2-A10F-72C827499A2F}
 		{3A9C6C17-21AE-4967-8BC7-66621B795BCE} = {361A0F6A-AEA5-4074-B624-88540F2D657F}
+		{F8A8B83D-9499-4839-BB87-EBE1B2D368DA} = {F9CC8C52-66E0-4CD0-A7CD-344C61247C07}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11CCBE01-9E86-4D68-A3BA-77898CFFEE79}
