@@ -8,12 +8,12 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Auth;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client.Pagination;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Services;
 using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira;
-
 
 public static class ServiceCollectionExtensions
 {

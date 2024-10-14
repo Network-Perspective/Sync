@@ -13,6 +13,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client;
 
 public interface IJiraAuthorizedFacade
 {
+    Task<JiraUser> GetCurrentUserAsync(Guid cloudId, CancellationToken stoppingToken = default);
     Task<IReadOnlyCollection<AccessibleResource>> GetAccessibleResourcesAsync(CancellationToken stoppingToken = default);
     Task<IReadOnlyCollection<GetProjectsPaginatedResponse.SingleProject>> GetProjectsAsync(Guid cloudId, CancellationToken stoppingToken = default);
     Task<IReadOnlyCollection<GetBulkUsersPaginatedResponse.SingleUser>> GetUsersDetailsAsync(Guid cloudId, IEnumerable<string> usersIds, CancellationToken stoppingToken = default);
@@ -24,6 +25,10 @@ internal class JiraAuthorizedFacade(IJiraHttpClient httpClient, PaginationHandle
     private readonly UsersClient _usersClient = new(httpClient);
     private readonly ProjectsClient _projectsClient = new(httpClient);
     private readonly OAuthClient _oauthClient = new(httpClient);
+    private readonly MyselfClient _myselfClient = new(httpClient);
+
+    public Task<JiraUser> GetCurrentUserAsync(Guid cloudId, CancellationToken stoppingToken = default)
+        => _myselfClient.GetCurrentUserAsync(cloudId, stoppingToken);
 
     public Task<IReadOnlyCollection<AccessibleResource>> GetAccessibleResourcesAsync(CancellationToken stoppingToken = default)
         => _oauthClient.GetAccessibleResourcesAsync(stoppingToken);

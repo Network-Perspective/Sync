@@ -30,6 +30,8 @@ internal class AuthTesterFactory(IAuthTesterContextAccessor contextAccessor, ISe
             return serviceProvider.GetRequiredKeyedService<IAuthTester>("NetworkPerspective.Sync.Infrastructure.DataSources.Excel.Services.AuthTester");
         else if (string.Equals(connectorType, "Office365"))
             return serviceProvider.GetRequiredKeyedService<IAuthTester>("NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services.AuthTester");
+        else if (string.Equals(connectorType, "Jira"))
+            return serviceProvider.GetRequiredKeyedService<IAuthTester>("NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Services.AuthTester");
         else
             throw new InvalidConnectorTypeException(connectorType);
     }
