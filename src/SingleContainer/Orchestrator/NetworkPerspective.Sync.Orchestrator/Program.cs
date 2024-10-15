@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Orchestrator.Application;
 using NetworkPerspective.Sync.Orchestrator.Controllers;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
@@ -43,6 +44,7 @@ public class Program
             .AddApplication(builder.Configuration.GetSection("App"), dbConnectionString)
             .AddPersistence(healthcheckBuilder)
             .AddAzureKeyVault(builder.Configuration.GetSection("Infrastructure:Vault"), healthcheckBuilder)
+            .AddSingleton<ICachedSecretRepository, CachedSecretRepository>()
             .AddAuth()
             .AddSlackAuth(builder.Configuration.GetSection("DataSources:Slack"))
             .AddMicrosoftAuth()

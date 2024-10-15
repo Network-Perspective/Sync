@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.HttpClients;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Services;
