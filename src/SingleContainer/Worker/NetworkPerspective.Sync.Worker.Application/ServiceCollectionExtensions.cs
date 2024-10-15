@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
