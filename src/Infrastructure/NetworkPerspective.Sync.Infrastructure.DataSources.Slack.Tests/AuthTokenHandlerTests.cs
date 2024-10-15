@@ -53,7 +53,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
                 .Returns(new ConnectorInfo(connectorId, networkId));
 
             var token = Guid.NewGuid().ToString();
-            var secretRepositoryMock = new Mock<ICachedSecretRepository>();
+            var secretRepositoryMock = new Mock<ICachedVault>();
             secretRepositoryMock
                 .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token.ToSecureString());
@@ -86,7 +86,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
 
             var token1 = Guid.NewGuid().ToString();
             var token2 = Guid.NewGuid().ToString();
-            var secretRepositoryMock = new Mock<ICachedSecretRepository>();
+            var secretRepositoryMock = new Mock<ICachedVault>();
             secretRepositoryMock
                 .SetupSequence(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token1.ToSecureString())
@@ -119,7 +119,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
                 .Returns(new ConnectorInfo(connectorId, networkId));
 
             var token = Guid.NewGuid().ToString();
-            var secretRepositoryMock = new Mock<ICachedSecretRepository>();
+            var secretRepositoryMock = new Mock<ICachedVault>();
             secretRepositoryMock
                 .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, networkId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token.ToSecureString());

@@ -35,7 +35,7 @@ public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthOptions>
         DefaultValueHandling = DefaultValueHandling.Ignore
     };
 
-    public ApiKeyAuthHandler(ICachedSecretRepository vault, IErrorService errorService, IOptionsMonitor<ApiKeyAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
+    public ApiKeyAuthHandler(ICachedVault vault, IErrorService errorService, IOptionsMonitor<ApiKeyAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
     {
         _vault = vault;
         _errorService = errorService;

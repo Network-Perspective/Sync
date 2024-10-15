@@ -20,14 +20,14 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack
 
     internal class UserTokenAuthHandler : AuthTokenHandler
     {
-        public UserTokenAuthHandler(IConnectorInfoProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, ILogger<AuthTokenHandler> logger)
+        public UserTokenAuthHandler(IConnectorInfoProvider networkIdProvider, ICachedVault cachedSecretRepository, ILogger<AuthTokenHandler> logger)
             : base(networkIdProvider, cachedSecretRepository, SlackKeys.UserTokenKeyPattern, logger)
         { }
     }
 
     internal class BotTokenAuthHandler : AuthTokenHandler
     {
-        public BotTokenAuthHandler(IConnectorInfoProvider networkIdProvider, ICachedSecretRepository cachedSecretRepository, ILogger<AuthTokenHandler> logger)
+        public BotTokenAuthHandler(IConnectorInfoProvider networkIdProvider, ICachedVault cachedSecretRepository, ILogger<AuthTokenHandler> logger)
             : base(networkIdProvider, cachedSecretRepository, SlackKeys.TokenKeyPattern, logger)
         { }
     }
@@ -35,11 +35,11 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack
     internal abstract class AuthTokenHandler : DelegatingHandler
     {
         private readonly IConnectorInfoProvider _connectorInfoProvider;
-        private readonly ICachedSecretRepository _cachedSecretRepository;
+        private readonly ICachedVault _cachedSecretRepository;
         private readonly string _tokenPatern;
         private readonly ILogger<AuthTokenHandler> _logger;
 
-        public AuthTokenHandler(IConnectorInfoProvider connectorInfoProvider, ICachedSecretRepository cachedSecretRepository, string tokenPatern, ILogger<AuthTokenHandler> logger)
+        public AuthTokenHandler(IConnectorInfoProvider connectorInfoProvider, ICachedVault cachedSecretRepository, string tokenPatern, ILogger<AuthTokenHandler> logger)
         {
             _connectorInfoProvider = connectorInfoProvider;
             _cachedSecretRepository = cachedSecretRepository;

@@ -10,6 +10,7 @@
         <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
         <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.10" />
         <PackageReference Include="Microsoft.Graph" Version="5.60.0" />
+        <PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.13.1" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2" />
     </ItemGroup>
 

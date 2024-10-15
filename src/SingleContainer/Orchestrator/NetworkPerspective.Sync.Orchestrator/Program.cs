@@ -44,7 +44,7 @@ public class Program
             .AddApplication(builder.Configuration.GetSection("App"), dbConnectionString)
             .AddPersistence(healthcheckBuilder)
             .AddAzureKeyVault(builder.Configuration.GetSection("Infrastructure:Vault"), healthcheckBuilder)
-            .AddSingleton<ICachedSecretRepository, CachedSecretRepository>()
+            .AddSingleton<ICachedVault, CachedVault>()
             .AddAuth()
             .AddSlackAuth(builder.Configuration.GetSection("DataSources:Slack"))
             .AddMicrosoftAuth()
