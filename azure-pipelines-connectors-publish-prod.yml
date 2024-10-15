@@ -17,7 +17,7 @@ resources:
     name: NetworkPerspective/NetworkPerspective.Infrastructure
 
 variables:
-  version: '2.1'
+  version: '2.2'
   tag: '$(version).$(Build.BuildId)'
 
   commitTagFile: 'Connectors/Prod/Tag.txt'
@@ -43,41 +43,21 @@ stages:
       persistCredentials: true
       displayName: Checkout repo
     - task: Docker@2
-      displayName: Build and push GSuite connector
+      displayName: Build and push Worker
       inputs:
         command: buildAndPush
-        repository: 'connectors/gsuite'
-        dockerfile: '$(Build.SourcesDirectory)/src/GSuite.Dockerfile'
+        repository: 'connectors/worker'
+        dockerfile: '$(Build.SourcesDirectory)/src/Worker.Dockerfile'
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
           latest
     - task: Docker@2
-      displayName: Build and push Slack connector
+      displayName: Build and push Orchestrator
       inputs:
         command: buildAndPush
-        repository: 'connectors/slack'
-        dockerfile: '$(Build.SourcesDirectory)/src/Slack.Dockerfile'
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          $(tag)
-          latest
-    - task: Docker@2
-      displayName: Build and push Office365 connector
-      inputs:
-        command: buildAndPush
-        repository: 'connectors/office365'
-        dockerfile: '$(Build.SourcesDirectory)/src/Office365.Dockerfile'
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          $(tag)
-          latest
-    - task: Docker@2
-      displayName: Build and push Excel connector
-      inputs:
-        command: buildAndPush
-        repository: 'connectors/excel'
-        dockerfile: '$(Build.SourcesDirectory)/src/Excel.Dockerfile'
+        repository: 'connectors/orchestrator'
+        dockerfile: '$(Build.SourcesDirectory)/src/Orchestrator.Dockerfile'
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)

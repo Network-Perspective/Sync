@@ -1,64 +1,19 @@
 
-<div align="center">  
-  <img src="docs/images/hero.png" ><br>
-  <h3 align="center">NetworkPerspective.Sync</h3>
-  <p align="center">
-    This project contains connectors from that syncs anonymous metadata from various sources to Network Perspective API.    
-    <br /><br/>
-    <a href="infra/readme.md"><strong>Private cloud deployment »</strong></a>
-    <br />
-    <a href="docs/create-slack-bot.md">Create Slack bot</a>
-    ·
-    <a href="docs/create-google-api-keys.md">Create Google API Keys</a>
-    ·
-    <a href="docs/authorize-google-api-keys.md">Authorize Google API Key</a>    
-    <br/><br/>
-    Technical reference for individual connectors<br/>
-    <a href="docs/google-connector.md">Google Workspace</a> 
-    ·
-    <a href="docs/slack-connector.md">Slack</a> 
-    · 
-    <a href="docs/office-connector.md">Office365</a>
-    · 
-    <a href="docs/custom-integration.md">Flat files (CSV)</a>
-  </p>
-</div>
+## About
+NP_Sync is a containerized app that syncs pseudonymized employee interaction metadata to enable Work Smart analysis. 
+It acts as a security and compliance layer that keeps all direct data access within your infrastructure.
+It is easy to deploy, fully transparent, open sourced and auditable.
 
-## Project organization
-    ├── src
-    │   ├── *.Gsuite               <- GSuite connector
-    │   ├── *.Slack                <- Slack connector
-    │   ├── *.Office365            <- Office365 connector
-    │   ├── *.Cli                  <- Cli connector
-    │   ├── *.Application          <- Common application layer
-    │   ├── *.Infrastructure       <- Infrastructure layer
-    │   ├── *.Dockefile            <- Docker build scripts    
-    │   └── *.Tests                <- Tests
-    ├── docs                       <- Documentation
-    └── infra                      <- Infrastructure scripts
-        └── helm-charts            <- helm charts
+## Security
+NP_Sync is deployed behind a firewall with no access from outside.
+All secrets (API keys, hashing key) are stored in a Key Vault enabling secure access and full audit trial. Cloud vendor specific Key Vault implementations are supported. All code is open sourced and fully auditable. 
 
-## Getting started
-Project is developed using Visual Studio 2022 and .net core 6.0. The solution file is in the src folder. 
-```
-src/NetworkPerspective.Sync.sln
-```
-Building the code requires .net core 6.0 sdk.
-```
-dotnet build .\src\NetworkPerspective.Sync.sln
-```
-You can run individual projects from Visual Studio or with `dotnet run` however there also `Tiltfile` prepared to simplify running connectors on local kubernetes. Please refer to [tilt.dev docs](https://docs.tilt.dev/) on getting started. 
-```
-tilt up
-```
-The above command will deploy connectors along Sql Server Developer edition to your local kubernetes.
+## Privacy & data protection
+All personally identifiable information is hashed using irreversible HMAC algorithm with a key that is only in your possession.
 
-## Data flow
-Each connector is a small app that fetch data from some source and pushes it to Network Perspective API. All personal data is pseydonymized using HMAC algorithm, i.e. hashed with a secret key. 
+<img src="docs/sec/privacy.png" width="100%">
 
-<img src="docs/images/dataflow.png"  width="100%">
-
-Connectors transform received data to interactions between employees - a temporal graph model that attempts to unify different types events. In general an interaction is directed edge - a triplet When (Timestamp), From (SourceVertex), To (TargetVertex) with optional additional Properties describing the event or particular interaction. 
+NP_Sync accesses only metadata to extract employee interaction graph. No content of communication is ever processed.
 
 Example data coming from connectors:
 
@@ -68,21 +23,31 @@ Example data coming from connectors:
 | 2022-07-08 11:15  | c5417a39 | 4395fa80 | 711665af | Email    |
 | 2022-07-08 13:00  | fcd030aa | a277e6c3 | dc5cf92b | Meeting  |
 
-
-
-## Deployment
-
-### Saas
-Network Perpsective hosts connectors within own Azure cloud infrastructure - the easiest way to go is just to authorize them, this takes just a few minutes and can be done from within the Network Perspective App admin panel. 
-
-### Private cloud
-However if your secuity requires having connectors within your infrastructure, we made easy to do it. All connectors are contenerized and helm chart is prepared for ease of deployement. That being said they main supported deployment platform is kubernetes. 
-[Read more](infra/readme.md)
-
-
-## Privacy and security principles
+### Privacy and security principles
 * **Data minimization**: only data required is included in the scope and fetched from source systems.
 * **Data anonymization**: data is securely transformed (identifiers cryptographically modified to make them not linkable with individuals; data points related to individuals obfuscated).
 * **On the fly data anonymization**: data is transformed and only the resulting anonymized data is passed on . Data fetched from source systems by connectors should not be stored on disk.
 * **GDPR-compliance**: connectors and built with GDPR compliance in mind.
 A risk analysis and Data Protection Impact Analysis (DPIA) has been performed for standard implementation model to support Data Processors to meet their regulatory obligations.
+
+## Deployment
+NP_Sync consists of just one container and a Key Vault.
+Due to simplicity it can be easily deployed in any major cloud like Azure, GCP, AWS but also Kubernetes or other environments that support Docker.
+
+<img src="docs/sec/deployment.png" width="100%">
+
+
+# Data and information flow
+
+<img src="docs/sec/data_flow.png" width="100%">
+
+1) NP_Sync requests API access key and a hashing key from Key Vault 
+2) Reads interactions from collaboration tool API
+3) Removes any PII and hashes identifiers with the hashing key
+4) Employee interaction graph is pushed to Work Smart api
+5) Work Smart analytical module processes anonymous data and computes over 100 metrics describing collaboration
+6) Metrics are presented via Web UI to end users, secured with SSO
+
+
+## SaaS
+Network Perpsective hosts connectors within own Azure cloud infrastructure - the easiest way to go is just to authorize them, this takes just a few minutes and can be done from within the Network Perspective App admin panel. 
