@@ -10,12 +10,13 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Auth;
 
-internal class AuthTokenHandler(IConnectorInfoProvider connectorInfoProvider, ICachedSecretRepository cachedSecretRepository, IJiraUnauthorizedFacade jiraFacade, ILogger<AuthTokenHandler> logger) : DelegatingHandler
+internal class AuthTokenHandler(IConnectorInfoProvider connectorInfoProvider, ICachedVault cachedSecretRepository, IJiraUnauthorizedFacade jiraFacade, ILogger<AuthTokenHandler> logger) : DelegatingHandler
 {
     private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
 
