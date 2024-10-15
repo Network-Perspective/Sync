@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
+using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Utils.Models;
@@ -33,9 +34,10 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync
 
         public async Task Execute(IJobExecutionContext context)
         {
+            var connectorId = Guid.Parse(context.JobDetail.Key.Name);
+
             try
             {
-                var connectorId = Guid.Parse(context.JobDetail.Key.Name);
                 var nextSyncStart = await _syncHistoryService.EvaluateSyncStartAsync(connectorId, context.CancellationToken);
 
                 var connector = await _connectorsService.GetAsync(connectorId, context.CancellationToken);
@@ -54,6 +56,10 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync
                 await _router.StartSyncAsync(connector.Worker.Name, syncContext);
 
                 _logger.LogInformation("Triggered job to order sync connector {connectorId}", connectorId);
+            }
+            catch (ConnectionNotFoundException cnfx)
+            {
+                _logger.LogWarning("Unable to sync connector '{Id}' because hosting worker '{Name}' is not connected", connectorId, cnfx.WorkerName);
             }
             catch (Exception ex)
             {

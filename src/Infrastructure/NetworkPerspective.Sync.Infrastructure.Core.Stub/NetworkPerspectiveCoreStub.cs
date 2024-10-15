@@ -98,7 +98,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
             {
                 var employeesList = employees
                     .GetAllInternal()
-                    .Select(x => UsersMapper.ToUser(x, "test"));
+                    .Select(x => UsersMapper.ToUser(x, dataSourceIdName));
 
                 var command = new SyncUsersCommand
                 {

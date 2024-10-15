@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
+using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
 

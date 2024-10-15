@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ISyncContextFactory, SyncContextFactory>();
         services.AddScoped<ISyncContextAccessor, SyncContextAccessor>();
 
-        services.AddScoped<ICachedSecretRepository, CachedSecretRepository>();
+        services.AddScoped<ICachedVault, CachedVault>();
 
         services.AddTransient<IClock, Clock>();
         services.AddTransient<IHashingServiceFactory, HashingServiceFactory>();
