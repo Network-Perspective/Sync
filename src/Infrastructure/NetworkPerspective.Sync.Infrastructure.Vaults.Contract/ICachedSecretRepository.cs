@@ -5,16 +5,14 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
-
-namespace NetworkPerspective.Sync.Worker.Application.Services;
+namespace NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 
 public interface ICachedSecretRepository : IVault
 {
     Task ClearCacheAsync(CancellationToken stoppingToken = default);
 }
 
-internal class CachedSecretRepository : ICachedSecretRepository
+public class CachedSecretRepository : ICachedSecretRepository
 {
     private readonly IVault _secretRepository;
     private readonly ILogger<CachedSecretRepository> _logger;
