@@ -53,17 +53,17 @@ internal class ConnectorsService : IConnectorsService
 
         _logger.LogInformation("New connector '{id}' has been created", id);
     }
-    
+
     public async Task RemoveAsync(Guid id, CancellationToken stoppingToken = default)
     {
         _logger.LogInformation("Deleting new connector '{id}'", id);
-        
+
         await ValidateExists(id, stoppingToken);
 
         await _unitOfWork
             .GetWorkerRepository()
             .RemoveAsync(id, stoppingToken);
-        
+
         await _unitOfWork.CommitAsync(stoppingToken);
 
         _logger.LogInformation("New connector '{id}' has been removed", id);
