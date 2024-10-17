@@ -14,9 +14,8 @@ using System;
 using System.Threading;
 
 using Microsoft.Extensions.Configuration;
-
-
-
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 
 #if !DEBUG
 #else
@@ -29,41 +28,75 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var builder = Host.CreateApplicationBuilder(args);
-
+        var builder = Host.CreateDefaultBuilder(args);
+        var config = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .Build();
         try
         {
-            var healthChecksBuilder = builder.Services
-                .AddHealthChecks();
+            // Configure services
+            builder.ConfigureServices((hostContext, services) =>
+            {
+                var configuration = hostContext.Configuration;
+                var healthChecksBuilder = services.AddHealthChecks();
 
-            builder.Services
-                .AddConnectorApplication(builder.Configuration.GetSection("App"))
-                .AddNetworkPerspectiveCore(builder.Configuration.GetSection("Infrastructure:Core"), healthChecksBuilder)
-                .AddVault(builder.Configuration.GetSection("Infrastructure:Vaults"), healthChecksBuilder)
-                .AddSlack(builder.Configuration.GetSection("Infrastructure:DataSources:Slack"))
-                .AddGoogle(builder.Configuration.GetSection("Infrastructure:DataSources:Google"))
-                .AddMicrosoft(builder.Configuration.GetSection("Infrastructure:DataSources:Microsoft"))
-                .AddJira(builder.Configuration.GetSection("Infrastructure:DataSources:Jira"))
-                .AddExcel(builder.Configuration.GetSection("Infrastructure:DataSources:Excel"))
-                .AddOrchestratorClient(builder.Configuration.GetSection("Infrastructure:Orchestrator"));
+                services
+                    .AddConnectorApplication(configuration.GetSection("App"))
+                    .AddNetworkPerspectiveCore(configuration.GetSection("Infrastructure:Core"), healthChecksBuilder)
+                    .AddVault(configuration.GetSection("Infrastructure:Vaults"), healthChecksBuilder)
+                    .AddSlack(configuration.GetSection("Infrastructure:DataSources:Slack"))
+                    .AddGoogle(configuration.GetSection("Infrastructure:DataSources:Google"))
+                    .AddMicrosoft(configuration.GetSection("Infrastructure:DataSources:Microsoft"))
+                    .AddJira(configuration.GetSection("Infrastructure:DataSources:Jira"))
+                    .AddExcel(configuration.GetSection("Infrastructure:DataSources:Excel"))
+                    .AddOrchestratorClient(configuration.GetSection("Infrastructure:Orchestrator"));
 
-            builder.Services.AddHostedService<ConnectionHost>();
+                services.AddHostedService<ConnectionHost>();
 
-            builder.Services.AddApplicationInsightsTelemetryWorkerService();
+                services.AddApplicationInsightsTelemetryWorkerService();
 
 #if !DEBUG
-            builder.Services.RemoveHttpClientLogging();
+            services.RemoveHttpClientLogging();
 #else
-            builder.Services.AddNetworkPerspectiveCoreStub(builder.Configuration.GetSection("Infrastructure:Core"));
+                services.AddNetworkPerspectiveCoreStub(configuration.GetSection("Infrastructure:Core"));
 #endif
+            });
+            
+            var enableWHealthChecks = config.GetValue<bool>("App:EnableHealthChecks");
+            if (enableWHealthChecks)
+            {
+                // Conditionally enable Kestrel and WebHost
+                builder.ConfigureWebHostDefaults(webBuilder =>
+                {
+                    {
+                        // Configure Kestrel
+                        webBuilder.ConfigureKestrel(options =>
+                        {
+                            options.ListenAnyIP(7000);
+                        });
+
+                        // Configure the app to use routing and map health checks
+                        webBuilder.Configure(app =>
+                        {
+                            app.UseRouting();
+                            app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapHealthChecks("/health");
+                            });
+                        });
+                    }
+                });
+            }
 
             var host = builder.Build();
+            
             host.Run();
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            var delay = builder.Configuration.GetValue<TimeSpan>("App:DelayBeforeExitOnException");
+            var delay = config.GetValue<TimeSpan>("App:DelayBeforeExitOnException");
             Thread.Sleep(delay);
             throw;
         }
