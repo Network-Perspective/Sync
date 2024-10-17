@@ -14,6 +14,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 public interface IConnectorsService
 {
     Task CreateAsync(Guid id, Guid networkId, string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default);
+    Task RemoveAsync(Guid id, CancellationToken stoppingToken = default);
     Task<Connector> GetAsync(Guid id, CancellationToken stoppingToken = default);
     Task<IEnumerable<Connector>> GetAllOfWorkerAsync(Guid workerId, CancellationToken stoppingToken = default);
     Task<IEnumerable<Connector>> GetAllAsync(CancellationToken stoppingToken = default);
@@ -51,6 +52,21 @@ internal class ConnectorsService : IConnectorsService
         await _unitOfWork.CommitAsync(stoppingToken);
 
         _logger.LogInformation("New connector '{id}' has been created", id);
+    }
+
+    public async Task RemoveAsync(Guid id, CancellationToken stoppingToken = default)
+    {
+        _logger.LogInformation("Deleting new connector '{id}'", id);
+
+        await ValidateExists(id, stoppingToken);
+
+        await _unitOfWork
+            .GetWorkerRepository()
+            .RemoveAsync(id, stoppingToken);
+
+        await _unitOfWork.CommitAsync(stoppingToken);
+
+        _logger.LogInformation("New connector '{id}' has been removed", id);
     }
 
     public async Task<IEnumerable<Connector>> GetAllAsync(CancellationToken stoppingToken = default)
