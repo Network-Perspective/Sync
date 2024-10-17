@@ -64,6 +64,28 @@ public class ConnectorsController : ControllerBase
         return Ok();
     }
 
+
+    /// <summary>
+    /// Removed connector for selected worker instance with specified properties
+    /// </summary>
+    /// <param name="id">connectorId</param>
+    /// <response code="200">Connector deleted</response>
+    /// <response code="500">Internal server error</response>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteAsync(Guid id)
+    {
+        _logger.LogDebug("Received request to delete connector '{id}'", id);
+        
+        await _syncScheduler.UnscheduleAsync(id);
+        await _tokenService.EnsureRemovedAsync(id);
+        await _connectorsService.RemoveAsync(id);
+        
+        return Ok();
+    }
+
     /// <summary>
     /// Get list of connectors of given worker
     /// </summary>
