@@ -34,7 +34,6 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
 
         var workerConnection = new WorkerConnection(workerName, Context.ConnectionId);
         connectionsLookupTable.Set(workerName, workerConnection);
-        var asd = Clients.Caller.GetWorkerCapabilitiesAsync(new GetWorkerCapabilitiesDto { CorrelationId = Guid.NewGuid() });
         await base.OnConnectedAsync();
     }
 
