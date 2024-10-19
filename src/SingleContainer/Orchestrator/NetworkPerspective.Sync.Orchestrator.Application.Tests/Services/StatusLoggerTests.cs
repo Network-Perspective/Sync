@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 using NetworkPerspective.Sync.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 
 using Xunit;
@@ -22,15 +23,22 @@ public class StatusLoggerTests
     private readonly ICryptoService _cryptoService = new CryptoService();
     private readonly IClock _clock = new Clock();
     private static readonly ILogger<StatusLogger> NullLogger = NullLogger<StatusLogger>.Instance;
+    private readonly Mock<IWorkerRouter> _workerRouterMock = new();
 
     [Fact]
     public async Task ShouldReturnPersistedLogs()
     {
         // Arrange
+        const string workerName = "worker-name";
+
         using var uowFactory = new SqliteUnitOfWorkFactory();
 
-        var workersService = new WorkersService(uowFactory.Create(), new Clock(), _cryptoService, NullLogger<WorkersService>.Instance);
-        var workerId = await workersService.CreateAsync("worker", "secret");
+        _workerRouterMock
+            .Setup(x => x.IsConnected(workerName))
+            .Returns(true);
+
+        var workersService = new WorkersService(uowFactory.Create(), _workerRouterMock.Object, new Clock(), _cryptoService, NullLogger<WorkersService>.Instance);
+        var workerId = await workersService.CreateAsync(workerName, "secret");
 
         var connectorId = Guid.NewGuid();
         var networkId = Guid.NewGuid();

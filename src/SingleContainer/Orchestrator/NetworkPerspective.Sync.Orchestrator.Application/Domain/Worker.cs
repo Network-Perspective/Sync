@@ -10,19 +10,23 @@ public class Worker
     public string SecretHash { get; }
     public string SecretSalt { get; }
     public bool IsAuthorized { get; private set; }
+    public bool IsOnline { get; private set; }
     public DateTime CreatedAt { get; }
 
-    public Worker(Guid id, int version, string name, string secretHash, string secretSalt, bool isApproved, DateTime createdAt)
+    public Worker(Guid id, int version, string name, string secretHash, string secretSalt, bool isAuthorized, DateTime createdAt)
     {
         Id = id;
         Version = version;
         Name = name;
         SecretHash = secretHash;
         SecretSalt = secretSalt;
-        IsAuthorized = isApproved;
+        IsAuthorized = isAuthorized;
         CreatedAt = createdAt;
     }
 
     public void Authorize()
         => IsAuthorized = true;
+
+    public void SetOnlineStatus(bool isOnline)
+        => IsOnline = isOnline;
 }
