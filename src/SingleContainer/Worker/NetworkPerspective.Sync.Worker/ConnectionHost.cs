@@ -128,6 +128,7 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
 
                 return new ConnectorStatusDto
                 {
+                    CorrelationId = dto.ConnectorId,
                     IsAuthorized = isAuthorized,
                     IsRunning = isRunning,
                     CurrentTaskCaption = taskStatus.Caption,
@@ -137,13 +138,27 @@ public class ConnectionHost(IWorkerHubClient hubClient, ISyncContextFactory sync
             };
         }
 
+        Task<WorkerCapabilitiesDto> OnGetWorkerCapabilities(GetWorkerCapabilitiesDto dto)
+        {
+            logger.LogInformation("Checking worker capabilities");
+
+            var connectorTypesCollection = serviceProvider.GetRequiredService<IConnectorTypesCollection>();
+
+            return Task.FromResult(new WorkerCapabilitiesDto
+            {
+                CorrelationId = dto.CorrelationId,
+                SupportedConnectorTypes = connectorTypesCollection.GetTypesNames(),
+            });
+        }
+
         await hubClient.ConnectAsync(configuration: x =>
         {
             x.TokenFactory = TokenFactory;
             x.OnStartSync = OnStartSync;
             x.OnSetSecrets = OnSetSecrets;
             x.OnRotateSecrets = OnRotateSecrets;
-            x.OnGetConnectrStatus = OnGetConnectorStatus;
+            x.OnGetConnectorStatus = OnGetConnectorStatus;
+            x.OnGetWorkerCapabilities = OnGetWorkerCapabilities;
         }, stoppingToken: stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)

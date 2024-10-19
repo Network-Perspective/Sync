@@ -46,7 +46,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests
             serviceCollection.AddTransient(x => Mock.Of<IVault>());
             serviceCollection.AddSingleton(Mock.Of<INetworkPerspectiveCore>());
             serviceCollection.AddSingleton(Mock.Of<IWorkerHubClient>());
-            serviceCollection.AddConnectorApplication(config.GetSection("Connector"));
+            serviceCollection.AddWorkerApplication(config.GetSection("Connector"), []);
 
             // Act
             serviceCollection.AddGoogle(config.GetSection("Infrastructure:Google"));

@@ -129,10 +129,22 @@ internal class WorkerHubClient : IWorkerHubClient
         {
             _logger.LogInformation("Received request '{correlationId}' to get connector '{connectorId}' status ", x.CorrelationId, x.ConnectorId);
 
-            if (_callbacks.OnGetConnectrStatus is null)
-                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetConnectrStatus));
+            if (_callbacks.OnGetConnectorStatus is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetConnectorStatus));
 
-            var result = await _callbacks.OnGetConnectrStatus(x);
+            var result = await _callbacks.OnGetConnectorStatus(x);
+            _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
+            return result;
+        });
+
+        _connection.On<GetWorkerCapabilitiesDto, WorkerCapabilitiesDto>(nameof(IWorkerClient.GetWorkerCapabilitiesAsync), async x =>
+        {
+            _logger.LogInformation("Received request '{correlationId}' to get worker capabilities ", x.CorrelationId);
+
+            if (_callbacks.OnGetWorkerCapabilities is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetWorkerCapabilities));
+
+            var result = await _callbacks.OnGetWorkerCapabilities(x);
             _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
             return result;
         });

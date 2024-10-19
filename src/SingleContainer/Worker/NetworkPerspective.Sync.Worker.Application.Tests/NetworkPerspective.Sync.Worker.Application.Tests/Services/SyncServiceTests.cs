@@ -29,6 +29,8 @@ namespace NetworkPerspective.Sync.Worker.Application.Tests.Services;
 
 public class SyncServiceTests
 {
+    const string ConnectorTypeName = "Slack";
+    const string DataSourceId = "SlackId";
     private readonly ILogger<SyncService> _logger = NullLogger<SyncService>.Instance;
     private readonly Mock<INetworkPerspectiveCore> _networkPerspectiveCoreMock = new();
     private readonly Mock<IInteractionsFilterFactory> _interactionsFilterFactoryMock = new();
@@ -36,6 +38,7 @@ public class SyncServiceTests
     private readonly Mock<IDataSource> _dataSourceMock = new();
     private readonly Mock<ITasksStatusesCache> _tasksStatusesCache = new();
     private readonly TestableInteractionStream _interactionsStream = new();
+    private readonly IConnectorTypesCollection _connectorTypes;
 
     public SyncServiceTests()
     {
@@ -57,6 +60,9 @@ public class SyncServiceTests
         _interactionsFilterMock
             .Setup(x => x.Filter(It.IsAny<IEnumerable<Interaction>>()))
             .Returns(new HashSet<Interaction>());
+
+        var connectorType = new ConnectorType { Name = ConnectorTypeName, DataSourceId = DataSourceId, DataSourceFacadeFullName = string.Empty };
+        _connectorTypes = new ConnectorTypesCollection([connectorType]);
     }
 
     [Fact]
@@ -67,12 +73,12 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var context = new SyncContext(Guid.NewGuid(), "Slack", ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
 
         _dataSourceMock
             .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SyncResult(10, 100, Enumerable.Empty<Exception>()));
-        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
 
         // Act
         await syncService.SyncAsync(context);
@@ -89,13 +95,13 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var context = new SyncContext(Guid.NewGuid(), "Slack", ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
 
         _dataSourceMock
             .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception());
 
-        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
 
         // Act
         await syncService.SyncAsync(context);
@@ -112,9 +118,9 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var context = new SyncContext(Guid.NewGuid(), "Slack", ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
 
-        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
 
         // Act
         await syncService.SyncAsync(context);
@@ -144,7 +150,7 @@ public class SyncServiceTests
             .Setup(x => x.GetHashedEmployeesAsync(context, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new EmployeeCollection([employee], HashFunction.Empty));
 
-        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
 
         // Act
         await syncService.SyncAsync(context);
@@ -166,14 +172,14 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var context = new SyncContext(Guid.NewGuid(), "Slack", ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
 
         var interactionsStreamMock = new Mock<IInteractionsStream>();
         _networkPerspectiveCoreMock
             .Setup(x => x.OpenInteractionsStream(It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns(interactionsStreamMock.Object);
 
-        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
 
         // Act
         await syncService.SyncAsync(context);
@@ -189,9 +195,9 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var context = new SyncContext(Guid.NewGuid(), "Slack", ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
 
-        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object);
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
 
         // Act
         await syncService.SyncAsync(context);

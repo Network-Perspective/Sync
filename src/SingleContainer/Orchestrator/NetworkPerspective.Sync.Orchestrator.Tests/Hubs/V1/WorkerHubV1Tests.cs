@@ -12,6 +12,7 @@ using Moq;
 
 using NetworkPerspective.Sync.Contract.V1;
 using NetworkPerspective.Sync.Contract.V1.Dtos;
+using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
@@ -22,6 +23,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Tests.Hubs.V1;
 
 public class WorkerHubV1Tests
 {
+    private const string WorkerName = "worker-name";
     private const string ConnectionId = "connection-id";
 
     private readonly Mock<IConnectionsLookupTable> _connectionsLookupTableMock = new();
@@ -40,9 +42,11 @@ public class WorkerHubV1Tests
         _serviceProviderMock.Reset();
         _clockMock.Reset();
 
+        var workerConnection = new WorkerConnection(WorkerName, ConnectionId);
+
         _connectionsLookupTableMock
             .Setup(x => x.Get(It.IsAny<string>()))
-            .Returns(ConnectionId);
+            .Returns(workerConnection);
 
         _clientsMock
             .Setup(x => x.Client(ConnectionId))
@@ -72,7 +76,7 @@ public class WorkerHubV1Tests
                 });
 
             // Act
-            var actualStatus = await hub.GetConnectorStatusAsync("worker-name", Guid.NewGuid(), Guid.NewGuid(), new Dictionary<string, string>(), "Slack");
+            var actualStatus = await hub.GetConnectorStatusAsync(WorkerName, Guid.NewGuid(), Guid.NewGuid(), new Dictionary<string, string>(), "Slack");
 
             // Assert
             var expectedStatus = ConnectorStatus.Idle(isAuthorized);
@@ -105,7 +109,7 @@ public class WorkerHubV1Tests
                 });
 
             // Act
-            var actualStatus = await hub.GetConnectorStatusAsync("worker-name", Guid.NewGuid(), Guid.NewGuid(), new Dictionary<string, string>(), "Slack");
+            var actualStatus = await hub.GetConnectorStatusAsync(WorkerName, Guid.NewGuid(), Guid.NewGuid(), new Dictionary<string, string>(), "Slack");
 
             // Assert
             var expectedTaskStatus = ConnectorTaskStatus.Create(caption, description, completionRate);

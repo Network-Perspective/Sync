@@ -1,27 +1,29 @@
 ﻿using System.Collections.Generic;
 
+using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
 public interface IConnectionsLookupTable
 {
-    string Get(string workerName);
+    WorkerConnection Get(string workerName);
     bool Contains(string workerName);
-    void Set(string workerName, string connectionId);
+    void Set(string workerName, WorkerConnection connection);
     void Remove(string workerName);
 }
 
+
 internal class ConnectionsLookupTable : IConnectionsLookupTable
 {
-    private readonly Dictionary<string, string> _lookupTable = [];
+    private readonly Dictionary<string, WorkerConnection> _lookupTable = [];
     private readonly object _lock = new();
 
-    public string Get(string workerName)
+    public WorkerConnection Get(string workerName)
     {
         lock (_lock)
         {
-            return _lookupTable.TryGetValue(workerName, out string value)
+            return _lookupTable.TryGetValue(workerName, out WorkerConnection value)
                 ? value
                 : throw new ConnectionNotFoundException(workerName);
         }
@@ -35,11 +37,11 @@ internal class ConnectionsLookupTable : IConnectionsLookupTable
         }
     }
 
-    public void Set(string workerName, string connectionId)
+    public void Set(string workerName, WorkerConnection connection)
     {
         lock (_lock)
         {
-            _lookupTable[workerName] = connectionId;
+            _lookupTable[workerName] = connection;
         }
     }
 

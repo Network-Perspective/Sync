@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -119,9 +118,12 @@ internal class WorkersService : IWorkersService
             .GetWorkerRepository()
             .GetAllAsync(stoppingToken);
 
-        var workersList = workers.ToList();
-        workersList.ForEach(x => SetOnlineStatus(ref x));
-        return workersList;
+        var newWorkers = new List<Worker>();
+
+        foreach (var worker in workers)
+            newWorkers.Add(await SetConnectionPropertiesAsync(worker));
+
+        return newWorkers;
     }
 
     public async Task<Worker> GetAsync(Guid id, CancellationToken stoppingToken = default)
@@ -130,7 +132,7 @@ internal class WorkersService : IWorkersService
             .GetWorkerRepository()
             .GetAsync(id, stoppingToken);
 
-        SetOnlineStatus(ref worker);
+        await SetConnectionPropertiesAsync(worker);
 
         return worker;
     }
@@ -141,14 +143,22 @@ internal class WorkersService : IWorkersService
             .GetWorkerRepository()
             .GetAsync(name, stoppingToken);
 
-        SetOnlineStatus(ref worker);
+        worker = await SetConnectionPropertiesAsync(worker);
 
         return worker;
     }
 
-    private void SetOnlineStatus(ref Worker worker)
+    private async Task<Worker> SetConnectionPropertiesAsync(Worker worker)
     {
         var isOnline = _workerRouter.IsConnected(worker.Name);
         worker.SetOnlineStatus(isOnline);
+
+        if (isOnline)
+        {
+            var supportedConnectorTypes = await _workerRouter.GetSupportedConnectorTypesAsync(worker.Name);
+            worker.SetSupportedConnectorTypes(supportedConnectorTypes);
+        }
+
+        return worker;
     }
 }
