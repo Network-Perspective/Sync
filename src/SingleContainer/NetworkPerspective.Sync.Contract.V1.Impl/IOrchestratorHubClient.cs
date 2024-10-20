@@ -14,20 +14,20 @@ using Polly.Retry;
 
 namespace NetworkPerspective.Sync.Contract.V1.Impl;
 
-public interface IWorkerHubClient : IOrchestratorClient
+public interface IOrchestratorHubClient : IOrchestratorClient
 {
     Task ConnectAsync(Action<OrchestratorClientConfiguration> configuration = null, Action<IHubConnectionBuilder> connectionConfiguration = null, CancellationToken stoppingToken = default);
 }
 
-internal class WorkerHubClient : IWorkerHubClient
+internal class OrchestartorHubClient : IOrchestratorHubClient
 {
     private HubConnection _connection;
     private readonly OrchestratorClientConfiguration _callbacks = new();
-    private readonly WorkerHubClientConfig _config;
-    private readonly ILogger<IWorkerHubClient> _logger;
+    private readonly OrchestratorHubClientConfig _config;
+    private readonly ILogger<IOrchestratorHubClient> _logger;
     private readonly AsyncRetryPolicy _asyncRetryPolicy;
 
-    public WorkerHubClient(IOptions<WorkerHubClientConfig> config, ILogger<IWorkerHubClient> logger)
+    public OrchestartorHubClient(IOptions<OrchestratorHubClientConfig> config, ILogger<IOrchestratorHubClient> logger)
     {
         _config = config.Value;
         _logger = logger;
@@ -129,10 +129,22 @@ internal class WorkerHubClient : IWorkerHubClient
         {
             _logger.LogInformation("Received request '{correlationId}' to get connector '{connectorId}' status ", x.CorrelationId, x.ConnectorId);
 
-            if (_callbacks.OnGetConnectrStatus is null)
-                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetConnectrStatus));
+            if (_callbacks.OnGetConnectorStatus is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetConnectorStatus));
 
-            var result = await _callbacks.OnGetConnectrStatus(x);
+            var result = await _callbacks.OnGetConnectorStatus(x);
+            _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
+            return result;
+        });
+
+        _connection.On<GetWorkerCapabilitiesDto, WorkerCapabilitiesDto>(nameof(IWorkerClient.GetWorkerCapabilitiesAsync), async x =>
+        {
+            _logger.LogInformation("Received request '{correlationId}' to get worker capabilities ", x.CorrelationId);
+
+            if (_callbacks.OnGetWorkerCapabilities is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetWorkerCapabilities));
+
+            var result = await _callbacks.OnGetWorkerCapabilities(x);
             _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
             return result;
         });

@@ -10,4 +10,5 @@ public interface IWorkerClient
     Task<AckDto> SetSecretsAsync(SetSecretsDto setSecretsRequestDto);
     Task<AckDto> RotateSecretsAsync(RotateSecretsDto rotateSecretsDto);
     Task<ConnectorStatusDto> GetConnectorStatusAsync(GetConnectorStatusDto getConnectorStatusDto);
+    Task<WorkerCapabilitiesDto> GetWorkerCapabilitiesAsync(GetWorkerCapabilitiesDto getWorkerCapabilites);
 }

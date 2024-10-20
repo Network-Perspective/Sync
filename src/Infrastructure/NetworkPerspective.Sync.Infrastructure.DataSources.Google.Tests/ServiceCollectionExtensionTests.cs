@@ -35,8 +35,6 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
                     { "Connector:Sync:DefaultSyncLookbackInDays", "5" },
-                    { "Connector:Misc:DataSourceName", "GSuite" },
-                    { "Infrastructure:Google:Domain", "networkperspective.io" },
                     { "Infrastructure:Google:ApplicationName", "app_connector" },
                     { "Infrastructure:Google:AdminEmail", "admin@networkperspective.io" }
                 })
@@ -45,8 +43,9 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests
             serviceCollection.AddLogging();
             serviceCollection.AddTransient(x => Mock.Of<IVault>());
             serviceCollection.AddSingleton(Mock.Of<INetworkPerspectiveCore>());
-            serviceCollection.AddSingleton(Mock.Of<IWorkerHubClient>());
-            serviceCollection.AddConnectorApplication(config.GetSection("Connector"));
+            serviceCollection.AddSingleton(Mock.Of<IOrchestratorHubClient>());
+            var connectorType = new ConnectorType { Name = "Google", DataSourceId = "GSuiteId", DataSourceFacadeFullName = (typeof(GoogleFacade).FullName) };
+            serviceCollection.AddWorkerApplication(config.GetSection("Connector"), [connectorType]);
 
             // Act
             serviceCollection.AddGoogle(config.GetSection("Infrastructure:Google"));
@@ -56,7 +55,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests
             var timeRange = new TimeRange(DateTime.UtcNow, DateTime.UtcNow);
             var syncContext = new SyncContext(Guid.NewGuid(), "Google", ConnectorConfig.Empty, [], "".ToSecureString(), timeRange, Mock.Of<IHashingService>());
             services.GetRequiredService<ISyncContextAccessor>().SyncContext = syncContext;
-            var dataSource = services.GetRequiredService<IDataSource>();
+            var dataSource = services.GetRequiredKeyedService<IDataSource>((typeof(GoogleFacade).FullName));
             dataSource.Should().BeAssignableTo<GoogleFacade>();
         }
     }

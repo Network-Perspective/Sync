@@ -30,19 +30,19 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
     public override async Task OnConnectedAsync()
     {
         var workerName = Context.GetWorkerName();
+        logger.LogInformation("Worker '{name}' connected", workerName);
 
-        logger.LogInformation("Worker '{id}' connected", workerName);
-        connectionsLookupTable.Set(workerName, Context.ConnectionId);
-
+        var workerConnection = new WorkerConnection(workerName, Context.ConnectionId);
+        connectionsLookupTable.Set(workerName, workerConnection);
         await base.OnConnectedAsync();
     }
 
     public override Task OnDisconnectedAsync(Exception exception)
     {
-        var connectorId = Context.GetWorkerName();
+        var workerName = Context.GetWorkerName();
 
-        logger.LogInformation("Worker '{id}' disconnected", connectorId);
-        connectionsLookupTable.Remove(connectorId);
+        logger.LogInformation("Worker '{name}' disconnected", workerName);
+        connectionsLookupTable.Remove(workerName);
 
         return base.OnDisconnectedAsync(exception);
     }
@@ -51,8 +51,8 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
     {
         var dto = syncContext.Adapt<StartSyncDto>();
         logger.LogInformation("Sending request '{correlationId}' to worker '{id}' to start sync...", dto.CorrelationId, workerName);
-        var connectionId = connectionsLookupTable.Get(workerName);
-        var response = await Clients.Client(connectionId).SyncAsync(dto);
+        var connection = connectionsLookupTable.Get(workerName);
+        var response = await Clients.Client(connection.Id).SyncAsync(dto);
         logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
 
@@ -64,8 +64,8 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
             Secrets = secrets.ToDictionary(x => x.Key, x => x.Value.ToSystemString())
         };
         logger.LogInformation("Sending request '{correlationId}' to worker '{id}' to set secrets...", dto.CorrelationId, workerName);
-        var connectionId = connectionsLookupTable.Get(workerName);
-        var response = await Clients.Client(connectionId).SetSecretsAsync(dto);
+        var connection = connectionsLookupTable.Get(workerName);
+        var response = await Clients.Client(connection.Id).SetSecretsAsync(dto);
         logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
 
@@ -78,9 +78,9 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
             NetworkProperties = networkProperties,
             ConnectorType = connectorType
         };
-        var connectionId = connectionsLookupTable.Get(workerName);
+        var connection = connectionsLookupTable.Get(workerName);
         var response = await Clients
-            .Client(connectionId)
+            .Client(connection.Id)
             .RotateSecretsAsync(dto);
         logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
@@ -96,9 +96,9 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
             ConnectorProperties = networkProperties
         };
 
-        var connectionId = connectionsLookupTable.Get(workerName);
+        var connection = connectionsLookupTable.Get(workerName);
         var responseDto = await Clients
-            .Client(connectionId)
+            .Client(connection.Id)
             .GetConnectorStatusAsync(requestDto);
 
         if (responseDto.IsRunning)
@@ -145,6 +145,20 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
 
     public bool IsConnected(string workerName)
         => connectionsLookupTable.Contains(workerName);
+
+    public async Task<IEnumerable<string>> GetSupportedConnectorTypesAsync(string workerName)
+    {
+        var requestDto = new GetWorkerCapabilitiesDto
+        {
+            CorrelationId = Guid.NewGuid()
+        };
+        var connection = connectionsLookupTable.Get(workerName);
+        var capabilities = await Clients
+            .Client(connection.Id)
+            .GetWorkerCapabilitiesAsync(requestDto);
+
+        return capabilities.SupportedConnectorTypes;
+    }
 
     private static Sync.Application.Domain.Statuses.StatusLogLevel ToDomainStatusLogLevel(StatusLogLevel level)
         => level switch
