@@ -19,8 +19,7 @@ using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 
 using System.Collections.Generic;
 
-using NetworkPerspective.Sync.Worker.Application.Services;
-
+using Microsoft.Extensions.Options;
 
 #if !DEBUG
 #else
@@ -49,6 +48,12 @@ public class Program
                 .AddHealthChecks();
 
             builder.Services
+                .AddSingleton<IValidateOptions<WorkerConfiguration>, WorkerConfiguration.Validator>()
+                .AddOptions<WorkerConfiguration>()
+                .Bind(builder.Configuration)
+                .ValidateOnStart();
+
+            builder.Services
                 .AddWorkerApplication(builder.Configuration.GetSection("App"), connectorTypes)
                 .AddNetworkPerspectiveCore(builder.Configuration.GetSection("Infrastructure:Core"), healthChecksBuilder)
                 .AddVault(builder.Configuration.GetSection("Infrastructure:Vaults"), healthChecksBuilder)
@@ -71,6 +76,15 @@ public class Program
 
             var host = builder.Build();
             host.Run();
+        }
+        catch (OptionsValidationException ex)
+        {
+
+            Console.WriteLine("Startup configuration validation thrown errors:");
+            Console.WriteLine(string.Join('\n', ex.Failures));
+            var delay = builder.Configuration.GetValue<TimeSpan>("App:DelayBeforeExitOnException");
+            Thread.Sleep(delay);
+            throw;
         }
         catch (Exception ex)
         {

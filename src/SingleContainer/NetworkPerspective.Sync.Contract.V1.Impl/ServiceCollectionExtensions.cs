@@ -7,11 +7,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddOrchestratorClient(this IServiceCollection services, IConfigurationSection config)
     {
-        services.Configure<WorkerHubClientConfig>(config);
+        services.Configure<OrchestratorHubClientConfig>(config);
 
-        services.AddSingleton<WorkerHubClient>();
-        services.AddSingleton<IWorkerHubClient>(sp => sp.GetRequiredService<WorkerHubClient>());
-        services.AddSingleton<IOrchestratorClient>(sp => sp.GetRequiredService<WorkerHubClient>());
+        services.AddSingleton<OrchestartorHubClient>();
+        services.AddSingleton<IOrchestratorHubClient>(sp => sp.GetRequiredService<OrchestartorHubClient>());
+        services.AddSingleton<IOrchestratorClient>(sp => sp.GetRequiredService<OrchestartorHubClient>());
 
         return services;
     }

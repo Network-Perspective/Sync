@@ -14,20 +14,20 @@ using Polly.Retry;
 
 namespace NetworkPerspective.Sync.Contract.V1.Impl;
 
-public interface IWorkerHubClient : IOrchestratorClient
+public interface IOrchestratorHubClient : IOrchestratorClient
 {
     Task ConnectAsync(Action<OrchestratorClientConfiguration> configuration = null, Action<IHubConnectionBuilder> connectionConfiguration = null, CancellationToken stoppingToken = default);
 }
 
-internal class WorkerHubClient : IWorkerHubClient
+internal class OrchestartorHubClient : IOrchestratorHubClient
 {
     private HubConnection _connection;
     private readonly OrchestratorClientConfiguration _callbacks = new();
-    private readonly WorkerHubClientConfig _config;
-    private readonly ILogger<IWorkerHubClient> _logger;
+    private readonly OrchestratorHubClientConfig _config;
+    private readonly ILogger<IOrchestratorHubClient> _logger;
     private readonly AsyncRetryPolicy _asyncRetryPolicy;
 
-    public WorkerHubClient(IOptions<WorkerHubClientConfig> config, ILogger<IWorkerHubClient> logger)
+    public OrchestartorHubClient(IOptions<OrchestratorHubClientConfig> config, ILogger<IOrchestratorHubClient> logger)
     {
         _config = config.Value;
         _logger = logger;
