@@ -11,6 +11,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Worker
 public interface IWorkerRouter
 {
     bool IsConnected(string workerName);
+    Task<IEnumerable<string>> GetSupportedConnectorTypesAsync(string workerName);
     Task StartSyncAsync(string workerName, SyncContext syncContext);
     Task SetSecretsAsync(string workerName, IDictionary<string, SecureString> secrets);
     Task RotateSecretsAsync(string workerName, Guid connectorId, IDictionary<string, string> networkProperties, string connectorType);
