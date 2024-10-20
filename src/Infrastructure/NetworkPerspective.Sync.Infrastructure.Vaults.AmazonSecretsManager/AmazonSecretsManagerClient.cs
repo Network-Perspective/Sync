@@ -27,8 +27,11 @@ internal class AmazonSecretsManagerClient : IVault
     {
         _config = config.Value;
         _logger = logger;
-        var regionEndpoint = RegionEndpoint.GetBySystemName(config.Value.Region);
-        _client = new Lazy<IAmazonSecretsManager>(() => new Amazon.SecretsManager.AmazonSecretsManagerClient(regionEndpoint));
+        _client = new Lazy<IAmazonSecretsManager>(() =>
+        {
+            var regionEndpoint = RegionEndpoint.GetBySystemName(config.Value.Region);
+            return new Amazon.SecretsManager.AmazonSecretsManagerClient(regionEndpoint);
+        });
     }
 
     public async Task<SecureString> GetSecretAsync(string key, CancellationToken stoppingToken = default)

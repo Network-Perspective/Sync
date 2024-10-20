@@ -11,5 +11,6 @@ public class OrchestratorClientConfiguration
     public Func<StartSyncDto, Task<SyncCompletedDto>> OnStartSync { get; set; }
     public Func<SetSecretsDto, Task> OnSetSecrets { get; set; }
     public Func<RotateSecretsDto, Task> OnRotateSecrets { get; set; }
-    public Func<GetConnectorStatusDto, Task<ConnectorStatusDto>> OnGetConnectrStatus { get; set; }
+    public Func<GetConnectorStatusDto, Task<ConnectorStatusDto>> OnGetConnectorStatus { get; set; }
+    public Func<GetWorkerCapabilitiesDto, Task<WorkerCapabilitiesDto>> OnGetWorkerCapabilities { get; set; }
 }

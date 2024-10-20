@@ -15,10 +15,10 @@ public interface IStatusLogger
     public Task AddLogAsync(string message, DomainStatusLogLevel level, CancellationToken stoppingToken = default);
 }
 
-internal class StatusLogger(ISyncContextAccessor syncContextAccessor, IWorkerHubClient hubClient) : IStatusLogger
+internal class StatusLogger(ISyncContextAccessor syncContextAccessor, IOrchestratorHubClient hubClient) : IStatusLogger
 {
     private readonly ISyncContextAccessor _syncContextAccessor = syncContextAccessor;
-    private readonly IWorkerHubClient _hubClient = hubClient;
+    private readonly IOrchestratorHubClient _hubClient = hubClient;
 
     public async Task AddLogAsync(string message, DomainStatusLogLevel level, CancellationToken stoppingToken = default)
     {
