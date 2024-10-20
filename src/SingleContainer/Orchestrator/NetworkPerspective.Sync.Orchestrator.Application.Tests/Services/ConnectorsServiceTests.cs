@@ -7,8 +7,11 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
+using Moq;
+
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
+using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Application.Tests;
 
@@ -22,6 +25,7 @@ public class ConnectorsServiceTests
     private readonly SqliteUnitOfWorkFactory _sqliteUnitOfWorkFactory = new();
     private readonly ICryptoService _cryptoService = new CryptoService();
     private readonly IClock _clock = new Clock();
+    private readonly Mock<IWorkerRouter> _workerRouterMock = new();
 
     public class AddOrReplace : ConnectorsServiceTests
     {
@@ -29,8 +33,14 @@ public class ConnectorsServiceTests
         public async Task ShouldAddNewConnector()
         {
             // Arrange
-            var workersService = new WorkersService(_sqliteUnitOfWorkFactory.Create(), new Clock(), _cryptoService, NullLogger<WorkersService>.Instance);
-            var workerId = await workersService.CreateAsync("worker", "secret");
+            const string workerName = "worker-name";
+
+            _workerRouterMock
+                .Setup(x => x.IsConnected(workerName))
+                .Returns(true);
+
+            var workersService = new WorkersService(_sqliteUnitOfWorkFactory.Create(), _workerRouterMock.Object, _clock, _cryptoService, NullLogger<WorkersService>.Instance);
+            var workerId = await workersService.CreateAsync(workerName, "secret");
 
             var connectorId = Guid.NewGuid();
             var networkId = Guid.NewGuid();
@@ -41,7 +51,7 @@ public class ConnectorsServiceTests
                 { "BoolProp", "true" },
                 { "IntProp", "321" }
             };
-            var connectorService = new ConnectorsService(_sqliteUnitOfWorkFactory.Create(), new Clock(), NullLogger);
+            var connectorService = new ConnectorsService(_sqliteUnitOfWorkFactory.Create(), _clock, NullLogger);
 
             // Act
             await connectorService.CreateAsync(connectorId, networkId, type, workerId, properties);
@@ -130,7 +140,7 @@ public class ConnectorsServiceTests
         public async Task ShouldThrowOnNonExisting()
         {
             // Arrange
-            var connectorService = new ConnectorsService(_sqliteUnitOfWorkFactory.Create(), new Clock(), NullLogger);
+            var connectorService = new ConnectorsService(_sqliteUnitOfWorkFactory.Create(), _clock, NullLogger);
             Func<Task<Connector>> func = () => connectorService.GetAsync(Guid.NewGuid());
 
             // Act Assert
@@ -144,8 +154,13 @@ public class ConnectorsServiceTests
         public async Task ShouldNotThrowOnExisting()
         {
             // Arrange
-            var workersService = new WorkersService(_sqliteUnitOfWorkFactory.Create(), new Clock(), _cryptoService, NullLogger<WorkersService>.Instance);
-            var workerId = await workersService.CreateAsync("worker", "secret");
+            const string workerName = "worker-name";
+
+            _workerRouterMock
+                .Setup(x => x.IsConnected(workerName))
+                .Returns(true);
+
+            var workersService = new WorkersService(_sqliteUnitOfWorkFactory.Create(), _workerRouterMock.Object, _clock, _cryptoService, NullLogger<WorkersService>.Instance); var workerId = await workersService.CreateAsync("worker", "secret");
 
             var connectorId = Guid.NewGuid();
             var networkId = Guid.NewGuid();
@@ -156,7 +171,7 @@ public class ConnectorsServiceTests
                 { "BoolProp", "true" },
                 { "IntProp", "321" }
             };
-            var connectorService = new ConnectorsService(_sqliteUnitOfWorkFactory.Create(), new Clock(), NullLogger);
+            var connectorService = new ConnectorsService(_sqliteUnitOfWorkFactory.Create(), _clock, NullLogger);
 
             await connectorService.CreateAsync(connectorId, networkId, type, workerId, properties);
 

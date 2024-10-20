@@ -12,7 +12,6 @@ using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
-using NetworkPerspective.Sync.Worker.Application.Mappers;
 
 namespace NetworkPerspective.Sync.Worker.Application.Services;
 
@@ -29,13 +28,15 @@ internal sealed class SyncService : ISyncService
     private readonly IStatusLogger _statusLogger;
     private readonly ITasksStatusesCache _tasksStatusesCache;
     private readonly IInteractionsFilterFactory _interactionFilterFactory;
+    private readonly IConnectorTypesCollection _connectorTypes;
 
     public SyncService(ILogger<SyncService> logger,
                        IDataSource dataSource,
                        INetworkPerspectiveCore networkPerspectiveCore,
                        IStatusLogger statusLogger,
                        ITasksStatusesCache tasksStatusesCache,
-                       IInteractionsFilterFactory interactionFilterFactory)
+                       IInteractionsFilterFactory interactionFilterFactory,
+                       IConnectorTypesCollection connectorTypes)
     {
         _logger = logger;
         _dataSource = dataSource;
@@ -43,6 +44,7 @@ internal sealed class SyncService : ISyncService
         _statusLogger = statusLogger;
         _tasksStatusesCache = tasksStatusesCache;
         _interactionFilterFactory = interactionFilterFactory;
+        _connectorTypes = connectorTypes;
     }
 
     public async Task<SyncResult> SyncAsync(SyncContext context, CancellationToken stoppingToken = default)
@@ -96,7 +98,7 @@ internal sealed class SyncService : ISyncService
 
         var employees = await dataSource.GetEmployeesAsync(context, stoppingToken);
         await _statusLogger.LogInfoAsync($"Received employees profiles", stoppingToken);
-        var dataSourceIdName = ConnectorTypeMapper.ToDataSourceId(context.ConnectorType);
+        var dataSourceIdName = _connectorTypes[context.ConnectorType].DataSourceId;
         await _networkPerspectiveCore.PushUsersAsync(context.AccessToken, employees, dataSourceIdName, stoppingToken);
         await _statusLogger.LogInfoAsync($"Uploaded employees profiles", stoppingToken);
 
@@ -111,8 +113,8 @@ internal sealed class SyncService : ISyncService
 
         var employees = await dataSource.GetHashedEmployeesAsync(context, stoppingToken);
         await _statusLogger.LogInfoAsync($"Received hashed employees profiles", stoppingToken);
-        var dataSourceIdName = ConnectorTypeMapper.ToDataSourceId(context.ConnectorType);
-        await _networkPerspectiveCore.PushEntitiesAsync(context.AccessToken, employees, context.TimeRange.Start, dataSourceIdName, stoppingToken);
+        var dataSourceId = _connectorTypes[context.ConnectorType].DataSourceId;
+        await _networkPerspectiveCore.PushEntitiesAsync(context.AccessToken, employees, context.TimeRange.Start, dataSourceId, stoppingToken);
         await _statusLogger.LogInfoAsync($"Uploaded hashed employees profiles", stoppingToken);
 
         await _statusLogger.LogInfoAsync($"Synchronization of hashed employees profiles completed", stoppingToken);
@@ -155,7 +157,7 @@ internal sealed class SyncService : ISyncService
         var filter = _interactionFilterFactory
             .CreateInteractionsFilter(context.TimeRange);
 
-        var stream = _networkPerspectiveCore.OpenInteractionsStream(context.AccessToken, $"{context.ConnectorType}Id", stoppingToken);
+        var stream = _networkPerspectiveCore.OpenInteractionsStream(context.AccessToken, _connectorTypes[context.ConnectorType].DataSourceId, stoppingToken);
         await using var filteredStream = new FilteredInteractionStreamDecorator(stream, filter);
 
         var result = await dataSource.SyncInteractionsAsync(filteredStream, context, stoppingToken);

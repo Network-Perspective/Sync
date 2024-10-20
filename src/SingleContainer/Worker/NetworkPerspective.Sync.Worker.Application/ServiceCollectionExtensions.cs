@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Collections.Generic;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
@@ -9,8 +12,10 @@ namespace NetworkPerspective.Sync.Worker.Application;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddConnectorApplication(this IServiceCollection services, IConfigurationSection configurationSection)
+    public static IServiceCollection AddWorkerApplication(this IServiceCollection services, IConfigurationSection configurationSection, IEnumerable<ConnectorType> connectorTypes)
     {
+        services.AddSingleton(new ConnectorTypesCollection(connectorTypes) as IConnectorTypesCollection);
+
         services.AddScoped<ConnectorInfoProvider>();
         services.AddScoped<IConnectorInfoProvider>(x => x.GetRequiredService<ConnectorInfoProvider>());
         services.AddScoped<IConnectorInfoInitializer>(x => x.GetRequiredService<ConnectorInfoProvider>());

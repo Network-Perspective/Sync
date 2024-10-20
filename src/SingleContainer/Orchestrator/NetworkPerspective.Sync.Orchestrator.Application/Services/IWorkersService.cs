@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
+using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
@@ -25,13 +26,15 @@ public interface IWorkersService
 internal class WorkersService : IWorkersService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IWorkerRouter _workerRouter;
     private readonly IClock _clock;
     private readonly ICryptoService _cryptoService;
     private readonly ILogger<IWorkersService> _logger;
 
-    public WorkersService(IUnitOfWork unitOfWork, IClock clock, ICryptoService cryptoService, ILogger<WorkersService> logger)
+    public WorkersService(IUnitOfWork unitOfWork, IWorkerRouter workerRouter, IClock clock, ICryptoService cryptoService, ILogger<WorkersService> logger)
     {
         _unitOfWork = unitOfWork;
+        _workerRouter = workerRouter;
         _clock = clock;
         _cryptoService = cryptoService;
         _logger = logger;
@@ -109,24 +112,53 @@ internal class WorkersService : IWorkersService
         _logger.LogInformation("Worker '{id}' does not exist, nothing to delete", id);
     }
 
-    public Task<IEnumerable<Worker>> GetAllAsync(CancellationToken stoppingToken = default)
+    public async Task<IEnumerable<Worker>> GetAllAsync(CancellationToken stoppingToken = default)
     {
-        return _unitOfWork
+        var workers = await _unitOfWork
             .GetWorkerRepository()
             .GetAllAsync(stoppingToken);
+
+        var newWorkers = new List<Worker>();
+
+        foreach (var worker in workers)
+            newWorkers.Add(await SetConnectionPropertiesAsync(worker));
+
+        return newWorkers;
     }
 
-    public Task<Worker> GetAsync(Guid id, CancellationToken stoppingToken = default)
+    public async Task<Worker> GetAsync(Guid id, CancellationToken stoppingToken = default)
     {
-        return _unitOfWork
+        var worker = await _unitOfWork
             .GetWorkerRepository()
             .GetAsync(id, stoppingToken);
+
+        await SetConnectionPropertiesAsync(worker);
+
+        return worker;
     }
 
-    public Task<Worker> GetAsync(string name, CancellationToken stoppingToken = default)
+    public async Task<Worker> GetAsync(string name, CancellationToken stoppingToken = default)
     {
-        return _unitOfWork
+        var worker = await _unitOfWork
             .GetWorkerRepository()
             .GetAsync(name, stoppingToken);
+
+        worker = await SetConnectionPropertiesAsync(worker);
+
+        return worker;
+    }
+
+    private async Task<Worker> SetConnectionPropertiesAsync(Worker worker)
+    {
+        var isOnline = _workerRouter.IsConnected(worker.Name);
+        worker.SetOnlineStatus(isOnline);
+
+        if (isOnline)
+        {
+            var supportedConnectorTypes = await _workerRouter.GetSupportedConnectorTypesAsync(worker.Name);
+            worker.SetSupportedConnectorTypes(supportedConnectorTypes);
+        }
+
+        return worker;
     }
 }

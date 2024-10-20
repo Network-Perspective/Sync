@@ -46,11 +46,11 @@ public class WorkersHubTests
         var worker = await workersClient.WorkersGetAsync(workerName);
         await workersClient.AuthAsync(worker.Id);
 
-        var config = Options.Create(new WorkerHubClientConfig
+        var config = Options.Create(new OrchestratorHubClientConfig
         {
             BaseUrl = _service.Server.BaseAddress.ToString()
         });
-        var hubClient = new WorkerHubClient(config, NullLogger<IWorkerHubClient>.Instance);
+        var hubClient = new OrchestartorHubClient(config, NullLogger<IOrchestratorHubClient>.Instance);
 
         // Act
         await hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
@@ -86,11 +86,11 @@ public class WorkersHubTests
         var worker = await workersClient.WorkersGetAsync(workerName);
         await workersClient.AuthAsync(worker.Id);
 
-        var config = Options.Create(new WorkerHubClientConfig
+        var config = Options.Create(new OrchestratorHubClientConfig
         {
             BaseUrl = _service.Server.BaseAddress.ToString()
         });
-        var hubClient = new WorkerHubClient(config, NullLogger<IWorkerHubClient>.Instance);
+        var hubClient = new OrchestartorHubClient(config, NullLogger<IOrchestratorHubClient>.Instance);
 
         // Act
         Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
@@ -120,11 +120,11 @@ public class WorkersHubTests
         });
         var worker = await workersClient.WorkersGetAsync(workerName);
 
-        var config = Options.Create(new WorkerHubClientConfig
+        var config = Options.Create(new OrchestratorHubClientConfig
         {
             BaseUrl = _service.Server.BaseAddress.ToString()
         });
-        var hubClient = new WorkerHubClient(config, NullLogger<IWorkerHubClient>.Instance);
+        var hubClient = new OrchestartorHubClient(config, NullLogger<IOrchestratorHubClient>.Instance);
 
         // Act
         Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
