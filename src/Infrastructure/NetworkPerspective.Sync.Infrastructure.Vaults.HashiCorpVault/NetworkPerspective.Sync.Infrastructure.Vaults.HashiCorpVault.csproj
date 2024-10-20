@@ -6,6 +6,7 @@
 
     <ItemGroup>
         <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.1" />
+        <PackageReference Include="FluentValidation" Version="11.10.0" />
         <PackageReference Include="System.Text.Json" Version="8.0.5" />
         <PackageReference Include="VaultSharp" Version="1.17.5.1" />
     </ItemGroup>

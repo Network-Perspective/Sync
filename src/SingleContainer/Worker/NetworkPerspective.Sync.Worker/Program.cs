@@ -15,8 +15,11 @@ using System.Threading;
 
 using Microsoft.Extensions.Configuration;
 
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 
+using System.Collections.Generic;
 
+using Microsoft.Extensions.Options;
 
 #if !DEBUG
 #else
@@ -33,11 +36,25 @@ public class Program
 
         try
         {
+            var connectorTypes = new List<ConnectorType>{
+                new() { Name = "Slack",     DataSourceId = "SlackId",       DataSourceFacadeFullName = "NetworkPerspective.Sync.Infrastructure.DataSources.Slack.SlackFacade"},
+                new() { Name = "Google",    DataSourceId = "GSuiteId",      DataSourceFacadeFullName = "NetworkPerspective.Sync.Infrastructure.DataSources.Google.GoogleFacade"},
+                new() { Name = "Excel",     DataSourceId = "ExcelId",       DataSourceFacadeFullName = "NetworkPerspective.Sync.Infrastructure.DataSources.Excel.ExcelFacade"},
+                new() { Name = "Office365", DataSourceId = "Office365Id",   DataSourceFacadeFullName = "NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.MicrosoftFacade"},
+                new() { Name = "Jira",      DataSourceId = "JiraId",        DataSourceFacadeFullName = "NetworkPerspective.Sync.Infrastructure.DataSources.Jira.JiraFacade"},
+            };
+
             var healthChecksBuilder = builder.Services
                 .AddHealthChecks();
 
             builder.Services
-                .AddConnectorApplication(builder.Configuration.GetSection("App"))
+                .AddSingleton<IValidateOptions<WorkerConfiguration>, WorkerConfiguration.Validator>()
+                .AddOptions<WorkerConfiguration>()
+                .Bind(builder.Configuration)
+                .ValidateOnStart();
+
+            builder.Services
+                .AddWorkerApplication(builder.Configuration.GetSection("App"), connectorTypes)
                 .AddNetworkPerspectiveCore(builder.Configuration.GetSection("Infrastructure:Core"), healthChecksBuilder)
                 .AddVault(builder.Configuration.GetSection("Infrastructure:Vaults"), healthChecksBuilder)
                 .AddSlack(builder.Configuration.GetSection("Infrastructure:DataSources:Slack"))
@@ -59,6 +76,15 @@ public class Program
 
             var host = builder.Build();
             host.Run();
+        }
+        catch (OptionsValidationException ex)
+        {
+
+            Console.WriteLine("Startup configuration validation thrown errors:");
+            Console.WriteLine(string.Join('\n', ex.Failures));
+            var delay = builder.Configuration.GetValue<TimeSpan>("App:DelayBeforeExitOnException");
+            Thread.Sleep(delay);
+            throw;
         }
         catch (Exception ex)
         {

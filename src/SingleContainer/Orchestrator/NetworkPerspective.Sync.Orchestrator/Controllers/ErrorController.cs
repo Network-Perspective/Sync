@@ -8,16 +8,9 @@ namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [ApiController]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class ErrorController : ControllerBase
+public class ErrorController(IErrorService errorService) : ControllerBase
 {
     public const string ErrorRoute = "/error";
-
-    private readonly IErrorService _errorService;
-
-    public ErrorController(IErrorService errorService)
-    {
-        _errorService = errorService;
-    }
 
     [Route(ErrorRoute)]
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -25,7 +18,7 @@ public class ErrorController : ControllerBase
     {
         var context = HttpContext.Features.Get<IExceptionHandlerFeature>();
 
-        var error = _errorService.MapToError(context.Error);
+        var error = errorService.MapToError(context.Error);
 
         Response.StatusCode = error.StatusCode;
 
