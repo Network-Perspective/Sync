@@ -29,6 +29,7 @@ public class StatusLoggerTests
     public async Task ShouldReturnPersistedLogs()
     {
         // Arrange
+        var workerId = Guid.NewGuid();
         const string workerName = "worker-name";
 
         using var uowFactory = new SqliteUnitOfWorkFactory();
@@ -38,7 +39,7 @@ public class StatusLoggerTests
             .Returns(true);
 
         var workersService = new WorkersService(uowFactory.Create(), _workerRouterMock.Object, new Clock(), _cryptoService, NullLogger<WorkersService>.Instance);
-        var workerId = await workersService.CreateAsync(workerName, "secret");
+        await workersService.CreateAsync(workerId, workerName, "secret");
 
         var connectorId = Guid.NewGuid();
         var networkId = Guid.NewGuid();
