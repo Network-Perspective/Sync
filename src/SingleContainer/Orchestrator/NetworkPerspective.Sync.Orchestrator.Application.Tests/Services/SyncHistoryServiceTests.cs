@@ -30,6 +30,7 @@ public class SyncHistoryServiceTests
     public async Task ShouldReturnEndOfLastSyncPeriod()
     {
         // Arrange
+        var workerId = Guid.NewGuid();
         const string workerName = "worker-name";
         using var uowFactory = new SqliteUnitOfWorkFactory();
 
@@ -38,7 +39,7 @@ public class SyncHistoryServiceTests
             .Returns(true);
 
         var workersService = new WorkersService(uowFactory.Create(), _workerRouterMock.Object, new Clock(), _cryptoService, NullLogger<WorkersService>.Instance);
-        var workerId = await workersService.CreateAsync(workerName, "secret");
+        await workersService.CreateAsync(workerId, workerName, "secret");
 
         var connectorId = Guid.NewGuid();
         var networkId = Guid.NewGuid();
@@ -70,6 +71,7 @@ public class SyncHistoryServiceTests
     public async Task ShouldReturnSyncStartTime()
     {
         // Arrange
+        var workerId = Guid.NewGuid();
         const string workerName = "worker-name";
         using var uowFactory = new SqliteUnitOfWorkFactory();
 
@@ -78,7 +80,7 @@ public class SyncHistoryServiceTests
             .Returns(true);
 
         var workersService = new WorkersService(uowFactory.Create(), _workerRouterMock.Object, new Clock(), _cryptoService, NullLogger<WorkersService>.Instance);
-        var workerId = await workersService.CreateAsync(workerName, "secret");
+        await workersService.CreateAsync(workerId, workerName, "secret");
 
         var connectorId = Guid.NewGuid();
         var networkId = Guid.NewGuid();
@@ -112,6 +114,7 @@ public class SyncHistoryServiceTests
     public async Task ShouldOverrideSyncStart()
     {
         // Arrange
+        var workerId = Guid.NewGuid();
         const string workerName = "worker-name";
         using var uowFactory = new SqliteUnitOfWorkFactory();
 
@@ -120,7 +123,7 @@ public class SyncHistoryServiceTests
             .Returns(true);
 
         var workersService = new WorkersService(uowFactory.Create(), _workerRouterMock.Object, new Clock(), _cryptoService, NullLogger<WorkersService>.Instance);
-        var workerId = await workersService.CreateAsync(workerName, "secret");
+        await workersService.CreateAsync(workerId, workerName, "secret");
 
         var connectorId = Guid.NewGuid();
         var networkId = Guid.NewGuid();
