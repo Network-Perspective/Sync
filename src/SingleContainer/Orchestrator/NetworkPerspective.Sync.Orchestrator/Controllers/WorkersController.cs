@@ -49,7 +49,7 @@ public class WorkersController : ControllerBase
     public async Task<IActionResult> CreateAsync([FromBody] CreateWorkerDto request, CancellationToken stoppingToken = default)
     {
         _logger.LogDebug("Received request to create new worker '{name}'", request.Name);
-        await _workersService.CreateAsync(request.Name, request.Secret, stoppingToken);
+        await _workersService.CreateAsync(request.Id, request.Name, request.Secret, stoppingToken);
 
         return Ok();
     }

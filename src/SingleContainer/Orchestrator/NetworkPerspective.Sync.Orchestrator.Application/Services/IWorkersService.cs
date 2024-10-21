@@ -17,7 +17,7 @@ public interface IWorkersService
     Task<Worker> GetAsync(Guid id, CancellationToken stoppingToken = default);
     Task<Worker> GetAsync(string name, CancellationToken stoppingToken = default);
     Task<IEnumerable<Worker>> GetAllAsync(CancellationToken stoppingToken = default);
-    Task<Guid> CreateAsync(string name, string secret, CancellationToken stoppingToken = default);
+    Task CreateAsync(Guid id, string name, string secret, CancellationToken stoppingToken = default);
     Task AuthorizeAsync(Guid id, CancellationToken stoppingToken = default);
     Task<Worker> AuthenticateAsync(string name, string password, CancellationToken stoppingToken = default);
     Task EnsureRemoved(Guid id, CancellationToken stoppingToken = default);
@@ -40,13 +40,12 @@ internal class WorkersService : IWorkersService
         _logger = logger;
     }
 
-    public async Task<Guid> CreateAsync(string name, string secret, CancellationToken stoppingToken = default)
+    public async Task CreateAsync(Guid id, string name, string secret, CancellationToken stoppingToken = default)
     {
         const int workerProtocolVersion = 1;
 
         _logger.LogInformation("Creating new worker '{name}'...", name);
 
-        var id = Guid.NewGuid();
         var keySalt = _cryptoService.GenerateSalt();
         var hashedSecret = _cryptoService.HashPassword(secret, keySalt);
         var keySaltBase64 = Convert.ToBase64String(keySalt);
@@ -62,8 +61,6 @@ internal class WorkersService : IWorkersService
         await _unitOfWork.CommitAsync(stoppingToken);
 
         _logger.LogInformation("New worker '{id}' has been created", id);
-
-        return id;
     }
 
     public async Task AuthorizeAsync(Guid id, CancellationToken stoppingToken = default)

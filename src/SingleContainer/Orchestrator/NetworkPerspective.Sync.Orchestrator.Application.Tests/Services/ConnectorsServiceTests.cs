@@ -33,6 +33,7 @@ public class ConnectorsServiceTests
         public async Task ShouldAddNewConnector()
         {
             // Arrange
+            var workerId = Guid.NewGuid();
             const string workerName = "worker-name";
 
             _workerRouterMock
@@ -40,7 +41,7 @@ public class ConnectorsServiceTests
                 .Returns(true);
 
             var workersService = new WorkersService(_sqliteUnitOfWorkFactory.Create(), _workerRouterMock.Object, _clock, _cryptoService, NullLogger<WorkersService>.Instance);
-            var workerId = await workersService.CreateAsync(workerName, "secret");
+            await workersService.CreateAsync(workerId, workerName, "secret");
 
             var connectorId = Guid.NewGuid();
             var networkId = Guid.NewGuid();
@@ -154,13 +155,15 @@ public class ConnectorsServiceTests
         public async Task ShouldNotThrowOnExisting()
         {
             // Arrange
+            var workerId = Guid.NewGuid();
             const string workerName = "worker-name";
 
             _workerRouterMock
                 .Setup(x => x.IsConnected(workerName))
                 .Returns(true);
 
-            var workersService = new WorkersService(_sqliteUnitOfWorkFactory.Create(), _workerRouterMock.Object, _clock, _cryptoService, NullLogger<WorkersService>.Instance); var workerId = await workersService.CreateAsync("worker", "secret");
+            var workersService = new WorkersService(_sqliteUnitOfWorkFactory.Create(), _workerRouterMock.Object, _clock, _cryptoService, NullLogger<WorkersService>.Instance);
+            await workersService.CreateAsync(workerId, "worker", "secret");
 
             var connectorId = Guid.NewGuid();
             var networkId = Guid.NewGuid();

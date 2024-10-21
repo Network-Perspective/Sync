@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -31,6 +32,7 @@ public class WorkerServiceTests
         public async Task ShouldReturnOnlineStatus(bool isOnline)
         {
             // Arrange
+            var workerId = Guid.NewGuid();
             const string workerName = "worker-name";
 
             _workerRouterMock
@@ -38,7 +40,7 @@ public class WorkerServiceTests
                 .Returns(isOnline);
 
             var workersService = new WorkersService(_sqliteUnitOfWorkFactory.Create(), _workerRouterMock.Object, _clock, _cryptoService, NullLogger);
-            await workersService.CreateAsync(workerName, "foo");
+            await workersService.CreateAsync(workerId, workerName, "foo");
 
             // Act
             var worker = await workersService.GetAsync(workerName);
@@ -54,6 +56,9 @@ public class WorkerServiceTests
         public async Task ShouldReturnOnlineStatus()
         {
             // Arrange
+            var workerId1 = Guid.NewGuid();
+            var workerId2 = Guid.NewGuid();
+
             const string workerName1 = "worker-name-1";
             const string workerName2 = "worker-name-2";
 
@@ -66,8 +71,8 @@ public class WorkerServiceTests
                 .Returns(false);
 
             var workersService = new WorkersService(_sqliteUnitOfWorkFactory.Create(), _workerRouterMock.Object, _clock, _cryptoService, NullLogger);
-            await workersService.CreateAsync(workerName1, "secret");
-            await workersService.CreateAsync(workerName2, "secret");
+            await workersService.CreateAsync(workerId1, workerName1, "secret");
+            await workersService.CreateAsync(workerId2, workerName2, "secret");
 
 
             // Act
