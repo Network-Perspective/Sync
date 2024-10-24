@@ -1,63 +1,11 @@
-﻿using System.Linq;
+﻿using FluentValidation;
 
-using FluentValidation;
-
-using Microsoft.Extensions.Options;
-
-using NetworkPerspective.Sync.Contract.V1.Impl;
-using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager;
 using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 using NetworkPerspective.Sync.Infrastructure.Vaults.GoogleSecretManager;
 using NetworkPerspective.Sync.Infrastructure.Vaults.HashiCorpVault;
 
-namespace NetworkPerspective.Sync.Worker;
-
-public class WorkerConfiguration
-{
-    public InfrastructureConfig Infrastructure { get; set; }
-
-    public class Validator : AbstractValidator<WorkerConfiguration>, IValidateOptions<WorkerConfiguration>
-    {
-        public ValidateOptionsResult Validate(string name, WorkerConfiguration options)
-        {
-            var validateResult = Validate(options);
-            return validateResult.IsValid
-                ? ValidateOptionsResult.Success
-                : ValidateOptionsResult.Fail(validateResult.Errors.Select(x => x.ErrorMessage));
-        }
-
-        public Validator()
-        {
-            RuleFor(x => x.Infrastructure)
-                .SetValidator(x => new InfrastructureConfig.Validator($"{nameof(Infrastructure)}"));
-        }
-    }
-}
-
-public class InfrastructureConfig
-{
-    public OrchestratorHubClientConfig Orchestrator { get; set; }
-    public NetworkPerspectiveCoreConfig Core { get; set; }
-    public VaultsConfig Vaults { get; set; }
-
-    public class Validator : AbstractValidator<InfrastructureConfig>
-    {
-        public Validator(string configPath)
-        {
-            RuleFor(x => x.Orchestrator.BaseUrl)
-                .NotEmpty()
-                .WithName($"{configPath}:{nameof(Orchestrator)}:{nameof(OrchestratorHubClientConfig.BaseUrl)}");
-
-            RuleFor(x => x.Core.BaseUrl)
-                .NotEmpty()
-                .WithName($"{configPath}:{nameof(Core)}:{nameof(NetworkPerspectiveCoreConfig.BaseUrl)}");
-
-            RuleFor(x => x.Vaults)
-                .SetValidator(new VaultsConfig.Validator($"{configPath}:{nameof(Vaults)}"));
-        }
-    }
-}
+namespace NetworkPerspective.Sync.Worker.Configs;
 
 public class VaultsConfig
 {
