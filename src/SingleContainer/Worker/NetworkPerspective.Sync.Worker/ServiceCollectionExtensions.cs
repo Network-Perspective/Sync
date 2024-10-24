@@ -31,7 +31,7 @@ internal static class ServiceCollectionExtensions
         var containsAmazonSecretsManager = configurationSections.Any(x => x.Key == amazonSecretsManagerConfigSection);
 
         if (containsAzureKeyVault)
-            services.AddAzureKeyVault(configuration.GetSection(azureKeyVaultConfigSection));
+            services.AddAzureKeyVault(configuration.GetSection(azureKeyVaultConfigSection), healthChecksBuilder);
         else if (containsHcpVault)
             services.AddHcpKeyVault(configuration.GetSection(azureKeyVaultConfigSection));
         else if (containsGoogleSecretManagerConfigSection)
