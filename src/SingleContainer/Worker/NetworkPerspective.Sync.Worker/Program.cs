@@ -53,8 +53,8 @@ public class Program
                 .AddHealthChecks();
 
             builder.Services
-                .AddSingleton<IValidateOptions<WorkerConfiguration>, WorkerConfiguration.Validator>()
-                .AddOptions<WorkerConfiguration>()
+                .AddSingleton<IValidateOptions<WorkerConfig>, WorkerConfig.Validator>()
+                .AddOptions<WorkerConfig>()
                 .Bind(builder.Configuration)
                 .ValidateOnStart();
 
@@ -69,6 +69,7 @@ public class Program
                 .AddExcel(builder.Configuration.GetSection("Infrastructure:DataSources:Excel"))
                 .AddOrchestratorClient(builder.Configuration.GetSection("Infrastructure:Orchestrator"));
 
+            builder.Services.AddHostedService<StartupHealthChecker>();
             builder.Services.AddHostedService<ConnectionHost>();
 
             builder.Services.AddApplicationInsightsTelemetryWorkerService();
