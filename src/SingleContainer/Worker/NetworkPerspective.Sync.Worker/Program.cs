@@ -21,6 +21,11 @@ using System.Collections.Generic;
 
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Worker.Configs;
+
+using Microsoft.Graph.Models;
+
+
 #if !DEBUG
 #else
 using NetworkPerspective.Sync.Infrastructure.Core.Stub;
@@ -77,18 +82,8 @@ public class Program
             var host = builder.Build();
             host.Run();
         }
-        catch (OptionsValidationException ex)
+        catch (Exception)
         {
-
-            Console.WriteLine("Startup configuration validation thrown errors:");
-            Console.WriteLine(string.Join('\n', ex.Failures));
-            var delay = builder.Configuration.GetValue<TimeSpan>("App:DelayBeforeExitOnException");
-            Thread.Sleep(delay);
-            throw;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
             var delay = builder.Configuration.GetValue<TimeSpan>("App:DelayBeforeExitOnException");
             Thread.Sleep(delay);
             throw;
