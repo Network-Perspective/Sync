@@ -7,12 +7,12 @@ using Microsoft.Extensions.Options;
 
 namespace NetworkPerspective.Sync.Worker.Configs;
 
-public class WorkerConfiguration
+public class WorkerConfig
 {
     public string APPLICATIONINSIGHTS_CONNECTION_STRING { get; set; }
     public InfrastructureConfig Infrastructure { get; set; }
 
-    public class Validator : AbstractValidator<WorkerConfiguration>, IValidateOptions<WorkerConfiguration>
+    public class Validator : AbstractValidator<WorkerConfig>, IValidateOptions<WorkerConfig>
     {
         private readonly ILogger<Validator> _logger;
 
@@ -29,7 +29,7 @@ public class WorkerConfiguration
             _logger = logger;
         }
 
-        public ValidateOptionsResult Validate(string name, WorkerConfiguration config)
+        public ValidateOptionsResult Validate(string name, WorkerConfig config)
         {
             var validateResult = Validate(config);
 
