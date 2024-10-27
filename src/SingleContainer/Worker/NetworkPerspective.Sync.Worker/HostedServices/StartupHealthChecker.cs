@@ -6,7 +6,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace NetworkPerspective.Sync.Worker;
+namespace NetworkPerspective.Sync.Worker.HostedServices;
 
 internal class StartupHealthChecker(HealthCheckService healthCheckService, ILogger<StartupHealthChecker> logger) : IHostedService
 {

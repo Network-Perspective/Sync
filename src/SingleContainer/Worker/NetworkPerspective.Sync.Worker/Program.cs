@@ -23,8 +23,7 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Worker.Configs;
 
-using Microsoft.Graph.Models;
-
+using NetworkPerspective.Sync.Worker.HostedServices;
 
 #if !DEBUG
 #else
