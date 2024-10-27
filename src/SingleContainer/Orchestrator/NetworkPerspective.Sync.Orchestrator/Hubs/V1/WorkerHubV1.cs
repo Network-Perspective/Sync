@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
-
 using Mapster;
 
 using Microsoft.AspNetCore.Authorization;
@@ -110,6 +109,46 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
         {
             return ConnectorStatus.Idle(responseDto.IsAuthorized);
         }
+    }
+
+    public async Task<OAuthInitializationResult> InitializeOAuthAsync(string workerName, Guid connectorId, string connectorType, string callbackUri, IDictionary<string, string> connectorProperties)
+    {
+        var requestDto = new InitializeOAuthRequest
+        {
+            CorrelationId = Guid.NewGuid(),
+            ConnectorId = connectorId,
+            ConnectorType = connectorType,
+            CallbackUri = callbackUri,
+            ConnectorProperties = connectorProperties
+        };
+
+        var connection = connectionsLookupTable.Get(workerName);
+
+        var responseDto = await Clients
+            .Client(connection.Id)
+            .InitializeOAuthAsync(requestDto);
+
+        var result = new OAuthInitializationResult(responseDto.AuthUri, responseDto.State, responseDto.StateExpirationTimestamp);
+
+        return result;
+    }
+
+    public async Task HandleOAuthCallbackAsync(string workerName, string code, string state)
+    {
+        var requestDto = new HandleOAuthCallbackRequest
+        {
+            CorrelationId = Guid.NewGuid(),
+            Code = code,
+            State = state
+        };
+
+        var connection = connectionsLookupTable.Get(workerName);
+
+        var responseDto = await Clients
+            .Client(connection.Id)
+            .HandleOAuthCallbackAsync(requestDto);
+
+        logger.LogInformation("Received ack '{correlationId}'", responseDto.CorrelationId);
     }
 
     public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto dto)

@@ -54,6 +54,8 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack
             services.AddScoped<IMembersClient, MembersClient>();
             services.AddScoped<IChatClient, ChatClient>();
 
+            services.AddScoped<IOAuthService, SlackAuthService>();
+
             services.AddKeyedScoped<IAuthTester, AuthTester>(typeof(AuthTester).FullName);
             services.AddKeyedScoped<IDataSource, SlackFacade>(typeof(SlackFacade).FullName);
 

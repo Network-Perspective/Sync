@@ -13,6 +13,7 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.OAuth;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
@@ -153,6 +154,44 @@ internal class ConnectionHost(IOrchestratorHubClient hubClient, ISyncContextFact
             });
         }
 
+        async Task<InitializeOAuthResponse> OnInitializeOAuth(InitializeOAuthRequest dto)
+        {
+            logger.LogInformation("Initializing OAuth for connector '{connectorId}' (of type '{connectorType}')", dto.ConnectorId, dto.ConnectorType);
+
+            await using (var scope = serviceProvider.CreateAsyncScope())
+            {
+                var authService = scope.ServiceProvider.GetRequiredService<IOAuthService>();
+
+                var context = new OAuthContext(dto.ConnectorId, dto.CallbackUri, dto.ConnectorProperties);
+
+                var result = await authService.InitializeOAuthAsync(context, stoppingToken);
+
+                var response = new InitializeOAuthResponse
+                {
+                    CorrelationId = dto.CorrelationId,
+                    AuthUri = result.AuthUri,
+                    State = result.State,
+                    StateExpirationTimestamp = result.StateExpirationTimestamp
+                };
+
+                return response;
+            }
+        }
+
+        async Task<AckDto> OnHandleOAuth(HandleOAuthCallbackRequest dto)
+        {
+            logger.LogInformation("Handling OAuth callback");
+
+            await using (var scope = serviceProvider.CreateAsyncScope())
+            {
+                var authService = scope.ServiceProvider.GetRequiredService<IOAuthService>();
+
+                await authService.HandleAuthorizationCodeCallbackAsync(dto.Code, dto.State, stoppingToken);
+
+                return new AckDto { CorrelationId = dto.CorrelationId };
+            }
+        }
+
         await hubClient.ConnectAsync(configuration: x =>
         {
             x.TokenFactory = TokenFactory;
@@ -161,6 +200,8 @@ internal class ConnectionHost(IOrchestratorHubClient hubClient, ISyncContextFact
             x.OnRotateSecrets = OnRotateSecrets;
             x.OnGetConnectorStatus = OnGetConnectorStatus;
             x.OnGetWorkerCapabilities = OnGetWorkerCapabilities;
+            x.OnInitializeOAuth = OnInitializeOAuth;
+            x.OnHandleOAuth = OnHandleOAuth;
         }, stoppingToken: stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)

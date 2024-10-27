@@ -1,20 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
+using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
+using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
-using NetworkPerspective.Sync.Orchestrator.OAuth.Slack;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [Route(AuthPath)]
-public class SlackAuthController(IConnectorsService connectorsService, ISlackAuthService authService) : ControllerBase
+public class SlackAuthController(IConnectorsService connectorsService, IWorkerRouter workerRouter, IMemoryCache cache) : ControllerBase
 {
     private const string CallbackPath = "callback";
     private const string AuthPath = "api/connectors/slack-auth";
@@ -39,13 +40,13 @@ public class SlackAuthController(IConnectorsService connectorsService, ISlackAut
     {
         var connector = await connectorsService.GetAsync(connectorId, stoppingToken);
 
-        var useAdminPrivileges = UseAdminPrivileges(connector.Properties);
-        var callbackUri = callbackUrl == null ? CreateCallbackUri() : new Uri(callbackUrl);
-        var authProcess = new SlackAuthProcess(connectorId, connector.Worker.Name, callbackUri, useAdminPrivileges);
+        var callbackUri = callbackUrl == null
+            ? CreateCallbackUri()
+            : new Uri(callbackUrl);
+        var result = await workerRouter.InitializeOAuthAsync(connector.Worker.Name, connectorId, connector.Type, callbackUri.ToString(), connector.Properties);
+        cache.Set(result.State, connector.Worker.Name, result.StateExpirationTimestamp);
 
-        var result = await authService.StartAuthProcessAsync(authProcess, stoppingToken);
-
-        return Ok(result.SlackAuthUri);
+        return Ok(result.AuthUri);
     }
 
     /// <summary>
@@ -64,19 +65,12 @@ public class SlackAuthController(IConnectorsService connectorsService, ISlackAut
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> HandleCallback(string code, string state, CancellationToken stoppingToken = default)
     {
-        await authService.HandleAuthorizationCodeCallbackAsync(code, state, stoppingToken);
+        if (!cache.TryGetValue(state, out string workerName))
+            throw new OAuthException("State does not match initialized value");
+
+        await workerRouter.HandleOAuthCallbackAsync(workerName, code, state);
 
         return Ok("Auth completed!");
-    }
-
-    private static bool UseAdminPrivileges(IDictionary<string, string> properties)
-    {
-        const string key = "UsesAdminPrivileges";
-
-        if (!properties.ContainsKey(key))
-            return false;
-
-        return properties[key] == "true" ? true : false;
     }
 
     private Uri CreateCallbackUri()

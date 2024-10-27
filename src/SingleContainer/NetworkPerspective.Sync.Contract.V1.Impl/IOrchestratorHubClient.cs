@@ -127,7 +127,7 @@ internal class OrchestartorHubClient : IOrchestratorHubClient
 
         _connection.On<GetConnectorStatusDto, ConnectorStatusDto>(nameof(IWorkerClient.GetConnectorStatusAsync), async x =>
         {
-            _logger.LogInformation("Received request '{correlationId}' to get connector '{connectorId}' status ", x.CorrelationId, x.ConnectorId);
+            _logger.LogInformation("Received request '{correlationId}' to get connector '{connectorId}' status", x.CorrelationId, x.ConnectorId);
 
             if (_callbacks.OnGetConnectorStatus is null)
                 throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetConnectorStatus));
@@ -139,12 +139,36 @@ internal class OrchestartorHubClient : IOrchestratorHubClient
 
         _connection.On<GetWorkerCapabilitiesDto, WorkerCapabilitiesDto>(nameof(IWorkerClient.GetWorkerCapabilitiesAsync), async x =>
         {
-            _logger.LogInformation("Received request '{correlationId}' to get worker capabilities ", x.CorrelationId);
+            _logger.LogInformation("Received request '{correlationId}' to get worker capabilities", x.CorrelationId);
 
             if (_callbacks.OnGetWorkerCapabilities is null)
                 throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetWorkerCapabilities));
 
             var result = await _callbacks.OnGetWorkerCapabilities(x);
+            _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
+            return result;
+        });
+
+        _connection.On<InitializeOAuthRequest, InitializeOAuthResponse>(nameof(IWorkerClient.InitializeOAuthAsync), async x =>
+        {
+            _logger.LogInformation("Received request '{correlationId}' to initialize OAuth", x.CorrelationId);
+
+            if (_callbacks.OnInitializeOAuth is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnInitializeOAuth));
+
+            var result = await _callbacks.OnInitializeOAuth(x);
+            _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
+            return result;
+        });
+
+        _connection.On<HandleOAuthCallbackRequest, AckDto>(nameof(IWorkerClient.HandleOAuthCallbackAsync), async x =>
+        {
+            _logger.LogInformation("Received request '{correlationId}' to handle OAuth callback", x.CorrelationId);
+
+            if (_callbacks.OnHandleOAuth is null)
+                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnHandleOAuth));
+
+            var result = await _callbacks.OnHandleOAuth(x);
             _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
             return result;
         });
