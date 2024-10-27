@@ -15,12 +15,11 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Configs;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Domain.OAuth;
-using NetworkPerspective.Sync.Worker.Application.Exceptions;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 
-internal class SlackAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, IMemoryCache cache, IOptions<AuthConfig> slackAuthConfig, ISlackClientUnauthorizedFacade slackClientUnauthorizedFacade, ILogger<SlackAuthService> logger) : IOAuthService
+internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, IMemoryCache cache, IOptions<AuthConfig> slackAuthConfig, ISlackClientUnauthorizedFacade slackClientUnauthorizedFacade, ILogger<OAuthService> logger) : IOAuthService
 {
     private const int SlackAuthorizationCodeExpirationTimeInMinutes = 10;
     public const string SlackClientIdKey = "slack-client-id";
@@ -46,12 +45,9 @@ internal class SlackAuthService(IVault vault, IAuthStateKeyFactory stateKeyFacto
         return new InitializeOAuthResult(authUri, stateKey, stateExpirationTimestamp.UtcDateTime);
     }
 
-    public async Task HandleAuthorizationCodeCallbackAsync(string code, string state, CancellationToken stoppingToken = default)
+    public async Task HandleAuthorizationCodeCallbackAsync(string code, OAuthContext context, CancellationToken stoppingToken = default)
     {
         logger.LogInformation("Received Authentication callback");
-
-        if (!cache.TryGetValue(state, out OAuthContext context))
-            throw new OAuthException("State does not match initialized value");
 
         var clientId = await vault.GetSecretAsync(SlackClientIdKey, stoppingToken);
         var clientSecret = await vault.GetSecretAsync(SlackClientSecretKey, stoppingToken);
@@ -69,30 +65,30 @@ internal class SlackAuthService(IVault vault, IAuthStateKeyFactory stateKeyFacto
 
         var secrets = new Dictionary<string, SecureString>();
 
-        var botTokenKey = string.Format(SlackBotTokenKeyPattern, context.ConnectorId);
+        var botTokenKey = string.Format(SlackBotTokenKeyPattern, context.Connector.Id);
         secrets.Add(botTokenKey, response.AccessToken.ToSecureString());
 
         // save refresh token if token rotation is enabled
         if (!string.IsNullOrEmpty(response.RefreshToken))
         {
-            var refreshTokenKey = string.Format(SlackRefreshTokenPattern, context.ConnectorId);
+            var refreshTokenKey = string.Format(SlackRefreshTokenPattern, context.Connector.Id);
             await vault.SetSecretAsync(refreshTokenKey, response.RefreshToken.ToSecureString(), stoppingToken);
         }
 
-        var connectorProperties = context.GetConnectorProperties<SlackConnectorProperties>();
+        var connectorProperties = context.Connector.GetConnectorProperties<SlackConnectorProperties>();
 
         if (connectorProperties.UsesAdminPrivileges)
         {
-            var userTokenKey = string.Format(SlackUserTokenKeyPattern, context.ConnectorId);
+            var userTokenKey = string.Format(SlackUserTokenKeyPattern, context.Connector.Id);
             await vault.SetSecretAsync(userTokenKey, response.User.AccessToken.ToSecureString(), stoppingToken);
         }
 
-        logger.LogInformation("Authentication callback processed successfully. Connector '{connectorId}' is configured for synchronization", context.ConnectorId);
+        logger.LogInformation("Authentication callback processed successfully. Connector '{connectorId}' is configured for synchronization", context.Connector.Id);
     }
 
     private string BuildSlackAuthUri(string state, OAuthContext context, SecureString slackClientId)
     {
-        var connectorProperties = context.GetConnectorProperties<SlackConnectorProperties>();
+        var connectorProperties = context.Connector.GetConnectorProperties<SlackConnectorProperties>();
 
         logger.LogDebug("Building slack auth path... The {parameter} is set to '{value}'", nameof(connectorProperties.UsesAdminPrivileges), connectorProperties.UsesAdminPrivileges);
 

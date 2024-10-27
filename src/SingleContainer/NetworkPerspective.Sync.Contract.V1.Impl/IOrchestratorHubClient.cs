@@ -84,7 +84,7 @@ internal class OrchestartorHubClient : IOrchestratorHubClient
     {
         _connection.On<StartSyncDto, AckDto>(nameof(IWorkerClient.SyncAsync), x =>
         {
-            _logger.LogInformation("Received request '{correlationId}' to start sync '{connectorId}' from {start} to {end}", x.CorrelationId, x.ConnectorId, x.Start, x.End);
+            _logger.LogInformation("Received request '{correlationId}' to start sync '{connectorId}' from {start} to {end}", x.CorrelationId, x.Connector.Id, x.Start, x.End);
 
             _ = Task.Run(async () =>
             {
@@ -114,7 +114,7 @@ internal class OrchestartorHubClient : IOrchestratorHubClient
 
         _connection.On<RotateSecretsDto, AckDto>(nameof(IWorkerClient.RotateSecretsAsync), async x =>
         {
-            _logger.LogInformation("Received request '{correlationId}' to rotate secrets for connector '{connectorId}' of type '{type}'", x.CorrelationId, x.ConnectorId, x.ConnectorType);
+            _logger.LogInformation("Received request '{correlationId}' to rotate secrets for connector '{connectorId}' of type '{type}'", x.CorrelationId, x.Connector.Id, x.Connector.Type);
 
             if (_callbacks.OnRotateSecrets is null)
                 throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnRotateSecrets));
@@ -127,7 +127,7 @@ internal class OrchestartorHubClient : IOrchestratorHubClient
 
         _connection.On<GetConnectorStatusDto, ConnectorStatusDto>(nameof(IWorkerClient.GetConnectorStatusAsync), async x =>
         {
-            _logger.LogInformation("Received request '{correlationId}' to get connector '{connectorId}' status", x.CorrelationId, x.ConnectorId);
+            _logger.LogInformation("Received request '{correlationId}' to get connector '{connectorId}' status", x.CorrelationId, x.Connector.Id);
 
             if (_callbacks.OnGetConnectorStatus is null)
                 throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetConnectorStatus));

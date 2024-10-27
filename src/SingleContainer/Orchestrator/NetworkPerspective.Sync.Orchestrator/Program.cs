@@ -15,7 +15,6 @@ using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 using NetworkPerspective.Sync.Orchestrator.Mappers;
 using NetworkPerspective.Sync.Orchestrator.OAuth.Jira;
-using NetworkPerspective.Sync.Orchestrator.OAuth.Microsoft;
 using NetworkPerspective.Sync.Orchestrator.Persistence;
 
 namespace NetworkPerspective.Sync.Orchestrator;
@@ -45,7 +44,6 @@ public class Program
             .AddAzureKeyVault(builder.Configuration.GetSection("Infrastructure:Vault"), healthcheckBuilder)
             .AddSingleton<ICachedVault, CachedVault>()
             .AddAuth()
-            .AddMicrosoftAuth()
             .AddJiraAuth(builder.Configuration.GetSection("DataSources:Jira"))
             .AddHub();
 

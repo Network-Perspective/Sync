@@ -40,7 +40,7 @@ public class SlackAuthController(IConnectorsService connectorsService, IWorkerRo
     {
         var connector = await connectorsService.GetAsync(connectorId, stoppingToken);
 
-        var callbackUri = callbackUrl == null
+        var callbackUri = callbackUrl is null
             ? CreateCallbackUri()
             : new Uri(callbackUrl);
         var result = await workerRouter.InitializeOAuthAsync(connector.Worker.Name, connectorId, connector.Type, callbackUri.ToString(), connector.Properties);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
+
 using Mapster;
 
 using Microsoft.AspNetCore.Authorization;
@@ -68,14 +69,17 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
         logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
 
-    public async Task RotateSecretsAsync(string workerName, Guid connectorId, IDictionary<string, string> networkProperties, string connectorType)
+    public async Task RotateSecretsAsync(string workerName, Guid connectorId, IDictionary<string, string> connectorProperties, string connectorType)
     {
         var dto = new RotateSecretsDto
         {
             CorrelationId = Guid.NewGuid(),
-            ConnectorId = connectorId,
-            NetworkProperties = networkProperties,
-            ConnectorType = connectorType
+            Connector = new ConnectorDto
+            {
+                Id = connectorId,
+                Type = connectorType,
+                Properties = connectorProperties
+            }
         };
         var connection = connectionsLookupTable.Get(workerName);
         var response = await Clients
@@ -84,15 +88,17 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
         logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
 
-    public async Task<ConnectorStatus> GetConnectorStatusAsync(string workerName, Guid connectorId, Guid networkId, IDictionary<string, string> networkProperties, string connectorType)
+    public async Task<ConnectorStatus> GetConnectorStatusAsync(string workerName, Guid connectorId, Guid networkId, IDictionary<string, string> connectorProperties, string connectorType)
     {
         var requestDto = new GetConnectorStatusDto
         {
             CorrelationId = Guid.NewGuid(),
-            ConnectorId = connectorId,
-            NetworkId = networkId,
-            ConnectorType = connectorType,
-            ConnectorProperties = networkProperties
+            Connector = new ConnectorDto
+            {
+                Id = connectorId,
+                Type = connectorType,
+                Properties = connectorProperties
+            },
         };
 
         var connection = connectionsLookupTable.Get(workerName);
@@ -116,10 +122,13 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
         var requestDto = new InitializeOAuthRequest
         {
             CorrelationId = Guid.NewGuid(),
-            ConnectorId = connectorId,
-            ConnectorType = connectorType,
+            Connector = new ConnectorDto
+            {
+                Id = connectorId,
+                Type = connectorType,
+                Properties = connectorProperties
+            },
             CallbackUri = callbackUri,
-            ConnectorProperties = connectorProperties
         };
 
         var connection = connectionsLookupTable.Get(workerName);

@@ -14,6 +14,9 @@ public class StartSyncRequestConfig : IRegister
             .NewConfig<SyncContext, StartSyncDto>()
                 .Map(dest => dest.Start, src => src.TimeRange.Start)
                 .Map(dest => dest.End, src => src.TimeRange.End)
-                .Map(dest => dest.AccessToken, src => src.AccessToken.ToSystemString());
+                .Map(dest => dest.AccessToken, src => src.AccessToken.ToSystemString())
+                .Map(dest => dest.Connector.Id, src => src.ConnectorId)
+                .Map(dest => dest.Connector.Type, src => src.ConnectorType)
+                .Map(dest => dest.Connector.Properties, src => src.NetworkProperties);
     }
 }

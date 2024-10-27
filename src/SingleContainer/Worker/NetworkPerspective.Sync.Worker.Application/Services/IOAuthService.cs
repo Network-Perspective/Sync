@@ -8,5 +8,5 @@ namespace NetworkPerspective.Sync.Worker.Application.Services;
 public interface IOAuthService
 {
     Task<InitializeOAuthResult> InitializeOAuthAsync(OAuthContext context, CancellationToken stoppingToken = default);
-    Task HandleAuthorizationCodeCallbackAsync(string code, string state, CancellationToken stoppingToken = default);
+    Task HandleAuthorizationCodeCallbackAsync(string code, OAuthContext context, CancellationToken stoppingToken = default);
 }

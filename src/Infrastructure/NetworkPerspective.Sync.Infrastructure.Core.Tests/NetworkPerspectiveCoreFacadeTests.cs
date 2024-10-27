@@ -18,6 +18,7 @@ using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
@@ -52,7 +53,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, CreateNpCoreOptions(), _loggerFactory);
 
                 // Act
-                Func<Task<ConnectorInfo>> func = async () => await facade.ValidateTokenAsync(new NetworkCredential(string.Empty, token).SecurePassword);
+                Func<Task<CoreTokenValidationResult>> func = async () => await facade.ValidateTokenAsync(new NetworkCredential(string.Empty, token).SecurePassword);
 
                 // Assert
                 await func.Should().ThrowExactlyAsync<InvalidTokenException>();

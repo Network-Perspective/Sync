@@ -11,6 +11,8 @@ public static class ServiceCollectionExtensions
     {
         services.Configure<JiraConfig>(configuration);
 
+        services.AddMemoryCache();
+
         services.AddScoped<IJiraClient, JiraClient>();
         services.AddScoped<IJiraAuthService, JiraAuthService>();
 

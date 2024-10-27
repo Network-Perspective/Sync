@@ -44,11 +44,11 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests
             serviceCollection.AddTransient(x => Mock.Of<IVault>());
             serviceCollection.AddSingleton(Mock.Of<INetworkPerspectiveCore>());
             serviceCollection.AddSingleton(Mock.Of<IOrchestratorHubClient>());
-            var connectorType = new ConnectorType { Name = "Google", DataSourceId = "GSuiteId", DataSourceFacadeFullName = (typeof(GoogleFacade).FullName) };
+            var connectorType = new ConnectorType { Name = "Google", DataSourceId = "GSuiteId" };
             serviceCollection.AddWorkerApplication(config.GetSection("Connector"), [connectorType]);
 
             // Act
-            serviceCollection.AddGoogle(config.GetSection("Infrastructure:Google"));
+            serviceCollection.AddGoogle(config.GetSection("Infrastructure:Google"), connectorType);
 
             // Assert
             var services = serviceCollection.BuildServiceProvider();

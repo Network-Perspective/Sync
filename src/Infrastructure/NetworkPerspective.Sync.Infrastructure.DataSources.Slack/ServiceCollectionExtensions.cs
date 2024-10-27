@@ -10,6 +10,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 using NetworkPerspective.Sync.Worker.Application;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
@@ -19,7 +20,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddSlack(this IServiceCollection services, IConfigurationSection configurationSection)
+        public static IServiceCollection AddSlack(this IServiceCollection services, IConfigurationSection configurationSection, ConnectorType connectorType)
         {
             services.AddSlackClient(configurationSection.GetSection("Resiliency"));
 
@@ -54,10 +55,10 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack
             services.AddScoped<IMembersClient, MembersClient>();
             services.AddScoped<IChatClient, ChatClient>();
 
-            services.AddScoped<IOAuthService, SlackAuthService>();
 
-            services.AddKeyedScoped<IAuthTester, AuthTester>(typeof(AuthTester).FullName);
-            services.AddKeyedScoped<IDataSource, SlackFacade>(typeof(SlackFacade).FullName);
+            services.AddKeyedScoped<IAuthTester, AuthTester>(connectorType.GetKeyOf<IAuthTester>());
+            services.AddKeyedScoped<IDataSource, SlackFacade>(connectorType.GetKeyOf<IDataSource>());
+            services.AddKeyedScoped<IOAuthService, OAuthService>(connectorType.GetKeyOf<IOAuthService>());
 
             services.AddTransient<ISecretRotationService, SlackSecretRoationService>();
 

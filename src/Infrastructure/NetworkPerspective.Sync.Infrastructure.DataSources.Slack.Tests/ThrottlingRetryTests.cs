@@ -13,6 +13,7 @@ using Microsoft.Net.Http.Headers;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
@@ -57,7 +58,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
 
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddLogging();
-            serviceCollection.AddSlack(config.GetSection("Infrastructure:Slack"));
+            serviceCollection.AddSlack(config.GetSection("Infrastructure:Slack"), new ConnectorType { Name = "Slack", DataSourceId = "SlackId" });
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
             using var httpClient = serviceProvider

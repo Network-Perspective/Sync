@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 
@@ -20,5 +21,5 @@ public interface INetworkPerspectiveCore
     Task ReportSyncStartAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default);
     Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default);
     Task TryReportSyncFailedAsync(SecureString accessToken, TimeRange timeRange, string message, CancellationToken stoppingToken = default);
-    Task<ConnectorInfo> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default);
+    Task<CoreTokenValidationResult> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default);
 }

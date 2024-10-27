@@ -1,27 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
+using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
-using NetworkPerspective.Sync.Orchestrator.OAuth.Microsoft;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [Route(AuthPath)]
-public class MicrosoftAuthController(IConnectorsService connectorsService, IMicrosoftAuthService authService) : ControllerBase
+public class MicrosoftAuthController(IConnectorsService connectorsService, IWorkerRouter workerRouter, IMemoryCache cache) : ControllerBase
 {
     private const string CallbackPath = "callback";
     private const string AuthPath = "api/connectors/microsoft-auth";
-
-    private readonly IMicrosoftAuthService authService = authService;
-    private readonly IConnectorsService connectorsService = connectorsService;
 
     /// <summary>
     /// Initialize OAuth process
@@ -43,13 +40,14 @@ public class MicrosoftAuthController(IConnectorsService connectorsService, IMicr
     {
         var connector = await connectorsService.GetAsync(connectorId, stoppingToken);
 
-        var syncMsTeams = SyncMsTeams(connector.Properties);
-        var callbackUri = callbackUrl == null ? CreateCallbackUri() : new Uri(callbackUrl);
-        var authProcess = new MicrosoftAuthProcess(connectorId, connector.Worker.Name, callbackUri, syncMsTeams);
+        var callbackUri = callbackUrl is null
+            ? CreateCallbackUri()
+            : new Uri(callbackUrl);
 
-        var result = await authService.StartAuthProcessAsync(authProcess, stoppingToken);
+        var result = await workerRouter.InitializeOAuthAsync(connector.Worker.Name, connectorId, connector.Type, callbackUri.ToString(), connector.Properties);
+        cache.Set(result.State, connector.Worker.Name, result.StateExpirationTimestamp);
 
-        return Ok(result.MicrosoftAuthUri);
+        return Ok(result.AuthUri);
     }
 
     /// <summary>
@@ -74,7 +72,10 @@ public class MicrosoftAuthController(IConnectorsService connectorsService, IMicr
         if (error is not null || error_description is not null)
             throw new OAuthException(error, error_description);
 
-        await authService.HandleCallbackAsync(tenant, state, stoppingToken);
+        if (!cache.TryGetValue(state, out string workerName))
+            throw new OAuthException("State does not match initialized value");
+
+        await workerRouter.HandleOAuthCallbackAsync(workerName, tenant.ToString(), state);
 
         return Ok("Admin consent completed!");
     }
@@ -92,15 +93,5 @@ public class MicrosoftAuthController(IConnectorsService connectorsService, IMicr
 
         callbackUrlBuilder.Path = string.Join('/', AuthPath, CallbackPath);
         return callbackUrlBuilder.Uri;
-    }
-
-    private static bool SyncMsTeams(IDictionary<string, string> properties)
-    {
-        const string key = "SyncMsTeams";
-
-        if (!properties.ContainsKey(key))
-            return false;
-
-        return properties[key] == "true";
     }
 }
