@@ -63,10 +63,8 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
 
         var response = await slackClientUnauthorizedFacade.AccessAsync(request, stoppingToken);
 
-        var secrets = new Dictionary<string, SecureString>();
-
         var botTokenKey = string.Format(SlackBotTokenKeyPattern, context.Connector.Id);
-        secrets.Add(botTokenKey, response.AccessToken.ToSecureString());
+        await vault.SetSecretAsync(botTokenKey, response.AccessToken.ToSecureString(), stoppingToken);
 
         // save refresh token if token rotation is enabled
         if (!string.IsNullOrEmpty(response.RefreshToken))
