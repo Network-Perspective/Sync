@@ -5,15 +5,17 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
+using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
+using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
-using NetworkPerspective.Sync.Orchestrator.OAuth.Jira;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [Route(AuthPath)]
-public class JiraAuthController(IConnectorsService connectorsService, IJiraAuthService authService) : ControllerBase
+public class JiraAuthController(IConnectorsService connectorsService, IWorkerRouter workerRouter, IMemoryCache cache) : ControllerBase
 {
     private const string CallbackPath = "callback";
     private const string AuthPath = "api/connectors/jira-auth";
@@ -38,12 +40,14 @@ public class JiraAuthController(IConnectorsService connectorsService, IJiraAuthS
     {
         var connector = await connectorsService.GetAsync(connectorId, stoppingToken);
 
-        var callbackUri = callbackUrl == null ? CreateCallbackUri() : new Uri(callbackUrl);
-        var authProcess = new JiraAuthProcess(connectorId, connector.Worker.Name, callbackUri);
+        var callbackUri = callbackUrl is null
+            ? CreateCallbackUri()
+            : new Uri(callbackUrl);
 
-        var result = await authService.StartAuthProcessAsync(authProcess, stoppingToken);
+        var result = await workerRouter.InitializeOAuthAsync(connector.Worker.Name, connectorId, connector.Type, callbackUri.ToString(), connector.Properties);
+        cache.Set(result.State, connector.Worker.Name, result.StateExpirationTimestamp);
 
-        return Redirect(result.JiraAuthUri);
+        return Ok(result.AuthUri);
     }
 
     /// <summary>
@@ -62,7 +66,10 @@ public class JiraAuthController(IConnectorsService connectorsService, IJiraAuthS
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> HandleCallback(string code, string state, CancellationToken stoppingToken = default)
     {
-        await authService.HandleCallbackAsync(code, state, stoppingToken);
+        if (!cache.TryGetValue(state, out string workerName))
+            throw new OAuthException("State does not match initialized value");
+
+        await workerRouter.HandleOAuthCallbackAsync(workerName, code, state);
 
         return Ok("Auth completed!");
     }

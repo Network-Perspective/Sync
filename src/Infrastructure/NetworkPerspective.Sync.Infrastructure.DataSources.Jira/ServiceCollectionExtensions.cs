@@ -8,6 +8,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Auth;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client.Pagination;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Services;
 using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
@@ -20,8 +21,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddJira(this IServiceCollection services, IConfigurationSection configurationSection, ConnectorType connectorType)
     {
-        var authBaseUrl = configurationSection.GetValue<string>("AuthBaseUrl");
-        var apibaseUrl = configurationSection.GetValue<string>("ApiBaseUrl");
+        services.Configure<JiraConfig>(configurationSection);
+
+        var apibaseUrl = configurationSection.GetValue<string>("BaseUrl");
+        var authBaseUrl = configurationSection.GetValue<string>("Auth:BaseUrl");
 
         services
             .AddHttpClient(Consts.JiraApiHttpClientName, x =>
@@ -58,6 +61,7 @@ public static class ServiceCollectionExtensions
 
         services.AddKeyedScoped<IAuthTester, AuthTester>(connectorType.GetKeyOf<IAuthTester>());
         services.AddKeyedScoped<IDataSource, JiraFacade>(connectorType.GetKeyOf<IDataSource>());
+        services.AddKeyedScoped<IOAuthService, OAuthService>(connectorType.GetKeyOf<IOAuthService>());
 
         return services;
     }

@@ -1,7 +1,8 @@
 ﻿namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Configs;
 
-public class JiraConfig
+public class JiraAuthConfig
 {
     public string BaseUrl { get; set; }
-    public JiraAuthConfig Auth { get; set; } = new();
+    public string Path { get; set; }
+    public string[] Scopes { get; set; } = [];
 }
