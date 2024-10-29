@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
@@ -10,7 +11,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddMicrosoft(this IServiceCollection services, IConfigurationSection configurationSection)
+    public static IServiceCollection AddMicrosoft(this IServiceCollection services, IConfigurationSection configurationSection, ConnectorType connectorType)
     {
         services.Configure<Resiliency>(configurationSection.GetSection("Resiliency"));
 
@@ -24,8 +25,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IChannelsClient, ChannelsClient>();
         services.AddScoped<IChatsClient, ChatsClient>();
 
-        services.AddKeyedScoped<IAuthTester, AuthTester>(typeof(AuthTester).FullName);
-        services.AddKeyedScoped<IDataSource, MicrosoftFacade>(typeof(MicrosoftFacade).FullName);
+        services.AddKeyedScoped<IAuthTester, AuthTester>(connectorType.GetKeyOf<IAuthTester>());
+        services.AddKeyedScoped<IDataSource, MicrosoftFacade>(connectorType.GetKeyOf<IDataSource>());
+        services.AddKeyedScoped<IOAuthService, OAuthService>(connectorType.GetKeyOf<IOAuthService>());
 
         services.AddMemoryCache();
 

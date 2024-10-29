@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -12,21 +14,22 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
-using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
-using NetworkPerspective.Sync.Orchestrator.Application.Services;
-using NetworkPerspective.Sync.Orchestrator.OAuth.Microsoft;
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.OAuth;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Orchestrator.Tests.OAuth.Microsoft;
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Services;
 
 public class MicrosoftAuthServiceTests
 {
     private readonly Mock<IVault> _vaultMock = new();
     private readonly Mock<IAuthStateKeyFactory> _authStateKeyFactoryMock = new();
-    private readonly ILogger<MicrosoftAuthService> _logger = NullLogger<MicrosoftAuthService>.Instance;
+    private readonly ILogger<OAuthService> _logger = NullLogger<OAuthService>.Instance;
 
     public MicrosoftAuthServiceTests()
     {
@@ -50,17 +53,23 @@ public class MicrosoftAuthServiceTests
                 .Returns(state);
 
             _vaultMock
-                .Setup(x => x.GetSecretAsync(MicrosoftAuthService.MicrosoftClientBasicIdKey, It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(OAuthService.MicrosoftClientBasicIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(clientId.ToSecureString());
 
             var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
-            var service = new MicrosoftAuthService(_vaultMock.Object, _authStateKeyFactoryMock.Object, cache, _logger);
+            var service = new OAuthService(_vaultMock.Object, _authStateKeyFactoryMock.Object, cache, _logger);
+
+            var connectorProperties = new Dictionary<string, string>
+            {
+                { "SyncMsTeams", "false" }
+            };
+            var connectorInfo = new ConnectorInfo(Guid.NewGuid(), "Office365", connectorProperties);
 
             // Act
-            var result = await service.StartAuthProcessAsync(new MicrosoftAuthProcess(connectorId, "worker-name", new Uri(redirectUrl), false));
+            var result = await service.InitializeOAuthAsync(new OAuthContext(connectorInfo, redirectUrl));
 
             // Assert
-            var resultUri = new Uri(result.MicrosoftAuthUri);
+            var resultUri = new Uri(result.AuthUri);
             resultUri.Scheme.Should().Be("https");
             resultUri.Host.Should().Be("login.microsoftonline.com");
             resultUri.LocalPath.Should().Be("/common/adminconsent");
@@ -74,8 +83,9 @@ public class MicrosoftAuthServiceTests
         {
             // Arrange
             var connectorId = Guid.NewGuid();
-            var callbackUri = new Uri("https://localhost:5001/callback");
-            var authProcess = new MicrosoftAuthProcess(connectorId, "worker-name", callbackUri, true);
+            var callbackUri = "https://localhost:5001/callback";
+            var connectorInfo = new ConnectorInfo(connectorId, "Office365", new Dictionary<string, string>());
+            var context = new OAuthContext(connectorInfo, callbackUri);
 
             var state = Guid.NewGuid().ToString();
 
@@ -84,35 +94,35 @@ public class MicrosoftAuthServiceTests
                 .Returns(state);
 
             var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
-            var service = new MicrosoftAuthService(_vaultMock.Object, _authStateKeyFactoryMock.Object, cache, _logger);
+            var service = new OAuthService(_vaultMock.Object, _authStateKeyFactoryMock.Object, cache, _logger);
 
             // Act
-            var result = service.StartAuthProcessAsync(authProcess);
+            var result = service.InitializeOAuthAsync(context);
 
             // Assert
-            cache.Get(state).Should().Be(authProcess);
+            cache.Get(state).Should().Be(context);
         }
     }
 
     public class HandleCallback : MicrosoftAuthServiceTests
     {
         [Fact]
-        public async Task ShouldThrowAuthExceptionOnNonExistingState()
+        public async Task ShouldSetKeysInVault()
         {
             // Arrange
-            var state = "non-exiting-state";
+            var connectorId = Guid.NewGuid();
+            var callbackUri = "https://localhost:5001/callback";
 
-            var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
+            var connectorInfo = new ConnectorInfo(connectorId, "Office365", new Dictionary<string, string>());
+            var context = new OAuthContext(connectorInfo, callbackUri);
 
-            var service = new MicrosoftAuthService(_vaultMock.Object, _authStateKeyFactoryMock.Object, cache, _logger);
+            var service = new OAuthService(_vaultMock.Object, _authStateKeyFactoryMock.Object, Mock.Of<IMemoryCache>(), _logger);
 
             // Act
-            Func<Task> func = () => service.HandleCallbackAsync(Guid.NewGuid(), state);
+            await service.HandleAuthorizationCodeCallbackAsync(Guid.NewGuid().ToString(), context);
 
             // Assert
-            await func.Should().ThrowAsync<OAuthException>();
+            _vaultMock.Verify(x => x.SetSecretAsync(It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
         }
     }
-
-    // TODO: Test if tokens are sent to worker
 }

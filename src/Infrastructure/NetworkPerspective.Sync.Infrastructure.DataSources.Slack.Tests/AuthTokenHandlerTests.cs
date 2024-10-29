@@ -50,7 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             var connectorInfoProviderMock = new Mock<IConnectorInfoProvider>();
             connectorInfoProviderMock
                 .Setup(x => x.Get())
-                .Returns(new ConnectorInfo(connectorId, networkId));
+                .Returns(new ConnectorInfo(connectorId, "type", new Dictionary<string, string>()));
 
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedVault>();
@@ -82,7 +82,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             var connectorInfoProviderMock = new Mock<IConnectorInfoProvider>();
             connectorInfoProviderMock
                 .Setup(x => x.Get())
-                .Returns(new ConnectorInfo(connectorId, networkId));
+                .Returns(new ConnectorInfo(connectorId, "type", new Dictionary<string, string>()));
 
             var token1 = Guid.NewGuid().ToString();
             var token2 = Guid.NewGuid().ToString();
@@ -116,7 +116,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             var networkIdProviderMock = new Mock<IConnectorInfoProvider>();
             networkIdProviderMock
                 .Setup(x => x.Get())
-                .Returns(new ConnectorInfo(connectorId, networkId));
+                .Returns(new ConnectorInfo(connectorId, "type", new Dictionary<string, string>()));
 
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedVault>();

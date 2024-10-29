@@ -69,14 +69,17 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
         logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
 
-    public async Task RotateSecretsAsync(string workerName, Guid connectorId, IDictionary<string, string> networkProperties, string connectorType)
+    public async Task RotateSecretsAsync(string workerName, Guid connectorId, IDictionary<string, string> connectorProperties, string connectorType)
     {
         var dto = new RotateSecretsDto
         {
             CorrelationId = Guid.NewGuid(),
-            ConnectorId = connectorId,
-            NetworkProperties = networkProperties,
-            ConnectorType = connectorType
+            Connector = new ConnectorDto
+            {
+                Id = connectorId,
+                Type = connectorType,
+                Properties = connectorProperties
+            }
         };
         var connection = connectionsLookupTable.Get(workerName);
         var response = await Clients
@@ -85,15 +88,17 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
         logger.LogInformation("Received ack '{correlationId}'", response.CorrelationId);
     }
 
-    public async Task<ConnectorStatus> GetConnectorStatusAsync(string workerName, Guid connectorId, Guid networkId, IDictionary<string, string> networkProperties, string connectorType)
+    public async Task<ConnectorStatus> GetConnectorStatusAsync(string workerName, Guid connectorId, Guid networkId, IDictionary<string, string> connectorProperties, string connectorType)
     {
         var requestDto = new GetConnectorStatusDto
         {
             CorrelationId = Guid.NewGuid(),
-            ConnectorId = connectorId,
-            NetworkId = networkId,
-            ConnectorType = connectorType,
-            ConnectorProperties = networkProperties
+            Connector = new ConnectorDto
+            {
+                Id = connectorId,
+                Type = connectorType,
+                Properties = connectorProperties
+            },
         };
 
         var connection = connectionsLookupTable.Get(workerName);
@@ -110,6 +115,49 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
         {
             return ConnectorStatus.Idle(responseDto.IsAuthorized);
         }
+    }
+
+    public async Task<OAuthInitializationResult> InitializeOAuthAsync(string workerName, Guid connectorId, string connectorType, string callbackUri, IDictionary<string, string> connectorProperties)
+    {
+        var requestDto = new InitializeOAuthRequest
+        {
+            CorrelationId = Guid.NewGuid(),
+            Connector = new ConnectorDto
+            {
+                Id = connectorId,
+                Type = connectorType,
+                Properties = connectorProperties
+            },
+            CallbackUri = callbackUri,
+        };
+
+        var connection = connectionsLookupTable.Get(workerName);
+
+        var responseDto = await Clients
+            .Client(connection.Id)
+            .InitializeOAuthAsync(requestDto);
+
+        var result = new OAuthInitializationResult(responseDto.AuthUri, responseDto.State, responseDto.StateExpirationTimestamp);
+
+        return result;
+    }
+
+    public async Task HandleOAuthCallbackAsync(string workerName, string code, string state)
+    {
+        var requestDto = new HandleOAuthCallbackRequest
+        {
+            CorrelationId = Guid.NewGuid(),
+            Code = code,
+            State = state
+        };
+
+        var connection = connectionsLookupTable.Get(workerName);
+
+        var responseDto = await Clients
+            .Client(connection.Id)
+            .HandleOAuthCallbackAsync(requestDto);
+
+        logger.LogInformation("Received ack '{correlationId}'", responseDto.CorrelationId);
     }
 
     public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto dto)

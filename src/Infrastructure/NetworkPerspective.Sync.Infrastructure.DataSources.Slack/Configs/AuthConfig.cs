@@ -1,11 +1,8 @@
-﻿using System;
+﻿namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Configs;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Configs
+internal class AuthConfig
 {
-    internal class AuthConfig
-    {
-        public string[] Scopes { get; set; } = Array.Empty<string>();
-        public string[] UserScopes { get; set; } = Array.Empty<string>();
-        public string[] AdminUserScopes { get; set; } = Array.Empty<string>();
-    }
+    public string[] Scopes { get; set; } = [];
+    public string[] UserScopes { get; set; } = [];
+    public string[] AdminUserScopes { get; set; } = [];
 }

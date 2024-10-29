@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +12,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Services;
 
 internal class AuthTester(IJiraAuthorizedFacade jiraFacade, ILogger<AuthTester> logger) : IAuthTester
 {
-    public async Task<bool> IsAuthorizedAsync(IDictionary<string, string> connectorProperties, CancellationToken stoppingToken = default)
+    public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
     {
         try
         {
