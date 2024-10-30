@@ -10,6 +10,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client;
 public interface IJiraUnauthorizedFacade
 {
     Task<OAuthTokenResponse> RefreshTokenFlowAsync(string clientId, string clientSecret, string refreshToken, CancellationToken stoppingToken = default);
+    Task<OAuthTokenResponse> ExchangeCodeForTokenAsync(string code, string clientId, string clientSecret, string callbackUri, CancellationToken stoppingToken = default);
 }
 
 internal class JiraUnauthorizedFacade(IJiraHttpClient jiraHttpClient) : IJiraUnauthorizedFacade
@@ -18,4 +19,7 @@ internal class JiraUnauthorizedFacade(IJiraHttpClient jiraHttpClient) : IJiraUna
 
     public Task<OAuthTokenResponse> RefreshTokenFlowAsync(string clientId, string clientSecret, string refreshToken, CancellationToken stoppingToken = default)
         => _oauthClient.RefreshTokenFlowAsync(clientId, clientSecret, refreshToken, stoppingToken);
+
+    public Task<OAuthTokenResponse> ExchangeCodeForTokenAsync(string code, string clientId, string clientSecret, string callbackUri, CancellationToken stoppingToken = default)
+        => _oauthClient.ExchangeCodeForTokenAsync(code, clientId, clientSecret, callbackUri, stoppingToken);
 }

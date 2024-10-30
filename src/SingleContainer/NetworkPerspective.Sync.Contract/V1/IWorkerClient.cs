@@ -11,4 +11,6 @@ public interface IWorkerClient
     Task<AckDto> RotateSecretsAsync(RotateSecretsDto rotateSecretsDto);
     Task<ConnectorStatusDto> GetConnectorStatusAsync(GetConnectorStatusDto getConnectorStatusDto);
     Task<WorkerCapabilitiesDto> GetWorkerCapabilitiesAsync(GetWorkerCapabilitiesDto getWorkerCapabilites);
+    Task<InitializeOAuthResponse> InitializeOAuthAsync(InitializeOAuthRequest request);
+    Task<AckDto> HandleOAuthCallbackAsync(HandleOAuthCallbackRequest request);
 }

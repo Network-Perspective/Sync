@@ -18,7 +18,7 @@ public class ConnectorTypesCollectionTests
     {
         // Arrange
         const string name = "name";
-        var type = new ConnectorType { Name = name, DataSourceId = "id", DataSourceFacadeFullName = "fullName" };
+        var type = new ConnectorType { Name = name, DataSourceId = "id" };
         var types = new List<ConnectorType> { type };
         var collection = new ConnectorTypesCollection(types);
 
@@ -48,8 +48,8 @@ public class ConnectorTypesCollectionTests
         // Arrange
         const string name1 = "name1";
         const string name2 = "name2";
-        var type1 = new ConnectorType { Name = name1, DataSourceId = "id1", DataSourceFacadeFullName = "fullName1" };
-        var type2 = new ConnectorType { Name = name2, DataSourceId = "id2", DataSourceFacadeFullName = "fullName2" };
+        var type1 = new ConnectorType { Name = name1, DataSourceId = "id1" };
+        var type2 = new ConnectorType { Name = name2, DataSourceId = "id2" };
         var types = new List<ConnectorType> { type1, type2 };
         var collection = new ConnectorTypesCollection(types);
 

@@ -11,6 +11,7 @@ using NetworkPerspective.Sync.Infrastructure.Core.HttpClients;
 using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
@@ -124,9 +125,9 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
         public Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default)
             => Task.CompletedTask;
 
-        public Task<ConnectorInfo> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default)
+        public Task<CoreTokenValidationResult> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default)
         {
-            return Task.FromResult(new ConnectorInfo(ConnectorId, NetworkId));
+            return Task.FromResult(new CoreTokenValidationResult(ConnectorId, NetworkId));
         }
 
         public IInteractionsStream OpenInteractionsStream(SecureString accessToken, string dataSourceIdName, CancellationToken stoppingToken = default)

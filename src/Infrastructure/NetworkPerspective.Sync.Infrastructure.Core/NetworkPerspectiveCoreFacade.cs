@@ -14,6 +14,7 @@ using NetworkPerspective.Sync.Infrastructure.Core.Mappers;
 using NetworkPerspective.Sync.Infrastructure.Core.Services;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application.Domain;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
@@ -156,13 +157,13 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             }
         }
 
-        public async Task<ConnectorInfo> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default)
+        public async Task<CoreTokenValidationResult> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default)
         {
             try
             {
                 var result = await _client.QueryAsync(accessToken.ToSystemString(), stoppingToken);
 
-                return new ConnectorInfo(result.ConnectorId.Value, result.NetworkId.Value);
+                return new CoreTokenValidationResult(result.ConnectorId.Value, result.NetworkId.Value);
             }
             catch (ApiException aex) when (aex.StatusCode == (int)HttpStatusCode.Forbidden)
             {

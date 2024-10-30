@@ -21,6 +21,10 @@ using System.Collections.Generic;
 
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Worker.Configs;
+
+using NetworkPerspective.Sync.Worker.HostedServices;
+
 #if !DEBUG
 #else
 using NetworkPerspective.Sync.Infrastructure.Core.Stub;
@@ -36,20 +40,26 @@ public class Program
 
         try
         {
-            var connectorTypes = new List<ConnectorType>{
-                new() { Name = "Slack",     DataSourceId = "SlackId",       DataSourceFacadeFullName = "NetworkPerspective.Sync.Infrastructure.DataSources.Slack.SlackFacade"},
-                new() { Name = "Google",    DataSourceId = "GSuiteId",      DataSourceFacadeFullName = "NetworkPerspective.Sync.Infrastructure.DataSources.Google.GoogleFacade"},
-                new() { Name = "Excel",     DataSourceId = "ExcelId",       DataSourceFacadeFullName = "NetworkPerspective.Sync.Infrastructure.DataSources.Excel.ExcelFacade"},
-                new() { Name = "Office365", DataSourceId = "Office365Id",   DataSourceFacadeFullName = "NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.MicrosoftFacade"},
-                new() { Name = "Jira",      DataSourceId = "JiraId",        DataSourceFacadeFullName = "NetworkPerspective.Sync.Infrastructure.DataSources.Jira.JiraFacade"},
+            var slackConnector = new ConnectorType { Name = "Slack", DataSourceId = "SlackId" };
+            var googleConnector = new ConnectorType { Name = "Google", DataSourceId = "GSuiteId" };
+            var excelConnector = new ConnectorType { Name = "Excel", DataSourceId = "ExcelId" };
+            var office365Connector = new ConnectorType { Name = "Office365", DataSourceId = "Office365Id" };
+            var jiraConnector = new ConnectorType { Name = "Jira", DataSourceId = "JiraId" };
+
+            var connectorTypes = new List<ConnectorType> {
+                slackConnector,
+                googleConnector,
+                excelConnector,
+                office365Connector,
+                jiraConnector,
             };
 
             var healthChecksBuilder = builder.Services
                 .AddHealthChecks();
 
             builder.Services
-                .AddSingleton<IValidateOptions<WorkerConfiguration>, WorkerConfiguration.Validator>()
-                .AddOptions<WorkerConfiguration>()
+                .AddSingleton<IValidateOptions<WorkerConfig>, WorkerConfig.Validator>()
+                .AddOptions<WorkerConfig>()
                 .Bind(builder.Configuration)
                 .ValidateOnStart();
 
@@ -57,13 +67,14 @@ public class Program
                 .AddWorkerApplication(builder.Configuration.GetSection("App"), connectorTypes)
                 .AddNetworkPerspectiveCore(builder.Configuration.GetSection("Infrastructure:Core"), healthChecksBuilder)
                 .AddVault(builder.Configuration.GetSection("Infrastructure:Vaults"), healthChecksBuilder)
-                .AddSlack(builder.Configuration.GetSection("Infrastructure:DataSources:Slack"))
-                .AddGoogle(builder.Configuration.GetSection("Infrastructure:DataSources:Google"))
-                .AddMicrosoft(builder.Configuration.GetSection("Infrastructure:DataSources:Microsoft"))
-                .AddJira(builder.Configuration.GetSection("Infrastructure:DataSources:Jira"))
-                .AddExcel(builder.Configuration.GetSection("Infrastructure:DataSources:Excel"))
+                .AddSlack(builder.Configuration.GetSection("Infrastructure:DataSources:Slack"), slackConnector)
+                .AddGoogle(builder.Configuration.GetSection("Infrastructure:DataSources:Google"), googleConnector)
+                .AddMicrosoft(builder.Configuration.GetSection("Infrastructure:DataSources:Microsoft"), office365Connector)
+                .AddJira(builder.Configuration.GetSection("Infrastructure:DataSources:Jira"), jiraConnector)
+                .AddExcel(builder.Configuration.GetSection("Infrastructure:DataSources:Excel"), excelConnector)
                 .AddOrchestratorClient(builder.Configuration.GetSection("Infrastructure:Orchestrator"));
 
+            builder.Services.AddHostedService<StartupHealthChecker>();
             builder.Services.AddHostedService<ConnectionHost>();
 
             builder.Services.AddApplicationInsightsTelemetryWorkerService();
@@ -77,18 +88,8 @@ public class Program
             var host = builder.Build();
             host.Run();
         }
-        catch (OptionsValidationException ex)
+        catch (Exception)
         {
-
-            Console.WriteLine("Startup configuration validation thrown errors:");
-            Console.WriteLine(string.Join('\n', ex.Failures));
-            var delay = builder.Configuration.GetValue<TimeSpan>("App:DelayBeforeExitOnException");
-            Thread.Sleep(delay);
-            throw;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
             var delay = builder.Configuration.GetValue<TimeSpan>("App:DelayBeforeExitOnException");
             Thread.Sleep(delay);
             throw;

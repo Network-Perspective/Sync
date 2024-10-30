@@ -1,44 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
-using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 
 internal class AuthTester : IAuthTester
 {
-    private readonly IAuthTesterContextAccessor _contextAccessor;
+    private readonly IConnectorInfoProvider _connectorInfoProvider;
     private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
     private readonly ILogger<AuthTester> _logger;
 
-    public AuthTester(IAuthTesterContextAccessor contextAccessor, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<AuthTester> logger)
+    public AuthTester(IConnectorInfoProvider connectorInfoProvider, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<AuthTester> logger)
     {
-        _contextAccessor = contextAccessor;
+        _connectorInfoProvider = connectorInfoProvider;
         _slackClientFacadeFactory = slackClientFacadeFactory;
         _logger = logger;
     }
 
 
-    public async Task<bool> IsAuthorizedAsync(IDictionary<string, string> networkProperties, CancellationToken stoppingToken = default)
+    public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
     {
-        var connectorProperties = ConnectorProperties.Create<SlackConnectorProperties>(networkProperties);
+        var connectorInfo = _connectorInfoProvider.Get();
 
-        if (connectorProperties.UsesAdminPrivileges)
+        if (connectorInfo.GetConnectorProperties<SlackConnectorProperties>().UsesAdminPrivileges)
         {
-            var isUserTokenOk = await TestUserTokenAsync(_contextAccessor.Context.ConnectorId, stoppingToken);
-            var isBotTokenOk = await TestBotTokenAsync(_contextAccessor.Context.ConnectorId, stoppingToken);
+            var isUserTokenOk = await TestUserTokenAsync(connectorInfo.Id, stoppingToken);
+            var isBotTokenOk = await TestBotTokenAsync(connectorInfo.Id, stoppingToken);
 
             return isUserTokenOk && isBotTokenOk;
         }
         else
         {
-            return await TestBotTokenAsync(_contextAccessor.Context.ConnectorId, stoppingToken);
+            return await TestBotTokenAsync(connectorInfo.Id, stoppingToken);
         }
     }
 
