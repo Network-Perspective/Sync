@@ -11,7 +11,7 @@ namespace NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 
 public sealed class SyncContext : IDisposable
 {
-    private readonly IDictionary<Type, object> _container = new Dictionary<Type, object>();
+    private readonly Dictionary<Type, object> _container = [];
     private readonly IHashingService _hashingService;
     private readonly IEnumerable<KeyValuePair<string, string>> _connectorProperties;
 
@@ -33,7 +33,6 @@ public sealed class SyncContext : IDisposable
         _hashingService = hashingService;
         HashFunction = hashingService.Hash;
     }
-
 
     public T GetConnectorProperties<T>() where T : ConnectorProperties, new()
         => ConnectorProperties.Create<T>(_connectorProperties);

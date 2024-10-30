@@ -14,9 +14,6 @@ using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 using NetworkPerspective.Sync.Orchestrator.Mappers;
-using NetworkPerspective.Sync.Orchestrator.OAuth.Jira;
-using NetworkPerspective.Sync.Orchestrator.OAuth.Microsoft;
-using NetworkPerspective.Sync.Orchestrator.OAuth.Slack;
 using NetworkPerspective.Sync.Orchestrator.Persistence;
 
 namespace NetworkPerspective.Sync.Orchestrator;
@@ -46,10 +43,10 @@ public class Program
             .AddAzureKeyVault(builder.Configuration.GetSection("Infrastructure:Vault"), healthcheckBuilder)
             .AddSingleton<ICachedVault, CachedVault>()
             .AddAuth()
-            .AddSlackAuth(builder.Configuration.GetSection("DataSources:Slack"))
-            .AddMicrosoftAuth()
-            .AddJiraAuth(builder.Configuration.GetSection("DataSources:Jira"))
             .AddHub();
+
+        builder.Services
+            .AddMemoryCache();
 
         builder.Services.AddControllers(options =>
         {

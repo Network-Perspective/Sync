@@ -23,7 +23,6 @@ internal class SyncContextAccessor : ISyncContextAccessor
         }
     }
 
-
     public SyncContext SyncContext
     {
         get

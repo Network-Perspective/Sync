@@ -16,4 +16,6 @@ public interface IWorkerRouter
     Task SetSecretsAsync(string workerName, IDictionary<string, SecureString> secrets);
     Task RotateSecretsAsync(string workerName, Guid connectorId, IDictionary<string, string> networkProperties, string connectorType);
     Task<ConnectorStatus> GetConnectorStatusAsync(string workerName, Guid connectorId, Guid networkId, IDictionary<string, string> networkProperties, string connectorType);
+    Task<OAuthInitializationResult> InitializeOAuthAsync(string workerName, Guid connectorId, string connectorType, string callbackUri, IDictionary<string, string> connectorProperties);
+    Task HandleOAuthCallbackAsync(string workerName, string code, string state);
 }

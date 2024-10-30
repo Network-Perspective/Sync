@@ -16,6 +16,7 @@ internal interface IOAuthClient
 {
     Task<IReadOnlyCollection<AccessibleResource>> GetAccessibleResourcesAsync(CancellationToken stoppingToken = default);
     Task<OAuthTokenResponse> RefreshTokenFlowAsync(string clientId, string clientSecret, string refreshToken, CancellationToken stoppingToken = default);
+    Task<OAuthTokenResponse> ExchangeCodeForTokenAsync(string code, string clientId, string clientSecret, string callbackUri, CancellationToken stoppingToken = default);
 }
 
 internal class OAuthClient(IJiraHttpClient jiraHttpClient) : IOAuthClient
@@ -45,5 +46,20 @@ internal class OAuthClient(IJiraHttpClient jiraHttpClient) : IOAuthClient
 
         var result = await jiraHttpClient.GetAsync<IEnumerable<AccessibleResource>>(path, stoppingToken);
         return result.ToList().AsReadOnly();
+    }
+
+    public async Task<OAuthTokenResponse> ExchangeCodeForTokenAsync(string code, string clientId, string clientSecret, string callbackUri, CancellationToken stoppingToken = default)
+    {
+        var requestObject = new OAuthTokenRequest
+        {
+            GrantType = "authorization_code",
+            ClientId = clientId,
+            ClientSecret = clientSecret,
+            Code = code,
+            RedirectUri = callbackUri
+        };
+        var requestPayload = JsonConvert.SerializeObject(requestObject);
+        var requestContent = new StringContent(requestPayload, Encoding.UTF8, "application/json");
+        return await jiraHttpClient.PostAsync<OAuthTokenResponse>("oauth/token", requestContent, stoppingToken);
     }
 }

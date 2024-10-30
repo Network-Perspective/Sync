@@ -2,6 +2,6 @@
 
 public class JiraConfig
 {
-    public string ApiBaseUrl { get; set; }
-    public string AuthBaseUrl { get; set; }
+    public string BaseUrl { get; set; }
+    public JiraAuthConfig Auth { get; set; } = new();
 }

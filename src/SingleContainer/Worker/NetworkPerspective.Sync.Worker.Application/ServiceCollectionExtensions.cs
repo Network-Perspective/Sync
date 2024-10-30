@@ -32,18 +32,41 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<ITasksStatusesCache, TasksStatusesCache>();
 
-        services.AddScoped<IDataSourceFactory, DataSourceFactory>();
-        services.AddScoped<IDataSource>(sp => sp.GetRequiredService<IDataSourceFactory>().CreateDataSource());
-
-        services.AddSingleton<ISecretRotationContextFactory, SecretRotationContextFactory>();
-        services.AddScoped<ISecretRotationContextAccessor, SecretRotationContextAccessor>();
         services.AddScoped<ISecretRotationServiceFactory, SecretRotatorFactory>();
         services.AddScoped<ISecretRotationService>(sp => sp.GetRequiredService<ISecretRotationServiceFactory>().CreateSecretRotator());
 
-        services.AddSingleton<IAuthTesterContextFactory, AuthTesterContextFactory>();
-        services.AddScoped<IAuthTesterContextAccessor, AuthTesterContextAccessor>();
-        services.AddScoped<IAuthTesterFactory, AuthTesterFactory>();
-        services.AddScoped<IAuthTester>(sp => sp.GetRequiredService<IAuthTesterFactory>().CreateAuthTester());
+        services.AddScoped<IAuthTester>(sp =>
+        {
+            var connectorInforProvider = sp.GetRequiredService<IConnectorInfoProvider>();
+            var connectorInfo = connectorInforProvider.Get();
+
+            var connectorTypes = sp.GetRequiredService<IConnectorTypesCollection>();
+            var dataSourceKey = connectorTypes[connectorInfo.Type].GetKeyOf<IAuthTester>();
+
+            return sp.GetRequiredKeyedService<IAuthTester>(dataSourceKey);
+        });
+
+        services.AddScoped<IOAuthService>(sp =>
+        {
+            var connectorInforProvider = sp.GetRequiredService<IConnectorInfoProvider>();
+            var connectorInfo = connectorInforProvider.Get();
+
+            var connectorTypes = sp.GetRequiredService<IConnectorTypesCollection>();
+            var dataSourceKey = connectorTypes[connectorInfo.Type].GetKeyOf<IOAuthService>();
+
+            return sp.GetRequiredKeyedService<IOAuthService>(dataSourceKey);
+        });
+
+        services.AddScoped<IDataSource>(sp =>
+        {
+            var connectorInforProvider = sp.GetRequiredService<IConnectorInfoProvider>();
+            var connectorInfo = connectorInforProvider.Get();
+
+            var connectorTypes = sp.GetRequiredService<IConnectorTypesCollection>();
+            var dataSourceKey = connectorTypes[connectorInfo.Type].GetKeyOf<IDataSource>();
+
+            return sp.GetRequiredKeyedService<IDataSource>(dataSourceKey);
+        });
 
 
         services.AddScoped<IStatusLogger, StatusLogger>();
