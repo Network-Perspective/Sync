@@ -9,7 +9,6 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
@@ -18,7 +17,7 @@ internal class AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider cr
 {
     private readonly GoogleConfig _config = config.Value;
 
-    public async Task<bool> IsAuthorizedAsync(IDictionary<string, string> networkProperties, CancellationToken stoppingToken = default)
+    public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
     {
         const string currentAccountCustomer = "my_customer";
 
@@ -26,7 +25,7 @@ internal class AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider cr
         try
         {
             logger.LogInformation("Checking if connector '{connectorId}' is authorized", connectorInfo);
-            var googleNetworkProperties = ConnectorProperties.Create<GoogleNetworkProperties>(networkProperties);
+            var googleNetworkProperties = connectorInfo.GetConnectorProperties<GoogleNetworkProperties>();
 
             var userCredentials = await credentialsProvider.GetForUserAsync(googleNetworkProperties.AdminEmail, stoppingToken);
 

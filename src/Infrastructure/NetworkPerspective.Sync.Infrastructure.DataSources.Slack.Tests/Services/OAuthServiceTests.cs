@@ -16,18 +16,19 @@ using Moq;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Dtos;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Configs;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
-using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
-using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
-using NetworkPerspective.Sync.Orchestrator.Application.Services;
-using NetworkPerspective.Sync.Orchestrator.OAuth.Slack;
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.OAuth;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Orchestrator.Tests.OAuth.Slack;
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.Services;
 
-public class SlackAuthServiceTests
+public class OAuthServiceTests
 {
     private const string ClientId = "1234";
     private static readonly string[] Scopes = ["scope1", "scope2"];
@@ -36,19 +37,17 @@ public class SlackAuthServiceTests
 
     private readonly Mock<IVault> _vaultMock = new();
     private readonly Mock<IAuthStateKeyFactory> _stateFactoryMock = new();
-    private readonly Mock<IWorkerRouter> _workerRouter = new();
     private readonly Mock<ISlackClientUnauthorizedFacade> _slackClientUnauthorizedFacadeMock = new();
-    private readonly ILogger<SlackAuthService> _logger = NullLogger<SlackAuthService>.Instance;
+    private readonly ILogger<OAuthService> _logger = NullLogger<OAuthService>.Instance;
 
-    public SlackAuthServiceTests()
+    public OAuthServiceTests()
     {
         _vaultMock.Reset();
         _stateFactoryMock.Reset();
-        _workerRouter.Reset();
         _slackClientUnauthorizedFacadeMock.Reset();
     }
 
-    public class StartAuthProcess : SlackAuthServiceTests
+    public class StartAuthProcess : OAuthServiceTests
     {
         [Fact]
         public async Task ShouldBuildCorrectAuthUriWithoutAdminPrivileges()
@@ -63,29 +62,33 @@ public class SlackAuthServiceTests
                 .Returns(state);
 
             _vaultMock
-                .Setup(x => x.GetSecretAsync(SlackAuthService.SlackClientIdKey, It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(OAuthService.SlackClientIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ClientId.ToSecureString());
 
             var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
 
-            var service = new SlackAuthService(
+            var service = new OAuthService(
                 _vaultMock.Object,
                 _stateFactoryMock.Object,
                 cache,
-                _workerRouter.Object,
                 config,
                 _slackClientUnauthorizedFacadeMock.Object,
                 _logger);
 
+            var connectorProperties = new Dictionary<string, string>
+            {
+                { "UsesAdminPrivileges", "false" }
+            };
+            var connectorInfo = new ConnectorInfo(Guid.NewGuid(), "Slack", connectorProperties);
             // Act
-            var result = await service.StartAuthProcessAsync(new SlackAuthProcess(Guid.NewGuid(), "worker-name", new Uri(redirectUrl), false));
+            var result = await service.InitializeOAuthAsync(new OAuthContext(connectorInfo, redirectUrl));
 
             // Assert
-            result.SlackAuthUri.Should().Contain("oauth/v2/authorize");
-            result.SlackAuthUri.Should().Contain($"client_id={ClientId}");
-            result.SlackAuthUri.Should().Contain($"scope={string.Join(',', Scopes)}");
-            result.SlackAuthUri.Should().Contain($"user_scope={string.Join(',', UserScopes)}");
-            result.SlackAuthUri.Should().Contain($"redirect_uri={redirectUrl}");
+            result.AuthUri.Should().Contain("oauth/v2/authorize");
+            result.AuthUri.Should().Contain($"client_id={ClientId}");
+            result.AuthUri.Should().Contain($"scope={string.Join(',', Scopes)}");
+            result.AuthUri.Should().Contain($"user_scope={string.Join(',', UserScopes)}");
+            result.AuthUri.Should().Contain($"redirect_uri={redirectUrl}");
         }
 
         [Fact]
@@ -101,37 +104,44 @@ public class SlackAuthServiceTests
                 .Returns(state);
 
             _vaultMock
-                .Setup(x => x.GetSecretAsync(SlackAuthService.SlackClientIdKey, It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(OAuthService.SlackClientIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ClientId.ToSecureString());
 
             var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
 
-            var service = new SlackAuthService(
+            var service = new OAuthService(
                 _vaultMock.Object,
                 _stateFactoryMock.Object,
                 cache,
-                _workerRouter.Object,
                 config,
                 _slackClientUnauthorizedFacadeMock.Object,
                 _logger);
 
+            var connectorProperties = new Dictionary<string, string>
+            {
+                { "UsesAdminPrivileges", "true" }
+            };
+            var connectorInfo = new ConnectorInfo(Guid.NewGuid(), "Slack", connectorProperties);
+
             // Act
-            var result = await service.StartAuthProcessAsync(new SlackAuthProcess(Guid.NewGuid(), "worker-name", new Uri(redirectUrl), true));
+            var result = await service.InitializeOAuthAsync(new OAuthContext(connectorInfo, redirectUrl));
+
             // Assert
-            result.SlackAuthUri.Should().Contain("oauth/v2/authorize");
-            result.SlackAuthUri.Should().Contain($"client_id={ClientId}");
-            result.SlackAuthUri.Should().Contain($"scope={string.Join(',', Scopes)}");
-            result.SlackAuthUri.Should().Contain($"user_scope={string.Join(',', UserScopes.Union(AdminUserScopes))}");
-            result.SlackAuthUri.Should().Contain($"redirect_uri={redirectUrl}");
+            result.AuthUri.Should().Contain("oauth/v2/authorize");
+            result.AuthUri.Should().Contain($"client_id={ClientId}");
+            result.AuthUri.Should().Contain($"scope={string.Join(',', Scopes)}");
+            result.AuthUri.Should().Contain($"user_scope={string.Join(',', UserScopes.Union(AdminUserScopes))}");
+            result.AuthUri.Should().Contain($"redirect_uri={redirectUrl}");
         }
 
         [Fact]
         public void ShouldPutStateToCache()
         {
             // Arrange
-            var networkId = Guid.NewGuid();
-            var callbackUri = new Uri("https://localhost:5001/callback");
-            var authProcess = new SlackAuthProcess(networkId, "worker-name", callbackUri, false);
+            var connectorId = Guid.NewGuid();
+            var callbackUri = "https://localhost:5001/callback";
+            var connectorInfo = new ConnectorInfo(connectorId, "Slack", new Dictionary<string, string>());
+            var context = new OAuthContext(connectorInfo, callbackUri);
 
             var stateKey = Guid.NewGuid().ToString();
             var config = CreateDefaultOptions();
@@ -141,63 +151,36 @@ public class SlackAuthServiceTests
                 .Returns(stateKey);
 
             var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
-            var service = new SlackAuthService(
+            var service = new OAuthService(
                 _vaultMock.Object,
                 _stateFactoryMock.Object,
                 cache,
-                _workerRouter.Object,
                 config,
                 _slackClientUnauthorizedFacadeMock.Object,
                 _logger);
 
             // Act
-            var result = service.StartAuthProcessAsync(authProcess);
+            var result = service.InitializeOAuthAsync(context);
 
             // Assert
-            cache.Get(stateKey).Should().Be(authProcess);
+            cache.Get(stateKey).Should().Be(context);
         }
     }
 
-    public class HandleAuthorizationCodeCallback : SlackAuthServiceTests
+    public class HandleAuthorizationCodeCallback : OAuthServiceTests
     {
         [Fact]
-        public async Task ShouldThrowAuthExceptionOnNonExistingState()
+        public async Task ShouldSetKeysInVault()
         {
             // Arrange
-            var state = "non-exiting-state";
+            var connectorId = Guid.NewGuid();
+            var callbackUri = "https://localhost:5001/callback";
 
             var config = CreateDefaultOptions();
 
-            var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
+            var connectorInfo = new ConnectorInfo(connectorId, "Slack", new Dictionary<string, string>());
+            var context = new OAuthContext(connectorInfo, callbackUri);
 
-            var service = new SlackAuthService(
-                _vaultMock.Object,
-                _stateFactoryMock.Object,
-                cache,
-                _workerRouter.Object,
-                config,
-                _slackClientUnauthorizedFacadeMock.Object,
-                _logger);
-
-            // Act
-            Func<Task> func = () => service.HandleAuthorizationCodeCallbackAsync("foo", state);
-
-            // Assert
-            await func.Should().ThrowAsync<OAuthException>();
-        }
-
-        [Fact]
-        public async Task ShouldSendTokensToWorker()
-        {
-            // Arrange
-            var state = "state-key";
-            var workerName = "worker-name";
-
-            var config = CreateDefaultOptions();
-
-            var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
-            var authState = new SlackAuthProcess(Guid.NewGuid(), workerName, new Uri("https://networkperspective.io/"), false);
-            cache.Set(state, authState);
 
             var accessResponse = new OAuthAccessResponse
             {
@@ -208,25 +191,24 @@ public class SlackAuthServiceTests
                 .Setup(x => x.AccessAsync(It.IsAny<OAuthAccessRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(accessResponse);
 
-            var service = new SlackAuthService(
+            var service = new OAuthService(
                 _vaultMock.Object,
                 _stateFactoryMock.Object,
-                cache,
-                _workerRouter.Object,
+                Mock.Of<IMemoryCache>(),
                 config,
                 _slackClientUnauthorizedFacadeMock.Object,
                 _logger);
 
             // Act
-            await service.HandleAuthorizationCodeCallbackAsync("foo", state);
+            await service.HandleAuthorizationCodeCallbackAsync("foo", context);
 
             // Assert
-            _workerRouter.Verify(x => x.SetSecretsAsync(workerName, It.IsAny<IDictionary<string, SecureString>>()), Times.Once);
+            _vaultMock.Verify(x => x.SetSecretAsync(It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
         }
     }
 
-    private static IOptions<SlackAuthConfig> CreateDefaultOptions()
-        => Options.Create(new SlackAuthConfig
+    private static IOptions<AuthConfig> CreateDefaultOptions()
+        => Options.Create(new AuthConfig
         {
             Scopes = Scopes,
             UserScopes = UserScopes,

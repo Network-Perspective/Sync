@@ -61,7 +61,7 @@ public class SyncServiceTests
             .Setup(x => x.Filter(It.IsAny<IEnumerable<Interaction>>()))
             .Returns(new HashSet<Interaction>());
 
-        var connectorType = new ConnectorType { Name = ConnectorTypeName, DataSourceId = DataSourceId, DataSourceFacadeFullName = string.Empty };
+        var connectorType = new ConnectorType { Name = ConnectorTypeName, DataSourceId = DataSourceId };
         _connectorTypes = new ConnectorTypesCollection([connectorType]);
     }
 
