@@ -51,6 +51,8 @@ internal sealed class SyncService : ISyncService
     {
         try
         {
+            var status = new SingleTaskStatus("Initializing synchronization", "The synchronization is starting", 0);
+            await _tasksStatusesCache.SetStatusAsync(context.ConnectorId, status, stoppingToken);
             await _statusLogger.LogInfoAsync("Sync started", stoppingToken);
             _logger.LogInformation("Executing synchronization for Connector '{connectorId}' for timerange '{timeRange}'", context.ConnectorId, context.TimeRange);
 
