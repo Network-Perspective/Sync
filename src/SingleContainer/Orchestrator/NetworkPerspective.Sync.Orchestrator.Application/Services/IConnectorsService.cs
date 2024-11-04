@@ -61,7 +61,7 @@ internal class ConnectorsService : IConnectorsService
         await ValidateExists(id, stoppingToken);
 
         await _unitOfWork
-            .GetWorkerRepository()
+            .GetConnectorRepository()
             .RemoveAsync(id, stoppingToken);
 
         await _unitOfWork.CommitAsync(stoppingToken);
