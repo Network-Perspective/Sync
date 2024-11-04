@@ -80,7 +80,6 @@ public class ConnectorsController : ControllerBase
         _logger.LogDebug("Received request to delete connector '{id}'", id);
 
         await _syncScheduler.UnscheduleAsync(id);
-        await _tokenService.EnsureRemovedAsync(id);
         await _connectorsService.RemoveAsync(id);
 
         return Ok();
