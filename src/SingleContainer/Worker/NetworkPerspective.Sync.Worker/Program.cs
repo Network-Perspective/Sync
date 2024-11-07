@@ -81,9 +81,11 @@ public class Program
 
 #if !DEBUG
             builder.Services.RemoveHttpClientLogging();
-#else
-            builder.Services.AddNetworkPerspectiveCoreStub(builder.Configuration.GetSection("Infrastructure:Core"));
 #endif
+            if (builder.Configuration.GetValue<bool>("Infrastructure:Core:Stub"))
+            {
+                builder.Services.AddNetworkPerspectiveCoreStub(builder.Configuration.GetSection("Infrastructure:Core"));
+            }
 
             var host = builder.Build();
             host.Run();
