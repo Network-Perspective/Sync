@@ -11,6 +11,11 @@ public class ConnectorConfig : IRegister
     {
         config
             .NewConfig<Connector, ConnectorDto>()
-                .Map(dest => dest.WorkerId, src => src.Worker.Id);
+            .Map(dest => dest.WorkerId, src => src.Worker.Id);
+        
+        config
+            .NewConfig<Connector, ConnectorDetailsDto>()
+                .Map(dest => dest.WorkerId, src => src.Worker.Id)
+                .Map(dest => dest.Properties, src => src.Properties);
     }
 }
