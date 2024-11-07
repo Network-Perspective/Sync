@@ -34,13 +34,13 @@ public class ConnectorsControllerTests
         await wokrersClient.WorkersPostAsync(new CreateWorkerDto { Name = workerName, Secret = "secret1" });
 
         var workers = await wokrersClient.WorkersGetAsync();
-        var workerId = workers.Single(x => x.Name == workerName).Id;
+        var workerId = workers.Single(x => x.Name == workerName).Id as Guid?;
 
         // Act
         await connectorsClient.ConnectorsPostAsync(new CreateConnectorDto
         {
             Id = Guid.NewGuid(),
-            WorkerId = workerId,
+            WorkerId = workerId.Value,
             Type = "Google",
             Properties =
             [
@@ -53,6 +53,6 @@ public class ConnectorsControllerTests
         var actual = await connectorsClient.ConnectorsGetAsync(workerId);
         actual.Should().HaveCount(1);
         actual.Single().Type.Should().Be("Google");
-        actual.Single().WorkerId.Should().Be(workerId);
+        actual.Single().WorkerId.Should().Be(workerId.Value);
     }
 }

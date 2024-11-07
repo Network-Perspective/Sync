@@ -1,31 +1,24 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
-using NetworkPerspective.Sync.Contract.V1.Impl;
-using NetworkPerspective.Sync.Infrastructure.Core;
-using NetworkPerspective.Sync.Worker.Application;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Excel;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Google;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Jira;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
-
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 using Microsoft.Extensions.Configuration;
-
-using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
-
-using System.Collections.Generic;
-
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Worker.Configs;
-
-using NetworkPerspective.Sync.Worker.HostedServices;
-
+using NetworkPerspective.Sync.Contract.V1.Impl;
+using NetworkPerspective.Sync.Infrastructure.Core;
 using NetworkPerspective.Sync.Infrastructure.Core.Stub;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Excel;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Jira;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
+using NetworkPerspective.Sync.Worker.Application;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Configs;
+using NetworkPerspective.Sync.Worker.HostedServices;
 
 namespace NetworkPerspective.Sync.Worker;
 
