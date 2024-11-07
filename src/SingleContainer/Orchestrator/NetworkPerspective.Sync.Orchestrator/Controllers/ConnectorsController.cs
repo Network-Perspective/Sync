@@ -63,7 +63,7 @@ public class ConnectorsController : ControllerBase
 
         return Ok();
     }
-    
+
     /// <summary>
     /// Read connector details
     /// </summary>

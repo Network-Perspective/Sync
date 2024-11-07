@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
 
         services.Configure<ExcelSyncConstraints>(config.GetSection(SyncConstraintsConfigSection));
         services.AddKeyedScoped<IAuthTester, AuthTester>(connectorType.GetKeyOf<IAuthTester>());
-        
+
         return services;
     }
 }
