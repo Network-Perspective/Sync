@@ -25,10 +25,7 @@ using NetworkPerspective.Sync.Worker.Configs;
 
 using NetworkPerspective.Sync.Worker.HostedServices;
 
-#if !DEBUG
-#else
 using NetworkPerspective.Sync.Infrastructure.Core.Stub;
-#endif
 
 namespace NetworkPerspective.Sync.Worker;
 
