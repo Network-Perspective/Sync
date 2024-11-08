@@ -72,7 +72,7 @@ public class Program
 #if !DEBUG
             builder.Services.RemoveHttpClientLogging();
 #endif
-            if (builder.Configuration.GetValue<bool>("Infrastructure:Core:Stub"))
+            if (builder.Configuration.GetValue<bool>("Infrastructure:Core:UseStub"))
             {
                 builder.Services.AddNetworkPerspectiveCoreStub(builder.Configuration.GetSection("Infrastructure:Core"));
             }
