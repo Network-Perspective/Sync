@@ -22,7 +22,6 @@ public class ConnectorPropertyConfiguration : IEntityTypeConfiguration<Connector
 
         builder
             .Property(x => x.Value)
-            .HasMaxLength(1024)
             .IsRequired(true);
     }
 }
