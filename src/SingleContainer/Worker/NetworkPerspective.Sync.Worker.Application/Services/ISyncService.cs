@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,7 +53,9 @@ internal sealed class SyncService : ISyncService
         try
         {
             await _statusLogger.LogInfoAsync("Sync started", stoppingToken);
-            _logger.LogInformation("Executing synchronization for Connector '{connectorId}' for timerange '{timeRange}'", context.ConnectorId, context.TimeRange);
+            _logger.LogInformation(
+                "Executing synchronization for Connector '{connectorId}' for timerange '{timeRange}'",
+                context.ConnectorId, context.TimeRange);
 
             await _networkPerspectiveCore.ReportSyncStartAsync(context.AccessToken, context.TimeRange, stoppingToken);
 
@@ -65,11 +68,19 @@ internal sealed class SyncService : ISyncService
             await SyncEntitiesAsync(_dataSource, context, stoppingToken);
             var syncResult = await SyncInteractionsAsync(_dataSource, context, stoppingToken);
 
-            await _networkPerspectiveCore.ReportSyncSuccessfulAsync(context.AccessToken, context.TimeRange, stoppingToken);
+            await _networkPerspectiveCore.ReportSyncSuccessfulAsync(context.AccessToken, context.TimeRange,
+                stoppingToken);
             await _statusLogger.LogInfoAsync("Sync completed", stoppingToken);
             _logger.LogInformation("Synchronization completed for Connector '{connectorId}'", context.ConnectorId);
 
             return syncResult;
+        }
+        catch (ValidationException ve)
+        {
+            await _networkPerspectiveCore.TryReportSyncFailedAsync(context.AccessToken, context.TimeRange, ve.Message, stoppingToken);
+            _logger.LogError(ve, "Cannot complete synchronization job for Connector {connectorId}.\n{exceptionMessage}", context.ConnectorId, ve.Message);
+            await _statusLogger.LogErrorAsync($"Sync cancelled because of validation error '{ve.Message}'", CancellationToken.None);
+            return SyncResult.Empty;
         }
         catch (Exception ex) when (ex.IndicatesTaskCanceled())
         {
