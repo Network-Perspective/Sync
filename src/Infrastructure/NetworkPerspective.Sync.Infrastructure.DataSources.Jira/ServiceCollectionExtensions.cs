@@ -3,6 +3,7 @@ using System.Net.Http;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Auth;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client;
@@ -10,6 +11,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client.HttpClients
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client.Pagination;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Services;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
@@ -27,13 +29,13 @@ public static class ServiceCollectionExtensions
         var authBaseUrl = configurationSection.GetValue<string>("Auth:BaseUrl");
 
         services
-            .AddHttpClient(Consts.JiraApiHttpClientName, x =>
+            .AddHttpClient(JiraClientKeys.JiraApiHttpClientName, x =>
             {
                 x.BaseAddress = new Uri(authBaseUrl);
             });
 
         services
-            .AddHttpClient(Consts.JiraApiHttpClientWithTokenName, x =>
+            .AddHttpClient(JiraClientKeys.JiraApiHttpClientWithTokenName, x =>
             {
                 x.BaseAddress = new Uri(apibaseUrl);
             })
@@ -44,7 +46,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped(sp =>
             {
                 var clientFactory = sp.GetRequiredService<IHttpClientFactory>();
-                var httpClient = clientFactory.CreateClient(Consts.JiraApiHttpClientName);
+                var httpClient = clientFactory.CreateClient(JiraClientKeys.JiraApiHttpClientName);
                 var jiraHttpClient = new JiraHttpClient(httpClient);
                 return new JiraUnauthorizedFacade(jiraHttpClient) as IJiraUnauthorizedFacade;
             });
@@ -53,11 +55,17 @@ public static class ServiceCollectionExtensions
         {
             var paginationHandler = sp.GetRequiredService<PaginationHandler>();
             var clientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var httpClient = clientFactory.CreateClient(Consts.JiraApiHttpClientWithTokenName);
+            var httpClient = clientFactory.CreateClient(JiraClientKeys.JiraApiHttpClientWithTokenName);
             var jiraHttpClient = new JiraHttpClient(httpClient);
             return new JiraAuthorizedFacade(jiraHttpClient, paginationHandler) as IJiraAuthorizedFacade;
         });
 
+        services.AddTransient<ICapabilityTester>(x =>
+        {
+            var vault = x.GetRequiredService<IVault>();
+            var logger = x.GetRequiredService<ILogger<CapabilityTester>>();
+            return new CapabilityTester(connectorType, vault, logger);
+        });
 
         services.AddKeyedScoped<IAuthTester, AuthTester>(connectorType.GetKeyOf<IAuthTester>());
         services.AddKeyedScoped<IDataSource, JiraFacade>(connectorType.GetKeyOf<IDataSource>());

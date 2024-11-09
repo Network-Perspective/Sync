@@ -71,6 +71,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IStatusLogger, StatusLogger>();
         services.AddScoped<ISyncService, SyncService>();
+        services.AddTransient<ICapabilitiesService, CapabilitiesService>();
 
         return services;
     }

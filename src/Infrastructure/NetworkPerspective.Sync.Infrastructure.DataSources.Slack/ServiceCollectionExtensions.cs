@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
@@ -51,6 +53,13 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack
                 .AddScopeAwareHttpHandler<UserTokenAuthHandler>();
 
             services.AddMemoryCache();
+
+            services.AddTransient<ICapabilityTester>(x =>
+            {
+                var vault = x.GetRequiredService<IVault>();
+                var logger = x.GetRequiredService<ILogger<CapabilityTester>>();
+                return new CapabilityTester(connectorType, vault, logger);
+            });
 
             services.AddScoped<IMembersClient, MembersClient>();
             services.AddScoped<IChatClient, ChatClient>();
