@@ -64,6 +64,19 @@ public class ConnectorsController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Read connector details
+    /// </summary>
+    /// <param name="id">connectorId</param>
+    [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ConnectorDetailsDto))]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetAsync(Guid id)
+    {
+        var result = await _connectorsService.GetAsync(id);
+        return Ok(result.Adapt<ConnectorDetailsDto>());
+    }
 
     /// <summary>
     /// Removed connector for selected worker instance with specified properties
@@ -80,7 +93,6 @@ public class ConnectorsController : ControllerBase
         _logger.LogDebug("Received request to delete connector '{id}'", id);
 
         await _syncScheduler.UnscheduleAsync(id);
-        await _tokenService.EnsureRemovedAsync(id);
         await _connectorsService.RemoveAsync(id);
 
         return Ok();

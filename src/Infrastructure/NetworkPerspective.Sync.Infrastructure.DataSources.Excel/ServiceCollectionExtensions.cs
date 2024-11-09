@@ -22,6 +22,8 @@ public static class ServiceCollectionExtensions
         services.AddKeyedScoped<IDataSource, ExcelFacade>(connectorType.GetKeyOf<IDataSource>());
 
         services.Configure<ExcelSyncConstraints>(config.GetSection(SyncConstraintsConfigSection));
+        services.AddKeyedScoped<IAuthTester, AuthTester>(connectorType.GetKeyOf<IAuthTester>());
+
         return services;
     }
 }
