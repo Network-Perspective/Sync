@@ -56,8 +56,8 @@ internal class AuthTokenHandler(IConnectorInfoProvider connectorInfoProvider, IC
             var accessTokenKey = string.Format(JiraKeys.JiraAccessTokenKeyPattern, connectorId);
 
             var getRefreshTokenTask = cachedSecretRepository.GetSecretAsync(refreshTokenKey, stoppingToken);
-            var getClientIdTask = cachedSecretRepository.GetSecretAsync(Consts.JiraClientIdKey, stoppingToken);
-            var getClientSecretTask = cachedSecretRepository.GetSecretAsync(Consts.JiraClientSecretKey, stoppingToken);
+            var getClientIdTask = cachedSecretRepository.GetSecretAsync(JiraClientKeys.JiraClientIdKey, stoppingToken);
+            var getClientSecretTask = cachedSecretRepository.GetSecretAsync(JiraClientKeys.JiraClientSecretKey, stoppingToken);
 
             await Task.WhenAll(getRefreshTokenTask, getClientIdTask, getClientSecretTask);
 

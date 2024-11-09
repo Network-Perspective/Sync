@@ -61,7 +61,7 @@ public class JiraAuthTests
                 .Returns(state);
 
             _vaultMock
-                .Setup(x => x.GetSecretAsync(JiraKeys.JiraClientIdKey, It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(JiraClientKeys.JiraClientIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ClientId.ToSecureString());
 
             var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
