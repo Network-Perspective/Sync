@@ -120,4 +120,53 @@ public class ConnectorsController : ControllerBase
         var workers = await _connectorsService.GetAllOfWorkerAsync(workerId, stoppingToken);
         return workers.Adapt<IEnumerable<ConnectorDto>>();
     }
+
+    /// <summary>
+    /// Get list of connector's properties
+    /// </summary>
+    /// <param name="id">Connector Id</param>
+    /// <param name="stoppingToken">Stopping token</param>
+    /// <returns>List of connectors of given worker</returns>
+    /// <response code="200">Ok</response>
+    /// <response code="401">Missing or invalid authorization token</response>
+    /// <response code="404">Connector doesnt exist</response>
+    /// <response code="500">Internal server error</response>
+    [HttpGet("{id}/properties")]
+    [ProducesResponseType(typeof(IEnumerable<ConnectorPropertyDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IEnumerable<ConnectorPropertyDto>> GetPropertiesAsync([FromRoute] Guid id, CancellationToken stoppingToken = default)
+    {
+        _logger.LogDebug("Received request to get all connector's {connectorId} properties'", id);
+
+        var connector = await _connectorsService.GetAsync(id, stoppingToken);
+        return connector.Properties.Adapt<IEnumerable<ConnectorPropertyDto>>();
+    }
+
+    /// <summary>
+    /// Set connector's properties
+    /// </summary>
+    /// <param name="id">Connector Id</param>
+    /// <param name="propertiesDto">New connector properties</param>
+    /// <param name="stoppingToken">Stopping token</param>
+    /// <returns>List of connectors of given worker</returns>
+    /// <response code="200">Ok</response>
+    /// <response code="401">Missing or invalid authorization token</response>
+    /// <response code="404">Connector doesnt exist</response>
+    /// <response code="500">Internal server error</response>
+    [HttpPut("{id}/properties")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> SetPropertiesAsync([FromRoute] Guid id, [FromBody] IEnumerable<ConnectorPropertyDto> propertiesDto, CancellationToken stoppingToken = default)
+    {
+        _logger.LogDebug("Received request to set connector's {connectorId} properties'", id);
+
+        var properties = propertiesDto.ToDictionary(x => x.Key, x => x.Value);
+        await _connectorsService.UpdatePropertiesAsync(id, properties, stoppingToken);
+
+        return Ok();
+    }
 }

@@ -11,6 +11,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persis
         Task MigrateAsync();
         ISyncHistoryRepository GetSyncHistoryRepository();
         IConnectorRepository GetConnectorRepository();
+        IConnectorPropertyRepository GetConnectorPropertyRepository();
         IStatusLogRepository GetStatusLogRepository();
         IWorkerRepository GetWorkerRepository();
         Task CommitAsync(CancellationToken stoppingToken = default);

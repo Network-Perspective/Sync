@@ -18,6 +18,7 @@ public interface IConnectorsService
     Task<Connector> GetAsync(Guid id, CancellationToken stoppingToken = default);
     Task<IEnumerable<Connector>> GetAllOfWorkerAsync(Guid workerId, CancellationToken stoppingToken = default);
     Task<IEnumerable<Connector>> GetAllAsync(CancellationToken stoppingToken = default);
+    Task UpdatePropertiesAsync(Guid id, IDictionary<string, string> properties, CancellationToken stoppingToken = default);
     Task ValidateExists(Guid id, CancellationToken stoppingToken = default);
 }
 
@@ -97,6 +98,16 @@ internal class ConnectorsService : IConnectorsService
             throw new ConnectorNotFoundException(id);
 
         return connector;
+    }
+
+    public async Task UpdatePropertiesAsync(Guid id, IDictionary<string, string> properties, CancellationToken stoppingToken = default)
+    {
+        await ValidateExists(id, stoppingToken);
+
+        await _unitOfWork.GetConnectorPropertyRepository()
+            .SetAsync(id, properties, stoppingToken);
+
+        await _unitOfWork.CommitAsync(stoppingToken);
     }
 
     public async Task ValidateExists(Guid id, CancellationToken stoppingToken = default)
