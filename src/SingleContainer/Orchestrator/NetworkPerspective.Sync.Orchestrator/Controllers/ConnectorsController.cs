@@ -22,20 +22,8 @@ namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [Route("api/connectors")]
 [Authorize(AuthenticationSchemes = ApiKeyAuthOptions.DefaultScheme)]
-public class ConnectorsController : ControllerBase
+public class ConnectorsController(IConnectorsService connectorsService, ISyncScheduler syncScheduler, ITokenService tokenService, ILogger<ConnectorsController> logger) : ControllerBase
 {
-    private readonly IConnectorsService _connectorsService;
-    private readonly ISyncScheduler _syncScheduler;
-    private readonly ITokenService _tokenService;
-    private readonly ILogger<ConnectorsController> _logger;
-
-    public ConnectorsController(IConnectorsService connectorsService, ISyncScheduler syncScheduler, ITokenService tokenService, ILogger<ConnectorsController> logger)
-    {
-        _connectorsService = connectorsService;
-        _syncScheduler = syncScheduler;
-        _tokenService = tokenService;
-        _logger = logger;
-    }
 
     /// <summary>
     /// Creates new connector for selected worker instance with specified properties
@@ -53,13 +41,13 @@ public class ConnectorsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateAsync([FromBody] CreateConnectorDto request, CancellationToken stoppingToken = default)
     {
-        _logger.LogDebug("Received request to create new connector '{type}' for worker '{workerId}'", request.Type, request.WorkerId);
+        logger.LogDebug("Received request to create new connector '{type}' for worker '{workerId}'", request.Type, request.WorkerId);
 
         var properties = request.Properties.ToDictionary(p => p.Key, p => p.Value);
-        await _connectorsService.CreateAsync(request.Id, request.NetworkId, request.Type, request.WorkerId, properties, stoppingToken);
+        await connectorsService.CreateAsync(request.Id, request.NetworkId, request.Type, request.WorkerId, properties, stoppingToken);
 
-        await _tokenService.AddOrReplace(request.AccessToken.ToSecureString(), request.Id, stoppingToken);
-        await _syncScheduler.AddOrReplaceAsync(request.Id, stoppingToken);
+        await tokenService.AddOrReplace(request.AccessToken.ToSecureString(), request.Id, stoppingToken);
+        await syncScheduler.AddOrReplaceAsync(request.Id, stoppingToken);
 
         return Ok();
     }
@@ -74,7 +62,7 @@ public class ConnectorsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAsync(Guid id)
     {
-        var result = await _connectorsService.GetAsync(id);
+        var result = await connectorsService.GetAsync(id);
         return Ok(result.Adapt<ConnectorDetailsDto>());
     }
 
@@ -90,10 +78,10 @@ public class ConnectorsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteAsync(Guid id)
     {
-        _logger.LogDebug("Received request to delete connector '{id}'", id);
+        logger.LogDebug("Received request to delete connector '{id}'", id);
 
-        await _syncScheduler.UnscheduleAsync(id);
-        await _connectorsService.RemoveAsync(id);
+        await syncScheduler.UnscheduleAsync(id);
+        await connectorsService.RemoveAsync(id);
 
         return Ok();
     }
@@ -115,9 +103,9 @@ public class ConnectorsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<ConnectorDto>> GetAllAsync([FromQuery] Guid workerId, CancellationToken stoppingToken = default)
     {
-        _logger.LogDebug("Received request to get all connectors of worker '{workerId}'", workerId);
+        logger.LogDebug("Received request to get all connectors of worker '{workerId}'", workerId);
 
-        var workers = await _connectorsService.GetAllOfWorkerAsync(workerId, stoppingToken);
+        var workers = await connectorsService.GetAllOfWorkerAsync(workerId, stoppingToken);
         return workers.Adapt<IEnumerable<ConnectorDto>>();
     }
 
@@ -126,7 +114,7 @@ public class ConnectorsController : ControllerBase
     /// </summary>
     /// <param name="id">Connector Id</param>
     /// <param name="stoppingToken">Stopping token</param>
-    /// <returns>List of connectors of given worker</returns>
+    /// <returns>List of connector's properties</returns>
     /// <response code="200">Ok</response>
     /// <response code="401">Missing or invalid authorization token</response>
     /// <response code="404">Connector doesnt exist</response>
@@ -138,9 +126,9 @@ public class ConnectorsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<ConnectorPropertyDto>> GetPropertiesAsync([FromRoute] Guid id, CancellationToken stoppingToken = default)
     {
-        _logger.LogDebug("Received request to get all connector's {connectorId} properties'", id);
+        logger.LogDebug("Received request to get all connector's {connectorId} properties'", id);
 
-        var connector = await _connectorsService.GetAsync(id, stoppingToken);
+        var connector = await connectorsService.GetAsync(id, stoppingToken);
         return connector.Properties.Adapt<IEnumerable<ConnectorPropertyDto>>();
     }
 
@@ -162,10 +150,10 @@ public class ConnectorsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> SetPropertiesAsync([FromRoute] Guid id, [FromBody] IEnumerable<ConnectorPropertyDto> propertiesDto, CancellationToken stoppingToken = default)
     {
-        _logger.LogDebug("Received request to set connector's {connectorId} properties'", id);
+        logger.LogDebug("Received request to set connector's {connectorId} properties'", id);
 
         var properties = propertiesDto.ToDictionary(x => x.Key, x => x.Value);
-        await _connectorsService.UpdatePropertiesAsync(id, properties, stoppingToken);
+        await connectorsService.UpdatePropertiesAsync(id, properties, stoppingToken);
 
         return Ok();
     }
