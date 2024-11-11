@@ -14,21 +14,14 @@ using NetworkPerspective.Sync.Orchestrator.Persistence.Mappers;
 
 namespace NetworkPerspective.Sync.Orchestrator.Persistence.Repositories;
 
-internal class ConnectorRepository : IConnectorRepository
+internal class ConnectorRepository(DbSet<ConnectorEntity> dbSet) : IConnectorRepository
 {
-    private readonly DbSet<ConnectorEntity> _dbSet;
-
-    public ConnectorRepository(DbSet<ConnectorEntity> dbSet)
-    {
-        _dbSet = dbSet;
-    }
-
     public async Task AddAsync(Connector connector, CancellationToken stoppingToken = default)
     {
         try
         {
             var entity = ConnectorMapper.DomainModelToEntity(connector);
-            await _dbSet.AddAsync(entity, stoppingToken);
+            await dbSet.AddAsync(entity, stoppingToken);
         }
         catch (Exception ex)
         {
@@ -40,8 +33,8 @@ internal class ConnectorRepository : IConnectorRepository
     {
         try
         {
-            var entity = await _dbSet.SingleAsync(x => x.Id == networkId, stoppingToken);
-            _dbSet.Remove(entity);
+            var entity = await dbSet.SingleAsync(x => x.Id == networkId, stoppingToken);
+            dbSet.Remove(entity);
         }
         catch (Exception ex)
         {
@@ -53,7 +46,7 @@ internal class ConnectorRepository : IConnectorRepository
     {
         try
         {
-            var result = await _dbSet
+            var result = await dbSet
                 .Include(x => x.Properties)
                 .Include(x => x.Worker)
                 .SingleOrDefaultAsync(x => x.Id == id, stoppingToken);
@@ -73,7 +66,7 @@ internal class ConnectorRepository : IConnectorRepository
 
         try
         {
-            var result = await _dbSet
+            var result = await dbSet
                 .Include(x => x.Properties)
                 .Include(x => x.Worker)
                 .SingleAsync(x => x.Id == id, stoppingToken);
@@ -90,7 +83,7 @@ internal class ConnectorRepository : IConnectorRepository
     {
         try
         {
-            var entities = await _dbSet
+            var entities = await dbSet
                 .Include(x => x.Properties)
                 .Include(x => x.Worker)
                 .ToListAsync(stoppingToken);
@@ -107,7 +100,7 @@ internal class ConnectorRepository : IConnectorRepository
     {
         try
         {
-            var entities = await _dbSet
+            var entities = await dbSet
                 .Where(x => x.WorkerId == workerId)
                 .Include(x => x.Properties)
                 .Include(x => x.Worker)
@@ -125,7 +118,7 @@ internal class ConnectorRepository : IConnectorRepository
     {
         try
         {
-            var result = await _dbSet
+            var result = await dbSet
                 .SingleOrDefaultAsync(x => x.Id == id, stoppingToken);
 
             return result is not null;
