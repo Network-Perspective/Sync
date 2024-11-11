@@ -149,7 +149,7 @@
       "serializeTypeInformation": false,
       "queryNullValue": "",
       "className": "{controller}Client",
-      "operationGenerationMode": "MultipleClientsFromFirstTagAndPathSegments",
+      "operationGenerationMode": "MultipleClientsFromFirstTagAndOperationName",
       "additionalNamespaceUsages": [],
       "additionalContractNamespaceUsages": [],
       "generateOptionalParameters": false,

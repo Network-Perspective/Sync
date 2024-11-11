@@ -1,6 +1,6 @@
 ﻿namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client;
 
-public static class Consts
+public static class JiraClientKeys
 {
     internal const string JiraApiHttpClientName = "JiraApi";
     internal const string JiraApiHttpClientWithTokenName = "JiraApiWithToken";

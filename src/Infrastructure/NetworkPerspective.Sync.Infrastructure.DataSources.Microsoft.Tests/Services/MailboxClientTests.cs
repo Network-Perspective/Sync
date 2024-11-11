@@ -42,7 +42,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Ser
         {
             // Arrange
             var stream = new TestableInteractionStream();
-            var usersClient = new UsersClient(_microsoftClientFixture.Client, _usersClientlogger);
+            var usersClient = new UsersClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _usersClientlogger);
 
             var timeRange = new TimeRange(new DateTime(2021, 12, 01), new DateTime(2021, 12, 02));
             var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), timeRange, Mock.Of<IHashingService>());

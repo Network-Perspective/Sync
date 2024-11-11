@@ -189,7 +189,7 @@ public class SyncServiceTests
     }
 
     [Fact]
-    public async Task ShouldSetTaskStatusToEmptyOnExit()
+    public async Task ShouldSetTaskStatusToEmptyOnEnd()
     {
         // Arrange
         var start = new DateTime(2022, 01, 01);
@@ -204,5 +204,23 @@ public class SyncServiceTests
 
         // Assert
         _tasksStatusesCache.Verify(x => x.SetStatusAsync(context.ConnectorId, SingleTaskStatus.Empty, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ShouldSetTaskStatusToNonEmptyOnStart()
+    {
+        // Arrange
+        var start = new DateTime(2022, 01, 01);
+        var end = new DateTime(2022, 01, 02);
+        var timeRange = new TimeRange(start, end);
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
+
+        // Act
+        await syncService.SyncAsync(context);
+
+        // Assert
+        _tasksStatusesCache.Verify(x => x.SetStatusAsync(context.ConnectorId, It.Is<SingleTaskStatus>(x => x != SingleTaskStatus.Empty), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -2,7 +2,7 @@
 
 public class SingleTaskStatus
 {
-    public static readonly SingleTaskStatus Empty = new SingleTaskStatus(string.Empty, string.Empty, null);
+    public static readonly SingleTaskStatus Empty = new(string.Empty, string.Empty, null);
 
     public string Caption { get; set; }
     public string Description { get; set; }

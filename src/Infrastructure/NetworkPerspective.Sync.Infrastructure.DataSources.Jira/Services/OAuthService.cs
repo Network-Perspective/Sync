@@ -25,7 +25,7 @@ internal class OAuthService(IVault vault, IJiraUnauthorizedFacade jiraUnauthoriz
     {
         logger.LogInformation("Starting jira autentication process...");
 
-        var clientId = await vault.GetSecretAsync(JiraKeys.JiraClientIdKey, stoppingToken);
+        var clientId = await vault.GetSecretAsync(JiraClientKeys.JiraClientIdKey, stoppingToken);
 
         var stateKey = stateKeyFactory.Create();
         var stateExpirationTimestamp = DateTimeOffset.UtcNow.AddMinutes(AuthorizationCodeExpirationTimeInMinutes);
@@ -42,8 +42,8 @@ internal class OAuthService(IVault vault, IJiraUnauthorizedFacade jiraUnauthoriz
     {
         logger.LogInformation("Received Authentication callback.");
 
-        var clientId = await vault.GetSecretAsync(JiraKeys.JiraClientIdKey, stoppingToken);
-        var clientSecret = await vault.GetSecretAsync(JiraKeys.JiraClientSecretKey, stoppingToken);
+        var clientId = await vault.GetSecretAsync(JiraClientKeys.JiraClientIdKey, stoppingToken);
+        var clientSecret = await vault.GetSecretAsync(JiraClientKeys.JiraClientSecretKey, stoppingToken);
 
         var tokenResponse = await jiraUnauthorizedFacade.ExchangeCodeForTokenAsync(code, clientId.ToSystemString(), clientSecret.ToSystemString(), context.CallbackUri, stoppingToken);
 

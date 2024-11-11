@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Criterias;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
@@ -14,6 +15,12 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddGoogle(this IServiceCollection services, IConfigurationSection configurationSection, ConnectorType connectorType)
     {
         services.Configure<GoogleConfig>(configurationSection);
+
+        services.AddTransient<ICapabilityTester>(x =>
+        {
+            var logger = x.GetRequiredService<ILogger<CapabilityTester>>();
+            return new CapabilityTester(connectorType, logger);
+        });
 
         services.AddTransient<IRetryPolicyProvider, RetryPolicyProvider>();
 

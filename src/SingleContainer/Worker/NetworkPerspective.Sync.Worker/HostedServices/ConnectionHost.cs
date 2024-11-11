@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -135,17 +136,17 @@ internal class ConnectionHost(IOrchestratorHubClient hubClient, ISyncContextFact
             };
         }
 
-        Task<WorkerCapabilitiesDto> OnGetWorkerCapabilities(GetWorkerCapabilitiesDto dto)
+        async Task<WorkerCapabilitiesDto> OnGetWorkerCapabilities(GetWorkerCapabilitiesDto dto)
         {
             logger.LogInformation("Checking worker capabilities");
 
-            var connectorTypesCollection = serviceProvider.GetRequiredService<IConnectorTypesCollection>();
-
-            return Task.FromResult(new WorkerCapabilitiesDto
+            var capabilitiesService = serviceProvider.GetRequiredService<ICapabilitiesService>();
+            var connectorTypes = await capabilitiesService.GetSupportedConnectorTypesAsync(stoppingToken);
+            return new WorkerCapabilitiesDto
             {
                 CorrelationId = dto.CorrelationId,
-                SupportedConnectorTypes = connectorTypesCollection.GetTypesNames(),
-            });
+                SupportedConnectorTypes = connectorTypes.Select(x => x.Name)
+            };
         }
 
         async Task<InitializeOAuthResponse> OnInitializeOAuth(InitializeOAuthRequest dto)

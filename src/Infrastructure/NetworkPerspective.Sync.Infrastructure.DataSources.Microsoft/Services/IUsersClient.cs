@@ -8,99 +8,99 @@ using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Users;
 
+using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
+
+internal interface IUsersClient
 {
-    internal interface IUsersClient
+    Task<IEnumerable<User>> GetUsersAsync(SyncContext contex, CancellationToken stoppingToken = default);
+}
+
+internal class UsersClient(GraphServiceClient graphClient, ITasksStatusesCache tasksStatusesCache, ILogger<UsersClient> logger) : IUsersClient
+{
+    private const string TaskCaption = "Synchronizing employees metadata";
+    private const string TaskDescription = "Fetching employees metadata from Microsoft API";
+
+    private const int MaxPageSize = 999;
+
+    public async Task<IEnumerable<User>> GetUsersAsync(SyncContext context, CancellationToken stoppingToken = default)
     {
-        Task<IEnumerable<User>> GetUsersAsync(SyncContext contex, CancellationToken stoppingToken = default);
-    }
+        logger.LogDebug("Fetching users for connector '{connectorId}'...", context.ConnectorId);
 
-    internal class UsersClient : IUsersClient
-    {
-        private const int MaxPageSize = 999;
-        private readonly GraphServiceClient _graphClient;
-        private readonly ILogger<UsersClient> _logger;
+        var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, 0);
+        await tasksStatusesCache.SetStatusAsync(context.ConnectorId, taskStatus, stoppingToken);
 
-        public UsersClient(GraphServiceClient graphClient, ILogger<UsersClient> logger)
-        {
-            _graphClient = graphClient;
-            _logger = logger;
-        }
+        var result = new List<User>();
 
-        public async Task<IEnumerable<User>> GetUsersAsync(SyncContext context, CancellationToken stoppingToken = default)
-        {
-            _logger.LogDebug("Fetching users for connector '{connectorId}'...", context.ConnectorId);
-            var result = new List<User>();
-
-            var usersResponse = await _graphClient
-                .Users
-                .GetAsync(x =>
+        var usersResponse = await graphClient
+            .Users
+            .GetAsync(x =>
+            {
+                x.QueryParameters = new UsersRequestBuilder.UsersRequestBuilderGetQueryParameters
                 {
-                    x.QueryParameters = new UsersRequestBuilder.UsersRequestBuilderGetQueryParameters
+                    Select = new[]
                     {
-                        Select = new[]
-                        {
-                            nameof(User.Id),
-                            nameof(User.Mail),
-                            nameof(User.OtherMails),
-                            nameof(User.EmployeeId),
-                            nameof(User.DisplayName),
-                            nameof(User.Department),
-                            nameof(User.CreatedDateTime)
-                        },
-                        Filter = "userType eq 'Member'",
-                        Top = MaxPageSize,
-                        Expand = new[]
-                        {
-                            nameof(User.Manager)
-                        }
-                    };
-                }, stoppingToken);
+                        nameof(User.Id),
+                        nameof(User.Mail),
+                        nameof(User.OtherMails),
+                        nameof(User.EmployeeId),
+                        nameof(User.DisplayName),
+                        nameof(User.Department),
+                        nameof(User.CreatedDateTime)
+                    },
+                    Filter = "userType eq 'Member'",
+                    Top = MaxPageSize,
+                    Expand = new[]
+                    {
+                        nameof(User.Manager)
+                    }
+                };
+            }, stoppingToken);
 
-            var pageIterator = PageIterator<User, UserCollectionResponse>
-                .CreatePageIterator(_graphClient, usersResponse,
-                async user =>
-                {
-                    var groups = await _graphClient
-                        .Users[user.Id]
-                        .TransitiveMemberOf
-                        .GraphGroup
-                        .GetAsync(x =>
+        var pageIterator = PageIterator<User, UserCollectionResponse>
+            .CreatePageIterator(graphClient, usersResponse,
+            async user =>
+            {
+                var groups = await graphClient
+                    .Users[user.Id]
+                    .TransitiveMemberOf
+                    .GraphGroup
+                    .GetAsync(x =>
+                    {
+                        x.QueryParameters = new()
                         {
-                            x.QueryParameters = new()
+                            Select = new[]
                             {
-                                Select = new[]
-                                {
-                                    nameof(Group.DisplayName),
-                                }
-                            };
-                        });
+                                nameof(Group.DisplayName),
+                            }
+                        };
+                    });
 
-                    var mails = new[] { user.Mail }
-                        .Union(user.OtherMails);
-                    var groupsNames = groups.Value.Select(x => x.DisplayName);
+                var mails = new[] { user.Mail }
+                    .Union(user.OtherMails);
+                var groupsNames = groups.Value.Select(x => x.DisplayName);
 
-                    if (context.NetworkConfig.EmailFilter.IsInternal(mails, groupsNames))
-                        result.Add(user);
+                if (context.NetworkConfig.EmailFilter.IsInternal(mails, groupsNames))
+                    result.Add(user);
 
-                    return true;
-                },
-                request =>
-                {
-                    return request;
-                });
+                return true;
+            },
+            request =>
+            {
+                return request;
+            });
 
-            await pageIterator.IterateAsync(stoppingToken);
+        await pageIterator.IterateAsync(stoppingToken);
 
 
-            if (!result.Any())
-                _logger.LogWarning("No users found in connector '{connectorId}'", context.ConnectorId);
-            else
-                _logger.LogDebug("Fetching employees for connector '{neconnectorIdtworkId}' completed. '{count}' employees found", context.ConnectorId, result.Count);
+        if (!result.Any())
+            logger.LogWarning("No users found in connector '{connectorId}'", context.ConnectorId);
+        else
+            logger.LogDebug("Fetching employees for connector '{neconnectorIdtworkId}' completed. '{count}' employees found", context.ConnectorId, result.Count);
 
-            return result;
-        }
+        return result;
     }
 }
