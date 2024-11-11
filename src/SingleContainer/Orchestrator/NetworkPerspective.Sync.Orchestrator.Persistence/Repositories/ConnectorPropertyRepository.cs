@@ -25,7 +25,7 @@ internal class ConnectorPropertyRepository(DbSet<ConnectorPropertyEntity> dbSet)
             foreach (var property in properties)
             {
                 var entity = new ConnectorPropertyEntity
-                { 
+                {
                     ConnectorId = connectorId,
                     Key = property.Key,
                     Value = property.Value
