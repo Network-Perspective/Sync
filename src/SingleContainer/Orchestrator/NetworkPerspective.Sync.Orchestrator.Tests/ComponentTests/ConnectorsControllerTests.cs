@@ -31,16 +31,16 @@ public class ConnectorsControllerTests
 
         var wokrersClient = new WorkersClient(httpClient);
         var connectorsClient = new ConnectorsClient(httpClient);
-        await wokrersClient.WorkersPostAsync(new CreateWorkerDto { Name = workerName, Secret = "secret1" });
+        await wokrersClient.CreateAsync(new CreateWorkerDto { Name = workerName, Secret = "secret1" });
 
-        var workers = await wokrersClient.WorkersGetAsync();
-        var workerId = workers.Single(x => x.Name == workerName).Id as Guid?;
+        var workers = await wokrersClient.GetAllAsync();
+        var workerId = workers.Single(x => x.Name == workerName).Id;
 
         // Act
-        await connectorsClient.ConnectorsPostAsync(new CreateConnectorDto
+        await connectorsClient.CreateAsync(new CreateConnectorDto
         {
             Id = Guid.NewGuid(),
-            WorkerId = workerId.Value,
+            WorkerId = workerId,
             Type = "Google",
             Properties =
             [
@@ -50,9 +50,9 @@ public class ConnectorsControllerTests
         });
 
         // Assert
-        var actual = await connectorsClient.ConnectorsGetAsync(workerId);
+        var actual = await connectorsClient.GetAllAsync(workerId);
         actual.Should().HaveCount(1);
         actual.Single().Type.Should().Be("Google");
-        actual.Single().WorkerId.Should().Be(workerId.Value);
+        actual.Single().WorkerId.Should().Be(workerId);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -9,9 +10,7 @@ using Moq;
 using NetworkPerspective.Sync.Common.Tests.Factories;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
-using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Fixtures
@@ -37,14 +36,14 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Fix
                 .Setup(x => x.Hash(It.IsAny<string>()))
                 .Returns<string>(x => x);
 
-            var context = new SyncContext(connectorId, "Office365", ConnectorConfig.Empty, [], string.Empty.ToSecureString(), new Utils.Models.TimeRange(DateTime.UtcNow, DateTime.UtcNow), hashingService.Object);
+            var connectorInfo = new ConnectorInfo(connectorId, "Office365", new Dictionary<string, string>());
 
-            var contextProviderMock = new Mock<ISyncContextAccessor>();
-            contextProviderMock
-                .Setup(x => x.SyncContext)
-                .Returns(context);
+            var connectorInforProviederMock = new Mock<IConnectorInfoProvider>();
+            connectorInforProviederMock
+                .Setup(x => x.Get())
+                .Returns(connectorInfo);
 
-            var microsoftClientFactory = new MicrosoftClientFactory(secretRepository, contextProviderMock.Object, resiliency, NullLoggerFactory.Instance);
+            var microsoftClientFactory = new MicrosoftClientFactory(secretRepository, connectorInforProviederMock.Object, resiliency, NullLoggerFactory.Instance);
             return microsoftClientFactory.GetMicrosoftClientAsync().Result;
         }
     }

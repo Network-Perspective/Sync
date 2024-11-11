@@ -4,6 +4,8 @@ using FluentAssertions;
 
 using Microsoft.Extensions.Logging.Abstractions;
 
+using Moq;
+
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.HttpClients;
@@ -11,6 +13,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Pagination
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.Fixtures;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Xunit;
 
@@ -36,7 +39,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.Service
             var paginationHandler = new CursorPaginationHandler(paginationLogger);
 
             var slackClientFacade = new SlackClientBotScopeFacade(_slackHttpClient, paginationHandler);
-            var membersClient = new MembersClient(clientLogger);
+            var membersClient = new MembersClient(Mock.Of<ITasksStatusesCache>(), Mock.Of<IConnectorInfoProvider>(), clientLogger);
 
             try
             {

@@ -38,13 +38,13 @@ public class WorkersHubTests
         var workerSecret = "pass1";
         var workersClient = new WorkersClient(_service.CreateDefaultClient());
 
-        await workersClient.WorkersPostAsync(new CreateWorkerDto
+        await workersClient.CreateAsync(new CreateWorkerDto
         {
             Name = workerName,
             Secret = workerSecret,
         });
-        var worker = await workersClient.WorkersGetAsync(workerName);
-        await workersClient.AuthAsync(worker.Id);
+        var worker = await workersClient.GetAsync(workerName);
+        await workersClient.AuthorizeAsync(worker.Id);
 
         var config = Options.Create(new OrchestratorHubClientConfig
         {
@@ -67,7 +67,7 @@ public class WorkersHubTests
         var correlationId = Guid.NewGuid();
         var pongResponse = await hubClient.PingAsync(new PingDto { CorrelationId = correlationId, Timestamp = DateTime.UtcNow });
         pongResponse.CorrelationId.Should().Be(correlationId);
-        await workersClient.WorkersDeleteAsync(worker.Id);
+        await workersClient.RemoveAsync(worker.Id);
     }
 
     [Fact]
@@ -78,13 +78,13 @@ public class WorkersHubTests
         var workerSecret = "invalid-pass";
         var workersClient = new WorkersClient(_service.CreateDefaultClient());
 
-        await workersClient.WorkersPostAsync(new CreateWorkerDto
+        await workersClient.CreateAsync(new CreateWorkerDto
         {
             Name = workerName,
             Secret = workerSecret,
         });
-        var worker = await workersClient.WorkersGetAsync(workerName);
-        await workersClient.AuthAsync(worker.Id);
+        var worker = await workersClient.GetAsync(workerName);
+        await workersClient.AuthorizeAsync(worker.Id);
 
         var config = Options.Create(new OrchestratorHubClientConfig
         {
@@ -102,7 +102,7 @@ public class WorkersHubTests
         await func.Should()
             .ThrowAsync<HttpRequestException>()
             .Where(x => x.StatusCode == HttpStatusCode.Unauthorized);
-        await workersClient.WorkersDeleteAsync(worker.Id);
+        await workersClient.RemoveAsync(worker.Id);
     }
 
     [Fact]
@@ -113,12 +113,12 @@ public class WorkersHubTests
         var workerSecret = "pass1";
         var workersClient = new WorkersClient(_service.CreateDefaultClient());
 
-        await workersClient.WorkersPostAsync(new CreateWorkerDto
+        await workersClient.CreateAsync(new CreateWorkerDto
         {
             Name = workerName,
             Secret = workerSecret,
         });
-        var worker = await workersClient.WorkersGetAsync(workerName);
+        var worker = await workersClient.GetAsync(workerName);
 
         var config = Options.Create(new OrchestratorHubClientConfig
         {
@@ -141,6 +141,6 @@ public class WorkersHubTests
         await func.Should()
             .ThrowAsync<HttpRequestException>()
             .Where(x => x.StatusCode == HttpStatusCode.Unauthorized);
-        await workersClient.WorkersDeleteAsync(worker.Id);
+        await workersClient.RemoveAsync(worker.Id);
     }
 }

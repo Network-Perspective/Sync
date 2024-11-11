@@ -71,16 +71,16 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
             var filterString = $"receivedDateTime ge {context.TimeRange.Start:s}Z and receivedDateTime lt {context.TimeRange.End:s}Z";
 
             var mailsResponse = await _graphClient
-                .Users[userEmail]
-                .Messages
-                .GetAsync(x =>
+            .Users[userEmail]
+            .Messages
+            .GetAsync(x =>
+            {
+                x.QueryParameters = new MessagesRequestBuilder.MessagesRequestBuilderGetQueryParameters
                 {
-                    x.QueryParameters = new MessagesRequestBuilder.MessagesRequestBuilderGetQueryParameters
-                    {
-                        Filter = filterString
-                    };
-                    x.Headers.Add("Prefer", "IdType=\"ImmutableId\"");
-                }, stoppingToken);
+                    Filter = filterString
+                };
+                x.Headers.Add("Prefer", "IdType=\"ImmutableId\"");
+            }, stoppingToken);
 
             var pageIterator = PageIterator<Message, MessageCollectionResponse>
                 .CreatePageIterator(_graphClient, mailsResponse,

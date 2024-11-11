@@ -37,7 +37,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Ser
         public async Task ShouldBeAbleToGetUsers()
         {
             // Arrange
-            var client = new UsersClient(_microsoftClientFixture.Client, _logger);
+            var client = new UsersClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _logger);
             var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
             var filter = new EmployeeFilter(["group:Sample Team Site"], Array.Empty<string>());
             var networkConfig = new ConnectorConfig(filter, CustomAttributesConfig.Empty);
