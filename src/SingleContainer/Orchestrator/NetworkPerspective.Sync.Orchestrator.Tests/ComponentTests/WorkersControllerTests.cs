@@ -32,22 +32,22 @@ public class WorkersControllerTests
         var client = new WorkersClient(httpClient);
 
         // Act
-        await client.WorkersPostAsync(new CreateWorkerDto { Name = "worker1", Secret = "secret1" });
-        await client.WorkersPostAsync(new CreateWorkerDto { Name = "worker2", Secret = "secret2" });
-        await client.WorkersPostAsync(new CreateWorkerDto { Name = "worker3", Secret = "secret3" });
+        await client.CreateAsync(new CreateWorkerDto { Name = "worker1", Secret = "secret1" });
+        await client.CreateAsync(new CreateWorkerDto { Name = "worker2", Secret = "secret2" });
+        await client.CreateAsync(new CreateWorkerDto { Name = "worker3", Secret = "secret3" });
 
-        var current = await client.WorkersGetAsync();
+        var current = await client.GetAllAsync();
 
         var tobeAuthorized = current.Single(x => x.Name == "worker1").Id;
-        await client.AuthAsync(tobeAuthorized);
+        await client.AuthorizeAsync(tobeAuthorized);
 
         var toBeDeletedId = current.Single(x => x.Name == "worker2").Id;
-        await client.WorkersDeleteAsync(toBeDeletedId);
+        await client.AuthorizeAsync(toBeDeletedId);
 
         var unauthorized = current.Single(x => x.Name == "worker3").Id;
 
         // Assert
-        var actual = await client.WorkersGetAsync();
+        var actual = await client.GetAllAsync();
 
         actual.Should().ContainEquivalentOf(new WorkerDto { Id = tobeAuthorized, Name = "worker1", IsAuthorized = true });
         actual.Should().NotContainEquivalentOf(new WorkerDto { Id = toBeDeletedId, Name = "worker2", IsAuthorized = false });
@@ -64,7 +64,7 @@ public class WorkersControllerTests
         var client = new WorkersClient(httpClient);
 
         // Act
-        Func<Task> func = () => client.WorkersPostAsync(new CreateWorkerDto { Name = "worker1", Secret = "secret1" });
+        Func<Task> func = () => client.CreateAsync(new CreateWorkerDto { Name = "worker1", Secret = "secret1" });
 
         (await func.Should().ThrowExactlyAsync<OrchestratorClientException>()).And.StatusCode.Should().Be(401);
     }

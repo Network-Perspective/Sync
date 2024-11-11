@@ -7,7 +7,8 @@ namespace NetworkPerspective.Sync.Orchestrator.Persistence;
 public class OrchestratorDbContext : DbContext
 {
     public DbSet<SyncHistoryEntryEntity> SyncHistoryEntities { get; set; }
-    public DbSet<ConnectorEntity> NetworkEntities { get; set; }
+    public DbSet<ConnectorEntity> ConnectorEntities { get; set; }
+    public DbSet<ConnectorPropertyEntity> ConnectorPropertyEntities { get; set; }
     public DbSet<WorkerEntity> WorkerEntities { get; set; }
     public DbSet<StatusLogEntity> StatusLogEntities { get; set; }
     public DbSet<SecretEntity> SecretEntities { get; set; }
