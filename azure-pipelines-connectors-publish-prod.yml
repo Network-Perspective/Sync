@@ -15,6 +15,7 @@ resources:
     type: bitbucket
     endpoint: BitbucketAzureServiceConnection
     name: NetworkPerspective/NetworkPerspective.Infrastructure
+    ref: 'refs/heads/master'  # Check out the master branch
 
 variables:
   version: '2.2'
@@ -82,7 +83,6 @@ stages:
         persistCredentials: true
         path: 'Infrastructure' 
         fetchDepth: 0             # Fetch all history and branches
-        ref: 'refs/heads/master'  # Check out the master branch
         
       - script: |
           git config user.email "azure@networkperspective.io"
