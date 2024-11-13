@@ -80,14 +80,16 @@ stages:
         displayName: Checkout infrastructure
         clean: true
         persistCredentials: true
+        path: 'Infrastructure' 
 
       - script: |
-         git config --global user.email azure@networkperspective.io & git config --global user.name "Azure Pipeline"
-         git checkout -b master
-         git pull origin master
-         echo $(tag) > $(commitTagFile)
-         git add -A
-         git commit -m "$(commitTagMessage)"
-         git push --set-upstream origin master 
+          git config user.email "azure@networkperspective.io"
+          git config user.name "Azure Pipeline"
+          git checkout master
+          git pull origin master
+          echo $(tag) > $(commitTagFile)
+          git add -A
+          git commit -m "$(commitTagMessage)"
+          git push origin master
         displayName: Update PROD release version
-        workingDirectory: $(Build.SourcesDirectory)
+        workingDirectory: $(Pipeline.Workspace)/Infrastructure  
