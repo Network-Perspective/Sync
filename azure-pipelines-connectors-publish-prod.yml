@@ -81,11 +81,12 @@ stages:
         clean: true
         persistCredentials: true
         path: 'Infrastructure' 
-
+        fetchDepth: 0             # Fetch all history and branches
+        ref: 'refs/heads/master'  # Check out the master branch
+        
       - script: |
           git config user.email "azure@networkperspective.io"
           git config user.name "Azure Pipeline"
-          git checkout master
           git pull origin master
           echo $(tag) > $(commitTagFile)
           git add -A
