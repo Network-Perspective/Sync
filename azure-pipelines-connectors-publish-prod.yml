@@ -15,6 +15,7 @@ resources:
     type: bitbucket
     endpoint: BitbucketAzureServiceConnection
     name: NetworkPerspective/NetworkPerspective.Infrastructure
+    ref: 'refs/heads/master'  # Check out the master branch
 
 variables:
   version: '2.2'
@@ -80,14 +81,20 @@ stages:
         displayName: Checkout infrastructure
         clean: true
         persistCredentials: true
-
+        path: 'Infrastructure' 
+        fetchDepth: 0             # Fetch all history and branches
+        
       - script: |
-         git config --global user.email azure@networkperspective.io & git config --global user.name "Azure Pipeline"
-         git checkout -b master
-         git pull origin master
-         echo $(tag) > $(commitTagFile)
-         git add -A
-         git commit -m "$(commitTagMessage)"
-         git push --set-upstream origin master 
+          git config user.email "azure@networkperspective.io"
+          git config user.name "Azure Pipeline"
+
+          git fetch origin master          
+          git checkout -B master origin/master
+          git pull origin master           
+
+          echo $(tag) > $(commitTagFile)
+          git add -A
+          git commit -m "$(commitTagMessage)"
+          git push origin master
         displayName: Update PROD release version
-        workingDirectory: $(Build.SourcesDirectory)
+        workingDirectory: $(Pipeline.Workspace)/Infrastructure  
