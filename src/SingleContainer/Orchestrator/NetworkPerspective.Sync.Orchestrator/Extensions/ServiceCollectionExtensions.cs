@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
+using NetworkPerspective.Sync.Orchestrator.ApplicationInsights;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 using NetworkPerspective.Sync.Orchestrator.Auth.Worker;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
@@ -66,6 +69,18 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddSwaggerGenNewtonsoftSupport();
+
+        return services;
+    }
+
+    public static IServiceCollection AddApplicaitonInsights(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddOptions<ApplicationInsightConfig>()
+            .Bind(configuration);
+
+        services.AddApplicationInsightsTelemetry();
+        services.AddSingleton<ITelemetryInitializer, CloudContextTelemetryInitializer>();
 
         return services;
     }
