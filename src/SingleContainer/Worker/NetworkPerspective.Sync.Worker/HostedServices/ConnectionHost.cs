@@ -14,6 +14,7 @@ using NetworkPerspective.Sync.Contract.V1.Impl;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
+using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.OAuth;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
@@ -24,15 +25,12 @@ namespace NetworkPerspective.Sync.Worker.HostedServices;
 
 internal class ConnectionHost(IOrchestratorHubClient hubClient, ISyncContextFactory syncContextFactory, IServiceProvider serviceProvider, IVault secretRepository, ILogger<ConnectionHost> logger) : BackgroundService
 {
-    public const string OrchestratorClientNameKey = "orchestrator-client-name";
-    public const string OrchestratorClientSecretKey = "orchestrator-client-secret";
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         async Task<string> TokenFactory()
         {
-            var nameTask = secretRepository.GetSecretAsync(OrchestratorClientNameKey, stoppingToken);
-            var passTask = secretRepository.GetSecretAsync(OrchestratorClientSecretKey, stoppingToken);
+            var nameTask = secretRepository.GetSecretAsync(Keys.OrchestratorClientNameKey, stoppingToken);
+            var passTask = secretRepository.GetSecretAsync(Keys.OrchestratorClientSecretKey, stoppingToken);
 
             await Task.WhenAll(nameTask, passTask);
 

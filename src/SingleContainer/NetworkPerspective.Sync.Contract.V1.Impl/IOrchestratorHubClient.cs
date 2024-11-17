@@ -19,15 +19,15 @@ public interface IOrchestratorHubClient : IOrchestratorClient
     Task ConnectAsync(Action<OrchestratorClientConfiguration> configuration = null, Action<IHubConnectionBuilder> connectionConfiguration = null, CancellationToken stoppingToken = default);
 }
 
-internal class OrchestartorHubClient : IOrchestratorHubClient
+internal class OrchestratorHubClient : IOrchestratorHubClient
 {
     private HubConnection _connection;
     private readonly OrchestratorClientConfiguration _callbacks = new();
     private readonly OrchestratorHubClientConfig _config;
-    private readonly ILogger<IOrchestratorHubClient> _logger;
+    private readonly ILogger<OrchestratorHubClient> _logger;
     private readonly AsyncRetryPolicy _asyncRetryPolicy;
 
-    public OrchestartorHubClient(IOptions<OrchestratorHubClientConfig> config, ILogger<IOrchestratorHubClient> logger)
+    public OrchestratorHubClient(IOptions<OrchestratorHubClientConfig> config, ILogger<OrchestratorHubClient> logger)
     {
         _config = config.Value;
         _logger = logger;
