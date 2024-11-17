@@ -5,11 +5,13 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Worker.ApplicationInsights;
+
 namespace NetworkPerspective.Sync.Worker.Configs;
 
 public class WorkerConfig
 {
-    public string APPLICATIONINSIGHTS_CONNECTION_STRING { get; set; }
+    public ApplicationInsightConfig ApplicationInsights { get; set; }
     public InfrastructureConfig Infrastructure { get; set; }
 
     public class Validator : AbstractValidator<WorkerConfig>, IValidateOptions<WorkerConfig>
@@ -21,10 +23,8 @@ public class WorkerConfig
             RuleFor(x => x.Infrastructure)
                 .SetValidator(x => new InfrastructureConfig.Validator($"{nameof(Infrastructure)}"));
 
-            RuleFor(x => x.APPLICATIONINSIGHTS_CONNECTION_STRING)
-                .NotEmpty()
-                .WithName(nameof(APPLICATIONINSIGHTS_CONNECTION_STRING))
-                .WithSeverity(Severity.Warning);
+            RuleFor(x => x.ApplicationInsights)
+                .SetValidator(x => new ApplicationInsightConfig.Validator($"{nameof(ApplicationInsights)}"));
 
             _logger = logger;
         }

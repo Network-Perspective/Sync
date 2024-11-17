@@ -50,7 +50,7 @@ public class WorkersHubTests
         {
             BaseUrl = _service.Server.BaseAddress.ToString()
         });
-        var hubClient = new OrchestartorHubClient(config, NullLogger<IOrchestratorHubClient>.Instance);
+        var hubClient = new OrchestratorHubClient(config, NullLogger<OrchestratorHubClient>.Instance);
 
         // Act
         await hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
@@ -90,7 +90,7 @@ public class WorkersHubTests
         {
             BaseUrl = _service.Server.BaseAddress.ToString()
         });
-        var hubClient = new OrchestartorHubClient(config, NullLogger<IOrchestratorHubClient>.Instance);
+        var hubClient = new OrchestratorHubClient(config, NullLogger<OrchestratorHubClient>.Instance);
 
         // Act
         Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
@@ -124,7 +124,7 @@ public class WorkersHubTests
         {
             BaseUrl = _service.Server.BaseAddress.ToString()
         });
-        var hubClient = new OrchestartorHubClient(config, NullLogger<IOrchestratorHubClient>.Instance);
+        var hubClient = new OrchestratorHubClient(config, NullLogger<OrchestratorHubClient>.Instance);
 
         // Act
         Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
