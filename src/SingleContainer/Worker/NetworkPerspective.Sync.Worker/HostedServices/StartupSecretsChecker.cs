@@ -7,14 +7,15 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application;
 
 namespace NetworkPerspective.Sync.Worker.HostedServices;
 
 internal class StartupSecretsChecker(IVault vault, ILogger<StartupSecretsChecker> logger) : IHostedService
 {
     private readonly string[] _expectedSecretsKeys = [
-        ConnectionHost.OrchestratorClientNameKey,
-        ConnectionHost.OrchestratorClientNameKey
+        Keys.OrchestratorClientNameKey,
+        Keys.OrchestratorClientNameKey
     ];
 
     public async Task StartAsync(CancellationToken cancellationToken)

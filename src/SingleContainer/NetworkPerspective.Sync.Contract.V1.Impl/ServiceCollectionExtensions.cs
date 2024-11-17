@@ -9,9 +9,9 @@ public static class ServiceCollectionExtensions
     {
         services.Configure<OrchestratorHubClientConfig>(config);
 
-        services.AddSingleton<OrchestartorHubClient>();
-        services.AddSingleton<IOrchestratorHubClient>(sp => sp.GetRequiredService<OrchestartorHubClient>());
-        services.AddSingleton<IOrchestratorClient>(sp => sp.GetRequiredService<OrchestartorHubClient>());
+        services.AddSingleton<OrchestratorHubClient>();
+        services.AddSingleton<IOrchestratorHubClient>(sp => sp.GetRequiredService<OrchestratorHubClient>());
+        services.AddSingleton<IOrchestratorClient>(sp => sp.GetRequiredService<OrchestratorHubClient>());
 
         return services;
     }

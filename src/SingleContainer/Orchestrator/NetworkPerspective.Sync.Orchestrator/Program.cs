@@ -1,5 +1,6 @@
 using Mapster;
 
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Orchestrator.Application;
+using NetworkPerspective.Sync.Orchestrator.ApplicationInsights;
 using NetworkPerspective.Sync.Orchestrator.Controllers;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
@@ -53,7 +55,8 @@ public class Program
             options.OutputFormatters.RemoveType<StringOutputFormatter>();
         });
 
-        builder.Services.AddApplicationInsightsTelemetry();
+
+        builder.Services.AddApplicaitonInsights(builder.Configuration.GetSection("ApplicationInsights"));
 
         var app = builder.Build();
         app.UseExceptionHandler(ErrorController.ErrorRoute);
