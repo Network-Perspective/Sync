@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -11,6 +12,7 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.Contract.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Vaults.ExternalAzureKeyVault;
 using NetworkPerspective.Sync.Infrastructure.Vaults.GoogleSecretManager;
 using NetworkPerspective.Sync.Infrastructure.Vaults.HashiCorpVault;
+using NetworkPerspective.Sync.Worker.ApplicationInsights;
 
 namespace NetworkPerspective.Sync.Worker;
 
@@ -62,4 +64,16 @@ internal static class ServiceCollectionExtensions
 
     public static IServiceCollection RemoveHttpClientLogging(this IServiceCollection services)
         => services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
+
+    public static IServiceCollection AddApplicaitonInsights(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddOptions<ApplicationInsightConfig>()
+            .Bind(configuration);
+
+        services.AddApplicationInsightsTelemetryWorkerService();
+        services.AddSingleton<ITelemetryInitializer, CloudContextTelemetryInitializer>();
+
+        return services;
+    }
 }

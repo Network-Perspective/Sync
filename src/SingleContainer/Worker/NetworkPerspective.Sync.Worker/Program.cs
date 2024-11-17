@@ -44,6 +44,8 @@ public class Program
                 jiraConnector,
             };
 
+            builder.Services.AddApplicaitonInsights(builder.Configuration.GetSection("ApplicationInsights"));
+
             var healthChecksBuilder = builder.Services
                 .AddHealthChecks();
 
@@ -66,8 +68,6 @@ public class Program
 
             builder.Services.AddHostedService<StartupHealthChecker>();
             builder.Services.AddHostedService<ConnectionHost>();
-
-            builder.Services.AddApplicationInsightsTelemetryWorkerService();
 
 #if !DEBUG
             builder.Services.RemoveHttpClientLogging();
