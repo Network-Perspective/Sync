@@ -1,0 +1,47 @@
+appSettings:
+  networkPerspectiveApi: https://app.networkperspective.io
+  applicationInsightsConnectionString: ""
+  applicationInsightsRoleInstance: ""
+
+imagePullSecrets: 
+  - name: np-sync-np-acr
+
+extraEnvironmentVars: []
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: networkperspective.azurecr.io/connectors/worker
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+resources:   
+  requests:
+    cpu: "100m"
+    memory: "1G"
+  limits:
+    cpu: "2"         
+    memory: "4G"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+redeployOnUpdate: true
+
+podAnnotations: {}
+podSecurityContext: 
+  runAsNonRoot: true
+
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsUser: 1000
+
+networkPolicy:
+  # forbid traffic from other namespaces
+  enabled: true
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "network-perspective-worker"

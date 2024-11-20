@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "np-worker.fullname" . }}
+  labels:
+    {{- include "np-worker.labels" . | nindent 4 }}
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "np-worker.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+      {{- if and .Values.redeployOnUpdate }}
+        rollme: {{ randAlphaNum 5 | quote }}
+      {{- end }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}      
+      labels:
+        {{- include "np-worker.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "np-worker.serviceAccountName" . }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:          
+            - name: Infrastructure__Core__BaseUrl
+              value: {{ .Values.appSettings.networkPerspectiveApi }}
+            - name: Infrastructure__Orchestrator__BaseUrl
+              value: {{ .Values.appSettings.networkPerspectiveApi }}          
+            {{- if .Values.appSettings.applicationInsightsConnectionString }}
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              value: {{ .Values.appSettings.applicationInsightsConnectionString }}            
+            - name: ApplicationInsights__RoleInstance
+              value: {{ required "applicationInsightsRoleInstance is required if application insights is enables" .Values.appSettings.applicationInsightsRoleInstance }}
+            {{- end }}
+
+            {{- if .Values.extraEnvironmentVars }}
+            {{- toYaml .Values.extraEnvironmentVars | nindent 12 }}
+            {{- end }}                      
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}        
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+     
