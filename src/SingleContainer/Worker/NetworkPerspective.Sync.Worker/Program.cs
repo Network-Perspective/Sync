@@ -95,7 +95,7 @@ public class Program
 
             Console.WriteLine(e.Message);
             Console.WriteLine(e.StackTrace);
-            
+
             var delay = builder.Configuration.GetValue<TimeSpan>("App:DelayBeforeExitOnException");
             Thread.Sleep(delay);
             throw;
