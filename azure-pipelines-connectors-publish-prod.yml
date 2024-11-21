@@ -18,7 +18,7 @@ resources:
     ref: 'refs/heads/master'  # Check out the master branch
 
 variables:
-  version: '2.2'
+  version: '3.0'
   tag: '$(version).$(Build.BuildId)'
 
   commitTagFile: 'Connectors/Prod/Tag.txt'

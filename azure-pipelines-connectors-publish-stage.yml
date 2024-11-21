@@ -11,10 +11,10 @@ resources:
     type: bitbucket
     endpoint: BitbucketAzureServiceConnection
     name: NetworkPerspective/NetworkPerspective.Infrastructure
-    ref: develop
+    ref: 'refs/heads/develop'
 
 variables:
-  version: '2.1'
+  version: '3.0'
   tag: '$(version).$(Build.BuildId)'
 
   commitTagFile: 'Connectors/Test/Tag.txt'
@@ -64,6 +64,12 @@ stages:
         git push origin v$(tag)
       workingDirectory: $(Build.SourcesDirectory)
       displayName: Add tag to repository
+    - script: |
+        helm package infra/helm-charts/np-worker --version $(tag) --destination infra/helm-charts/np-worker/charts
+        helm registry login $(containerRegistry) --username $(DOCKER_USERNAME) --password $(DOCKER_PASSWORD)
+        helm push infra/helm-charts/np-worker/charts/np-worker-$(tag).tgz oci://$(containerRegistry)/helm-charts        
+      displayName: Build and publish Helm chart to OCI registry
+      workingDirectory: $(Build.SourcesDirectory)
 
 - stage: UpdateInfrastructure 
   displayName: Update infrastructure 
@@ -77,14 +83,20 @@ stages:
         displayName: Checkout infrastructure
         clean: true
         persistCredentials: true
-
+        path: 'Infrastructure' 
+        fetchDepth: 0             # Fetch all history and branches
+        
       - script: |
-         git config --global user.email azure@networkperspective.io & git config --global user.name "Azure Pipeline"
-         git checkout -b develop
-         git pull origin develop
-         echo $(tag) > $(commitTagFile)
-         git add -A
-         git commit -m "$(commitTagMessage)"
-         git push --set-upstream origin develop 
+          git config user.email "azure@networkperspective.io"
+          git config user.name "Azure Pipeline"
+
+          git fetch origin develop          
+          git checkout -B develop origin/develop
+          git pull origin develop           
+
+          echo $(tag) > $(commitTagFile)
+          git add -A
+          git commit -m "$(commitTagMessage)"
+          git push origin develop
         displayName: Update TEST release version
-        workingDirectory: $(Build.SourcesDirectory)
+        workingDirectory: $(Pipeline.Workspace)/Infrastructure
