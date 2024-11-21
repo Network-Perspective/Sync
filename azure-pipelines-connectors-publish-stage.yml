@@ -64,15 +64,16 @@ stages:
     #     git push origin v$(tag)
     #   workingDirectory: $(Build.SourcesDirectory)
     #   displayName: Add tag to repository
+    - task: Docker@2
+      displayName: Login to ACR
+      inputs:
+        command: login
+        containerRegistry: $(dockerRegistryServiceConnection)
     - script: |
         helm package infra/helm-charts/np-worker --version $(tag) --destination infra/helm-charts/np-worker/charts
-        helm registry login $(containerRegistry) --username $(DOCKER_USERNAME) --password $(DOCKER_PASSWORD)
-        helm push infra/helm-charts/np-worker/charts/np-worker-$(tag).tgz oci://$(containerRegistry)/helm-charts        
+        helm push infra/helm-charts/np-worker/charts/np-worker-$(tag).tgz oci://$(containerRegistry)/helm-charts
       displayName: Build and publish Helm chart to OCI registry
       workingDirectory: $(Build.SourcesDirectory)
-      env:
-        DOCKER_USERNAME: $(DOCKER_USERNAME)
-        DOCKER_PASSWORD: $(DOCKER_PASSWORD)
 
 # - stage: UpdateInfrastructure 
 #   displayName: Update infrastructure 
