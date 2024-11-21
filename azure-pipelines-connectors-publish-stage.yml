@@ -39,64 +39,67 @@ stages:
     - checkout: self
       persistCredentials: true
       displayName: Checkout repo
-    - task: Docker@2
-      displayName: Build and push Worker
-      inputs:
-        command: buildAndPush
-        repository: 'connectors/worker'
-        dockerfile: '$(Build.SourcesDirectory)/src/Worker.Dockerfile'
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          $(tag)
-          latest
-    - task: Docker@2
-      displayName: Build and push Orchestrator
-      inputs:
-        command: buildAndPush
-        repository: 'connectors/orchestrator'
-        dockerfile: '$(Build.SourcesDirectory)/src/Orchestrator.Dockerfile'
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          $(tag)
-          latest
-    - script: |
-        git tag v$(tag)
-        git push origin v$(tag)
-      workingDirectory: $(Build.SourcesDirectory)
-      displayName: Add tag to repository
+    # - task: Docker@2
+    #   displayName: Build and push Worker
+    #   inputs:
+    #     command: buildAndPush
+    #     repository: 'connectors/worker'
+    #     dockerfile: '$(Build.SourcesDirectory)/src/Worker.Dockerfile'
+    #     containerRegistry: $(dockerRegistryServiceConnection)
+    #     tags: |
+    #       $(tag)
+    #       latest
+    # - task: Docker@2
+    #   displayName: Build and push Orchestrator
+    #   inputs:
+    #     command: buildAndPush
+    #     repository: 'connectors/orchestrator'
+    #     dockerfile: '$(Build.SourcesDirectory)/src/Orchestrator.Dockerfile'
+    #     containerRegistry: $(dockerRegistryServiceConnection)
+    #     tags: |
+    #       $(tag)
+    #       latest
+    # - script: |
+    #     git tag v$(tag)
+    #     git push origin v$(tag)
+    #   workingDirectory: $(Build.SourcesDirectory)
+    #   displayName: Add tag to repository
     - script: |
         helm package infra/helm-charts/np-worker --version $(tag) --destination infra/helm-charts/np-worker/charts
         helm registry login $(containerRegistry) --username $(DOCKER_USERNAME) --password $(DOCKER_PASSWORD)
         helm push infra/helm-charts/np-worker/charts/np-worker-$(tag).tgz oci://$(containerRegistry)/helm-charts        
       displayName: Build and publish Helm chart to OCI registry
       workingDirectory: $(Build.SourcesDirectory)
+      env:
+        DOCKER_USERNAME: $(DOCKER_USERNAME)
+        DOCKER_PASSWORD: $(DOCKER_PASSWORD)
 
-- stage: UpdateInfrastructure 
-  displayName: Update infrastructure 
-  jobs:
-  - job: BumpVersion
-    displayName: Bump version
-    pool:
-      vmImage: $(vmImageName)
-    steps:
-      - checkout: Infrastructure
-        displayName: Checkout infrastructure
-        clean: true
-        persistCredentials: true
-        path: 'Infrastructure' 
-        fetchDepth: 0             # Fetch all history and branches
+# - stage: UpdateInfrastructure 
+#   displayName: Update infrastructure 
+#   jobs:
+#   - job: BumpVersion
+#     displayName: Bump version
+#     pool:
+#       vmImage: $(vmImageName)
+#     steps:
+#       - checkout: Infrastructure
+#         displayName: Checkout infrastructure
+#         clean: true
+#         persistCredentials: true
+#         path: 'Infrastructure' 
+#         fetchDepth: 0             # Fetch all history and branches
         
-      - script: |
-          git config user.email "azure@networkperspective.io"
-          git config user.name "Azure Pipeline"
+#       - script: |
+#           git config user.email "azure@networkperspective.io"
+#           git config user.name "Azure Pipeline"
 
-          git fetch origin develop          
-          git checkout -B develop origin/develop
-          git pull origin develop           
+#           git fetch origin develop          
+#           git checkout -B develop origin/develop
+#           git pull origin develop           
 
-          echo $(tag) > $(commitTagFile)
-          git add -A
-          git commit -m "$(commitTagMessage)"
-          git push origin develop
-        displayName: Update TEST release version
-        workingDirectory: $(Pipeline.Workspace)/Infrastructure
+#           echo $(tag) > $(commitTagFile)
+#           git add -A
+#           git commit -m "$(commitTagMessage)"
+#           git push origin develop
+#         displayName: Update TEST release version
+#         workingDirectory: $(Pipeline.Workspace)/Infrastructure
