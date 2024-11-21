@@ -1,0 +1,17 @@
+iam:
+  username: "networkperspectvie-worker"
+  policy: "networkperspectvie-worker-policy"
+  
+secrets:
+  prefix: "networkperspective/worker"
+  region: "eu-central-1"  
+
+  hashing-key: "placeholder"
+  orchestrator-client-secret: "placeholder"
+  orchestrator-client-name: "placeholder"
+  microsoft-client-with-teams-id: "placeholder"
+  microsoft-client-with-teams-secret: "placeholder"
+  slack-client-id: "placeholder"
+  slack-client-secret: "placeholder"
+  jira-client-id: "placeholder"
+  jira-client-secret: "placeholder"

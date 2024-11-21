@@ -1,0 +1,13 @@
+NOTES:
+
+1. Get the application pod name by running:
+
+    export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "np-worker.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+
+2. To check the logs of the application, run:
+
+    kubectl logs -f $POD_NAME --namespace {{ .Release.Namespace }}
+
+3. To delete the application, run:
+
+    helm delete {{ .Release.Name }} --namespace {{ .Release.Namespace }}
