@@ -1,0 +1,78 @@
+---
+# Source: np-worker/templates/networkpolicy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-same-namespace
+spec:
+  podSelector: {} # Applies to all Pods in the namespace
+  policyTypes:
+  - Ingress
+  - Egress 
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0 # Allows egress to the Internet
+---
+# Source: np-worker/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: network-perspective-worker
+  labels:
+    helm.sh/chart: np-worker-3.0.0
+    app.kubernetes.io/name: np-worker
+    app.kubernetes.io/instance: np-worker
+    app.kubernetes.io/version: "3.0.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: np-worker/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: np-worker
+  labels:
+    helm.sh/chart: np-worker-3.0.0
+    app.kubernetes.io/name: np-worker
+    app.kubernetes.io/instance: np-worker
+    app.kubernetes.io/version: "3.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: np-worker
+      app.kubernetes.io/instance: np-worker
+  template:
+    metadata:
+      annotations:      
+      labels:
+        app.kubernetes.io/name: np-worker
+        app.kubernetes.io/instance: np-worker
+    spec:
+      imagePullSecrets:
+        - name: np-sync-np-acr
+      serviceAccountName: network-perspective-worker
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: np-worker
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 1000
+          image: "networkperspective.azurecr.io/connectors/worker:3.0.0"
+          imagePullPolicy: IfNotPresent
+          env:          
+            - name: Infrastructure__Core__BaseUrl
+              value: https://app.networkperspective.io
+            - name: Infrastructure__Orchestrator__BaseUrl
+              value: https://app.networkperspective.io                      
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4G
+            requests:
+              cpu: 100m
+              memory: 1G

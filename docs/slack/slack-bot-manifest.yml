@@ -9,7 +9,7 @@ features:
     always_online: false
 oauth_config:
   redirect_urls:
-    - https://app.networkperspective.io/sync/SlackSync/Callback
+    - https://app.networkperspective.io/sync/callback/slack
   scopes:
     user:
       - identify
