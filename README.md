@@ -1,4 +1,3 @@
-
 ## About
 NP_Sync is a containerized app that syncs pseudonymized employee interaction metadata to enable Work Smart analysis. 
 It acts as a security and compliance layer that keeps all direct data access within your infrastructure.
@@ -51,3 +50,6 @@ Due to simplicity it can be easily deployed in any major cloud like Azure, GCP, 
 
 ## SaaS
 Network Perpsective hosts connectors within own Azure cloud infrastructure - the easiest way to go is just to authorize them, this takes just a few minutes and can be done from within the Network Perspective App admin panel. 
+
+## Infrastructure
+For infrastructure-related configurations and scripts, refer to [infra/readme.md](infra/readme.md)
