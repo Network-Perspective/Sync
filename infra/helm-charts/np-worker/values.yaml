@@ -1,0 +1,67 @@
+appSettings:
+  # Network Perspective API settings
+  networkPerspectiveApi: https://app.networkperspective.io
+
+  # Application Insights settings
+  applicationInsightsConnectionString: ""
+  applicationInsightsRoleInstance: ""
+
+  # AWS Secrets Manager settings
+  awsSecretsManagerRegion: ""
+  awsSecretsManagerPrefix: ""
+
+  # Azure key vault settings
+  azureKeyVaultUri: ""
+
+  # Google Cloud Secret Manager settings
+  googleCloudSecretManagerProjectId: ""
+  
+  # HCP Vault settings
+  hcpVaultAddress: ""
+
+# Secrets for pulling images from private registry
+imagePullSecrets: 
+  - name: np-sync-np-acr
+
+
+# Additional optional settings
+extraEnvironmentVars: []
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: networkperspective.azurecr.io/connectors/worker
+  pullPolicy: IfNotPresent
+
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+resources:   
+  requests:
+    cpu: "100m"
+    memory: "1G"
+  limits:
+    cpu: "2"         
+    memory: "4G"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+redeployOnUpdate: true
+
+podAnnotations: {}
+podSecurityContext: 
+  runAsNonRoot: true
+
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsUser: 1000
+
+networkPolicy:
+  # forbid traffic from other namespaces
+  enabled: true
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "network-perspective-worker"
