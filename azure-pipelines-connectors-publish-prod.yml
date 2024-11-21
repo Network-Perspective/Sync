@@ -33,7 +33,7 @@ variables:
 
 stages:
 - stage: Build
-  displayName: Build and push stage
+  displayName: Build and push prod
   jobs:
   - job: Build
     displayName: Build
