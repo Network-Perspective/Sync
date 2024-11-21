@@ -1,5 +1,7 @@
 appSettings:
   networkPerspectiveApi: https://staging.networkperspective.io/
+  awsSecretsManagerRegion: eu-central-1
+  awsSecretsManagerPrefix: networkperspective/worker
 
 extraEnvironmentVars:
   - name: AWS_ACCESS_KEY_ID
@@ -12,9 +14,5 @@ extraEnvironmentVars:
       secretKeyRef:
         name: np-worker-aws-secret
         key: aws_secret_access_key
-  - name: Infrastructure__Vaults__AmazonSecretsManager__SecretsPrefix
-    value: test/worker/local
-  - name: Infrastructure__Vaults__AmazonSecretsManager__Region
-    value: eu-central-1
   - name: Logging__LogLevel__Default
     value: Debug

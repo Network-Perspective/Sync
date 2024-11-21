@@ -50,6 +50,28 @@ spec:
               value: {{ required "applicationInsightsRoleInstance is required if application insights is enables" .Values.appSettings.applicationInsightsRoleInstance }}
             {{- end }}
 
+            {{- if and .Values.appSettings.awsSecretsManagerRegion .Values.appSettings.awsSecretsManagerPrefix }}
+            - name: Infrastructure__Vaults__AmazonSecretsManager__SecretsPrefix
+              value: {{ .Values.appSettings.awsSecretsManagerPrefix }}
+            - name: Infrastructure__Vaults__AmazonSecretsManager__Region
+              value: {{ .Values.appSettings.awsSecretsManagerRegion }}
+            {{- end }}
+
+            {{- if .Values.appSettings.azureKeyVaultUri }}
+            - name: Infrastructure__Vaults__AzureKeyVault__BaseUrl
+              value: {{ .Values.appSettings.awsSecretsManagerPrefix }}            
+            {{- end}}
+
+            {{- if .Values.appSettings.googleCloudSecretManagerProjectId }}
+            - name: Infrastructure__Vaults__GoogleSecretManager__ProjectId
+              value: {{ .Values.appSettings.googleCloudSecretManagerProjectId }}            
+            {{- end}}
+
+            {{- if .Values.appSettings.hcpVaultAddress }}
+            - name: Infrastructure__Vaults__HcpVault__BaseUrl
+              value: {{ .Values.appSettings.hcpVaultAddress }}            
+            {{- end}}
+
             {{- if .Values.extraEnvironmentVars }}
             {{- toYaml .Values.extraEnvironmentVars | nindent 12 }}
             {{- end }}                      
@@ -67,4 +89,3 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-     
