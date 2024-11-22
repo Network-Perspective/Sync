@@ -7,44 +7,37 @@ using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.HttpClients
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.HttpClients;
+
+internal class SlackHttpClient(HttpClient httpClient, ILogger<SlackHttpClient> logger) : ISlackHttpClient
 {
-    internal class SlackHttpClient : ISlackHttpClient
+    public void Dispose()
     {
-        private readonly HttpClient _httpClient;
-        private readonly ILogger<SlackHttpClient> _logger;
+        httpClient?.Dispose();
+    }
 
-        public SlackHttpClient(HttpClient httpClient, ILogger<SlackHttpClient> logger)
-        {
-            _httpClient = httpClient;
-            _logger = logger;
-        }
+    public Task<T> GetAsync<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
+        => Invoke<T>(() => httpClient.GetAsync(path, stoppingToken));
 
-        public void Dispose()
-        {
-            _httpClient?.Dispose();
-        }
+    public Task<T> PostAsync<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
+        => Invoke<T>(() => httpClient.PostAsync(path, null, stoppingToken));
 
-        public Task<T> GetAsync<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
-            => Invoke<T>(() => _httpClient.GetAsync(path, stoppingToken));
+    public Task<T> PostAsync<T>(string path, HttpContent content, CancellationToken stoppingToken = default) where T : IResponseWithError
+        => Invoke<T>(() => httpClient.PostAsync(path, content, stoppingToken));
 
-        public Task<T> PostAsync<T>(string path, CancellationToken stoppingToken = default) where T : IResponseWithError
-            => Invoke<T>(() => _httpClient.PostAsync(path, null, stoppingToken));
+    public Task<T> SendAsync<T>(HttpRequestMessage requestMessage, CancellationToken stoppingToken = default) where T : IResponseWithError
+        => Invoke<T>(() => httpClient.SendAsync(requestMessage, stoppingToken));
 
-        public Task<T> PostAsync<T>(string path, HttpContent content, CancellationToken stoppingToken = default) where T : IResponseWithError
-            => Invoke<T>(() => _httpClient.PostAsync(path, content, stoppingToken));
+    private static async Task<T> Invoke<T>(Func<Task<HttpResponseMessage>> innerMethod) where T : IResponseWithError
+    {
+        var result = await innerMethod.Invoke();
+        var responseBody = await result.Content.ReadAsStringAsync();
 
-        private static async Task<T> Invoke<T>(Func<Task<HttpResponseMessage>> innerMethod) where T : IResponseWithError
-        {
-            var result = await innerMethod.Invoke();
-            var responseBody = await result.Content.ReadAsStringAsync();
+        var responseObject = JsonConvert.DeserializeObject<T>(responseBody);
 
-            var responseObject = JsonConvert.DeserializeObject<T>(responseBody);
+        if (responseObject.IsOk == false)
+            throw new ApiException((int)result.StatusCode, responseObject.Error);
 
-            if (responseObject.IsOk == false)
-                throw new ApiException((int)result.StatusCode, responseObject.Error);
-
-            return responseObject;
-        }
+        return responseObject;
     }
 }
