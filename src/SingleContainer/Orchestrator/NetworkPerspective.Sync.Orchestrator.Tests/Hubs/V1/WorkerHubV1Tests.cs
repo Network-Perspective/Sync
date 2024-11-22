@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using Mapster;
+
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -16,6 +18,7 @@ using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
+using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 
 using Xunit;
 
@@ -37,6 +40,8 @@ public class WorkerHubV1Tests
 
     public WorkerHubV1Tests()
     {
+        HubV1MapsterConfig.RegisterMappings(TypeAdapterConfig.GlobalSettings);
+
         _connectionsLookupTableMock.Reset();
         _statusLoggerMock.Reset();
         _serviceProviderMock.Reset();
