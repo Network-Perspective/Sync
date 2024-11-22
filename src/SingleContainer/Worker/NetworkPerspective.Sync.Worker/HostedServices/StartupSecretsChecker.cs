@@ -15,7 +15,8 @@ internal class StartupSecretsChecker(IVault vault, ILogger<StartupSecretsChecker
 {
     private readonly string[] _expectedSecretsKeys = [
         Keys.OrchestratorClientNameKey,
-        Keys.OrchestratorClientNameKey
+        Keys.OrchestratorClientNameKey,
+        Keys.HashingKey
     ];
 
     public async Task StartAsync(CancellationToken cancellationToken)
