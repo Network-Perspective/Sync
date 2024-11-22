@@ -20,33 +20,26 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Services
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Services;
+
+public class UsersClientTests(MicrosoftClientBasicFixture microsoftClientFixture) : IClassFixture<MicrosoftClientBasicFixture>
 {
-    public class UsersClientTests : IClassFixture<MicrosoftClientBasicFixture>
+    private readonly ILogger<UsersClient> _logger = NullLogger<UsersClient>.Instance;
+
+    [Fact]
+    [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
+    public async Task ShouldBeAbleToGetUsers()
     {
-        private readonly MicrosoftClientBasicFixture _microsoftClientFixture;
-        private readonly ILogger<UsersClient> _logger = NullLogger<UsersClient>.Instance;
+        // Arrange
+        var client = new UsersClient(microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _logger);
+        var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
+        var filter = new EmployeeFilter(["group:Sample Team Site"], Array.Empty<string>());
+        var networkConfig = new ConnectorConfig(filter, CustomAttributesConfig.Empty);
+        var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, networkConfig, [], new SecureString(), timeRange);
 
-        public UsersClientTests(MicrosoftClientBasicFixture microsoftClientFixture)
-        {
-            _microsoftClientFixture = microsoftClientFixture;
-        }
+        // Act
+        var result = await client.GetUsersAsync(syncContext);
 
-        [Fact]
-        [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
-        public async Task ShouldBeAbleToGetUsers()
-        {
-            // Arrange
-            var client = new UsersClient(_microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _logger);
-            var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
-            var filter = new EmployeeFilter(["group:Sample Team Site"], Array.Empty<string>());
-            var networkConfig = new ConnectorConfig(filter, CustomAttributesConfig.Empty);
-            var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, networkConfig, [], new SecureString(), timeRange, Mock.Of<IHashingService>());
-
-            // Act
-            var result = await client.GetUsersAsync(syncContext);
-
-            result.Should().NotBeEmpty();
-        }
+        result.Should().NotBeEmpty();
     }
 }

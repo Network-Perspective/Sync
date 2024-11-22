@@ -73,7 +73,7 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange);
 
         _dataSourceMock
             .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
@@ -95,7 +95,7 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange);
 
         _dataSourceMock
             .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
@@ -118,7 +118,7 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange);
 
         var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
 
@@ -138,7 +138,7 @@ public class SyncServiceTests
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
         var connectorProperties = new ConnectorProperties(true, false, null);
-        var context = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, connectorProperties.GetAll(), "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, connectorProperties.GetAll(), "foo".ToSecureString(), timeRange);
 
         var employeeId = EmployeeId.Create("foo", "bar");
         var departmentGroup = Group.Create("group1Id", "groupName1", Group.DepartmentCatergory);
@@ -172,7 +172,7 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange);
 
         var interactionsStreamMock = new Mock<IInteractionsStream>();
         _networkPerspectiveCoreMock
@@ -195,7 +195,7 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange);
 
         var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
 
@@ -213,7 +213,7 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange);
 
         var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
 

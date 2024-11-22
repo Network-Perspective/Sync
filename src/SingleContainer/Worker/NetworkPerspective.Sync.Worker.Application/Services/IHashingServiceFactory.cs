@@ -12,26 +12,19 @@ namespace NetworkPerspective.Sync.Worker.Application.Services;
 
 public interface IHashingServiceFactory
 {
-    Task<IHashingService> CreateAsync(IVault secretRepository, CancellationToken stoppingToken = default);
+    Task<IHashingService> CreateAsync(CancellationToken stoppingToken = default);
 }
 
-internal sealed class HashingServiceFactory : IHashingServiceFactory
+internal sealed class HashingServiceFactory(IVault vault, ILoggerFactory loggerFactory) : IHashingServiceFactory
 {
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly ILogger<HashingServiceFactory> _logger;
+    private readonly ILogger<HashingServiceFactory> _logger = loggerFactory.CreateLogger<HashingServiceFactory>();
 
-    public HashingServiceFactory(ILoggerFactory loggerFactory)
+    public async Task<IHashingService> CreateAsync(CancellationToken stoppingToken = default)
     {
-        _loggerFactory = loggerFactory;
-        _logger = loggerFactory.CreateLogger<HashingServiceFactory>();
-    }
-
-    public async Task<IHashingService> CreateAsync(IVault secretRepository, CancellationToken stoppingToken = default)
-    {
-        _logger.LogDebug("Creating {service} using hashing key in {secretRepository}", typeof(HashingService), secretRepository.GetType());
-        using var hashingKey = await secretRepository.GetSecretAsync(Keys.HashingKey, stoppingToken);
+        _logger.LogDebug("Creating {service} using hashing key in {secretRepository}", typeof(HashingService), vault.GetType());
+        using var hashingKey = await vault.GetSecretAsync(Keys.HashingKey, stoppingToken);
         var hashingAlgorithm = new HMACSHA256(Encoding.UTF8.GetBytes(hashingKey.ToSystemString()));
 
-        return new HashingService(hashingAlgorithm, _loggerFactory.CreateLogger<HashingService>());
+        return new HashingService(hashingAlgorithm, loggerFactory.CreateLogger<HashingService>());
     }
 }

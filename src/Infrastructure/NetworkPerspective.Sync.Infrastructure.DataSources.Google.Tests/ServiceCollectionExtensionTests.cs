@@ -53,7 +53,7 @@ public class ServiceCollectionExtensionTests
         // Assert
         var services = serviceCollection.BuildServiceProvider();
         var timeRange = new TimeRange(DateTime.UtcNow, DateTime.UtcNow);
-        var syncContext = new SyncContext(Guid.NewGuid(), "Google", ConnectorConfig.Empty, [], "".ToSecureString(), timeRange, Mock.Of<IHashingService>());
+        var syncContext = new SyncContext(Guid.NewGuid(), "Google", ConnectorConfig.Empty, [], "".ToSecureString(), timeRange);
         services.GetRequiredService<ISyncContextAccessor>().SyncContext = syncContext;
         var dataSource = services.GetRequiredKeyedService<IDataSource>(connectorType.GetKeyOf<IDataSource>());
         dataSource.Should().BeAssignableTo<GoogleFacade>();

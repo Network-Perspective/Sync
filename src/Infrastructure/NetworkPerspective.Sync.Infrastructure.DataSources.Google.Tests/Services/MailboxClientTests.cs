@@ -23,54 +23,46 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Services
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Services;
+
+public class MailboxClientTests(GoogleClientFixture googleClientFixture) : IClassFixture<GoogleClientFixture>
 {
-    public class MailboxClientTests : IClassFixture<GoogleClientFixture>
+    [Fact]
+    [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
+    public async Task ShouldReturnNonEmptyEmailCollection()
     {
-        private readonly GoogleClientFixture _googleClientFixture;
+        // Arrange
+        const string userEmail = "nptestuser12@worksmartona.com";
 
-        public MailboxClientTests(GoogleClientFixture googleClientFixture)
+        var googleConfig = new GoogleConfig
         {
-            _googleClientFixture = googleClientFixture;
-        }
+            ApplicationName = "gmail_app",
+            MaxMessagesPerUserDaily = 1000,
+            SyncOverlapInMinutes = 0
+        };
 
-        [Fact]
-        [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
-        public async Task ShouldReturnNonEmptyEmailCollection()
-        {
-            // Arrange
-            const string userEmail = "nptestuser12@worksmartona.com";
+        var clock = new Clock();
+        var retryPolicyProvider = new RetryPolicyProvider(NullLogger<RetryPolicyProvider>.Instance);
 
-            var googleConfig = new GoogleConfig
-            {
-                ApplicationName = "gmail_app",
-                MaxMessagesPerUserDaily = 1000,
-                SyncOverlapInMinutes = 0
-            };
+        var mailboxClient = new MailboxClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), googleClientFixture.CredentialProvider, retryPolicyProvider, Mock.Of<IStatusLogger>(), NullLoggerFactory.Instance, clock);
 
-            var clock = new Clock();
-            var retryPolicyProvider = new RetryPolicyProvider(NullLogger<RetryPolicyProvider>.Instance);
+        var employees = new List<Employee>()
+            .Add(userEmail);
+        var employeesCollection = new EmployeeCollection(employees, null);
+        var interactionFactory = new EmailInteractionFactory((x) => $"{x}_hashed", employeesCollection, clock, NullLogger<EmailInteractionFactory>.Instance);
+        var stream = new TestableInteractionStream();
+        var timeRange = new TimeRange(new DateTime(2022, 11, 01), new DateTime(2022, 12, 31));
+        var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), timeRange);
 
-            var mailboxClient = new MailboxClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), _googleClientFixture.CredentialProvider, retryPolicyProvider, Mock.Of<IStatusLogger>(), NullLoggerFactory.Instance, clock);
+        // Act
+        await mailboxClient.SyncInteractionsAsync(syncContext, stream, new[] { userEmail }, interactionFactory);
 
-            var employees = new List<Employee>()
-                .Add(userEmail);
-            var employeesCollection = new EmployeeCollection(employees, null);
-            var interactionFactory = new EmailInteractionFactory((x) => $"{x}_hashed", employeesCollection, clock, NullLogger<EmailInteractionFactory>.Instance);
-            var stream = new TestableInteractionStream();
-            var timeRange = new TimeRange(new DateTime(2022, 11, 01), new DateTime(2022, 12, 31));
-            var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), timeRange, Mock.Of<IHashingService>());
+        // Assert
 
-            // Act
-            await mailboxClient.SyncInteractionsAsync(syncContext, stream, new[] { userEmail }, interactionFactory);
+        var result1 = stream.SentInteractions.Where(x => x.Timestamp.Date == new DateTime(2022, 11, 20));
+        result1.Single(x => x.Source.Id.PrimaryId == "maciej@networkperspective.io_hashed" && x.Target.Id.PrimaryId == $"{userEmail}_hashed");
 
-            // Assert
-
-            var result1 = stream.SentInteractions.Where(x => x.Timestamp.Date == new DateTime(2022, 11, 20));
-            result1.Single(x => x.Source.Id.PrimaryId == "maciej@networkperspective.io_hashed" && x.Target.Id.PrimaryId == $"{userEmail}_hashed");
-
-            var result2 = stream.SentInteractions.Where(x => x.Timestamp.Date == new DateTime(2022, 12, 24));
-            result2.Single(x => x.Source.Id.PrimaryId == $"{userEmail}_hashed" && x.Target.Id.PrimaryId == "john@worksmartona.com_hashed");
-        }
+        var result2 = stream.SentInteractions.Where(x => x.Timestamp.Date == new DateTime(2022, 12, 24));
+        result2.Single(x => x.Source.Id.PrimaryId == $"{userEmail}_hashed" && x.Target.Id.PrimaryId == "john@worksmartona.com_hashed");
     }
 }
