@@ -55,7 +55,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedVault>();
             secretRepositoryMock
-                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.BotTokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token.ToSecureString());
 
             var handler = new BotTokenAuthHandler(connectorInfoProviderMock.Object, secretRepositoryMock.Object, NullLogger<AuthTokenHandler>.Instance)
@@ -88,7 +88,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             var token2 = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedVault>();
             secretRepositoryMock
-                .SetupSequence(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
+                .SetupSequence(x => x.GetSecretAsync(string.Format(SlackKeys.BotTokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token1.ToSecureString())
                 .ReturnsAsync(token2.ToSecureString());
 
@@ -121,7 +121,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedVault>();
             secretRepositoryMock
-                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, networkId.ToString()), It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.BotTokenKeyPattern, networkId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token.ToSecureString());
 
             var handler = new BotTokenAuthHandler(networkIdProviderMock.Object, secretRepositoryMock.Object, NullLogger<AuthTokenHandler>.Instance)

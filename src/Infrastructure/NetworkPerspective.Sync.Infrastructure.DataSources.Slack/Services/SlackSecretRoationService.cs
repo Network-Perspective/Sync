@@ -25,7 +25,7 @@ internal class SlackSecretRoationService(IVault secretRepository, ISlackClientFa
 
         var slackClient = slackClientFacadeFactory.CreateUnauthorized();
 
-        var accessTokenKey = string.Format(SlackKeys.TokenKeyPattern, connectorInfo.Id);
+        var accessTokenKey = string.Format(SlackKeys.BotTokenKeyPattern, connectorInfo.Id);
         var refreshTokenKey = string.Format(SlackKeys.RefreshTokenPattern, connectorInfo.Id);
 
         var clientId = await secretRepository.GetSecretAsync(SlackKeys.SlackClientIdKey, stoppingToken);

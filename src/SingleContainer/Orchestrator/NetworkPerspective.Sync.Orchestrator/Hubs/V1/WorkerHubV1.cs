@@ -90,30 +90,30 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
 
     public async Task<ConnectorStatus> GetConnectorStatusAsync(string workerName, Guid connectorId, Guid networkId, IDictionary<string, string> connectorProperties, string connectorType)
     {
-        var requestDto = new GetConnectorStatusDto
+        try
         {
-            CorrelationId = Guid.NewGuid(),
-            Connector = new ConnectorDto
+            var requestDto = new GetConnectorStatusDto
             {
-                Id = connectorId,
-                Type = connectorType,
-                Properties = connectorProperties
-            },
-        };
+                CorrelationId = Guid.NewGuid(),
+                Connector = new ConnectorDto
+                {
+                    Id = connectorId,
+                    Type = connectorType,
+                    Properties = connectorProperties
+                },
+            };
 
-        var connection = connectionsLookupTable.Get(workerName);
-        var responseDto = await Clients
-            .Client(connection.Id)
-            .GetConnectorStatusAsync(requestDto);
+            var connection = connectionsLookupTable.Get(workerName);
+            var responseDto = await Clients
+                .Client(connection.Id)
+                .GetConnectorStatusAsync(requestDto);
 
-        if (responseDto.IsRunning)
-        {
-            var currentTask = ConnectorTaskStatus.Create(responseDto.CurrentTaskCaption, responseDto.CurrentTaskDescription, responseDto.CurrentTaskCompletionRate);
-            return ConnectorStatus.Running(responseDto.IsAuthorized, currentTask);
+            return responseDto.Adapt<ConnectorStatus>();
         }
-        else
+        catch (Exception ex)
         {
-            return ConnectorStatus.Idle(responseDto.IsAuthorized);
+            logger.LogDebug(ex, "Error occured while getting status of connector '{connectorId}'", connectorId);
+            return ConnectorStatus.Unknown;
         }
     }
 
