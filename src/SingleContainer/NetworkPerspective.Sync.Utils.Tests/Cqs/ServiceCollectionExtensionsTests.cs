@@ -16,7 +16,9 @@ public class ServiceCollectionExtensionsTests
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddHandler<CommandHandler, CommandRequest>();
+        services
+            .AddCqs()
+            .AddHandler<CommandHandler, CommandRequest>();
 
         // Act
         var serviceProvider = services.BuildServiceProvider();
@@ -31,7 +33,9 @@ public class ServiceCollectionExtensionsTests
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddHandler<QueryHandler, QueryRequest, Response>();
+        services
+            .AddCqs()
+            .AddHandler<QueryHandler, QueryRequest, Response>();
 
         // Act
         var serviceProvider = services.BuildServiceProvider();

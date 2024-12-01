@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -55,7 +54,7 @@ public class MediatorTests
             await mediator.SendAsync(request);
 
             // Assert
-            middlewareMock.Verify(x => x.HandleAsync(request, It.IsAny<Func<CommandRequest, CancellationToken, Task>>(), It.IsAny<CancellationToken>()), Times.Once);
+            middlewareMock.Verify(x => x.HandleAsync(request, It.IsAny<CommandHandler<CommandRequest>>(), It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 
@@ -98,7 +97,7 @@ public class MediatorTests
             var result = await mediator.SendAsync<QueryRequest, Response>(request);
 
             // Assert
-            middlewareMock.Verify(x => x.HandleAsync(request, It.IsAny<Func<QueryRequest, CancellationToken, Task<Response>>>(), It.IsAny<CancellationToken>()), Times.Once);
+            middlewareMock.Verify(x => x.HandleAsync(request, It.IsAny<QueryHandler<QueryRequest, Response>>(), It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

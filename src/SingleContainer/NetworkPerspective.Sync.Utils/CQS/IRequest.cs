@@ -14,7 +14,8 @@ public interface IRequest
     Guid CorrelationId { get; set; }
 }
 
-public interface IRequest<out TResponse> : IRequest where TResponse : class
+public interface IRequest<out TResponse> : IRequest
+    where TResponse : class
 {
 }
 
@@ -26,13 +27,13 @@ public interface IResponse
 // -----------------------
 
 
-public interface IRequestHandler<TRequest>
+public interface IRequestHandler<in TRequest>
     where TRequest : class, IRequest
 {
     Task HandleAsync(TRequest request, CancellationToken stoppingToken = default);
 }
 
-public interface IRequestHandler<TRequest, TResponse>
+public interface IRequestHandler<in TRequest, TResponse>
     where TRequest : class, IRequest<TResponse>
     where TResponse : class, IResponse
 {
@@ -41,52 +42,40 @@ public interface IRequestHandler<TRequest, TResponse>
 
 // -----------------------
 
+public delegate Task CommandHandler<TRequest>(TRequest request, CancellationToken stoppingToken)
+    where TRequest : class, IRequest;
+
+public delegate Task<TResponse> QueryHandler<TRequest, TResponse>(TRequest request, CancellationToken stoppingToken)
+    where TRequest : class, IRequest
+    where TResponse : class, IResponse;
+
 public interface IMediatorMiddleware
 {
-    Task HandleAsync<TRequest>(
-        TRequest request,
-        Func<TRequest, CancellationToken, Task> next,
-        CancellationToken cancellationToken)
+    Task HandleAsync<TRequest>(TRequest request, CommandHandler<TRequest> next, CancellationToken cancellationToken)
         where TRequest : class, IRequest;
 
-    Task<TResponse> HandleAsync<TRequest, TResponse>(
-        TRequest request,
-        Func<TRequest, CancellationToken, Task<TResponse>> next,
-        CancellationToken cancellationToken)
+    Task<TResponse> HandleAsync<TRequest, TResponse>(TRequest request, QueryHandler<TRequest, TResponse> next, CancellationToken cancellationToken)
         where TRequest : class, IRequest<TResponse>
         where TResponse : class, IResponse;
 }
 
-public class LoggingMiddleware : IMediatorMiddleware
+public class LoggingMiddleware(ILogger<LoggingMiddleware> logger) : IMediatorMiddleware
 {
-    private readonly ILogger<LoggingMiddleware> _logger;
-
-    public LoggingMiddleware(ILogger<LoggingMiddleware> logger)
-    {
-        _logger = logger;
-    }
-
-    public async Task HandleAsync<TRequest>(
-        TRequest request,
-        Func<TRequest, CancellationToken, Task> next,
-        CancellationToken cancellationToken)
+    public async Task HandleAsync<TRequest>(TRequest request, CommandHandler<TRequest> next, CancellationToken cancellationToken)
         where TRequest : class, IRequest
     {
-        _logger.LogInformation("Handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
+        logger.LogInformation("Handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
         await next(request, cancellationToken);
-        _logger.LogInformation("Finished handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
+        logger.LogInformation("Finished handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
     }
 
-    public async Task<TResponse> HandleAsync<TRequest, TResponse>(
-        TRequest request,
-        Func<TRequest, CancellationToken, Task<TResponse>> next,
-        CancellationToken cancellationToken)
+    public async Task<TResponse> HandleAsync<TRequest, TResponse>(TRequest request, QueryHandler<TRequest, TResponse> next, CancellationToken cancellationToken)
         where TRequest : class, IRequest<TResponse>
         where TResponse : class, IResponse
     {
-        _logger.LogInformation("Handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
+        logger.LogInformation("Handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
         var response = await next(request, cancellationToken); // Call the next middleware or handler
-        _logger.LogInformation("Finished handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
+        logger.LogInformation("Finished handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
         return response;
     }
 }
@@ -103,46 +92,38 @@ public interface IMediator
         where TResponse : class, IResponse;
 }
 
-internal class Mediator(IServiceProvider serviceProvider, IEnumerable<IMediatorMiddleware> _middlewares) : IMediator
+internal class Mediator(IServiceProvider serviceProvider, IEnumerable<IMediatorMiddleware> middlewares) : IMediator
 {
 
-    public async Task SendAsync<TRequest>(TRequest request, CancellationToken stoppingToken)
-        where TRequest : class, IRequest
+    async Task IMediator.SendAsync<TRequest>(TRequest request, CancellationToken stoppingToken)
     {
-        // Build the middleware pipeline
-        Func<TRequest, CancellationToken, Task> pipeline = HandleCommandAsync;
+        CommandHandler<TRequest> pipeline = HandleCommandAsync;
 
-        foreach (var middleware in _middlewares.Reverse())
+        foreach (var middleware in middlewares.Reverse())
         {
             var next = pipeline;
             pipeline = (req, token) => middleware.HandleAsync(req, next, token);
         }
 
-        // Execute the pipeline
         await pipeline(request, stoppingToken);
     }
 
-    public async Task<TResponse> SendAsync<TRequest, TResponse>(TRequest request, CancellationToken stoppingToken)
-        where TRequest : class, IRequest<TResponse>
-        where TResponse : class, IResponse
+    async Task<TResponse> IMediator.SendAsync<TRequest, TResponse>(TRequest request, CancellationToken stoppingToken)
     {
-        // Build the middleware pipeline
-        Func<TRequest, CancellationToken, Task<TResponse>> pipeline = (req, token) => HandleRequestAsync<TRequest, TResponse>(req, token);
+        QueryHandler<TRequest, TResponse> pipeline = HandleRequestAsync<TRequest, TResponse>;
 
-        foreach (var middleware in _middlewares.Reverse())
+        foreach (var middleware in middlewares.Reverse())
         {
             var next = pipeline;
             pipeline = (req, token) => middleware.HandleAsync(req, next, token);
         }
 
-        // Execute the pipeline
         return await pipeline(request, stoppingToken);
     }
 
     private async Task HandleCommandAsync<TRequest>(TRequest request, CancellationToken cancellationToken)
         where TRequest : class, IRequest
     {
-        // Resolve the appropriate handler from the service provider
         await using var scope = serviceProvider.CreateAsyncScope();
         var handler = scope.ServiceProvider.GetRequiredService<IRequestHandler<TRequest>>();
         await handler.HandleAsync(request, cancellationToken);
@@ -152,49 +133,52 @@ internal class Mediator(IServiceProvider serviceProvider, IEnumerable<IMediatorM
         where TRequest : class, IRequest<TResponse>
         where TResponse : class, IResponse
     {
-        // Resolve the appropriate handler from the service provider
         await using var scope = serviceProvider.CreateAsyncScope();
         var handler = scope.ServiceProvider.GetRequiredService<IRequestHandler<TRequest, TResponse>>();
         return await handler.HandleAsync(request, cancellationToken);
     }
 }
 
-public static class ServiceCollectionExcensions
+public static class ServiceCollectionExctensions
 {
-    public static IServiceCollection AddCqs(this IServiceCollection services)
+    public static CqsBuilder AddCqs(this IServiceCollection services)
     {
         services.AddSingleton<IMediator, Mediator>();
 
-        return services;
+        return new CqsBuilder(services);
     }
+}
 
-    public static IServiceCollection AddHandler<THandler, TRequest>(this IServiceCollection services)
+public class CqsBuilder(IServiceCollection services)
+{
+    public CqsBuilder AddHandler<THandler, TRequest>()
         where THandler : class, IRequestHandler<TRequest>
         where TRequest : class, IRequest
     {
         services.AddScoped<IRequestHandler<TRequest>, THandler>();
-        return services;
+        return this;
     }
 
-    public static IServiceCollection AddHandler<THandler, TRequest, TResponse>(this IServiceCollection services)
+    public CqsBuilder AddHandler<THandler, TRequest, TResponse>()
         where THandler : class, IRequestHandler<TRequest, TResponse>
         where TRequest : class, IRequest<TResponse>
         where TResponse : class, IResponse
     {
         services.AddScoped<IRequestHandler<TRequest, TResponse>, THandler>();
-        return services;
+        return this;
     }
 
-    public static IServiceCollection AddMiddleware<TMiddleware>(this IServiceCollection services)
+    public CqsBuilder AddMiddleware<TMiddleware>()
         where TMiddleware : class, IMediatorMiddleware
     {
         services.AddSingleton<TMiddleware, TMiddleware>();
-        return services;
+        return this;
     }
 
-    public static IServiceCollection AddMiddleware(this IServiceCollection services, IMediatorMiddleware middleware)
+    public CqsBuilder AddMiddleware(IMediatorMiddleware middleware)
     {
         services.AddSingleton(middleware);
-        return services;
+        return this;
     }
+
 }
