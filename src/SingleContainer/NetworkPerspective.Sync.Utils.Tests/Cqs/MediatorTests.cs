@@ -8,6 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
 using NetworkPerspective.Sync.Utils.CQS;
+using NetworkPerspective.Sync.Utils.CQS.Commands;
+using NetworkPerspective.Sync.Utils.CQS.Middlewares;
+using NetworkPerspective.Sync.Utils.CQS.Queries;
 using NetworkPerspective.Sync.Utils.Tests.Cqs.TestTypes;
 
 using Xunit;
@@ -31,7 +34,7 @@ public class MediatorTests
             // Act
             var serviceProvider = services.BuildServiceProvider();
             var mediator = serviceProvider.GetRequiredService<IMediator>();
-            await mediator.SendAsync(new CommandRequest());
+            await mediator.SendCommandAsync(new CommandRequest());
 
             // Assert
         }
@@ -51,10 +54,10 @@ public class MediatorTests
             // Act
             var serviceProvider = services.BuildServiceProvider();
             var mediator = serviceProvider.GetRequiredService<IMediator>();
-            await mediator.SendAsync(request);
+            await mediator.SendCommandAsync(request);
 
             // Assert
-            middlewareMock.Verify(x => x.HandleAsync(request, It.IsAny<CommandHandler<CommandRequest>>(), It.IsAny<CancellationToken>()), Times.Once);
+            middlewareMock.Verify(x => x.HandleCommandAsync(request, It.IsAny<CommandHandlerDelegate<CommandRequest>>(), It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 
@@ -73,7 +76,7 @@ public class MediatorTests
             // Act
             var serviceProvider = services.BuildServiceProvider();
             var mediator = serviceProvider.GetRequiredService<IMediator>();
-            var result = await mediator.SendAsync<QueryRequest, Response>(new QueryRequest());
+            var result = await mediator.SendQueryAsync<QueryRequest, Response>(new QueryRequest());
 
             // Assert
             result.Should().NotBeNull();
@@ -86,18 +89,18 @@ public class MediatorTests
             var request = new QueryRequest();
             var services = new ServiceCollection();
             var middlewareMock = new Mock<IMediatorMiddleware>();
-            services
-                .AddCqs()
+            ((ICqsBuilder)services
+                .AddCqs())
                 .AddMiddleware(middlewareMock.Object)
                 .AddHandler<QueryHandler, QueryRequest, Response>();
 
             // Act
             var serviceProvider = services.BuildServiceProvider();
             var mediator = serviceProvider.GetRequiredService<IMediator>();
-            var result = await mediator.SendAsync<QueryRequest, Response>(request);
+            var result = await mediator.SendQueryAsync<QueryRequest, Response>(request);
 
             // Assert
-            middlewareMock.Verify(x => x.HandleAsync(request, It.IsAny<QueryHandler<QueryRequest, Response>>(), It.IsAny<CancellationToken>()), Times.Once);
+            middlewareMock.Verify(x => x.HandleQueryAsync(request, It.IsAny<QueryHandlerDelegate<QueryRequest, Response>>(), It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

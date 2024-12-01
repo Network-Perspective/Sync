@@ -3,6 +3,8 @@
 using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Utils.CQS;
+using NetworkPerspective.Sync.Utils.CQS.Commands;
+using NetworkPerspective.Sync.Utils.CQS.Queries;
 using NetworkPerspective.Sync.Utils.Tests.Cqs.TestTypes;
 
 using Xunit;
@@ -22,7 +24,7 @@ public class ServiceCollectionExtensionsTests
 
         // Act
         var serviceProvider = services.BuildServiceProvider();
-        var service = serviceProvider.GetService<IRequestHandler<CommandRequest>>();
+        var service = serviceProvider.GetService<ICommandHandler<CommandRequest>>();
 
         // Assert
         service.Should().NotBeNull();
@@ -39,7 +41,7 @@ public class ServiceCollectionExtensionsTests
 
         // Act
         var serviceProvider = services.BuildServiceProvider();
-        var service = serviceProvider.GetService<IRequestHandler<QueryRequest, Response>>();
+        var service = serviceProvider.GetService<IQueryHandler<QueryRequest, Response>>();
 
         // Assert
         service.Should().NotBeNull();

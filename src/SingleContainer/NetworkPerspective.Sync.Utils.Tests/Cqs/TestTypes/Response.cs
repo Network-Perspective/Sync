@@ -1,6 +1,6 @@
 ﻿using System;
 
-using NetworkPerspective.Sync.Utils.CQS;
+using NetworkPerspective.Sync.Utils.CQS.Queries;
 
 namespace NetworkPerspective.Sync.Utils.Tests.Cqs.TestTypes;
 
