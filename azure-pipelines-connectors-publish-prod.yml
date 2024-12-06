@@ -50,6 +50,7 @@ stages:
         repository: 'connectors/worker'
         dockerfile: '$(Build.SourcesDirectory)/src/Worker.Dockerfile'
         containerRegistry: $(dockerRegistryServiceConnection)
+        arguments: --build-arg VERSION=$(tag)
         tags: |
           $(tag)
           latest
