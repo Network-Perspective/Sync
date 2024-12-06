@@ -1,4 +1,5 @@
 using System.Reflection;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -11,7 +12,7 @@ public static class DiagnosticExtensions
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         var logger = services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
         logger.LogInformation("Application starting. Version: {Version}", version);
-        
+
         return services;
     }
 }
