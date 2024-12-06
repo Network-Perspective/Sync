@@ -18,6 +18,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
 using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.ApplicationInsights;
 using NetworkPerspective.Sync.Worker.Configs;
 using NetworkPerspective.Sync.Worker.HostedServices;
 
@@ -46,6 +47,7 @@ public class Program
             };
 
             builder.Services.AddApplicaitonInsights(builder.Configuration.GetSection("ApplicationInsights"));
+            builder.Services.LogApplicationVersion();
 
             var healthChecksBuilder = builder.Services
                 .AddHealthChecks();
