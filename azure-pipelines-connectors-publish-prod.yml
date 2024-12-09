@@ -44,11 +44,21 @@ stages:
       persistCredentials: true
       displayName: Checkout repo
     - task: Docker@2
-      displayName: Build and push Worker
+      displayName: Build Worker
       inputs:
-        command: buildAndPush
+        command: build
         repository: 'connectors/worker'
         dockerfile: '$(Build.SourcesDirectory)/src/Worker.Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        arguments: --build-arg VERSION=$(tag)
+        tags: |
+          $(tag)
+          latest
+    - task: Docker@2
+      displayName: Push Worker
+      inputs:
+        command: push
+        repository: 'connectors/worker'
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
