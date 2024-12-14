@@ -10,9 +10,9 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application.UseCases.Handlers;
 
-internal class GetConnectorStatusHandler(IAuthTester authTester, ITasksStatusesCache tasksStatusesCache, ILogger<GetConnectorStatusHandler> logger) : IQueryHandler<GetConnectorStatusDto, ConnectorStatusDto>
+internal class ConnectorStatusHandler(IAuthTester authTester, ITasksStatusesCache tasksStatusesCache, ILogger<ConnectorStatusHandler> logger) : IRequestHandler<ConnectorStatusRequest, ConnectorStatusResponse>
 {
-    public async Task<ConnectorStatusDto> HandleAsync(GetConnectorStatusDto request, CancellationToken stoppingToken = default)
+    public async Task<ConnectorStatusResponse> HandleAsync(ConnectorStatusRequest request, CancellationToken stoppingToken = default)
     {
         logger.LogInformation("Checking connector '{connectorId}' status", request.Connector.Id);
 
@@ -23,7 +23,7 @@ internal class GetConnectorStatusHandler(IAuthTester authTester, ITasksStatusesC
 
         logger.LogInformation("Status check for connector '{connectorId}' completed", request.Connector.Id);
 
-        return new ConnectorStatusDto
+        return new ConnectorStatusResponse
         {
             CorrelationId = request.Connector.Id,
             IsAuthorized = isAuthorized,

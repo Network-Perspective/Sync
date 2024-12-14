@@ -10,14 +10,14 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application.UseCases.Handlers;
 
-internal class GetWorkerCapabilitiesHandler(ICapabilitiesService capabilitiesService, ILogger<GetWorkerCapabilitiesHandler> logger) : IQueryHandler<GetWorkerCapabilitiesDto, WorkerCapabilitiesDto>
+internal class WorkerCapabilitiesHandler(ICapabilitiesService capabilitiesService, ILogger<WorkerCapabilitiesHandler> logger) : IRequestHandler<WorkerCapabilitiesRequest, WorkerCapabilitiesResponse>
 {
-    public async Task<WorkerCapabilitiesDto> HandleAsync(GetWorkerCapabilitiesDto dto, CancellationToken stoppingToken = default)
+    public async Task<WorkerCapabilitiesResponse> HandleAsync(WorkerCapabilitiesRequest dto, CancellationToken stoppingToken = default)
     {
         logger.LogInformation("Checking worker capabilities");
 
         var connectorTypes = await capabilitiesService.GetSupportedConnectorTypesAsync(stoppingToken);
-        return new WorkerCapabilitiesDto
+        return new WorkerCapabilitiesResponse
         {
             CorrelationId = dto.CorrelationId,
             SupportedConnectorTypes = connectorTypes.Select(x => x.Name)

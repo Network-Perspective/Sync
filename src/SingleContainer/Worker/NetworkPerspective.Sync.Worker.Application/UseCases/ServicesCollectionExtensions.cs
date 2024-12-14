@@ -18,13 +18,13 @@ internal static class ServicesCollectionExtensions
             .AddPreProcessor<ConnectorScopedPreProcessor>()
             .AddMiddleware<LoggingMiddleware>()
             .AddMiddleware<ConnectorScopedLoggingMiddleware>()
-            .AddHandler<GetConnectorStatusHandler, GetConnectorStatusDto, ConnectorStatusDto>()
-            .AddHandler<GetWorkerCapabilitiesHandler, GetWorkerCapabilitiesDto, WorkerCapabilitiesDto>()
+            .AddHandler<ConnectorStatusHandler, ConnectorStatusRequest, ConnectorStatusResponse>()
+            .AddHandler<WorkerCapabilitiesHandler, WorkerCapabilitiesRequest, WorkerCapabilitiesResponse>()
             .AddHandler<InitializeOAuthHandler, InitializeOAuthRequest, InitializeOAuthResponse>()
             .AddHandler<OAuthCallbackHandler, HandleOAuthCallbackRequest, AckDto>()
-            .AddHandler<RotateSecretsHandler, RotateSecretsDto, AckDto>()
-            .AddHandler<SetSecretsHandler, SetSecretsDto, AckDto>()
-            .AddHandler<StartSyncHandler, StartSyncDto, SyncCompletedDto>();
+            .AddHandler<RotateSecretsHandler, RotateSecretsRequest, AckDto>()
+            .AddHandler<SetSecretsHandler, SetSecretsRequest, AckDto>()
+            .AddHandler<SyncHandler, SyncRequest, SyncResponse>();
 
         return services;
     }

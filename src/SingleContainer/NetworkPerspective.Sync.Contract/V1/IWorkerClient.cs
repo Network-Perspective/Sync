@@ -6,11 +6,11 @@ namespace NetworkPerspective.Sync.Contract.V1;
 
 public interface IWorkerClient
 {
-    Task<AckDto> SyncAsync(StartSyncDto startSyncRequestDto);
-    Task<AckDto> SetSecretsAsync(SetSecretsDto setSecretsRequestDto);
-    Task<AckDto> RotateSecretsAsync(RotateSecretsDto rotateSecretsDto);
-    Task<ConnectorStatusDto> GetConnectorStatusAsync(GetConnectorStatusDto getConnectorStatusDto);
-    Task<WorkerCapabilitiesDto> GetWorkerCapabilitiesAsync(GetWorkerCapabilitiesDto getWorkerCapabilites);
+    Task<AckDto> SyncAsync(SyncRequest startSyncRequestDto);
+    Task<AckDto> SetSecretsAsync(SetSecretsRequest setSecretsRequestDto);
+    Task<AckDto> RotateSecretsAsync(RotateSecretsRequest rotateSecretsDto);
+    Task<ConnectorStatusResponse> GetConnectorStatusAsync(ConnectorStatusRequest getConnectorStatusDto);
+    Task<WorkerCapabilitiesResponse> GetWorkerCapabilitiesAsync(WorkerCapabilitiesRequest getWorkerCapabilites);
     Task<InitializeOAuthResponse> InitializeOAuthAsync(InitializeOAuthRequest request);
     Task<AckDto> HandleOAuthCallbackAsync(HandleOAuthCallbackRequest request);
 }

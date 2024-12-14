@@ -2,7 +2,7 @@
 
 namespace NetworkPerspective.Sync.Utils.CQS.Queries;
 
-public interface IQuery<out TResponse>
+public interface IRequest<out TResponse>
     where TResponse : class
 {
     string UserFriendlyName { get; set; }

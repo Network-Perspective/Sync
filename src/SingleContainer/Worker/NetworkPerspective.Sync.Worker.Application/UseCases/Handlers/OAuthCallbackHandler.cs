@@ -12,7 +12,7 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application.UseCases.Handlers;
 
-internal class OAuthCallbackHandler(IMemoryCache cache, IOAuthService oAuthService, ILogger<OAuthCallbackHandler> logger) : IQueryHandler<HandleOAuthCallbackRequest, AckDto>
+internal class OAuthCallbackHandler(IMemoryCache cache, IOAuthService oAuthService, ILogger<OAuthCallbackHandler> logger) : IRequestHandler<HandleOAuthCallbackRequest, AckDto>
 {
     public async Task<AckDto> HandleAsync(HandleOAuthCallbackRequest dto, CancellationToken stoppingToken = default)
     {

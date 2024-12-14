@@ -73,8 +73,8 @@ public class WorkerHubV1Tests
             };
 
             _clientProxyMock
-                .Setup(x => x.GetConnectorStatusAsync(It.IsAny<GetConnectorStatusDto>()))
-                .ReturnsAsync(new ConnectorStatusDto()
+                .Setup(x => x.GetConnectorStatusAsync(It.IsAny<ConnectorStatusRequest>()))
+                .ReturnsAsync(new ConnectorStatusResponse()
                 {
                     IsRunning = false,
                     IsAuthorized = isAuthorized,
@@ -103,8 +103,8 @@ public class WorkerHubV1Tests
             };
 
             _clientProxyMock
-                .Setup(x => x.GetConnectorStatusAsync(It.IsAny<GetConnectorStatusDto>()))
-                .ReturnsAsync(new ConnectorStatusDto()
+                .Setup(x => x.GetConnectorStatusAsync(It.IsAny<ConnectorStatusRequest>()))
+                .ReturnsAsync(new ConnectorStatusResponse()
                 {
                     IsRunning = true,
                     IsAuthorized = isAuthorized,

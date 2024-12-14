@@ -5,7 +5,7 @@ using NetworkPerspective.Sync.Utils.CQS.Queries;
 
 namespace NetworkPerspective.Sync.Contract.V1.Dtos;
 
-public class SetSecretsDto : IQuery<AckDto>
+public class SetSecretsRequest : IRequest<AckDto>
 {
     public string UserFriendlyName { get; set; } = "Set Secrets";
     public Guid CorrelationId { get; set; } = Guid.NewGuid();

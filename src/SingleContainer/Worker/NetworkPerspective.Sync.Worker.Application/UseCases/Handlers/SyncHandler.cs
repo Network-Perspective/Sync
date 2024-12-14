@@ -11,9 +11,9 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application.UseCases.Handlers;
 
-internal class StartSyncHandler(ISyncContextFactory syncContextFactory, ISyncContextAccessor syncContextAccessor, ISyncService syncService, ILogger<StartSyncHandler> logger) : IQueryHandler<StartSyncDto, SyncCompletedDto>
+internal class SyncHandler(ISyncContextFactory syncContextFactory, ISyncContextAccessor syncContextAccessor, ISyncService syncService, ILogger<SyncHandler> logger) : IRequestHandler<SyncRequest, SyncResponse>
 {
-    public async Task<SyncCompletedDto> HandleAsync(StartSyncDto dto, CancellationToken stoppingToken = default)
+    public async Task<SyncResponse> HandleAsync(SyncRequest dto, CancellationToken stoppingToken = default)
     {
         logger.LogInformation("Syncing started for connector '{connectorId}'", dto.Connector.Id);
 
@@ -30,7 +30,7 @@ internal class StartSyncHandler(ISyncContextFactory syncContextFactory, ISyncCon
         var result = await syncService.SyncAsync(syncContext, stoppingToken);
         logger.LogInformation("Sync for connector '{connectorId}' completed", dto.Connector.Id);
 
-        return new SyncCompletedDto
+        return new SyncResponse
         {
             CorrelationId = dto.CorrelationId,
             ConnectorId = dto.Connector.Id,

@@ -3,7 +3,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Utils.CQS;
-using NetworkPerspective.Sync.Utils.CQS.Commands;
 using NetworkPerspective.Sync.Utils.CQS.Queries;
 using NetworkPerspective.Sync.Utils.Tests.Cqs.TestTypes;
 
@@ -13,23 +12,6 @@ namespace NetworkPerspective.Sync.Utils.Tests.Cqs;
 
 public class ServiceCollectionExtensionsTests
 {
-    [Fact]
-    public void ShouldResolveCommandHandler()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        services
-            .AddCqs()
-            .AddHandler<CommandHandler, CommandRequest>();
-
-        // Act
-        var serviceProvider = services.BuildServiceProvider();
-        var service = serviceProvider.GetService<ICommandHandler<CommandRequest>>();
-
-        // Assert
-        service.Should().NotBeNull();
-    }
-
     [Fact]
     public void ShouldResolveQueryHandler()
     {
@@ -41,7 +23,7 @@ public class ServiceCollectionExtensionsTests
 
         // Act
         var serviceProvider = services.BuildServiceProvider();
-        var service = serviceProvider.GetService<IQueryHandler<QueryRequest, Response>>();
+        var service = serviceProvider.GetService<IRequestHandler<QueryRequest, Response>>();
 
         // Assert
         service.Should().NotBeNull();

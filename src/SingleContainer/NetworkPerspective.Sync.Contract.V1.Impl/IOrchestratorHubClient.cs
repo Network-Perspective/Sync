@@ -64,7 +64,7 @@ internal class OrchestratorHubClient : IOrchestratorHubClient
         await _asyncRetryPolicy.ExecuteAsync((ct) => _connection.StartAsync(ct), stoppingToken);
     }
 
-    public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto syncCompleted)
+    public async Task<AckDto> SyncCompletedAsync(SyncResponse syncCompleted)
     {
         return await _asyncRetryPolicy.ExecuteAsync(() => _connection.InvokeAsync<AckDto>(nameof(IOrchestratorClient.SyncCompletedAsync), syncCompleted));
     }
@@ -84,13 +84,13 @@ internal class OrchestratorHubClient : IOrchestratorHubClient
 
     private void InitializeConnection()
     {
-        _connection.On<StartSyncDto, AckDto>(nameof(IWorkerClient.SyncAsync), x =>
+        _connection.On<SyncRequest, AckDto>(nameof(IWorkerClient.SyncAsync), x =>
         {
             _logger.LogInformation("Received request '{correlationId}' to start sync '{connectorId}' from {start} to {end}", x.CorrelationId, x.Connector.Id, x.Start, x.End);
 
             _ = Task.Run(async () =>
             {
-                var result = await _mediator.SendQueryAsync<StartSyncDto, SyncCompletedDto>(x);
+                var result = await _mediator.SendAsync<SyncRequest, SyncResponse>(x);
                 await SyncCompletedAsync(result);
             });
 
@@ -98,22 +98,22 @@ internal class OrchestratorHubClient : IOrchestratorHubClient
             return new AckDto { CorrelationId = x.CorrelationId };
         });
 
-        _connection.On<SetSecretsDto, AckDto>(nameof(IWorkerClient.SetSecretsAsync),
-            x => _mediator.SendQueryAsync<SetSecretsDto, AckDto>(x));
+        _connection.On<SetSecretsRequest, AckDto>(nameof(IWorkerClient.SetSecretsAsync),
+            x => _mediator.SendAsync<SetSecretsRequest, AckDto>(x));
 
-        _connection.On<RotateSecretsDto, AckDto>(nameof(IWorkerClient.RotateSecretsAsync),
-            x => _mediator.SendQueryAsync<RotateSecretsDto, AckDto>(x));
+        _connection.On<RotateSecretsRequest, AckDto>(nameof(IWorkerClient.RotateSecretsAsync),
+            x => _mediator.SendAsync<RotateSecretsRequest, AckDto>(x));
 
-        _connection.On<GetConnectorStatusDto, ConnectorStatusDto>(nameof(IWorkerClient.GetConnectorStatusAsync),
-            x => _mediator.SendQueryAsync<GetConnectorStatusDto, ConnectorStatusDto>(x));
+        _connection.On<ConnectorStatusRequest, ConnectorStatusResponse>(nameof(IWorkerClient.GetConnectorStatusAsync),
+            x => _mediator.SendAsync<ConnectorStatusRequest, ConnectorStatusResponse>(x));
 
-        _connection.On<GetWorkerCapabilitiesDto, WorkerCapabilitiesDto>(nameof(IWorkerClient.GetWorkerCapabilitiesAsync),
-            x => _mediator.SendQueryAsync<GetWorkerCapabilitiesDto, WorkerCapabilitiesDto>(x));
+        _connection.On<WorkerCapabilitiesRequest, WorkerCapabilitiesResponse>(nameof(IWorkerClient.GetWorkerCapabilitiesAsync),
+            x => _mediator.SendAsync<WorkerCapabilitiesRequest, WorkerCapabilitiesResponse>(x));
 
         _connection.On<InitializeOAuthRequest, InitializeOAuthResponse>(nameof(IWorkerClient.InitializeOAuthAsync),
-            x => _mediator.SendQueryAsync<InitializeOAuthRequest, InitializeOAuthResponse>(x));
+            x => _mediator.SendAsync<InitializeOAuthRequest, InitializeOAuthResponse>(x));
 
         _connection.On<HandleOAuthCallbackRequest, AckDto>(nameof(IWorkerClient.HandleOAuthCallbackAsync),
-            x => _mediator.SendQueryAsync<HandleOAuthCallbackRequest, AckDto>(x));
+            x => _mediator.SendAsync<HandleOAuthCallbackRequest, AckDto>(x));
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -13,12 +12,7 @@ namespace NetworkPerspective.Sync.Worker.Application.UseCases.Preprocessors;
 
 internal class ConnectorScopedPreProcessor(IConnectorContextAccessor connectorContextProvider) : IPreProcessor
 {
-    Task IPreProcessor.PreprocessAsync<TCommand>(TCommand command, IServiceScope scope, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    Task IPreProcessor.PreprocessAsync<TQuery, TResponse>(TQuery request, IServiceScope scope, CancellationToken cancellationToken)
+    Task IPreProcessor.PreprocessAsync<TRequest, TResponse>(TRequest request, IServiceScope scope, CancellationToken cancellationToken)
     {
         if (request is IConnectorScoped scopedRequest)
         {

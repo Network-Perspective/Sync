@@ -5,7 +5,7 @@ using NetworkPerspective.Sync.Utils.CQS.Queries;
 
 namespace NetworkPerspective.Sync.Contract.V1.Dtos;
 
-public class StartSyncDto : IQuery<SyncCompletedDto>, IConnectorScoped
+public class SyncRequest : IRequest<SyncResponse>, IConnectorScoped
 {
     public string UserFriendlyName { get; set; } = "Synchronize";
     public Guid CorrelationId { get; set; } = Guid.NewGuid();

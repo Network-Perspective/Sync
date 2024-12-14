@@ -10,11 +10,11 @@ public class ConnectorStatusConfig : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config
-            .NewConfig<ConnectorStatusDto, ConnectorStatus>()
+            .NewConfig<ConnectorStatusResponse, ConnectorStatus>()
                 .ConstructUsing(x => CreateDomainStatus(x));
     }
 
-    private static ConnectorStatus CreateDomainStatus(ConnectorStatusDto dto)
+    private static ConnectorStatus CreateDomainStatus(ConnectorStatusResponse dto)
     {
         if (!dto.IsRunning)
             return ConnectorStatus.Idle(dto.IsAuthorized);

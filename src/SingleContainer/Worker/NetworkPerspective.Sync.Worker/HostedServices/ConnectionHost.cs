@@ -14,7 +14,7 @@ using NetworkPerspective.Sync.Worker.Application;
 
 namespace NetworkPerspective.Sync.Worker.HostedServices;
 
-internal class ConnectionHost(IOrchestratorHubClient hubClient, IServiceProvider serviceProvider, IVault secretRepository, ILogger<ConnectionHost> logger) : BackgroundService
+internal class ConnectionHost(IOrchestratorHubClient hubClient, IVault secretRepository, ILogger<ConnectionHost> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

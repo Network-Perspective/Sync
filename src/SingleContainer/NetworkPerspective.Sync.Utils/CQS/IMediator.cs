@@ -1,17 +1,47 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System;
+using System.Threading;
 using System.Threading.Tasks;
-
-using NetworkPerspective.Sync.Utils.CQS.Commands;
 using NetworkPerspective.Sync.Utils.CQS.Queries;
+using Microsoft.Extensions.DependencyInjection;
+using NetworkPerspective.Sync.Utils.CQS.PreProcessors;
+using NetworkPerspective.Sync.Utils.CQS.Middlewares;
+using System.Linq;
 
 namespace NetworkPerspective.Sync.Utils.CQS;
 
 public interface IMediator
 {
-    Task SendCommandAsync<TCommand>(TCommand request, CancellationToken stoppingToken = default)
-        where TCommand : class, ICommand;
-
-    Task<TResponse> SendQueryAsync<TQuery, TResponse>(TQuery request, CancellationToken stoppingToken = default)
-        where TQuery : class, IQuery<TResponse>
+    Task<TResponse> SendAsync<TRequest, TResponse>(TRequest request, CancellationToken stoppingToken = default)
+        where TRequest : class, IRequest<TResponse>
         where TResponse : class, IResponse;
+}
+
+internal class Mediator(IServiceProvider serviceProvider) : IMediator
+{
+    async Task<TResponse> IMediator.SendAsync<TQuery, TResponse>(TQuery request, CancellationToken stoppingToken)
+    {
+        await using var scope = serviceProvider.CreateAsyncScope();
+
+        var preprocessors = scope.ServiceProvider.GetRequiredService<IEnumerable<IPreProcessor>>();
+
+        foreach (var preprocessor in preprocessors.Reverse())
+            await preprocessor.PreprocessAsync<TQuery, TResponse>(request, scope, stoppingToken);
+
+        QueryHandlerDelegate<TQuery, TResponse> pipeline = (query, ct) =>
+        {
+            var handler = scope.ServiceProvider.GetRequiredService<IRequestHandler<TQuery, TResponse>>();
+            return handler.HandleAsync(query, ct);
+        };
+
+        var middlewares = scope.ServiceProvider.GetRequiredService<IEnumerable<IMediatorMiddleware>>();
+
+        foreach (var middleware in middlewares.Reverse())
+        {
+            var next = pipeline;
+            pipeline = (req, token) => middleware.HandleQueryAsync(req, next, token);
+        }
+
+        return await pipeline(request, stoppingToken);
+    }
 }

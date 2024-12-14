@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using NetworkPerspective.Sync.Utils.CQS.Commands;
+using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Utils.CQS.Middlewares;
 using NetworkPerspective.Sync.Utils.CQS.Queries;
 using NetworkPerspective.Sync.Worker.Application.Extensions;
@@ -10,32 +10,23 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application.UseCases.Middlewares;
 
-internal class ConnectorScopedLoggingMiddleware : IMediatorMiddleware
+internal class ConnectorScopedLoggingMiddleware(IStatusLogger statusLogger) : IMediatorMiddleware
 {
-    private readonly IStatusLogger _statusLogger;
-
-    public ConnectorScopedLoggingMiddleware(IStatusLogger statusLogger)
+    async Task<TResponse> IMediatorMiddleware.HandleQueryAsync<TRequest, TResponse>(TRequest request, QueryHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
-        _statusLogger = statusLogger;
-    }
+        if(request is ConnectorStatusRequest)
+            return await next(request, cancellationToken);
 
-    Task IMediatorMiddleware.HandleCommandAsync<TCommand>(TCommand command, CommandHandlerDelegate<TCommand> next, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    async Task<TResponse> IMediatorMiddleware.HandleQueryAsync<TQuery, TResponse>(TQuery query, QueryHandlerDelegate<TQuery, TResponse> next, CancellationToken cancellationToken)
-    {
         try
         {
-            await _statusLogger.LogInfoAsync($"Running action '{query.UserFriendlyName}'", cancellationToken);
-            var result = await next(query, cancellationToken);
-            await _statusLogger.LogInfoAsync($"Action completed '{query.UserFriendlyName}'", cancellationToken);
+            await statusLogger.LogInfoAsync($"Running action '{request.UserFriendlyName}'", cancellationToken);
+            var result = await next(request, cancellationToken);
+            await statusLogger.LogInfoAsync($"Action completed '{request.UserFriendlyName}'", cancellationToken);
             return result;
         }
         catch (Exception)
         {
-            await _statusLogger.LogWarningAsync($"Unable to perform action '{query.UserFriendlyName}'", cancellationToken);
+            await statusLogger.LogWarningAsync($"Unable to perform action '{request.UserFriendlyName}'", cancellationToken);
             throw;
         }
     }

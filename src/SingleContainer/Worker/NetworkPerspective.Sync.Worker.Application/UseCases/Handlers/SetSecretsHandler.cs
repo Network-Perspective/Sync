@@ -10,9 +10,9 @@ using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Worker.Application.UseCases.Handlers;
 
-internal class SetSecretsHandler(IVault vault, ILogger<SetSecretsHandler> logger) : IQueryHandler<SetSecretsDto, AckDto>
+internal class SetSecretsHandler(IVault vault, ILogger<SetSecretsHandler> logger) : IRequestHandler<SetSecretsRequest, AckDto>
 {
-    public async Task<AckDto> HandleAsync(SetSecretsDto request, CancellationToken stoppingToken = default)
+    public async Task<AckDto> HandleAsync(SetSecretsRequest request, CancellationToken stoppingToken = default)
     {
         logger.LogInformation("Setting {count} secrets", request.Secrets.Count);
 

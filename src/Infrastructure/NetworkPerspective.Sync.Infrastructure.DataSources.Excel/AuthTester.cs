@@ -6,17 +6,17 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Excel;
 
 internal class AuthTester(ILogger<AuthTester> logger) : IAuthTester
 {
-    public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
+    public Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
     {
         try
         {
             // TODO: Implement authorization logic
-            return true;
+            return Task.FromResult(true);
         }
         catch (Exception ex)
         {
             logger.LogDebug(ex, "Not authorized");
-            return false;
+            return Task.FromResult(false);
         }
     }
 }

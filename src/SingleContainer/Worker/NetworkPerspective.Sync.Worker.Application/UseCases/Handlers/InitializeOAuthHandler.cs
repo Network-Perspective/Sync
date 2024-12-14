@@ -10,7 +10,7 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application.UseCases.Handlers;
 
-internal class InitializeOAuthHandler(IOAuthService oAuthService, IConnectorContextAccessor connectorContextAccessor, ILogger<InitializeOAuthHandler> logger) : IQueryHandler<InitializeOAuthRequest, InitializeOAuthResponse>
+internal class InitializeOAuthHandler(IOAuthService oAuthService, IConnectorContextAccessor connectorContextAccessor, ILogger<InitializeOAuthHandler> logger) : IRequestHandler<InitializeOAuthRequest, InitializeOAuthResponse>
 {
     public async Task<InitializeOAuthResponse> HandleAsync(InitializeOAuthRequest dto, CancellationToken stoppingToken = default)
     {

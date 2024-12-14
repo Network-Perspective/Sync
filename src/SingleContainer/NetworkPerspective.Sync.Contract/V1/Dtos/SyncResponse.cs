@@ -4,7 +4,7 @@ using NetworkPerspective.Sync.Utils.CQS.Queries;
 
 namespace NetworkPerspective.Sync.Contract.V1.Dtos;
 
-public class SyncCompletedDto : IResponse
+public class SyncResponse : IResponse
 {
     public Guid CorrelationId { get; set; } = Guid.NewGuid();
     public Guid ConnectorId { get; set; }

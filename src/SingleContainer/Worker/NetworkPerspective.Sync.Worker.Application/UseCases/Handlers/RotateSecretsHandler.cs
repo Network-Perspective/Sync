@@ -10,9 +10,9 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application.UseCases.Handlers;
 
-internal class RotateSecretsHandler(ISecretRotationService rotationService, ILogger<RotateSecretsHandler> logger) : IQueryHandler<RotateSecretsDto, AckDto>
+internal class RotateSecretsHandler(ISecretRotationService rotationService, ILogger<RotateSecretsHandler> logger) : IRequestHandler<RotateSecretsRequest, AckDto>
 {
-    public async Task<AckDto> HandleAsync(RotateSecretsDto dto, CancellationToken stoppingToken = default)
+    public async Task<AckDto> HandleAsync(RotateSecretsRequest dto, CancellationToken stoppingToken = default)
     {
         logger.LogInformation("Rotating secrets for connector '{connectorId}' of type '{type}'", dto.Connector.Id, dto.Connector.Type);
         await rotationService.ExecuteAsync(stoppingToken);

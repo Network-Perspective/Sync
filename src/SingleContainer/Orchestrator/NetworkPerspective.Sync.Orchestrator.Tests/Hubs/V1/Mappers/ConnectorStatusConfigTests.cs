@@ -19,7 +19,7 @@ public class ConnectorStatusConfigTests
         var config = new TypeAdapterConfig();
         new ConnectorStatusConfig().Register(config);
 
-        var input = new ConnectorStatusDto
+        var input = new ConnectorStatusResponse
         {
             IsAuthorized = true,
             IsRunning = true,
@@ -46,7 +46,7 @@ public class ConnectorStatusConfigTests
         var config = new TypeAdapterConfig();
         new ConnectorStatusConfig().Register(config);
 
-        var input = new ConnectorStatusDto
+        var input = new ConnectorStatusResponse
         {
             IsAuthorized = true,
             IsRunning = false,

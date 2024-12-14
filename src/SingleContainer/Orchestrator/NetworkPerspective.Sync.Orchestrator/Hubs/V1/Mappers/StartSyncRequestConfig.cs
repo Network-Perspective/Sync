@@ -11,7 +11,7 @@ public class StartSyncRequestConfig : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config
-            .NewConfig<SyncContext, StartSyncDto>()
+            .NewConfig<SyncContext, SyncRequest>()
                 .Map(dest => dest.Start, src => src.TimeRange.Start)
                 .Map(dest => dest.End, src => src.TimeRange.End)
                 .Map(dest => dest.AccessToken, src => src.AccessToken.ToSystemString())
