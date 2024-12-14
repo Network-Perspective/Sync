@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Contract.V1.Dtos;
-using NetworkPerspective.Sync.Contract.V1.Exceptions;
 using NetworkPerspective.Sync.Utils.CQS;
 
 using Polly;
@@ -99,78 +98,22 @@ internal class OrchestratorHubClient : IOrchestratorHubClient
             return new AckDto { CorrelationId = x.CorrelationId };
         });
 
-        _connection.On<SetSecretsDto, AckDto>(nameof(IWorkerClient.SetSecretsAsync), async x =>
-        {
-            _logger.LogInformation("Received request '{correlationId}' to set {count} secrets", x.CorrelationId, x.Secrets.Count);
+        _connection.On<SetSecretsDto, AckDto>(nameof(IWorkerClient.SetSecretsAsync),
+            x => _mediator.SendQueryAsync<SetSecretsDto, AckDto>(x));
 
-            if (_callbacks.OnSetSecrets is null)
-                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnSetSecrets));
+        _connection.On<RotateSecretsDto, AckDto>(nameof(IWorkerClient.RotateSecretsAsync),
+            x => _mediator.SendQueryAsync<RotateSecretsDto, AckDto>(x));
 
-            await _callbacks.OnSetSecrets(x);
+        _connection.On<GetConnectorStatusDto, ConnectorStatusDto>(nameof(IWorkerClient.GetConnectorStatusAsync),
+            x => _mediator.SendQueryAsync<GetConnectorStatusDto, ConnectorStatusDto>(x));
 
-            _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
-            return new AckDto { CorrelationId = x.CorrelationId };
-        });
+        _connection.On<GetWorkerCapabilitiesDto, WorkerCapabilitiesDto>(nameof(IWorkerClient.GetWorkerCapabilitiesAsync),
+            x => _mediator.SendQueryAsync<GetWorkerCapabilitiesDto, WorkerCapabilitiesDto>(x));
 
-        _connection.On<RotateSecretsDto, AckDto>(nameof(IWorkerClient.RotateSecretsAsync), async x =>
-        {
-            _logger.LogInformation("Received request '{correlationId}' to rotate secrets for connector '{connectorId}' of type '{type}'", x.CorrelationId, x.Connector.Id, x.Connector.Type);
+        _connection.On<InitializeOAuthRequest, InitializeOAuthResponse>(nameof(IWorkerClient.InitializeOAuthAsync),
+            x => _mediator.SendQueryAsync<InitializeOAuthRequest, InitializeOAuthResponse>(x));
 
-            if (_callbacks.OnRotateSecrets is null)
-                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnRotateSecrets));
-
-            await _callbacks.OnRotateSecrets(x);
-
-            _logger.LogInformation("Sending ack '{correlationId}'", x.CorrelationId);
-            return new AckDto { CorrelationId = x.CorrelationId };
-        });
-
-        _connection.On<GetConnectorStatusDto, ConnectorStatusDto>(nameof(IWorkerClient.GetConnectorStatusAsync), async x =>
-        {
-            _logger.LogInformation("Received request '{correlationId}' to get connector '{connectorId}' status", x.CorrelationId, x.Connector.Id);
-
-            if (_callbacks.OnGetConnectorStatus is null)
-                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetConnectorStatus));
-
-            var result = await _callbacks.OnGetConnectorStatus(x);
-            _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
-            return result;
-        });
-
-        _connection.On<GetWorkerCapabilitiesDto, WorkerCapabilitiesDto>(nameof(IWorkerClient.GetWorkerCapabilitiesAsync), async x =>
-        {
-            _logger.LogInformation("Received request '{correlationId}' to get worker capabilities", x.CorrelationId);
-
-            if (_callbacks.OnGetWorkerCapabilities is null)
-                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnGetWorkerCapabilities));
-
-            var result = await _callbacks.OnGetWorkerCapabilities(x);
-            _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
-            return result;
-        });
-
-        _connection.On<InitializeOAuthRequest, InitializeOAuthResponse>(nameof(IWorkerClient.InitializeOAuthAsync), async x =>
-        {
-            _logger.LogInformation("Received request '{correlationId}' to initialize OAuth", x.CorrelationId);
-
-            if (_callbacks.OnInitializeOAuth is null)
-                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnInitializeOAuth));
-
-            var result = await _callbacks.OnInitializeOAuth(x);
-            _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
-            return result;
-        });
-
-        _connection.On<HandleOAuthCallbackRequest, AckDto>(nameof(IWorkerClient.HandleOAuthCallbackAsync), async x =>
-        {
-            _logger.LogInformation("Received request '{correlationId}' to handle OAuth callback", x.CorrelationId);
-
-            if (_callbacks.OnHandleOAuth is null)
-                throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnHandleOAuth));
-
-            var result = await _callbacks.OnHandleOAuth(x);
-            _logger.LogInformation("Sending response to request '{correlationId}'", x.CorrelationId);
-            return result;
-        });
+        _connection.On<HandleOAuthCallbackRequest, AckDto>(nameof(IWorkerClient.HandleOAuthCallbackAsync),
+            x => _mediator.SendQueryAsync<HandleOAuthCallbackRequest, AckDto>(x));
     }
 }

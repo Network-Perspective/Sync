@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 
 namespace NetworkPerspective.Sync.Utils.CQS.Queries;
 
-public interface IQueryHandler<in TRequest, TResponse>
-    where TRequest : class, IQuery<TResponse>
+public interface IQueryHandler<in TQuery, TResponse>
+    where TQuery : class, IQuery<TResponse>
     where TResponse : class, IResponse
 {
-    Task<TResponse> HandleAsync(TRequest request, CancellationToken stoppingToken = default);
+    Task<TResponse> HandleAsync(TQuery dto, CancellationToken stoppingToken = default);
 }

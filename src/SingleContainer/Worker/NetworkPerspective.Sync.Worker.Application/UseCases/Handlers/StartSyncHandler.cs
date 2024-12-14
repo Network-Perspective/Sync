@@ -9,7 +9,7 @@ using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
-namespace NetworkPerspective.Sync.Worker.Application.UseCases;
+namespace NetworkPerspective.Sync.Worker.Application.UseCases.Handlers;
 
 internal class StartSyncHandler(ISyncContextFactory syncContextFactory, ISyncContextAccessor syncContextAccessor, ISyncService syncService, ILogger<StartSyncHandler> logger) : IQueryHandler<StartSyncDto, SyncCompletedDto>
 {

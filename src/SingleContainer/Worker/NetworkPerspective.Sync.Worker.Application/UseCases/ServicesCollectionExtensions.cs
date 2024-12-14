@@ -3,6 +3,7 @@
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Utils.CQS;
 using NetworkPerspective.Sync.Utils.CQS.Middlewares;
+using NetworkPerspective.Sync.Worker.Application.UseCases.Handlers;
 using NetworkPerspective.Sync.Worker.Application.UseCases.Middlewares;
 using NetworkPerspective.Sync.Worker.Application.UseCases.Preprocessors;
 
@@ -17,6 +18,12 @@ internal static class ServicesCollectionExtensions
             .AddPreProcessor<ConnectorScopedPreProcessor>()
             .AddMiddleware<LoggingMiddleware>()
             .AddMiddleware<ConnectorScopedLoggingMiddleware>()
+            .AddHandler<GetConnectorStatusHandler, GetConnectorStatusDto, ConnectorStatusDto>()
+            .AddHandler<GetWorkerCapabilitiesHandler, GetWorkerCapabilitiesDto, WorkerCapabilitiesDto>()
+            .AddHandler<InitializeOAuthHandler, InitializeOAuthRequest, InitializeOAuthResponse>()
+            .AddHandler<OAuthCallbackHandler, HandleOAuthCallbackRequest, AckDto>()
+            .AddHandler<RotateSecretsHandler, RotateSecretsDto, AckDto>()
+            .AddHandler<SetSecretsHandler, SetSecretsDto, AckDto>()
             .AddHandler<StartSyncHandler, StartSyncDto, SyncCompletedDto>();
 
         return services;
