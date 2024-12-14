@@ -15,11 +15,8 @@ public interface IStatusLogger
     public Task AddLogAsync(string message, DomainStatusLogLevel level, CancellationToken stoppingToken = default);
 }
 
-internal class StatusLogger(ISyncContextAccessor syncContextAccessor, IOrchestratorHubClient hubClient) : IStatusLogger
+internal class StatusLogger(IConnectorInfoProvider connectorInfoProvider, IOrchestratorHubClient hubClient) : IStatusLogger
 {
-    private readonly ISyncContextAccessor _syncContextAccessor = syncContextAccessor;
-    private readonly IOrchestratorHubClient _hubClient = hubClient;
-
     public async Task AddLogAsync(string message, DomainStatusLogLevel level, CancellationToken stoppingToken = default)
     {
         var contractLogLevel = level switch
@@ -31,12 +28,12 @@ internal class StatusLogger(ISyncContextAccessor syncContextAccessor, IOrchestra
 
         var dto = new AddLogDto
         {
-            ConnectorId = _syncContextAccessor.SyncContext.ConnectorId,
+            ConnectorId = connectorInfoProvider.Get().Id,
             Message = message,
             Level = contractLogLevel,
             CorrelationId = Guid.NewGuid()
         };
 
-        await _hubClient.AddLogAsync(dto);
+        await hubClient.AddLogAsync(dto);
     }
 }

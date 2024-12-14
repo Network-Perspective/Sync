@@ -1,5 +1,7 @@
 ﻿using System;
 
+using NetworkPerspective.Sync.Utils.CQS.Queries;
+
 namespace NetworkPerspective.Sync.Contract.V1.Dtos;
 
 public class ConnectorStatusDto : IResponse

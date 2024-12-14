@@ -2,6 +2,7 @@
 
 using NetworkPerspective.Sync.Utils.CQS.Commands;
 using NetworkPerspective.Sync.Utils.CQS.Middlewares;
+using NetworkPerspective.Sync.Utils.CQS.PreProcessors;
 using NetworkPerspective.Sync.Utils.CQS.Queries;
 
 namespace NetworkPerspective.Sync.Utils.CQS;
@@ -17,9 +18,9 @@ public interface ICqsBuilder
         where THandler : class, ICommandHandler<TRequest>
         where TRequest : class, ICommand;
 
-    ICqsBuilder AddMiddleware(IMediatorMiddleware middleware);
-
     ICqsBuilder AddMiddleware<TMiddleware>() where TMiddleware : class, IMediatorMiddleware;
+
+    ICqsBuilder AddPreProcessor<TPreProcessor>() where TPreProcessor : class, IPreProcessor;
 }
 
 internal class CqsBuilder(IServiceCollection services) : ICqsBuilder
@@ -38,15 +39,14 @@ internal class CqsBuilder(IServiceCollection services) : ICqsBuilder
     }
 
     ICqsBuilder ICqsBuilder.AddMiddleware<TMiddleware>()
-
     {
-        services.AddSingleton<TMiddleware, TMiddleware>();
+        services.AddScoped<IMediatorMiddleware, TMiddleware>();
         return this;
     }
 
-    ICqsBuilder ICqsBuilder.AddMiddleware(IMediatorMiddleware middleware)
+    ICqsBuilder ICqsBuilder.AddPreProcessor<TPreProcessor>()
     {
-        services.AddSingleton(middleware);
+        services.AddScoped<IPreProcessor, TPreProcessor>();
         return this;
     }
 }

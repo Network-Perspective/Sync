@@ -12,8 +12,8 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Contract.V1.Impl;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
+using NetworkPerspective.Sync.Utils.CQS;
 using NetworkPerspective.Sync.Utils.Extensions;
-using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.OAuth;
@@ -23,7 +23,7 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.HostedServices;
 
-internal class ConnectionHost(IOrchestratorHubClient hubClient, ISyncContextFactory syncContextFactory, IServiceProvider serviceProvider, IVault secretRepository, ILogger<ConnectionHost> logger) : BackgroundService
+internal class ConnectionHost(IOrchestratorHubClient hubClient, IMediator mediator, IServiceProvider serviceProvider, IVault secretRepository, ILogger<ConnectionHost> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -39,43 +39,8 @@ internal class ConnectionHost(IOrchestratorHubClient hubClient, ISyncContextFact
             return tokenBase64;
         }
 
-        async Task<SyncCompletedDto> OnStartSync(StartSyncDto dto)
-        {
-            logger.LogInformation("Syncing started for connector '{connectorId}'", dto.Connector.Id);
-
-            var timeRange = new TimeRange(dto.Start, dto.End);
-            var accessToken = dto.AccessToken.ToSecureString();
-
-            var syncContext = await syncContextFactory.CreateAsync(dto.Connector.Id, dto.Connector.Type, dto.Connector.Properties, timeRange, accessToken, stoppingToken);
-
-            if (dto.Employees is not null)
-                syncContext.Set(dto.Employees);
-
-            await using (var scope = serviceProvider.CreateAsyncScope())
-            {
-                var connectorInfo = scope.ServiceProvider.GetRequiredService<IConnectorInfoInitializer>();
-                connectorInfo.Initialize(new ConnectorInfo(dto.Connector.Id, dto.Connector.Type, dto.Connector.Properties));
-
-                var syncContextAccessor = scope.ServiceProvider.GetRequiredService<ISyncContextAccessor>();
-                syncContextAccessor.SyncContext = syncContext;
-
-                var syncService = scope.ServiceProvider.GetRequiredService<ISyncService>();
-                var result = await syncService.SyncAsync(syncContext, stoppingToken);
-                logger.LogInformation("Sync for connector '{connectorId}' completed", dto.Connector.Id);
-
-                return new SyncCompletedDto
-                {
-                    CorrelationId = dto.CorrelationId,
-                    ConnectorId = dto.Connector.Id,
-                    Start = dto.Start,
-                    End = dto.End,
-                    TasksCount = result.TasksCount,
-                    FailedTasksCount = result.FailedTasksCount,
-                    SuccessRate = result.SuccessRate,
-                    TotalInteractionsCount = result.TotalInteractionsCount
-                };
-            };
-        }
+        Task<SyncCompletedDto> OnStartSync(StartSyncDto dto)
+            => mediator.SendQueryAsync<StartSyncDto, SyncCompletedDto>(dto, stoppingToken);
 
         async Task OnSetSecrets(SetSecretsDto dto)
         {

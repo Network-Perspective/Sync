@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using NetworkPerspective.Sync.Utils.CQS.Queries;
+
 namespace NetworkPerspective.Sync.Contract.V1.Dtos;
 
-public class StartSyncDto : IRequest
+public class StartSyncDto : IQuery<SyncCompletedDto>, IConnectorScoped
 {
+    public string UserFriendlyName { get; set; } = "Synchronize";
     public Guid CorrelationId { get; set; } = Guid.NewGuid();
     public ConnectorDto Connector { get; set; }
     public DateTime Start { get; set; }

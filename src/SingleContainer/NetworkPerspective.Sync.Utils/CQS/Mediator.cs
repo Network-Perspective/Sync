@@ -8,15 +8,25 @@ using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Utils.CQS.Commands;
 using NetworkPerspective.Sync.Utils.CQS.Middlewares;
+using NetworkPerspective.Sync.Utils.CQS.PreProcessors;
 using NetworkPerspective.Sync.Utils.CQS.Queries;
 
 namespace NetworkPerspective.Sync.Utils.CQS;
 
-internal class Mediator(IServiceProvider serviceProvider, IEnumerable<IMediatorMiddleware> middlewares) : IMediator
+internal class Mediator(IServiceProvider serviceProvider) : IMediator
 {
     async Task IMediator.SendCommandAsync<TCommand>(TCommand request, CancellationToken stoppingToken)
     {
-        CommandHandlerDelegate<TCommand> pipeline = HandleCommandAsync;
+        await using var scope = serviceProvider.CreateAsyncScope();
+
+        var preprocessors = scope.ServiceProvider.GetRequiredService<IEnumerable<IPreProcessor>>();
+        foreach (var preprocessor in preprocessors.Reverse())
+            await preprocessor.PreprocessAsync(request, scope, stoppingToken);
+
+        var middlewares = scope.ServiceProvider.GetRequiredService<IEnumerable<IMediatorMiddleware>>();
+        var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<TCommand>>();
+
+        CommandHandlerDelegate<TCommand> pipeline = handler.HandleAsync;
 
         foreach (var middleware in middlewares.Reverse())
         {
@@ -29,7 +39,20 @@ internal class Mediator(IServiceProvider serviceProvider, IEnumerable<IMediatorM
 
     async Task<TResponse> IMediator.SendQueryAsync<TQuery, TResponse>(TQuery request, CancellationToken stoppingToken)
     {
-        QueryHandlerDelegate<TQuery, TResponse> pipeline = HandleQueryAsync<TQuery, TResponse>;
+        await using var scope = serviceProvider.CreateAsyncScope();
+
+        var preprocessors = scope.ServiceProvider.GetRequiredService<IEnumerable<IPreProcessor>>();
+        foreach (var preprocessor in preprocessors.Reverse())
+            await preprocessor.PreprocessAsync<TQuery, TResponse>(request, scope, stoppingToken);
+
+
+        QueryHandlerDelegate<TQuery, TResponse> pipeline = (query, ct) =>
+        {
+            var handler = scope.ServiceProvider.GetRequiredService<IQueryHandler<TQuery, TResponse>>();
+            return handler.HandleAsync(query, ct);
+        };
+
+                var middlewares = scope.ServiceProvider.GetRequiredService<IEnumerable<IMediatorMiddleware>>();
 
         foreach (var middleware in middlewares.Reverse())
         {
@@ -38,22 +61,5 @@ internal class Mediator(IServiceProvider serviceProvider, IEnumerable<IMediatorM
         }
 
         return await pipeline(request, stoppingToken);
-    }
-
-    private async Task HandleCommandAsync<TCommand>(TCommand request, CancellationToken cancellationToken)
-        where TCommand : class, ICommand
-    {
-        await using var scope = serviceProvider.CreateAsyncScope();
-        var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<TCommand>>();
-        await handler.HandleAsync(request, cancellationToken);
-    }
-
-    private async Task<TResponse> HandleQueryAsync<TQuery, TResponse>(TQuery request, CancellationToken cancellationToken)
-        where TQuery : class, IQuery<TResponse>
-        where TResponse : class, IResponse
-    {
-        await using var scope = serviceProvider.CreateAsyncScope();
-        var handler = scope.ServiceProvider.GetRequiredService<IQueryHandler<TQuery, TResponse>>();
-        return await handler.HandleAsync(request, cancellationToken);
     }
 }

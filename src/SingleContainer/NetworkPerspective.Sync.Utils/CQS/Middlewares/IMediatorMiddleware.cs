@@ -8,10 +8,10 @@ namespace NetworkPerspective.Sync.Utils.CQS.Middlewares;
 
 public interface IMediatorMiddleware
 {
-    Task HandleCommandAsync<TRequest>(TRequest request, CommandHandlerDelegate<TRequest> next, CancellationToken cancellationToken)
-        where TRequest : class, ICommand;
+    Task HandleCommandAsync<TCommand>(TCommand command, CommandHandlerDelegate<TCommand> next, CancellationToken cancellationToken)
+        where TCommand : class, ICommand;
 
-    Task<TResponse> HandleQueryAsync<TRequest, TResponse>(TRequest request, QueryHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
-        where TRequest : class, IQuery<TResponse>
+    Task<TResponse> HandleQueryAsync<TQuery, TResponse>(TQuery query, QueryHandlerDelegate<TQuery, TResponse> next, CancellationToken cancellationToken)
+        where TQuery : class, IQuery<TResponse>
         where TResponse : class, IResponse;
 }

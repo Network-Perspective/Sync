@@ -7,6 +7,7 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.UseCases;
 
 namespace NetworkPerspective.Sync.Worker.Application;
 
@@ -69,10 +70,11 @@ public static class ServiceCollectionExtensions
             return sp.GetRequiredKeyedService<IDataSource>(dataSourceKey);
         });
 
-
         services.AddScoped<IStatusLogger, StatusLogger>();
         services.AddScoped<ISyncService, SyncService>();
         services.AddTransient<ICapabilitiesService, CapabilitiesService>();
+
+        services.AddUseCasesHandling();
 
         return services;
     }

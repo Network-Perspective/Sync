@@ -11,21 +11,34 @@ namespace NetworkPerspective.Sync.Utils.CQS.Middlewares;
 
 public class LoggingMiddleware(ILogger<LoggingMiddleware> logger) : IMediatorMiddleware
 {
-    public async Task HandleCommandAsync<TRequest>(TRequest request, CommandHandlerDelegate<TRequest> next, CancellationToken cancellationToken)
-        where TRequest : class, ICommand
+    async Task IMediatorMiddleware.HandleCommandAsync<TCommand>(TCommand request, CommandHandlerDelegate<TCommand> next, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
-        await next(request, cancellationToken);
-        logger.LogInformation("Finished handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
+        try
+        {
+            logger.LogInformation("Handling command '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TCommand).Name);
+            await next(request, cancellationToken);
+            logger.LogInformation("Finished handling command '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TCommand).Name);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Exception has been thrown during execution of command '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TCommand).Name);
+            throw;
+        }
     }
 
-    public async Task<TResponse> HandleQueryAsync<TRequest, TResponse>(TRequest request, QueryHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
-        where TRequest : class, IQuery<TResponse>
-        where TResponse : class, IResponse
+    async Task<TResponse> IMediatorMiddleware.HandleQueryAsync<TQuery, TResponse>(TQuery request, QueryHandlerDelegate<TQuery, TResponse> next, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
-        var response = await next(request, cancellationToken); // Call the next middleware or handler
-        logger.LogInformation("Finished handling request '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TRequest).Name);
-        return response;
+        try
+        {
+            logger.LogInformation("Handling query '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TQuery).Name);
+            var response = await next(request, cancellationToken);
+            logger.LogInformation("Finished handling query '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TQuery).Name);
+            return response;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Exception has been thrown during execution of query '{CorrelationId}' of type {Type}", request.CorrelationId, typeof(TQuery).Name);
+            throw;
+        }
     }
 }
