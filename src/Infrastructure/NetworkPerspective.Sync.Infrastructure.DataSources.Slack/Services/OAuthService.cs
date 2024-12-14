@@ -63,13 +63,13 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
 
         var response = await slackClientUnauthorizedFacade.AccessAsync(request, stoppingToken);
 
-        var botTokenKey = string.Format(SlackBotTokenKeyPattern, context.Connector.Id);
+        var botTokenKey = string.Format(SlackBotTokenKeyPattern, context.Connector.ConnectorId);
         await vault.SetSecretAsync(botTokenKey, response.AccessToken.ToSecureString(), stoppingToken);
 
         // save refresh token if token rotation is enabled
         if (!string.IsNullOrEmpty(response.RefreshToken))
         {
-            var refreshTokenKey = string.Format(SlackRefreshTokenPattern, context.Connector.Id);
+            var refreshTokenKey = string.Format(SlackRefreshTokenPattern, context.Connector.ConnectorId);
             await vault.SetSecretAsync(refreshTokenKey, response.RefreshToken.ToSecureString(), stoppingToken);
         }
 
@@ -77,11 +77,11 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
 
         if (connectorProperties.UsesAdminPrivileges)
         {
-            var userTokenKey = string.Format(SlackUserTokenKeyPattern, context.Connector.Id);
+            var userTokenKey = string.Format(SlackUserTokenKeyPattern, context.Connector.ConnectorId);
             await vault.SetSecretAsync(userTokenKey, response.User.AccessToken.ToSecureString(), stoppingToken);
         }
 
-        logger.LogInformation("Authentication callback processed successfully. Connector '{connectorId}' is configured for synchronization", context.Connector.Id);
+        logger.LogInformation("Authentication callback processed successfully. Connector '{connectorId}' is configured for synchronization", context.Connector.ConnectorId);
     }
 
     private string BuildSlackAuthUri(string state, OAuthContext context, SecureString slackClientId)

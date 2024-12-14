@@ -11,7 +11,7 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application.UseCases.Preprocessors;
 
-internal class ConnectorScopedPreProcessor(IConnectorInfoInitializer connectorInfoInitializer) : IPreProcessor
+internal class ConnectorScopedPreProcessor(IConnectorContextAccessor connectorContextProvider) : IPreProcessor
 {
     Task IPreProcessor.PreprocessAsync<TCommand>(TCommand command, IServiceScope scope, CancellationToken cancellationToken)
     {
@@ -23,9 +23,7 @@ internal class ConnectorScopedPreProcessor(IConnectorInfoInitializer connectorIn
         if (request is IConnectorScoped scopedRequest)
         {
             var connector = scopedRequest.Connector;
-
-            var connectorInfo = new ConnectorInfo(connector.Id, connector.Type, connector.Properties);
-            connectorInfoInitializer.Initialize(connectorInfo);
+            connectorContextProvider.Context = new ConnectorContext(connector.Id, connector.Type, connector.Properties);
         }
 
         return Task.CompletedTask;

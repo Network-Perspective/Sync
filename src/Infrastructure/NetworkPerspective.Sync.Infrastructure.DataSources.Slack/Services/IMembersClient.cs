@@ -22,7 +22,7 @@ internal interface IMembersClient
     Task<EmployeeCollection> GetHashedEmployees(ISlackClientBotScopeFacade slackClientFacade, EmployeeFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default);
 }
 
-internal class MembersClient(ITasksStatusesCache tasksStatusesCache, IConnectorInfoProvider connectorInfoProvider, ILogger<MembersClient> logger) : IMembersClient
+internal class MembersClient(ITasksStatusesCache tasksStatusesCache, IConnectorContextAccessor connectorContextProvider, ILogger<MembersClient> logger) : IMembersClient
 {
     private const string TaskCaption = "Synchronizing employees metadata";
     private const string TaskDescription = "Fetching employees metadata from Slack API";
@@ -38,7 +38,7 @@ internal class MembersClient(ITasksStatusesCache tasksStatusesCache, IConnectorI
     private async Task<EmployeeCollection> GetEmployeesInternalAsync(ISlackClientBotScopeFacade slackClientFacade, EmployeeFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default)
     {
         var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, 0);
-        await tasksStatusesCache.SetStatusAsync(connectorInfoProvider.Get().Id, taskStatus, stoppingToken);
+        await tasksStatusesCache.SetStatusAsync(connectorContextProvider.Context.ConnectorId, taskStatus, stoppingToken);
 
         if (hashFunc == null)
             logger.LogDebug("Fetching employees... Skipping hashing due to null {func}", nameof(hashFunc));

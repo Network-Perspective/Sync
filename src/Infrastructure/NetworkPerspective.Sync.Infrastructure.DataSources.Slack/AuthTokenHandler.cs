@@ -17,17 +17,17 @@ using Newtonsoft.Json;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
 
-internal class UserTokenAuthHandler(IConnectorInfoProvider networkIdProvider, ICachedVault cachedSecretRepository, ILogger<AuthTokenHandler> logger)
+internal class UserTokenAuthHandler(IConnectorContextAccessor networkIdProvider, ICachedVault cachedSecretRepository, ILogger<AuthTokenHandler> logger)
     : AuthTokenHandler(networkIdProvider, cachedSecretRepository, SlackKeys.UserTokenKeyPattern, logger)
 {
 }
 
-internal class BotTokenAuthHandler(IConnectorInfoProvider networkIdProvider, ICachedVault cachedSecretRepository, ILogger<AuthTokenHandler> logger)
+internal class BotTokenAuthHandler(IConnectorContextAccessor networkIdProvider, ICachedVault cachedSecretRepository, ILogger<AuthTokenHandler> logger)
     : AuthTokenHandler(networkIdProvider, cachedSecretRepository, SlackKeys.BotTokenKeyPattern, logger)
 {
 }
 
-internal abstract class AuthTokenHandler(IConnectorInfoProvider connectorInfoProvider, ICachedVault cachedSecretRepository, string tokenPatern, ILogger<AuthTokenHandler> logger) : DelegatingHandler
+internal abstract class AuthTokenHandler(IConnectorContextAccessor connectorContextProvider, ICachedVault cachedSecretRepository, string tokenPatern, ILogger<AuthTokenHandler> logger) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken stoppingToken)
     {
@@ -52,8 +52,7 @@ internal abstract class AuthTokenHandler(IConnectorInfoProvider connectorInfoPro
 
     private async Task<SecureString> GetAccessTokenAsync(CancellationToken stoppingToken)
     {
-        var connectorInfo = connectorInfoProvider.Get();
-        var tokenKey = string.Format(tokenPatern, connectorInfo.Id);
+        var tokenKey = string.Format(tokenPatern, connectorContextProvider.Context.ConnectorId);
         return await cachedSecretRepository.GetSecretAsync(tokenKey, stoppingToken);
     }
 

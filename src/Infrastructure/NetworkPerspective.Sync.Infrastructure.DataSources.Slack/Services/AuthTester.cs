@@ -10,22 +10,22 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 
-internal class AuthTester(IConnectorInfoProvider connectorInfoProvider, ISlackClientFacadeFactory slackClientFacadeFactory, IVault vault, ILogger<AuthTester> logger) : IAuthTester
+internal class AuthTester(IConnectorContextAccessor connectorContextProvider, ISlackClientFacadeFactory slackClientFacadeFactory, IVault vault, ILogger<AuthTester> logger) : IAuthTester
 {
     public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
     {
-        var connectorInfo = connectorInfoProvider.Get();
+        var connectorContext = connectorContextProvider.Context;
 
-        if (connectorInfo.GetConnectorProperties<SlackConnectorProperties>().UsesAdminPrivileges)
+        if (connectorContext.GetConnectorProperties<SlackConnectorProperties>().UsesAdminPrivileges)
         {
-            var isUserTokenOk = await TestUserTokenAsync(connectorInfo.Id, stoppingToken);
-            var isBotTokenOk = await TestBotTokenAsync(connectorInfo.Id, stoppingToken);
+            var isUserTokenOk = await TestUserTokenAsync(connectorContext.ConnectorId, stoppingToken);
+            var isBotTokenOk = await TestBotTokenAsync(connectorContext.ConnectorId, stoppingToken);
 
             return isUserTokenOk && isBotTokenOk;
         }
         else
         {
-            return await TestBotTokenAsync(connectorInfo.Id, stoppingToken);
+            return await TestBotTokenAsync(connectorContext.ConnectorId, stoppingToken);
         }
     }
 

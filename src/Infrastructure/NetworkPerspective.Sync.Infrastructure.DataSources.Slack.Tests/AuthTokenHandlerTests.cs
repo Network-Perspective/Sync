@@ -47,10 +47,10 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             // Arrange
             var networkId = Guid.NewGuid();
             var connectorId = Guid.NewGuid();
-            var connectorInfoProviderMock = new Mock<IConnectorInfoProvider>();
+            var connectorInfoProviderMock = new Mock<IConnectorContextAccessor>();
             connectorInfoProviderMock
                 .Setup(x => x.Get())
-                .Returns(new ConnectorInfo(connectorId, "type", new Dictionary<string, string>()));
+                .Returns(new ConnectorContext(connectorId, "type", new Dictionary<string, string>()));
 
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedVault>();
@@ -79,10 +79,10 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             // Arrange
             var networkId = Guid.NewGuid();
             var connectorId = Guid.NewGuid();
-            var connectorInfoProviderMock = new Mock<IConnectorInfoProvider>();
+            var connectorInfoProviderMock = new Mock<IConnectorContextAccessor>();
             connectorInfoProviderMock
                 .Setup(x => x.Get())
-                .Returns(new ConnectorInfo(connectorId, "type", new Dictionary<string, string>()));
+                .Returns(new ConnectorContext(connectorId, "type", new Dictionary<string, string>()));
 
             var token1 = Guid.NewGuid().ToString();
             var token2 = Guid.NewGuid().ToString();
@@ -113,10 +113,10 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             // Arrange
             var networkId = Guid.NewGuid();
             var connectorId = Guid.NewGuid();
-            var networkIdProviderMock = new Mock<IConnectorInfoProvider>();
+            var networkIdProviderMock = new Mock<IConnectorContextAccessor>();
             networkIdProviderMock
                 .Setup(x => x.Get())
-                .Returns(new ConnectorInfo(connectorId, "type", new Dictionary<string, string>()));
+                .Returns(new ConnectorContext(connectorId, "type", new Dictionary<string, string>()));
 
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedVault>();

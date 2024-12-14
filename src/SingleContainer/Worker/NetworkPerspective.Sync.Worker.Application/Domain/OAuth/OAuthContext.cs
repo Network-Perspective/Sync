@@ -4,10 +4,10 @@ namespace NetworkPerspective.Sync.Worker.Application.Domain.OAuth;
 
 public class OAuthContext
 {
-    public ConnectorInfo Connector { get; }
+    public ConnectorContext Connector { get; }
     public string CallbackUri { get; }
 
-    public OAuthContext(ConnectorInfo connector, string callbackUri)
+    public OAuthContext(ConnectorContext connector, string callbackUri)
     {
         Connector = connector;
         CallbackUri = callbackUri;

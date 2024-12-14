@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Contract.V1.Exceptions;
+using NetworkPerspective.Sync.Utils.CQS;
 
 using Polly;
 using Polly.Retry;
@@ -24,12 +25,14 @@ internal class OrchestratorHubClient : IOrchestratorHubClient
     private HubConnection _connection;
     private readonly OrchestratorClientConfiguration _callbacks = new();
     private readonly OrchestratorHubClientConfig _config;
+    private readonly IMediator _mediator;
     private readonly ILogger<OrchestratorHubClient> _logger;
     private readonly AsyncRetryPolicy _asyncRetryPolicy;
 
-    public OrchestratorHubClient(IOptions<OrchestratorHubClientConfig> config, ILogger<OrchestratorHubClient> logger)
+    public OrchestratorHubClient(IMediator mediator, IOptions<OrchestratorHubClientConfig> config, ILogger<OrchestratorHubClient> logger)
     {
         _config = config.Value;
+        _mediator = mediator;
         _logger = logger;
 
         _asyncRetryPolicy = Policy
@@ -88,10 +91,7 @@ internal class OrchestratorHubClient : IOrchestratorHubClient
 
             _ = Task.Run(async () =>
             {
-                if (_callbacks.OnStartSync is null)
-                    throw new MissingHandlerException(nameof(OrchestratorClientConfiguration.OnStartSync));
-
-                var result = await _callbacks.OnStartSync(x);
+                var result = await _mediator.SendQueryAsync<StartSyncDto, SyncCompletedDto>(x);
                 await SyncCompletedAsync(result);
             });
 

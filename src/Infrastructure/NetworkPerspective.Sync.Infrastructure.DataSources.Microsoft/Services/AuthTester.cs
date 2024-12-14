@@ -8,11 +8,11 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
 
-internal class AuthTester(IConnectorInfoProvider connectorInfoProvider, IMicrosoftClientFactory clientFactory, ILogger<AuthTester> logger) : IAuthTester
+internal class AuthTester(IConnectorContextAccessor connectorInfoProvider, IMicrosoftClientFactory clientFactory, ILogger<AuthTester> logger) : IAuthTester
 {
     public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
     {
-        var connectorInfo = connectorInfoProvider.Get();
+        var connectorInfo = connectorInfoProvider.Context;
         try
         {
             var client = await clientFactory.GetMicrosoftClientAsync(stoppingToken);
@@ -21,7 +21,7 @@ internal class AuthTester(IConnectorInfoProvider connectorInfoProvider, IMicroso
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", connectorInfo.Id);
+            logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", connectorInfo.ConnectorId);
             return false;
         }
     }

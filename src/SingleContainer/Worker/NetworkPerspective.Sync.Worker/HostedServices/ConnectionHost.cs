@@ -23,7 +23,7 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.HostedServices;
 
-internal class ConnectionHost(IOrchestratorHubClient hubClient, IMediator mediator, IServiceProvider serviceProvider, IVault secretRepository, ILogger<ConnectionHost> logger) : BackgroundService
+internal class ConnectionHost(IOrchestratorHubClient hubClient, IServiceProvider serviceProvider, IVault secretRepository, ILogger<ConnectionHost> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -38,9 +38,6 @@ internal class ConnectionHost(IOrchestratorHubClient hubClient, IMediator mediat
             var tokenBase64 = Convert.ToBase64String(tokenBytes);
             return tokenBase64;
         }
-
-        Task<SyncCompletedDto> OnStartSync(StartSyncDto dto)
-            => mediator.SendQueryAsync<StartSyncDto, SyncCompletedDto>(dto, stoppingToken);
 
         async Task OnSetSecrets(SetSecretsDto dto)
         {
@@ -58,8 +55,8 @@ internal class ConnectionHost(IOrchestratorHubClient hubClient, IMediator mediat
 
             await using (var scope = serviceProvider.CreateAsyncScope())
             {
-                var connectorInfo = scope.ServiceProvider.GetRequiredService<IConnectorInfoInitializer>();
-                connectorInfo.Initialize(new ConnectorInfo(dto.Connector.Id, dto.Connector.Type, dto.Connector.Properties));
+                var connectorContextProvider = scope.ServiceProvider.GetRequiredService<IConnectorContextAccessor>();
+                connectorContextProvider.Context = new ConnectorContext(dto.Connector.Id, dto.Connector.Type, dto.Connector.Properties);
 
                 var service = scope.ServiceProvider.GetRequiredService<ISecretRotationService>();
                 await service.ExecuteAsync(stoppingToken);
@@ -74,8 +71,8 @@ internal class ConnectionHost(IOrchestratorHubClient hubClient, IMediator mediat
 
             await using (var scope = serviceProvider.CreateAsyncScope())
             {
-                var connectorInfo = scope.ServiceProvider.GetRequiredService<IConnectorInfoInitializer>();
-                connectorInfo.Initialize(new ConnectorInfo(dto.Connector.Id, dto.Connector.Type, dto.Connector.Properties));
+                var connectorContextProvider = scope.ServiceProvider.GetRequiredService<IConnectorContextAccessor>();
+                connectorContextProvider.Context = new ConnectorContext(dto.Connector.Id, dto.Connector.Type, dto.Connector.Properties);
 
                 var authTester = scope.ServiceProvider.GetRequiredService<IAuthTester>();
                 var isAuthorized = await authTester.IsAuthorizedAsync(stoppingToken);
@@ -118,13 +115,13 @@ internal class ConnectionHost(IOrchestratorHubClient hubClient, IMediator mediat
 
             await using (var scope = serviceProvider.CreateAsyncScope())
             {
-                var connectorInfoInitializer = scope.ServiceProvider.GetRequiredService<IConnectorInfoInitializer>();
-                var connectorInfo = new ConnectorInfo(dto.Connector.Id, dto.Connector.Type, dto.Connector.Properties);
-                connectorInfoInitializer.Initialize(connectorInfo);
+                var connectorInfoInitializer = scope.ServiceProvider.GetRequiredService<IConnectorContextAccessor>();
+                var connectorContext = new ConnectorContext(dto.Connector.Id, dto.Connector.Type, dto.Connector.Properties);
+                connectorInfoInitializer.Context = connectorContext;
 
                 var authService = scope.ServiceProvider.GetRequiredService<IOAuthService>();
 
-                var context = new OAuthContext(connectorInfo, dto.CallbackUri);
+                var context = new OAuthContext(connectorContext, dto.CallbackUri);
 
                 var result = await authService.InitializeOAuthAsync(context, stoppingToken);
 
@@ -151,8 +148,8 @@ internal class ConnectionHost(IOrchestratorHubClient hubClient, IMediator mediat
                 if (!cache.TryGetValue(dto.State, out OAuthContext context))
                     throw new OAuthException("State does not match initialized value");
 
-                var connectorInfo = scope.ServiceProvider.GetRequiredService<IConnectorInfoInitializer>();
-                connectorInfo.Initialize(context.Connector);
+                var connectorContextProvider = scope.ServiceProvider.GetRequiredService<IConnectorContextAccessor>();
+                connectorContextProvider.Context = context.Connector;
 
                 var authService = scope.ServiceProvider.GetRequiredService<IOAuthService>();
 
@@ -165,7 +162,6 @@ internal class ConnectionHost(IOrchestratorHubClient hubClient, IMediator mediat
         await hubClient.ConnectAsync(configuration: x =>
         {
             x.TokenFactory = TokenFactory;
-            x.OnStartSync = OnStartSync;
             x.OnSetSecrets = OnSetSecrets;
             x.OnRotateSecrets = OnRotateSecrets;
             x.OnGetConnectorStatus = OnGetConnectorStatus;
