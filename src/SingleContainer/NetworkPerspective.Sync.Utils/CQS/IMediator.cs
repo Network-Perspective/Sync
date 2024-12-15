@@ -28,7 +28,7 @@ internal class Mediator(IServiceProvider serviceProvider) : IMediator
         var preprocessors = scope.ServiceProvider.GetRequiredService<IEnumerable<IPreProcessor>>();
 
         foreach (var preprocessor in preprocessors.Reverse())
-            await preprocessor.PreprocessAsync<TQuery, TResponse>(request, scope, stoppingToken);
+            await preprocessor.PreprocessAsync<TQuery, TResponse>(request, stoppingToken);
 
         QueryHandlerDelegate<TQuery, TResponse> pipeline = (query, ct) =>
         {
