@@ -79,7 +79,7 @@ public class OAuthServiceTests
             {
                 { "UsesAdminPrivileges", "false" }
             };
-            var connectorInfo = new ConnectorInfo(Guid.NewGuid(), "Slack", connectorProperties);
+            var connectorInfo = new ConnectorContext(Guid.NewGuid(), "Slack", connectorProperties);
             // Act
             var result = await service.InitializeOAuthAsync(new OAuthContext(connectorInfo, redirectUrl));
 
@@ -121,7 +121,7 @@ public class OAuthServiceTests
             {
                 { "UsesAdminPrivileges", "true" }
             };
-            var connectorInfo = new ConnectorInfo(Guid.NewGuid(), "Slack", connectorProperties);
+            var connectorInfo = new ConnectorContext(Guid.NewGuid(), "Slack", connectorProperties);
 
             // Act
             var result = await service.InitializeOAuthAsync(new OAuthContext(connectorInfo, redirectUrl));
@@ -140,7 +140,7 @@ public class OAuthServiceTests
             // Arrange
             var connectorId = Guid.NewGuid();
             var callbackUri = "https://localhost:5001/callback";
-            var connectorInfo = new ConnectorInfo(connectorId, "Slack", new Dictionary<string, string>());
+            var connectorInfo = new ConnectorContext(connectorId, "Slack", new Dictionary<string, string>());
             var context = new OAuthContext(connectorInfo, callbackUri);
 
             var stateKey = Guid.NewGuid().ToString();
@@ -178,7 +178,7 @@ public class OAuthServiceTests
 
             var config = CreateDefaultOptions();
 
-            var connectorInfo = new ConnectorInfo(connectorId, "Slack", new Dictionary<string, string>());
+            var connectorInfo = new ConnectorContext(connectorId, "Slack", new Dictionary<string, string>());
             var context = new OAuthContext(connectorInfo, callbackUri);
 
 

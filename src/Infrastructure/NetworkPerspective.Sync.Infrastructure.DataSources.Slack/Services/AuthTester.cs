@@ -5,38 +5,27 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 
-internal class AuthTester : IAuthTester
+internal class AuthTester(IConnectorContextAccessor connectorContextProvider, ISlackClientFacadeFactory slackClientFacadeFactory, IVault vault, ILogger<AuthTester> logger) : IAuthTester
 {
-    private readonly IConnectorInfoProvider _connectorInfoProvider;
-    private readonly ISlackClientFacadeFactory _slackClientFacadeFactory;
-    private readonly ILogger<AuthTester> _logger;
-
-    public AuthTester(IConnectorInfoProvider connectorInfoProvider, ISlackClientFacadeFactory slackClientFacadeFactory, ILogger<AuthTester> logger)
-    {
-        _connectorInfoProvider = connectorInfoProvider;
-        _slackClientFacadeFactory = slackClientFacadeFactory;
-        _logger = logger;
-    }
-
-
     public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
     {
-        var connectorInfo = _connectorInfoProvider.Get();
+        var connectorContext = connectorContextProvider.Context;
 
-        if (connectorInfo.GetConnectorProperties<SlackConnectorProperties>().UsesAdminPrivileges)
+        if (connectorContext.GetConnectorProperties<SlackConnectorProperties>().UsesAdminPrivileges)
         {
-            var isUserTokenOk = await TestUserTokenAsync(connectorInfo.Id, stoppingToken);
-            var isBotTokenOk = await TestBotTokenAsync(connectorInfo.Id, stoppingToken);
+            var isUserTokenOk = await TestUserTokenAsync(connectorContext.ConnectorId, stoppingToken);
+            var isBotTokenOk = await TestBotTokenAsync(connectorContext.ConnectorId, stoppingToken);
 
             return isUserTokenOk && isBotTokenOk;
         }
         else
         {
-            return await TestBotTokenAsync(connectorInfo.Id, stoppingToken);
+            return await TestBotTokenAsync(connectorContext.ConnectorId, stoppingToken);
         }
     }
 
@@ -44,14 +33,16 @@ internal class AuthTester : IAuthTester
     {
         try
         {
-            var facade = _slackClientFacadeFactory.CreateWithBotToken(stoppingToken);
-            await facade.TestAsync(stoppingToken);
-            return true;
+            var key = string.Format(SlackKeys.BotTokenKeyPattern, connectorId);
+            var token = await vault.GetSecretAsync(key, stoppingToken);
+            var facade = slackClientFacadeFactory.CreateUnauthorized();
+            var result = await facade.TestTokenAsync(token, stoppingToken);
+            return result.IsOk;
 
         }
         catch (Exception ex)
         {
-            _logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", connectorId);
+            logger.LogInformation(ex, "Connector's '{connectorId}' is not authorized using bot token", connectorId);
             return false;
         }
     }
@@ -60,14 +51,16 @@ internal class AuthTester : IAuthTester
     {
         try
         {
-            var facade = _slackClientFacadeFactory.CreateWithUserToken(stoppingToken);
-            await facade.TestAsync(stoppingToken);
-            return true;
+            var key = string.Format(SlackKeys.BotTokenKeyPattern, connectorId);
+            var token = await vault.GetSecretAsync(key, stoppingToken);
+            var facade = slackClientFacadeFactory.CreateUnauthorized();
+            var result = await facade.TestTokenAsync(token, stoppingToken);
+            return result.IsOk;
 
         }
         catch (Exception ex)
         {
-            _logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", connectorId);
+            logger.LogInformation(ex, "Connector's '{connectorId}' is not authorized using user token", connectorId);
             return false;
         }
     }

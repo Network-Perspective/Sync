@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +12,7 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 
-internal class AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, IConnectorInfoProvider connectorInfoProvider, ILogger<AuthTester> logger) : IAuthTester
+internal class AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, IConnectorContextAccessor connectorContextProvider, ILogger<AuthTester> logger) : IAuthTester
 {
     private readonly GoogleConfig _config = config.Value;
 
@@ -21,11 +20,11 @@ internal class AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider cr
     {
         const string currentAccountCustomer = "my_customer";
 
-        var connectorInfo = connectorInfoProvider.Get();
+        var connectorContext = connectorContextProvider.Context;
         try
         {
-            logger.LogInformation("Checking if connector '{connectorId}' is authorized", connectorInfo);
-            var googleNetworkProperties = connectorInfo.GetConnectorProperties<GoogleNetworkProperties>();
+            logger.LogInformation("Checking if connector '{connectorId}' is authorized", connectorContext);
+            var googleNetworkProperties = connectorContext.GetConnectorProperties<GoogleNetworkProperties>();
 
             var userCredentials = await credentialsProvider.GetForUserAsync(googleNetworkProperties.AdminEmail, stoppingToken);
 
@@ -43,7 +42,7 @@ internal class AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider cr
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", connectorInfo);
+            logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", connectorContext);
             return false;
         }
     }

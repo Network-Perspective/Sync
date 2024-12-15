@@ -7,6 +7,7 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.UseCases;
 
 namespace NetworkPerspective.Sync.Worker.Application;
 
@@ -16,9 +17,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton(new ConnectorTypesCollection(connectorTypes) as IConnectorTypesCollection);
 
-        services.AddScoped<ConnectorInfoProvider>();
-        services.AddScoped<IConnectorInfoProvider>(x => x.GetRequiredService<ConnectorInfoProvider>());
-        services.AddScoped<IConnectorInfoInitializer>(x => x.GetRequiredService<ConnectorInfoProvider>());
+        services.AddScoped<IConnectorContextAccessor, ConnectorContextAccessor>();
 
         services.AddSingleton<ISyncContextFactory, SyncContextFactory>();
         services.AddScoped<ISyncContextAccessor, SyncContextAccessor>();
@@ -27,6 +26,7 @@ public static class ServiceCollectionExtensions
 
         services.AddTransient<IClock, Clock>();
         services.AddTransient<IHashingServiceFactory, HashingServiceFactory>();
+        services.AddScoped<IHashingService>(sp => sp.GetRequiredService<IHashingServiceFactory>().CreateAsync().Result);
         services.AddTransient<IInteractionsFilterFactory, InteractionsFilterFactory>();
         services.AddTransient<IAuthStateKeyFactory, AuthStateKeyFactory>();
 
@@ -37,41 +37,36 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IAuthTester>(sp =>
         {
-            var connectorInforProvider = sp.GetRequiredService<IConnectorInfoProvider>();
-            var connectorInfo = connectorInforProvider.Get();
-
+            var connectorContextProvider = sp.GetRequiredService<IConnectorContextAccessor>();
             var connectorTypes = sp.GetRequiredService<IConnectorTypesCollection>();
-            var dataSourceKey = connectorTypes[connectorInfo.Type].GetKeyOf<IAuthTester>();
+            var dataSourceKey = connectorTypes[connectorContextProvider.Context.Type].GetKeyOf<IAuthTester>();
 
             return sp.GetRequiredKeyedService<IAuthTester>(dataSourceKey);
         });
 
         services.AddScoped<IOAuthService>(sp =>
         {
-            var connectorInforProvider = sp.GetRequiredService<IConnectorInfoProvider>();
-            var connectorInfo = connectorInforProvider.Get();
-
+            var connectorContextProvider = sp.GetRequiredService<IConnectorContextAccessor>();
             var connectorTypes = sp.GetRequiredService<IConnectorTypesCollection>();
-            var dataSourceKey = connectorTypes[connectorInfo.Type].GetKeyOf<IOAuthService>();
+            var dataSourceKey = connectorTypes[connectorContextProvider.Context.Type].GetKeyOf<IOAuthService>();
 
             return sp.GetRequiredKeyedService<IOAuthService>(dataSourceKey);
         });
 
         services.AddScoped<IDataSource>(sp =>
         {
-            var connectorInforProvider = sp.GetRequiredService<IConnectorInfoProvider>();
-            var connectorInfo = connectorInforProvider.Get();
-
+            var connectorContextProvider = sp.GetRequiredService<IConnectorContextAccessor>();
             var connectorTypes = sp.GetRequiredService<IConnectorTypesCollection>();
-            var dataSourceKey = connectorTypes[connectorInfo.Type].GetKeyOf<IDataSource>();
+            var dataSourceKey = connectorTypes[connectorContextProvider.Context.Type].GetKeyOf<IDataSource>();
 
             return sp.GetRequiredKeyedService<IDataSource>(dataSourceKey);
         });
 
-
         services.AddScoped<IStatusLogger, StatusLogger>();
         services.AddScoped<ISyncService, SyncService>();
         services.AddTransient<ICapabilitiesService, CapabilitiesService>();
+
+        services.AddUseCasesHandling();
 
         return services;
     }

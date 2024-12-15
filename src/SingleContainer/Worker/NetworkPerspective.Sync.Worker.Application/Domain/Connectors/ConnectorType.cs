@@ -6,5 +6,5 @@ public class ConnectorType
     public string DataSourceId { get; init; }
 
     public string GetKeyOf<TType>()
-        => $"{Name}-{nameof(TType)}";
+        => $"{Name}-{typeof(TType)}";
 }

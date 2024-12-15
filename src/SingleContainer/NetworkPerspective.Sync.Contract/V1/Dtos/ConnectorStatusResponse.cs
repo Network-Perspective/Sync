@@ -1,8 +1,10 @@
 ﻿using System;
 
+using NetworkPerspective.Sync.Utils.CQS.Queries;
+
 namespace NetworkPerspective.Sync.Contract.V1.Dtos;
 
-public class ConnectorStatusDto : IResponse
+public class ConnectorStatusResponse : IResponse
 {
     public Guid CorrelationId { get; set; }
     public bool IsRunning { get; set; }

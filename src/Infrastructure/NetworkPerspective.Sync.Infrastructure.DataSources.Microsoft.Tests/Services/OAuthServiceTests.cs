@@ -63,7 +63,7 @@ public class MicrosoftAuthServiceTests
             {
                 { "SyncMsTeams", "false" }
             };
-            var connectorInfo = new ConnectorInfo(Guid.NewGuid(), "Office365", connectorProperties);
+            var connectorInfo = new ConnectorContext(Guid.NewGuid(), "Office365", connectorProperties);
 
             // Act
             var result = await service.InitializeOAuthAsync(new OAuthContext(connectorInfo, redirectUrl));
@@ -84,7 +84,7 @@ public class MicrosoftAuthServiceTests
             // Arrange
             var connectorId = Guid.NewGuid();
             var callbackUri = "https://localhost:5001/callback";
-            var connectorInfo = new ConnectorInfo(connectorId, "Office365", new Dictionary<string, string>());
+            var connectorInfo = new ConnectorContext(connectorId, "Office365", new Dictionary<string, string>());
             var context = new OAuthContext(connectorInfo, callbackUri);
 
             var state = Guid.NewGuid().ToString();
@@ -113,7 +113,7 @@ public class MicrosoftAuthServiceTests
             var connectorId = Guid.NewGuid();
             var callbackUri = "https://localhost:5001/callback";
 
-            var connectorInfo = new ConnectorInfo(connectorId, "Office365", new Dictionary<string, string>());
+            var connectorInfo = new ConnectorContext(connectorId, "Office365", new Dictionary<string, string>());
             var context = new OAuthContext(connectorInfo, callbackUri);
 
             var service = new OAuthService(_vaultMock.Object, _authStateKeyFactoryMock.Object, Mock.Of<IMemoryCache>(), _logger);

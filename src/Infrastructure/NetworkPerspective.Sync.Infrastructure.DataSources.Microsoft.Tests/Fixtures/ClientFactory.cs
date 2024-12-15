@@ -36,11 +36,11 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Fix
                 .Setup(x => x.Hash(It.IsAny<string>()))
                 .Returns<string>(x => x);
 
-            var connectorInfo = new ConnectorInfo(connectorId, "Office365", new Dictionary<string, string>());
+            var connectorInfo = new ConnectorContext(connectorId, "Office365", new Dictionary<string, string>());
 
-            var connectorInforProviederMock = new Mock<IConnectorInfoProvider>();
+            var connectorInforProviederMock = new Mock<IConnectorContextAccessor>();
             connectorInforProviederMock
-                .Setup(x => x.Get())
+                .Setup(x => x.Context)
                 .Returns(connectorInfo);
 
             var microsoftClientFactory = new MicrosoftClientFactory(secretRepository, connectorInforProviederMock.Object, resiliency, NullLoggerFactory.Instance);

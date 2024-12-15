@@ -9,24 +9,25 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Model;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira;
 
-internal class JiraFacade(IJiraAuthorizedFacade jiraFacade) : IDataSource
+internal class JiraFacade(IHashingService hashingService, IJiraAuthorizedFacade jiraFacade) : IDataSource
 {
     public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
     {
         var projectMembers = await context.EnsureSetAsync(() => GetProjectMembersAsync(stoppingToken));
         var connectorProperties = context.GetConnectorProperties<JiraNetworkProperties>();
 
-        return EmployeesMapper.ToEmployees(projectMembers, context.HashFunction, context.NetworkConfig.EmailFilter, connectorProperties.SyncGroupAccess);
+        return EmployeesMapper.ToEmployees(projectMembers, hashingService.Hash, context.NetworkConfig.EmailFilter, connectorProperties.SyncGroupAccess);
     }
 
     public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
     {
         var projectMembers = await context.EnsureSetAsync(() => GetProjectMembersAsync(stoppingToken));
 
-        return HashedEmployeesMapper.ToEmployees(projectMembers, context.HashFunction, context.NetworkConfig.EmailFilter);
+        return HashedEmployeesMapper.ToEmployees(projectMembers, hashingService.Hash, context.NetworkConfig.EmailFilter);
     }
 
     public Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)

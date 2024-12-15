@@ -10,11 +10,14 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
+using Moq;
+
 using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Contract.V1.Impl;
 using NetworkPerspective.Sync.Office365.Tests.Fixtures;
 using NetworkPerspective.Sync.Orchestrator.Client;
 using NetworkPerspective.Sync.Orchestrator.Tests.Fixtures;
+using NetworkPerspective.Sync.Utils.CQS;
 
 using Xunit;
 
@@ -50,7 +53,7 @@ public class WorkersHubTests
         {
             BaseUrl = _service.Server.BaseAddress.ToString()
         });
-        var hubClient = new OrchestratorHubClient(config, NullLogger<OrchestratorHubClient>.Instance);
+        var hubClient = new OrchestratorHubClient(Mock.Of<IMediator>(), config, NullLogger<OrchestratorHubClient>.Instance);
 
         // Act
         await hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
@@ -90,7 +93,7 @@ public class WorkersHubTests
         {
             BaseUrl = _service.Server.BaseAddress.ToString()
         });
-        var hubClient = new OrchestratorHubClient(config, NullLogger<OrchestratorHubClient>.Instance);
+        var hubClient = new OrchestratorHubClient(Mock.Of<IMediator>(), config, NullLogger<OrchestratorHubClient>.Instance);
 
         // Act
         Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
@@ -124,7 +127,7 @@ public class WorkersHubTests
         {
             BaseUrl = _service.Server.BaseAddress.ToString()
         });
-        var hubClient = new OrchestratorHubClient(config, NullLogger<OrchestratorHubClient>.Instance);
+        var hubClient = new OrchestratorHubClient(Mock.Of<IMediator>(), config, NullLogger<OrchestratorHubClient>.Instance);
 
         // Act
         Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>

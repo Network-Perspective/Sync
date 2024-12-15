@@ -16,7 +16,7 @@
 
 //using Xunit;
 
-//namespace NetworkPerspective.Sync.Application.Tests.Services
+//namespace NetworkPerspective.Sync.Worker.Application.Tests.Services
 //{
 //    public class StatusServiceTests
 //    {
@@ -104,4 +104,4 @@
 //    }
 //}
 
-// TODO new implementation - new tests
+//TODO new implementation - new tests

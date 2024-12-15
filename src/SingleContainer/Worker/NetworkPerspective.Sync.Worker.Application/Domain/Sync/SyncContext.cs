@@ -5,14 +5,12 @@ using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
-using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 
 public sealed class SyncContext : IDisposable
 {
     private readonly Dictionary<Type, object> _container = [];
-    private readonly IHashingService _hashingService;
     private readonly IEnumerable<KeyValuePair<string, string>> _connectorProperties;
 
     public Guid ConnectorId { get; }
@@ -20,9 +18,8 @@ public sealed class SyncContext : IDisposable
     public ConnectorConfig NetworkConfig { get; }
     public SecureString AccessToken { get; }
     public TimeRange TimeRange { get; }
-    public HashFunction.Delegate HashFunction { get; }
 
-    public SyncContext(Guid connectorId, string connectorType, ConnectorConfig networkConfig, IEnumerable<KeyValuePair<string, string>> connectorProperties, SecureString accessToken, TimeRange timeRange, IHashingService hashingService)
+    public SyncContext(Guid connectorId, string connectorType, ConnectorConfig networkConfig, IEnumerable<KeyValuePair<string, string>> connectorProperties, SecureString accessToken, TimeRange timeRange)
     {
         ConnectorId = connectorId;
         ConnectorType = connectorType;
@@ -30,8 +27,6 @@ public sealed class SyncContext : IDisposable
         _connectorProperties = connectorProperties;
         AccessToken = accessToken;
         TimeRange = timeRange;
-        _hashingService = hashingService;
-        HashFunction = hashingService.Hash;
     }
 
     public T GetConnectorProperties<T>() where T : ConnectorProperties, new()
@@ -69,7 +64,6 @@ public sealed class SyncContext : IDisposable
     public void Dispose()
     {
         AccessToken?.Dispose();
-        _hashingService?.Dispose();
 
         foreach (var type in _container.Keys)
         {
