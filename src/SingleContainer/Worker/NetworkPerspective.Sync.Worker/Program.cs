@@ -5,6 +5,7 @@ using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Contract.V1.Impl;
@@ -17,6 +18,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
 using NetworkPerspective.Sync.Worker.Application;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.ApplicationInsights;
 using NetworkPerspective.Sync.Worker.Configs;
 using NetworkPerspective.Sync.Worker.HostedServices;
 
@@ -45,6 +47,7 @@ public class Program
             };
 
             builder.Services.AddApplicaitonInsights(builder.Configuration.GetSection("ApplicationInsights"));
+            builder.Services.LogApplicationVersion();
 
             var healthChecksBuilder = builder.Services
                 .AddHealthChecks();
@@ -80,8 +83,21 @@ public class Program
             var host = builder.Build();
             host.Run();
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            try
+            {
+                var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
+                logger.LogCritical(e, "Unhandled exception occured in the application");
+            }
+            catch
+            {
+                // ignored
+            }
+
+            Console.WriteLine(e.Message);
+            Console.WriteLine(e.StackTrace);
+
             var delay = builder.Configuration.GetValue<TimeSpan>("App:DelayBeforeExitOnException");
             Thread.Sleep(delay);
             throw;

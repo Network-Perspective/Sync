@@ -11,10 +11,10 @@ resources:
     type: bitbucket
     endpoint: BitbucketAzureServiceConnection
     name: NetworkPerspective/NetworkPerspective.Infrastructure
-    ref: develop
+    ref: 'refs/heads/develop'
 
 variables:
-  version: '2.1'
+  version: '3.0'
   tag: '$(version).$(Build.BuildId)'
 
   commitTagFile: 'Connectors/Test/Tag.txt'
@@ -40,11 +40,21 @@ stages:
       persistCredentials: true
       displayName: Checkout repo
     - task: Docker@2
-      displayName: Build and push Worker
+      displayName: Build Worker
       inputs:
-        command: buildAndPush
+        command: build
         repository: 'connectors/worker'
         dockerfile: '$(Build.SourcesDirectory)/src/Worker.Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        arguments: --build-arg VERSION=$(tag)
+        tags: |
+          $(tag)
+          latest
+    - task: Docker@2
+      displayName: Push Worker
+      inputs:
+        command: push
+        repository: 'connectors/worker'
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
@@ -64,6 +74,16 @@ stages:
         git push origin v$(tag)
       workingDirectory: $(Build.SourcesDirectory)
       displayName: Add tag to repository
+    - task: Docker@2
+      displayName: Login to ACR
+      inputs:
+        command: login
+        containerRegistry: $(dockerRegistryServiceConnection)
+    - script: |
+        helm package infra/helm-charts/np-worker --version $(tag) --destination infra/helm-charts/np-worker/charts
+        helm push infra/helm-charts/np-worker/charts/np-worker-$(tag).tgz oci://$(containerRegistry)/helm
+      displayName: Build and publish Helm chart to OCI registry
+      workingDirectory: $(Build.SourcesDirectory)
 
 - stage: UpdateInfrastructure 
   displayName: Update infrastructure 
@@ -77,14 +97,20 @@ stages:
         displayName: Checkout infrastructure
         clean: true
         persistCredentials: true
-
+        path: 'Infrastructure' 
+        fetchDepth: 0             # Fetch all history and branches
+        
       - script: |
-         git config --global user.email azure@networkperspective.io & git config --global user.name "Azure Pipeline"
-         git checkout -b develop
-         git pull origin develop
-         echo $(tag) > $(commitTagFile)
-         git add -A
-         git commit -m "$(commitTagMessage)"
-         git push --set-upstream origin develop 
+          git config user.email "azure@networkperspective.io"
+          git config user.name "Azure Pipeline"
+
+          git fetch origin develop          
+          git checkout -B develop origin/develop
+          git pull origin develop           
+
+          echo $(tag) > $(commitTagFile)
+          git add -A
+          git commit -m "$(commitTagMessage)"
+          git push origin develop
         displayName: Update TEST release version
-        workingDirectory: $(Build.SourcesDirectory)
+        workingDirectory: $(Pipeline.Workspace)/Infrastructure
