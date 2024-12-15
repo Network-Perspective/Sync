@@ -29,4 +29,3 @@ public class ServiceCollectionExtensionsTests
         service.Should().NotBeNull();
     }
 }
-

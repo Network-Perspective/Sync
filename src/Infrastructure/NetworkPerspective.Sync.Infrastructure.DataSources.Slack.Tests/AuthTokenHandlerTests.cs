@@ -49,7 +49,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             var connectorId = Guid.NewGuid();
             var connectorInfoProviderMock = new Mock<IConnectorContextAccessor>();
             connectorInfoProviderMock
-                .Setup(x => x.Get())
+                .Setup(x => x.Context)
                 .Returns(new ConnectorContext(connectorId, "type", new Dictionary<string, string>()));
 
             var token = Guid.NewGuid().ToString();
@@ -81,7 +81,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             var connectorId = Guid.NewGuid();
             var connectorInfoProviderMock = new Mock<IConnectorContextAccessor>();
             connectorInfoProviderMock
-                .Setup(x => x.Get())
+                .Setup(x => x.Context)
                 .Returns(new ConnectorContext(connectorId, "type", new Dictionary<string, string>()));
 
             var token1 = Guid.NewGuid().ToString();
@@ -115,7 +115,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             var connectorId = Guid.NewGuid();
             var networkIdProviderMock = new Mock<IConnectorContextAccessor>();
             networkIdProviderMock
-                .Setup(x => x.Get())
+                .Setup(x => x.Context)
                 .Returns(new ConnectorContext(connectorId, "type", new Dictionary<string, string>()));
 
             var token = Guid.NewGuid().ToString();

@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NetworkPerspective.Sync.Utils.CQS.Queries;
+
 using Microsoft.Extensions.DependencyInjection;
-using NetworkPerspective.Sync.Utils.CQS.PreProcessors;
+
 using NetworkPerspective.Sync.Utils.CQS.Middlewares;
-using System.Linq;
+using NetworkPerspective.Sync.Utils.CQS.PreProcessors;
+using NetworkPerspective.Sync.Utils.CQS.Queries;
 
 namespace NetworkPerspective.Sync.Utils.CQS;
 

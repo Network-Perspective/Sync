@@ -40,7 +40,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Fix
 
             var connectorInforProviederMock = new Mock<IConnectorContextAccessor>();
             connectorInforProviederMock
-                .Setup(x => x.Get())
+                .Setup(x => x.Context)
                 .Returns(connectorInfo);
 
             var microsoftClientFactory = new MicrosoftClientFactory(secretRepository, connectorInforProviederMock.Object, resiliency, NullLoggerFactory.Instance);

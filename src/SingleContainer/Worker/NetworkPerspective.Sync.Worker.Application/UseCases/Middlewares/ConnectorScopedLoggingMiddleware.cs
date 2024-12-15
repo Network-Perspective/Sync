@@ -14,7 +14,7 @@ internal class ConnectorScopedLoggingMiddleware(IStatusLogger statusLogger) : IM
 {
     async Task<TResponse> IMediatorMiddleware.HandleQueryAsync<TRequest, TResponse>(TRequest request, QueryHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
-        if(request is ConnectorStatusRequest)
+        if (request is ConnectorStatusRequest)
             return await next(request, cancellationToken);
 
         try
