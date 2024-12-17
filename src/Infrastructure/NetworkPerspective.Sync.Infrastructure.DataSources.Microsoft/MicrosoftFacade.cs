@@ -11,109 +11,93 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
+
+internal sealed class MicrosoftFacade(
+    IUsersClient usersClient,
+    IMailboxClient mailboxClient,
+    ICalendarClient calendarClient,
+    IChannelsClient teamsClient,
+    IChatsClient chatsClient,
+    IHashingService hashingService,
+    ILoggerFactory loggerFactory) : IDataSource
 {
-    internal sealed class MicrosoftFacade : IDataSource
+    private readonly ILogger<MicrosoftFacade> _logger = loggerFactory.CreateLogger<MicrosoftFacade>();
+
+    public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
     {
-        private readonly IUsersClient _usersClient;
-        private readonly IMailboxClient _mailboxClient;
-        private readonly ICalendarClient _calendarClient;
-        private readonly IChannelsClient _channelsClient;
-        private readonly IChatsClient _chatsClient;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly ILogger<MicrosoftFacade> _logger;
+        _logger.LogInformation("Getting employees for connector '{connectorId}'", context.ConnectorId);
 
-        public MicrosoftFacade(
-            IUsersClient usersClient,
-            IMailboxClient mailboxClient,
-            ICalendarClient calendarClient,
-            IChannelsClient teamsClient,
-            IChatsClient chatsClient,
-            ILoggerFactory loggerFactory)
+        var connectorProperties = context.GetConnectorProperties<MicrosoftNetworkProperties>();
+
+        var employees = await context.EnsureSetAsync(async () =>
         {
-            _usersClient = usersClient;
-            _mailboxClient = mailboxClient;
-            _calendarClient = calendarClient;
-            _channelsClient = teamsClient;
-            _chatsClient = chatsClient;
-            _loggerFactory = loggerFactory;
-            _logger = loggerFactory.CreateLogger<MicrosoftFacade>();
-        }
+            var users = await usersClient.GetUsersAsync(context, stoppingToken);
+            return EmployeesMapper.ToEmployees(users, hashingService.Hash, context.NetworkConfig.EmailFilter, connectorProperties.SyncGroupAccess);
+        });
 
-        public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
+        return employees;
+    }
+
+    public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
+    {
+        _logger.LogInformation("Getting hashed employees for connector '{connectorId}'", context.ConnectorId);
+
+        var connectorProperties = context.GetConnectorProperties<MicrosoftNetworkProperties>();
+
+        IEnumerable<Channel> channels = connectorProperties.SyncMsTeams == true
+            ? await context.EnsureSetAsync(() => teamsClient.GetAllChannelsAsync(stoppingToken))
+            : Enumerable.Empty<Channel>();
+
+        var users = await usersClient.GetUsersAsync(context, stoppingToken);
+        return HashedEmployeesMapper.ToEmployees(users, channels, hashingService.Hash, context.NetworkConfig.EmailFilter);
+    }
+
+    public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
+    {
+        _logger.LogInformation("Getting interactions for connector '{connectorId}' for period {timeRange}", context.ConnectorId, context.TimeRange);
+        var connectorProperties = context.GetConnectorProperties<MicrosoftNetworkProperties>();
+
+        IEnumerable<Channel> channels = connectorProperties.SyncMsTeams == true
+            ? await context.EnsureSetAsync(() => teamsClient.GetAllChannelsAsync(stoppingToken))
+            : Enumerable.Empty<Channel>();
+
+        var employees = await context.EnsureSetAsync(async () =>
         {
-            _logger.LogInformation("Getting employees for connector '{connectorId}'", context.ConnectorId);
+            var users = await usersClient.GetUsersAsync(context, stoppingToken);
+            return EmployeesMapper.ToEmployees(users, hashingService.Hash, context.NetworkConfig.EmailFilter, connectorProperties.SyncGroupAccess);
+        });
 
-            var connectorProperties = context.GetConnectorProperties<MicrosoftNetworkProperties>();
+        var emailInteractionFactory = new EmailInteractionFactory(hashingService.Hash, employees, loggerFactory.CreateLogger<EmailInteractionFactory>());
+        var meetingInteractionFactory = new MeetingInteractionFactory(hashingService.Hash, employees, loggerFactory.CreateLogger<MeetingInteractionFactory>());
 
-            var employees = await context.EnsureSetAsync(async () =>
+        var usersEmails = employees
+            .GetAllInternal()
+            .Select(x => x.Id.PrimaryId);
+
+        var resultEmails = await mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, emailInteractionFactory, stoppingToken);
+        var resultCalendar = await calendarClient.SyncInteractionsAsync(context, stream, usersEmails, meetingInteractionFactory, stoppingToken);
+
+        var result = SyncResult.Combine(resultEmails, resultCalendar);
+
+        if (connectorProperties.SyncMsTeams)
+        {
+            var channelInteractionFactory = new ChannelInteractionFactory(hashingService.Hash, employees);
+            var resultChannels = await teamsClient.SyncInteractionsAsync(context, channels, stream, channelInteractionFactory, stoppingToken);
+            result = SyncResult.Combine(result, resultChannels);
+
+            if (connectorProperties.SyncChats)
             {
-                var users = await _usersClient.GetUsersAsync(context, stoppingToken);
-                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter, connectorProperties.SyncGroupAccess);
-            });
-
-            return employees;
-        }
-
-        public async Task<EmployeeCollection> GetHashedEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
-        {
-            _logger.LogInformation("Getting hashed employees for connector '{connectorId}'", context.ConnectorId);
-
-            var connectorProperties = context.GetConnectorProperties<MicrosoftNetworkProperties>();
-
-            IEnumerable<Channel> channels = connectorProperties.SyncMsTeams == true
-                ? await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken))
-                : Enumerable.Empty<Channel>();
-
-            var users = await _usersClient.GetUsersAsync(context, stoppingToken);
-            return HashedEmployeesMapper.ToEmployees(users, channels, context.HashFunction, context.NetworkConfig.EmailFilter);
-        }
-
-        public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
-        {
-            _logger.LogInformation("Getting interactions for connector '{connectorId}' for period {timeRange}", context.ConnectorId, context.TimeRange);
-            var connectorProperties = context.GetConnectorProperties<MicrosoftNetworkProperties>();
-
-            IEnumerable<Channel> channels = connectorProperties.SyncMsTeams == true
-                ? await context.EnsureSetAsync(() => _channelsClient.GetAllChannelsAsync(stoppingToken))
-                : Enumerable.Empty<Channel>();
-
-            var employees = await context.EnsureSetAsync(async () =>
-            {
-                var users = await _usersClient.GetUsersAsync(context, stoppingToken);
-                return EmployeesMapper.ToEmployees(users, context.HashFunction, context.NetworkConfig.EmailFilter, connectorProperties.SyncGroupAccess);
-            });
-
-            var emailInteractionFactory = new EmailInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<EmailInteractionFactory>());
-            var meetingInteractionFactory = new MeetingInteractionFactory(context.HashFunction, employees, _loggerFactory.CreateLogger<MeetingInteractionFactory>());
-
-            var usersEmails = employees
-                .GetAllInternal()
-                .Select(x => x.Id.PrimaryId);
-
-            var resultEmails = await _mailboxClient.SyncInteractionsAsync(context, stream, usersEmails, emailInteractionFactory, stoppingToken);
-            var resultCalendar = await _calendarClient.SyncInteractionsAsync(context, stream, usersEmails, meetingInteractionFactory, stoppingToken);
-
-            var result = SyncResult.Combine(resultEmails, resultCalendar);
-
-            if (connectorProperties.SyncMsTeams)
-            {
-                var channelInteractionFactory = new ChannelInteractionFactory(context.HashFunction, employees);
-                var resultChannels = await _channelsClient.SyncInteractionsAsync(context, channels, stream, channelInteractionFactory, stoppingToken);
-                result = SyncResult.Combine(result, resultChannels);
-
-                if (connectorProperties.SyncChats)
-                {
-                    var chatInteractionFactory = new ChatInteractionFactory(context.HashFunction, employees);
-                    var resultChat = await _chatsClient.SyncInteractionsAsync(context, stream, usersEmails, chatInteractionFactory, stoppingToken);
-                    result = SyncResult.Combine(result, resultChat);
-                }
+                var chatInteractionFactory = new ChatInteractionFactory(hashingService.Hash, employees);
+                var resultChat = await chatsClient.SyncInteractionsAsync(context, stream, usersEmails, chatInteractionFactory, stoppingToken);
+                result = SyncResult.Combine(result, resultChat);
             }
-
-            _logger.LogInformation("Getting interactions for connector '{connectorId}' completed", context.ConnectorId);
-
-            return result;
         }
+
+        _logger.LogInformation("Getting interactions for connector '{connectorId}' completed", context.ConnectorId);
+
+        return result;
     }
 }

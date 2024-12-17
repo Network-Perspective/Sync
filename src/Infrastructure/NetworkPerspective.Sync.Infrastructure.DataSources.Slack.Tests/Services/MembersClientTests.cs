@@ -39,7 +39,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.Service
             var paginationHandler = new CursorPaginationHandler(paginationLogger);
 
             var slackClientFacade = new SlackClientBotScopeFacade(_slackHttpClient, paginationHandler);
-            var membersClient = new MembersClient(Mock.Of<ITasksStatusesCache>(), Mock.Of<IConnectorInfoProvider>(), clientLogger);
+            var membersClient = new MembersClient(Mock.Of<ITasksStatusesCache>(), Mock.Of<IConnectorContextAccessor>(), clientLogger);
 
             try
             {

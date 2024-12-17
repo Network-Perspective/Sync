@@ -49,7 +49,7 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
 
     public async Task StartSyncAsync(string workerName, SyncContext syncContext)
     {
-        var dto = syncContext.Adapt<StartSyncDto>();
+        var dto = syncContext.Adapt<SyncRequest>();
         logger.LogInformation("Sending request '{correlationId}' to worker '{id}' to start sync...", dto.CorrelationId, workerName);
         var connection = connectionsLookupTable.Get(workerName);
         var response = await Clients.Client(connection.Id).SyncAsync(dto);
@@ -58,7 +58,7 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
 
     public async Task SetSecretsAsync(string workerName, IDictionary<string, SecureString> secrets)
     {
-        var dto = new SetSecretsDto
+        var dto = new SetSecretsRequest
         {
             CorrelationId = Guid.NewGuid(),
             Secrets = secrets.ToDictionary(x => x.Key, x => x.Value.ToSystemString())
@@ -71,7 +71,7 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
 
     public async Task RotateSecretsAsync(string workerName, Guid connectorId, IDictionary<string, string> connectorProperties, string connectorType)
     {
-        var dto = new RotateSecretsDto
+        var dto = new RotateSecretsRequest
         {
             CorrelationId = Guid.NewGuid(),
             Connector = new ConnectorDto
@@ -90,30 +90,30 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
 
     public async Task<ConnectorStatus> GetConnectorStatusAsync(string workerName, Guid connectorId, Guid networkId, IDictionary<string, string> connectorProperties, string connectorType)
     {
-        var requestDto = new GetConnectorStatusDto
+        try
         {
-            CorrelationId = Guid.NewGuid(),
-            Connector = new ConnectorDto
+            var requestDto = new ConnectorStatusRequest
             {
-                Id = connectorId,
-                Type = connectorType,
-                Properties = connectorProperties
-            },
-        };
+                CorrelationId = Guid.NewGuid(),
+                Connector = new ConnectorDto
+                {
+                    Id = connectorId,
+                    Type = connectorType,
+                    Properties = connectorProperties
+                },
+            };
 
-        var connection = connectionsLookupTable.Get(workerName);
-        var responseDto = await Clients
-            .Client(connection.Id)
-            .GetConnectorStatusAsync(requestDto);
+            var connection = connectionsLookupTable.Get(workerName);
+            var responseDto = await Clients
+                .Client(connection.Id)
+                .GetConnectorStatusAsync(requestDto);
 
-        if (responseDto.IsRunning)
-        {
-            var currentTask = ConnectorTaskStatus.Create(responseDto.CurrentTaskCaption, responseDto.CurrentTaskDescription, responseDto.CurrentTaskCompletionRate);
-            return ConnectorStatus.Running(responseDto.IsAuthorized, currentTask);
+            return responseDto.Adapt<ConnectorStatus>();
         }
-        else
+        catch (Exception ex)
         {
-            return ConnectorStatus.Idle(responseDto.IsAuthorized);
+            logger.LogDebug(ex, "Error occured while getting status of connector '{connectorId}'", connectorId);
+            return ConnectorStatus.Unknown;
         }
     }
 
@@ -160,7 +160,7 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
         logger.LogInformation("Received ack '{correlationId}'", responseDto.CorrelationId);
     }
 
-    public async Task<AckDto> SyncCompletedAsync(SyncCompletedDto dto)
+    public async Task<AckDto> SyncCompletedAsync(SyncResponse dto)
     {
         logger.LogInformation("Received notification from worker '{id}' sync completed", Context.GetWorkerName());
 
@@ -196,7 +196,7 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
 
     public async Task<IEnumerable<string>> GetSupportedConnectorTypesAsync(string workerName)
     {
-        var requestDto = new GetWorkerCapabilitiesDto
+        var requestDto = new WorkerCapabilitiesRequest
         {
             CorrelationId = Guid.NewGuid()
         };

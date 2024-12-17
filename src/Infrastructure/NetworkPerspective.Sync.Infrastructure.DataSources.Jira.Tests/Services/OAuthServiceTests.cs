@@ -76,7 +76,7 @@ public class JiraAuthTests
 
             var connectorProperties = new Dictionary<string, string>
             { };
-            var connectorInfo = new ConnectorInfo(Guid.NewGuid(), "Jira", connectorProperties);
+            var connectorInfo = new ConnectorContext(Guid.NewGuid(), "Jira", connectorProperties);
 
             // Act
             var result = await service.InitializeOAuthAsync(new OAuthContext(connectorInfo, redirectUrl));
@@ -96,7 +96,7 @@ public class JiraAuthTests
 
             var connectorId = Guid.NewGuid();
             var callbackUri = "https://localhost:5001/callback";
-            var connectorInfo = new ConnectorInfo(connectorId, "Slack", new Dictionary<string, string>());
+            var connectorInfo = new ConnectorContext(connectorId, "Slack", new Dictionary<string, string>());
             var context = new OAuthContext(connectorInfo, callbackUri);
 
             var state = Guid.NewGuid().ToString();
@@ -134,7 +134,7 @@ public class JiraAuthTests
 
             var config = CreateDefaultOptions();
 
-            var connectorInfo = new ConnectorInfo(connectorId, "Slack", new Dictionary<string, string>());
+            var connectorInfo = new ConnectorContext(connectorId, "Slack", new Dictionary<string, string>());
             var context = new OAuthContext(connectorInfo, callbackUri);
 
             _jiraClientMock

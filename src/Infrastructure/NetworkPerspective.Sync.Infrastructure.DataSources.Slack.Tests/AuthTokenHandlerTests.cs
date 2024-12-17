@@ -47,15 +47,15 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             // Arrange
             var networkId = Guid.NewGuid();
             var connectorId = Guid.NewGuid();
-            var connectorInfoProviderMock = new Mock<IConnectorInfoProvider>();
+            var connectorInfoProviderMock = new Mock<IConnectorContextAccessor>();
             connectorInfoProviderMock
-                .Setup(x => x.Get())
-                .Returns(new ConnectorInfo(connectorId, "type", new Dictionary<string, string>()));
+                .Setup(x => x.Context)
+                .Returns(new ConnectorContext(connectorId, "type", new Dictionary<string, string>()));
 
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedVault>();
             secretRepositoryMock
-                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.BotTokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token.ToSecureString());
 
             var handler = new BotTokenAuthHandler(connectorInfoProviderMock.Object, secretRepositoryMock.Object, NullLogger<AuthTokenHandler>.Instance)
@@ -79,16 +79,16 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             // Arrange
             var networkId = Guid.NewGuid();
             var connectorId = Guid.NewGuid();
-            var connectorInfoProviderMock = new Mock<IConnectorInfoProvider>();
+            var connectorInfoProviderMock = new Mock<IConnectorContextAccessor>();
             connectorInfoProviderMock
-                .Setup(x => x.Get())
-                .Returns(new ConnectorInfo(connectorId, "type", new Dictionary<string, string>()));
+                .Setup(x => x.Context)
+                .Returns(new ConnectorContext(connectorId, "type", new Dictionary<string, string>()));
 
             var token1 = Guid.NewGuid().ToString();
             var token2 = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedVault>();
             secretRepositoryMock
-                .SetupSequence(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
+                .SetupSequence(x => x.GetSecretAsync(string.Format(SlackKeys.BotTokenKeyPattern, connectorId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token1.ToSecureString())
                 .ReturnsAsync(token2.ToSecureString());
 
@@ -113,15 +113,15 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests
             // Arrange
             var networkId = Guid.NewGuid();
             var connectorId = Guid.NewGuid();
-            var networkIdProviderMock = new Mock<IConnectorInfoProvider>();
+            var networkIdProviderMock = new Mock<IConnectorContextAccessor>();
             networkIdProviderMock
-                .Setup(x => x.Get())
-                .Returns(new ConnectorInfo(connectorId, "type", new Dictionary<string, string>()));
+                .Setup(x => x.Context)
+                .Returns(new ConnectorContext(connectorId, "type", new Dictionary<string, string>()));
 
             var token = Guid.NewGuid().ToString();
             var secretRepositoryMock = new Mock<ICachedVault>();
             secretRepositoryMock
-                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.TokenKeyPattern, networkId.ToString()), It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(string.Format(SlackKeys.BotTokenKeyPattern, networkId.ToString()), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(token.ToSecureString());
 
             var handler = new BotTokenAuthHandler(networkIdProviderMock.Object, secretRepositoryMock.Object, NullLogger<AuthTokenHandler>.Instance)

@@ -29,7 +29,7 @@ internal class SecretRotationScheduler : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        //await Task.Delay(TimeSpan.FromMinutes(5));
+        await Task.Delay(20000);
         var jobKey = new JobKey(SecretRotationJobKey);
         var triggerKey = new TriggerKey(SecretRotationTriggerKey);
 

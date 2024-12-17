@@ -70,6 +70,7 @@ public class Program
                 .AddOrchestratorClient(builder.Configuration.GetSection("Infrastructure:Orchestrator"));
 
             builder.Services.AddHostedService<StartupHealthChecker>();
+            builder.Services.AddHostedService<StartupSecretsChecker>();
             builder.Services.AddHostedService<ConnectionHost>();
 
 #if !DEBUG

@@ -47,10 +47,10 @@ internal class OAuthService(IVault vault, IJiraUnauthorizedFacade jiraUnauthoriz
 
         var tokenResponse = await jiraUnauthorizedFacade.ExchangeCodeForTokenAsync(code, clientId.ToSystemString(), clientSecret.ToSystemString(), context.CallbackUri, stoppingToken);
 
-        var accessTokenKey = string.Format(JiraKeys.JiraAccessTokenKeyPattern, context.Connector.Id);
+        var accessTokenKey = string.Format(JiraKeys.JiraAccessTokenKeyPattern, context.Connector.ConnectorId);
         await vault.SetSecretAsync(accessTokenKey, tokenResponse.AccessToken.ToSecureString(), stoppingToken);
 
-        var refreshTokenKey = string.Format(JiraKeys.JiraRefreshTokenPattern, context.Connector.Id);
+        var refreshTokenKey = string.Format(JiraKeys.JiraRefreshTokenPattern, context.Connector.ConnectorId);
         await vault.SetSecretAsync(refreshTokenKey, tokenResponse.RefreshToken.ToSecureString(), stoppingToken);
     }
 

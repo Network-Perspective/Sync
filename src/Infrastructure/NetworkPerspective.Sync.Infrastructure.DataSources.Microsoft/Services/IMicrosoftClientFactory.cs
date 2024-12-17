@@ -29,13 +29,13 @@ internal interface IMicrosoftClientFactory
 internal class MicrosoftClientFactory : IMicrosoftClientFactory
 {
     private readonly IVault _secretRepository;
-    private readonly IConnectorInfoProvider _connectorInforProvider;
+    private readonly IConnectorContextAccessor _connectorContextProvider;
     private readonly PolicyHttpMessageHandler _retryHandler;
 
-    public MicrosoftClientFactory(IVault secretRepository, IConnectorInfoProvider connectorInforProvider, IOptions<Resiliency> resiliencyOptions, ILoggerFactory loggerFactory)
+    public MicrosoftClientFactory(IVault secretRepository, IConnectorContextAccessor connectorContextProvider, IOptions<Resiliency> resiliencyOptions, ILoggerFactory loggerFactory)
     {
         _secretRepository = secretRepository;
-        _connectorInforProvider = connectorInforProvider;
+        _connectorContextProvider = connectorContextProvider;
         var retryLogger = loggerFactory.CreateLogger<GraphServiceClient>();
 
         void OnRetry(DelegateResult<HttpResponseMessage> result, TimeSpan timespan)
@@ -60,10 +60,10 @@ internal class MicrosoftClientFactory : IMicrosoftClientFactory
 
     private async Task<AzureIdentityAuthenticationProvider> BuildAuthProvider(CancellationToken stoppingToken)
     {
-        var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, _connectorInforProvider.Get().Id);
+        var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, _connectorContextProvider.Context.ConnectorId);
         var tenantId = await _secretRepository.GetSecretAsync(tenantIdKey, stoppingToken);
 
-        var connectorProperties = _connectorInforProvider.Get().GetConnectorProperties<MicrosoftNetworkProperties>();
+        var connectorProperties = _connectorContextProvider.Context.GetConnectorProperties<MicrosoftNetworkProperties>();
 
         var clientIdKey = connectorProperties.SyncMsTeams == true
             ? MicrosoftKeys.MicrosoftClientTeamsIdKey

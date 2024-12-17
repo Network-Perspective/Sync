@@ -16,7 +16,7 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Auth;
 
-internal class AuthTokenHandler(IConnectorInfoProvider connectorInfoProvider, ICachedVault cachedSecretRepository, IJiraUnauthorizedFacade jiraFacade, ILogger<AuthTokenHandler> logger) : DelegatingHandler
+internal class AuthTokenHandler(IConnectorContextAccessor connectorContextProvider, ICachedVault cachedSecretRepository, IJiraUnauthorizedFacade jiraFacade, ILogger<AuthTokenHandler> logger) : DelegatingHandler
 {
     private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
 
@@ -50,7 +50,7 @@ internal class AuthTokenHandler(IConnectorInfoProvider connectorInfoProvider, IC
                 return accessToken;
             }
 
-            var connectorId = connectorInfoProvider.Get().Id;
+            var connectorId = connectorContextProvider.Context.ConnectorId;
 
             var refreshTokenKey = string.Format(JiraKeys.JiraRefreshTokenPattern, connectorId);
             var accessTokenKey = string.Format(JiraKeys.JiraAccessTokenKeyPattern, connectorId);
@@ -84,8 +84,8 @@ internal class AuthTokenHandler(IConnectorInfoProvider connectorInfoProvider, IC
 
     private async Task<SecureString> GetAccessTokenAsync(CancellationToken stoppingToken)
     {
-        var connectorInfo = connectorInfoProvider.Get();
-        var tokenKey = string.Format(JiraKeys.JiraAccessTokenKeyPattern, connectorInfo.Id);
+        var connectorContext = connectorContextProvider.Context;
+        var tokenKey = string.Format(JiraKeys.JiraAccessTokenKeyPattern, connectorContext.ConnectorId);
         return await cachedSecretRepository.GetSecretAsync(tokenKey, stoppingToken);
     }
 

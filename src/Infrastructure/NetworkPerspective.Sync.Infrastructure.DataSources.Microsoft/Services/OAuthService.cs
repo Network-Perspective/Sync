@@ -43,7 +43,7 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
     {
         logger.LogInformation("Received admin consent callback.");
 
-        var tenantIdKey = string.Format(MicrosoftTenantIdPattern, context.Connector.Id);
+        var tenantIdKey = string.Format(MicrosoftTenantIdPattern, context.Connector.ConnectorId);
         await vault.SetSecretAsync(tenantIdKey, tenantId.ToSecureString(), stoppingToken);
     }
 

@@ -60,16 +60,15 @@ public class HashingServiceTests
         hash1.Should().Be(null);
     }
 
-    private async Task<IHashingService> CreateHashingServiceAsync(string hashingKey)
+    private static async Task<IHashingService> CreateHashingServiceAsync(string hashingKey)
     {
-        var connectorId = Guid.NewGuid();
         var secretRepositoryMock = new Mock<IVault>();
 
         secretRepositoryMock
-            .Setup(x => x.GetSecretAsync(string.Format(Keys.HashingKey, connectorId), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetSecretAsync(string.Format(Keys.HashingKey), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new NetworkCredential(string.Empty, hashingKey).SecurePassword);
 
-        var hashingServiceFactory = new HashingServiceFactory(NullLoggerFactory.Instance);
-        return await hashingServiceFactory.CreateAsync(secretRepositoryMock.Object);
+        var hashingServiceFactory = new HashingServiceFactory(secretRepositoryMock.Object, NullLoggerFactory.Instance);
+        return await hashingServiceFactory.CreateAsync();
     }
 }
