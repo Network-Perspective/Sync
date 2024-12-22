@@ -5,7 +5,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler.SecretRotat
 
 internal static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddSecretRotationScheduler(this IServiceCollection services, IConfigurationSection configuration)
+    public static IServiceCollection AddSecretRotationScheduler(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<SecretRotationSchedulerConfig>(configuration);
         services.AddHostedService<SecretRotationScheduler>();
