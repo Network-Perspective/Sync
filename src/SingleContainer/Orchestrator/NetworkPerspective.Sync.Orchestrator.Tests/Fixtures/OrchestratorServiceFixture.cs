@@ -25,13 +25,13 @@ public class OrchestratorServiceFixture : WebApplicationFactory<Program>
     private readonly string _validApiKey = Guid.NewGuid().ToString();
 
     public SqliteUnitOfWorkFactory UnitOfWorkFactory { get; } = new SqliteUnitOfWorkFactory();
-    public Mock<IVault> VaultMock = new Mock<IVault>();
+    public Mock<IVault> VaultMock { get; } = new Mock<IVault>();
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
         var configOverride = new Dictionary<string, string>
         {
-            { "App:SyncScheduler:UsePersistentStore", "false" },
+            { "App:Scheduler:UsePersistentStore", "false" },
         };
 
         builder.ConfigureHostConfiguration(config =>
