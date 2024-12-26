@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using System.Web;
 
 using Google.Apis.Auth.OAuth2;
-using Google.Apis.Auth.OAuth2.Flows;
 
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Clients;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Domain.OAuth;
@@ -17,7 +17,7 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 
-internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, IMemoryCache cache, ILogger<OAuthService> logger) : IOAuthService
+internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, IOAuthClient authClient, IMemoryCache cache, ILogger<OAuthService> logger) : IOAuthService
 {
     private const int AuthorizationCodeExpirationTimeInMinutes = 10;
     private readonly string[] _scopes = [
@@ -48,22 +48,7 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
         var clientId = await vault.GetSecretAsync(GoogleKeys.GoogleClientIdKey, stoppingToken);
         var clientSecret = await vault.GetSecretAsync(GoogleKeys.GoogleClientSecretKey, stoppingToken);
 
-        var initializer = new AuthorizationCodeFlow.Initializer(GoogleAuthConsts.OidcAuthorizationUrl, GoogleAuthConsts.OidcTokenUrl)
-        {
-            ClientSecrets = new ClientSecrets
-            {
-                ClientId = clientId.ToSystemString(),
-                ClientSecret = clientSecret.ToSystemString()
-            }
-        };
-        var codeFlow = new AuthorizationCodeFlow(initializer);
-        var tokenResponse = await codeFlow.ExchangeCodeForTokenAsync(
-            userId: string.Empty,
-            code: code,
-            redirectUri: context.CallbackUri,
-            taskCancellationToken: stoppingToken
-        );
-
+        var tokenResponse = await authClient.ExchangeCodeForTokenAsync(code, clientId.ToSystemString(), clientSecret.ToSystemString(), context.CallbackUri, stoppingToken);
 
         var accessTokenKey = string.Format(GoogleKeys.GoogleAccessTokenKeyPattern, context.Connector.ConnectorId);
         await vault.SetSecretAsync(accessTokenKey, tokenResponse.AccessToken.ToSecureString(), stoppingToken);
