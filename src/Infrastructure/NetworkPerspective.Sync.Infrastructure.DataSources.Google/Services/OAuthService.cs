@@ -1,0 +1,97 @@
+﻿using System;
+using System.Security;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web;
+
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
+
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
+using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.OAuth;
+using NetworkPerspective.Sync.Worker.Application.Services;
+
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
+
+internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, IMemoryCache cache, ILogger<OAuthService> logger) : IOAuthService
+{
+    private const int AuthorizationCodeExpirationTimeInMinutes = 10;
+    private readonly string[] _scopes = [
+        // TODO To be defined
+        ];
+
+    public async Task<InitializeOAuthResult> InitializeOAuthAsync(OAuthContext context, CancellationToken stoppingToken = default)
+    {
+        logger.LogInformation("Starting google autentication process...");
+
+        var clientId = await vault.GetSecretAsync(GoogleKeys.GoogleClientIdKey, stoppingToken);
+
+        var stateKey = stateKeyFactory.Create();
+        var stateExpirationTimestamp = DateTimeOffset.UtcNow.AddMinutes(AuthorizationCodeExpirationTimeInMinutes);
+        cache.Set(stateKey, context, stateExpirationTimestamp);
+
+        var authUri = BuildAuthUri(stateKey, context, clientId);
+
+        logger.LogInformation("Google authentication process started. Unique state id: '{state}'", stateKey);
+
+        return new InitializeOAuthResult(authUri, stateKey, stateExpirationTimestamp.UtcDateTime);
+    }
+
+    public async Task HandleAuthorizationCodeCallbackAsync(string code, OAuthContext context, CancellationToken stoppingToken = default)
+    {
+        logger.LogInformation("Received Authentication callback.");
+
+        var clientId = await vault.GetSecretAsync(GoogleKeys.GoogleClientIdKey, stoppingToken);
+        var clientSecret = await vault.GetSecretAsync(GoogleKeys.GoogleClientSecretKey, stoppingToken);
+
+        var initializer = new AuthorizationCodeFlow.Initializer(GoogleAuthConsts.OidcAuthorizationUrl, GoogleAuthConsts.OidcTokenUrl)
+        {
+            ClientSecrets = new ClientSecrets
+            {
+                ClientId = clientId.ToSystemString(),
+                ClientSecret = clientSecret.ToSystemString()
+            }
+        };
+        var codeFlow = new AuthorizationCodeFlow(initializer);
+        var tokenResponse = await codeFlow.ExchangeCodeForTokenAsync(
+            userId: string.Empty,
+            code: code,
+            redirectUri: context.CallbackUri,
+            taskCancellationToken: stoppingToken
+        );
+
+
+        var accessTokenKey = string.Format(GoogleKeys.GoogleAccessTokenKeyPattern, context.Connector.ConnectorId);
+        await vault.SetSecretAsync(accessTokenKey, tokenResponse.AccessToken.ToSecureString(), stoppingToken);
+
+        var refreshTokenKey = string.Format(GoogleKeys.GoogleRefreshTokenPattern, context.Connector.ConnectorId);
+        await vault.SetSecretAsync(refreshTokenKey, tokenResponse.RefreshToken.ToSecureString(), stoppingToken);
+    }
+
+    private string BuildAuthUri(string state, OAuthContext context, SecureString clientId)
+    {
+        logger.LogDebug("Building google auth path...'");
+
+        var queryParameters = HttpUtility.ParseQueryString(string.Empty);
+        queryParameters["client_id"] = clientId.ToSystemString();
+        queryParameters["scope"] = string.Join(' ', _scopes);
+        queryParameters["redirect_uri"] = context.CallbackUri.ToString();
+        queryParameters["state"] = state;
+        queryParameters["response_type"] = "code";
+        queryParameters["access_type"] = "offline";
+        queryParameters["prompt"] = "consent";
+
+        var uriBuilder = new UriBuilder(GoogleAuthConsts.OidcAuthorizationUrl)
+        {
+            Query = queryParameters.ToString()
+        };
+
+        logger.LogDebug("Built google auth path: '{uriBuilder}'", uriBuilder);
+
+        return uriBuilder.ToString();
+    }
+}

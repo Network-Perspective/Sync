@@ -32,6 +32,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUsersClient, UsersClient>();
         services.AddScoped<IUserCalendarTimeZoneReader, UserCalendarTimeZoneReader>();
 
+        services.AddKeyedScoped<IOAuthService, OAuthService>(connectorType.GetKeyOf<IOAuthService>());
         services.AddKeyedScoped<IAuthTester, AuthTester>(connectorType.GetKeyOf<IAuthTester>());
         services.AddKeyedScoped<IDataSource, GoogleFacade>(connectorType.GetKeyOf<IDataSource>());
 

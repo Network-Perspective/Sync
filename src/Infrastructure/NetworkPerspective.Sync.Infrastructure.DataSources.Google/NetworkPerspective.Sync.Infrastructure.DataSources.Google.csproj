@@ -6,6 +6,7 @@
 
     <ItemGroup>
         <PackageReference Include="Google.Apis.Admin.Directory.directory_v1" Version="1.68.0.3554" />
+        <PackageReference Include="Google.Apis.Auth" Version="1.68.0" />
         <PackageReference Include="Google.Apis.Calendar.v3" Version="1.68.0.3557" />
         <PackageReference Include="Google.Apis.Gmail.v1" Version="1.68.0.3427" />
         <PackageReference Include="Google.Cloud.Iam.Admin.V1" Version="2.4.0" />

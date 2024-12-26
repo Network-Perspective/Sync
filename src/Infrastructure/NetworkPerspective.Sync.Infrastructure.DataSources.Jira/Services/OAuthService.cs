@@ -73,7 +73,7 @@ internal class OAuthService(IVault vault, IJiraUnauthorizedFacade jiraUnauthoriz
             Query = queryParameters.ToString()
         };
 
-        logger.LogDebug("Built slack auth path: '{uriBuilder}'", uriBuilder);
+        logger.LogDebug("Built jira auth path: '{uriBuilder}'", uriBuilder);
 
         return uriBuilder.ToString();
     }
