@@ -14,10 +14,9 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
-using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client.Dtos;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Configs;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Services;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Clients;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Model;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
@@ -26,33 +25,31 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Xunit;
 
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Services;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Tests.Services;
-
-public class JiraAuthTests
+public class OAuthServiceTest
 {
     private const string ClientId = "1234";
-    private static readonly string[] Scopes = ["scope1", "scope2"];
 
     private readonly Mock<IVault> _vaultMock = new();
     private readonly Mock<IAuthStateKeyFactory> _stateFactoryMock = new();
-    private readonly Mock<IJiraUnauthorizedFacade> _jiraClientMock = new();
+    private readonly Mock<IOAuthClient> _oAuthClientMock = new();
     private readonly ILogger<OAuthService> _logger = NullLogger<OAuthService>.Instance;
 
-    public JiraAuthTests()
+    public OAuthServiceTest()
     {
         _vaultMock.Reset();
         _stateFactoryMock.Reset();
+        _oAuthClientMock.Reset();
     }
 
-    public class StartAuthProcessAsync : JiraAuthTests
+    public class StartAuthProcessAsync : OAuthServiceTest
     {
         [Fact]
-        public async Task ShouldBuildCorrectAuthUriWithoutAdminPrivileges()
+        public async Task ShouldBuildCorrectAuthUri()
         {
             // Arrange
             var state = Guid.NewGuid().ToString();
-            var config = CreateDefaultOptions();
             const string redirectUrl = "https://networkperspective.io:5001/callback";
 
             _stateFactoryMock
@@ -60,30 +57,29 @@ public class JiraAuthTests
                 .Returns(state);
 
             _vaultMock
-                .Setup(x => x.GetSecretAsync(JiraClientKeys.JiraClientIdKey, It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetSecretAsync(GoogleKeys.GoogleClientIdKey, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ClientId.ToSecureString());
 
             var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
 
             var service = new OAuthService(
                 _vaultMock.Object,
-                _jiraClientMock.Object,
                 _stateFactoryMock.Object,
+                _oAuthClientMock.Object,
                 cache,
-                config,
                 _logger);
 
             var connectorProperties = new Dictionary<string, string>
             { };
-            var connectorInfo = new ConnectorContext(Guid.NewGuid(), "Jira", connectorProperties);
+            var connectorInfo = new ConnectorContext(Guid.NewGuid(), "Google", connectorProperties);
 
             // Act
             var result = await service.InitializeOAuthAsync(new OAuthContext(connectorInfo, redirectUrl));
 
             // Assert
-            result.AuthUri.Should().Contain("authorize");
+            result.AuthUri.Should().Contain("auth");
             result.AuthUri.Should().Contain($"client_id={ClientId}");
-            result.AuthUri.Should().Contain($"scope={string.Join('+', Scopes)}");
+            //result.AuthUri.Should().Contain($"scope={string.Join('+', Scopes)}"); // TODO to be defined what we expect here
             result.AuthUri.Should().Contain($"redirect_uri={HttpUtility.UrlEncode(redirectUrl)}");
         }
 
@@ -91,11 +87,9 @@ public class JiraAuthTests
         public async Task ShouldPutStateToCache()
         {
             // Arrange
-            var config = CreateDefaultOptions();
-
             var connectorId = Guid.NewGuid();
             var callbackUri = "https://localhost:5001/callback";
-            var connectorInfo = new ConnectorContext(connectorId, "Jira", new Dictionary<string, string>());
+            var connectorInfo = new ConnectorContext(connectorId, "Google", new Dictionary<string, string>());
             var context = new OAuthContext(connectorInfo, callbackUri);
 
             var state = Guid.NewGuid().ToString();
@@ -107,10 +101,9 @@ public class JiraAuthTests
             var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
             var service = new OAuthService(
                 _vaultMock.Object,
-                _jiraClientMock.Object,
                 _stateFactoryMock.Object,
+                _oAuthClientMock.Object,
                 cache,
-                config,
                 _logger);
 
             // Act
@@ -121,7 +114,7 @@ public class JiraAuthTests
         }
     }
 
-    public class HandleAuthorizationCodeCallback : JiraAuthTests
+    public class HandleAuthorizationCodeCallback : OAuthServiceTest
     {
         [Fact]
         public async Task ShouldSetKeysInVault()
@@ -130,22 +123,21 @@ public class JiraAuthTests
             var connectorId = Guid.NewGuid();
             var callbackUri = "https://localhost:5001/callback";
             var code = Guid.NewGuid().ToString();
+            var accessToken = Guid.NewGuid().ToString();
+            var refreshToken = Guid.NewGuid().ToString();
 
-            var config = CreateDefaultOptions();
-
-            var connectorInfo = new ConnectorContext(connectorId, "Jira", new Dictionary<string, string>());
+            var connectorInfo = new ConnectorContext(connectorId, "Google", new Dictionary<string, string>());
             var context = new OAuthContext(connectorInfo, callbackUri);
 
-            _jiraClientMock
-                .Setup(x => x.ExchangeCodeForTokenAsync(code, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new OAuthTokenResponse { AccessToken = "access-token", RefreshToken = "refresh-token" });
+            _oAuthClientMock
+                .Setup(x => x.ExchangeCodeForTokenAsync(code, It.IsAny<string>(), It.IsAny<string>(), callbackUri, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new TokenResponse(accessToken, refreshToken));
 
             var service = new OAuthService(
                 _vaultMock.Object,
-                _jiraClientMock.Object,
                 _stateFactoryMock.Object,
+                _oAuthClientMock.Object,
                 Mock.Of<IMemoryCache>(),
-                config,
                 _logger);
 
             // Act
@@ -155,16 +147,4 @@ public class JiraAuthTests
             _vaultMock.Verify(x => x.SetSecretAsync(It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
         }
     }
-
-    private static IOptions<JiraConfig> CreateDefaultOptions()
-    => Options.Create(new JiraConfig
-    {
-        BaseUrl = "https://network.perspective.io/",
-        Auth = new JiraAuthConfig
-        {
-            BaseUrl = "https://networkperspective.io/",
-            Path = "authorize",
-            Scopes = Scopes
-        }
-    });
 }
