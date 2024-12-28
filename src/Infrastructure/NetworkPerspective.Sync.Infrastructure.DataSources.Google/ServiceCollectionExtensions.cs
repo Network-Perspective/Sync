@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Clients;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Criterias;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
@@ -27,11 +28,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICredentialsProvider, CredentialsProvider>();
         services.AddScoped<ICriteria, NonServiceUserCriteria>();
 
+        services.AddScoped<IOAuthClient, OAuthClient>();
         services.AddScoped<IMailboxClient, MailboxClient>();
         services.AddScoped<ICalendarClient, CalendarClient>();
         services.AddScoped<IUsersClient, UsersClient>();
         services.AddScoped<IUserCalendarTimeZoneReader, UserCalendarTimeZoneReader>();
 
+        services.AddKeyedScoped<IOAuthService, OAuthService>(connectorType.GetKeyOf<IOAuthService>());
         services.AddKeyedScoped<IAuthTester, AuthTester>(connectorType.GetKeyOf<IAuthTester>());
         services.AddKeyedScoped<IDataSource, GoogleFacade>(connectorType.GetKeyOf<IDataSource>());
 

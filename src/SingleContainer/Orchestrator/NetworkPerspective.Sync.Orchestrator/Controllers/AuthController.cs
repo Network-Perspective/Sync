@@ -21,6 +21,7 @@ public class AuthController(IConnectorsService connectorsService, IWorkerRouter 
     private const string MicrosoftCallbackPath = "microsoft-callback";
     private const string JiraCallbackPath = "jira-callback";
     private const string SlackCallbackPath = "slack-callback";
+    private const string GoogleCallbackPath = "google-callback";
 
     /// <summary>
     /// Initialize OAuth process
@@ -130,6 +131,30 @@ public class AuthController(IConnectorsService connectorsService, IWorkerRouter 
         return Ok("Auth completed!");
     }
 
+    /// <summary>
+    /// Google OAuth callback
+    /// </summary>
+    /// <param name="code">Authorization code</param>
+    /// <param name="state">Anti-forgery unique value</param>
+    /// <param name="stoppingToken">Stopping token</param>
+    /// <response code="200">OAuth process completed</response>
+    /// <response code="401">State does not match any initialized OAuth process</response>
+    /// <response code="500">Internal server error</response>
+    [HttpGet(GoogleCallbackPath)]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> HandleGoogleCallback(string code, string state, CancellationToken stoppingToken = default)
+    {
+        if (!cache.TryGetValue(state, out string workerName))
+            throw new OAuthException("State does not match initialized value");
+
+        await workerRouter.HandleOAuthCallbackAsync(workerName, code, state);
+
+        return Ok("Auth completed!");
+    }
+
     private Uri CreateCallbackUri(string connectorType)
     {
         var callbackPath = connectorType switch
@@ -137,6 +162,7 @@ public class AuthController(IConnectorsService connectorsService, IWorkerRouter 
             "Slack" => SlackCallbackPath,
             "Office365" => MicrosoftCallbackPath,
             "Jira" => JiraCallbackPath,
+            "Google" => GoogleCallbackPath,
             _ => throw new NotImplementedException()
         };
 
