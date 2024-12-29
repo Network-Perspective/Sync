@@ -12,7 +12,7 @@ using Microsoft.Graph.Teams.Item.Channels.Item.Messages.Delta;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using ChatMessage = Microsoft.Graph.Models.ChatMessage;
 using GraphChannel = Microsoft.Graph.Models.Channel;
@@ -33,11 +33,11 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
         private const string TaskDescription = "Fetching channels metadata from Microsoft API";
 
         private readonly GraphServiceClient _graphClient;
-        private readonly ITasksStatusesCache _tasksStatusesCache;
+        private readonly IGlobalStatusCache _tasksStatusesCache;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<ChannelsClient> _logger;
 
-        public ChannelsClient(GraphServiceClient graphClient, ITasksStatusesCache tasksStatusesCache, ILoggerFactory loggerFactory)
+        public ChannelsClient(GraphServiceClient graphClient, IGlobalStatusCache tasksStatusesCache, ILoggerFactory loggerFactory)
         {
             _graphClient = graphClient;
             _tasksStatusesCache = tasksStatusesCache;

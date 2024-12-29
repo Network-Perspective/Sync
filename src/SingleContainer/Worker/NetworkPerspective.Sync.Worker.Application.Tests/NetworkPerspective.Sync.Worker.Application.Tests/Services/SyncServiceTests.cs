@@ -22,6 +22,7 @@ using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
 
@@ -36,7 +37,7 @@ public class SyncServiceTests
     private readonly Mock<IInteractionsFilterFactory> _interactionsFilterFactoryMock = new();
     private readonly Mock<IInteractionsFilter> _interactionsFilterMock = new();
     private readonly Mock<IDataSource> _dataSourceMock = new();
-    private readonly Mock<ITasksStatusesCache> _tasksStatusesCache = new();
+    private readonly Mock<IGlobalStatusCache> _tasksStatusesCache = new();
     private readonly TestableInteractionStream _interactionsStream = new();
     private readonly IConnectorTypesCollection _connectorTypes;
 

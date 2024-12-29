@@ -13,6 +13,7 @@ using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 
@@ -22,7 +23,7 @@ internal interface IMembersClient
     Task<EmployeeCollection> GetHashedEmployees(ISlackClientBotScopeFacade slackClientFacade, EmployeeFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default);
 }
 
-internal class MembersClient(ITasksStatusesCache tasksStatusesCache, IConnectorContextAccessor connectorContextProvider, ILogger<MembersClient> logger) : IMembersClient
+internal class MembersClient(IGlobalStatusCache tasksStatusesCache, IConnectorContextAccessor connectorContextProvider, ILogger<MembersClient> logger) : IMembersClient
 {
     private const string TaskCaption = "Synchronizing employees metadata";
     private const string TaskDescription = "Fetching employees metadata from Slack API";

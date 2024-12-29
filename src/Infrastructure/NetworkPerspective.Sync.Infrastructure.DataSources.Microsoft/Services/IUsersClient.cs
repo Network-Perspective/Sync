@@ -10,7 +10,7 @@ using Microsoft.Graph.Users;
 
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
 
@@ -19,7 +19,7 @@ internal interface IUsersClient
     Task<IEnumerable<User>> GetUsersAsync(SyncContext contex, CancellationToken stoppingToken = default);
 }
 
-internal class UsersClient(GraphServiceClient graphClient, ITasksStatusesCache tasksStatusesCache, ILogger<UsersClient> logger) : IUsersClient
+internal class UsersClient(GraphServiceClient graphClient, IGlobalStatusCache tasksStatusesCache, ILogger<UsersClient> logger) : IUsersClient
 {
     private const string TaskCaption = "Synchronizing employees metadata";
     private const string TaskDescription = "Fetching employees metadata from Microsoft API";
