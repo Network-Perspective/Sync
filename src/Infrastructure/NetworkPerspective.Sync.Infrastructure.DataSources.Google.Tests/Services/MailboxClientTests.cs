@@ -20,6 +20,7 @@ using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
 
@@ -36,7 +37,7 @@ public class MailboxClientTests(GoogleClientFixture googleClientFixture) : IClas
 
         var googleConfig = new GoogleConfig
         {
-            ApplicationName = "gmail_app",
+            ApplicationName = GoogleClientFixture.ApplicationName,
             MaxMessagesPerUserDaily = 1000,
             SyncOverlapInMinutes = 0
         };
@@ -44,7 +45,7 @@ public class MailboxClientTests(GoogleClientFixture googleClientFixture) : IClas
         var clock = new Clock();
         var retryPolicyProvider = new RetryPolicyProvider(NullLogger<RetryPolicyProvider>.Instance);
 
-        var mailboxClient = new MailboxClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), googleClientFixture.CredentialProvider, retryPolicyProvider, Mock.Of<IStatusLogger>(), NullLoggerFactory.Instance, clock);
+        var mailboxClient = new MailboxClient(Mock.Of<IGlobalStatusCache>(), Options.Create(googleConfig), googleClientFixture.CredentialProvider, retryPolicyProvider, Mock.Of<IStatusLogger>(), NullLoggerFactory.Instance, clock);
 
         var employees = new List<Employee>()
             .Add(userEmail);

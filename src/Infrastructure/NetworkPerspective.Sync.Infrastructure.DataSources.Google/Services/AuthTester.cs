@@ -8,11 +8,12 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Credentials;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 
-internal class AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, IConnectorContextAccessor connectorContextProvider, ILogger<AuthTester> logger) : IAuthTester
+internal class AuthTester(IOptions<GoogleConfig> config, IImpesonificationCredentialsProvider credentialsProvider, IConnectorContextAccessor connectorContextProvider, ILogger<AuthTester> logger) : IAuthTester
 {
     private readonly GoogleConfig _config = config.Value;
 
@@ -26,7 +27,7 @@ internal class AuthTester(IOptions<GoogleConfig> config, ICredentialsProvider cr
             logger.LogInformation("Checking if connector '{connectorId}' is authorized", connectorContext);
             var googleNetworkProperties = connectorContext.GetConnectorProperties<GoogleNetworkProperties>();
 
-            var userCredentials = await credentialsProvider.GetForUserAsync(googleNetworkProperties.AdminEmail, stoppingToken);
+            var userCredentials = await credentialsProvider.ImpersonificateAsync(googleNetworkProperties.AdminEmail, stoppingToken);
 
             var service = new DirectoryService(new BaseClientService.Initializer
             {

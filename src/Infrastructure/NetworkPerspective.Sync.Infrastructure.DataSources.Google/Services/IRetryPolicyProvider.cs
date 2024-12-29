@@ -11,57 +11,49 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Extensions;
 using Polly;
 using Polly.Retry;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
+
+internal interface IRetryPolicyProvider
 {
-    internal interface IRetryPolicyProvider
+    AsyncRetryPolicy GetSecretRotationRetryPolicy();
+    AsyncRetryPolicy GetThrottlingRetryPolicy();
+}
+
+internal class RetryPolicyProvider(ILogger<RetryPolicyProvider> logger) : IRetryPolicyProvider
+{
+    public AsyncRetryPolicy GetSecretRotationRetryPolicy()
     {
-        AsyncRetryPolicy GetSecretRotationRetryPolicy();
-        AsyncRetryPolicy GetThrottlingRetryPolicy();
+        void OnTokenRotationException(Exception exception, int count)
+        {
+            logger.LogDebug("Google API threw an exception that suggests the opration got interrupted by secret rotation. Retrying...");
+        }
+
+        return Policy
+            .Handle<TokenResponseException>(x => x.Error.IsInvalidSignatureError())
+            .RetryAsync(1, OnTokenRotationException);
     }
 
-    internal class RetryPolicyProvider : IRetryPolicyProvider
+
+    public AsyncRetryPolicy GetThrottlingRetryPolicy()
     {
-        private readonly ILogger<RetryPolicyProvider> _logger;
-
-        public RetryPolicyProvider(ILogger<RetryPolicyProvider> logger)
+        bool IsThrottlingException(GoogleApiException exception)
         {
-            _logger = logger;
+            const string exceptionDomain = "usageLimits";
+            const string exceptionReason = "rateLimitExceeded";
+            return exception.Error.Errors.Any(x => x.Domain == exceptionDomain && x.Reason == exceptionReason);
         }
 
-        public AsyncRetryPolicy GetSecretRotationRetryPolicy()
-        {
-            void OnTokenRotationException(Exception exception, int count)
-            {
-                _logger.LogDebug("Google API threw an exception that suggests the opration got interrupted by secret rotation. Retrying...");
-            }
+        TimeSpan SleepDurationProvider(int retryCount)
+            => TimeSpan.FromMinutes(1);
 
-            return Policy
-                .Handle<TokenResponseException>(x => x.Error.IsInvalidSignatureError())
-                .RetryAsync(1, OnTokenRotationException);
+        void OnThrottingException(Exception exception, TimeSpan timeSpan)
+        {
+            logger.LogDebug("Google api threw an exception that suggests queries have been throttled. " +
+                "The attempt will be retried in {timespan}s", timeSpan.TotalSeconds);
         }
 
-
-        public AsyncRetryPolicy GetThrottlingRetryPolicy()
-        {
-            bool IsThrottlingException(GoogleApiException exception)
-            {
-                const string exceptionDomain = "usageLimits";
-                const string exceptionReason = "rateLimitExceeded";
-                return exception.Error.Errors.Any(x => x.Domain == exceptionDomain && x.Reason == exceptionReason);
-            }
-
-            TimeSpan SleepDurationProvider(int retryCount)
-                => TimeSpan.FromMinutes(1);
-
-            void OnThrottingException(Exception exception, TimeSpan timeSpan)
-            {
-                _logger.LogDebug("Google api threw an exception that suggests queries have been throttled. " +
-                    "The attempt will be retried in {timespan}s", timeSpan.TotalSeconds);
-            }
-
-            return Policy
-                .Handle<GoogleApiException>(IsThrottlingException)
-                .WaitAndRetryForeverAsync(SleepDurationProvider, OnThrottingException);
-        }
+        return Policy
+            .Handle<GoogleApiException>(IsThrottlingException)
+            .WaitAndRetryForeverAsync(SleepDurationProvider, OnThrottingException);
     }
 }

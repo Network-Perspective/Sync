@@ -7,6 +7,7 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 using NetworkPerspective.Sync.Worker.Application.UseCases;
 
 namespace NetworkPerspective.Sync.Worker.Application;
@@ -30,7 +31,8 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IInteractionsFilterFactory, InteractionsFilterFactory>();
         services.AddTransient<IAuthStateKeyFactory, AuthStateKeyFactory>();
 
-        services.AddSingleton<ITasksStatusesCache, TasksStatusesCache>();
+        services.AddScoped<IScopedStatusCache, ScopedStatusCache>();
+        services.AddSingleton<IGlobalStatusCache, GlobalStatusCache>();
 
         services.AddScoped<ISecretRotationServiceFactory, SecretRotatorFactory>();
         services.AddScoped<ISecretRotationService>(sp => sp.GetRequiredService<ISecretRotationServiceFactory>().CreateSecretRotator());

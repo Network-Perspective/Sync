@@ -12,7 +12,7 @@ using Microsoft.Graph.Users.Item.Calendar.Events.Item;
 
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
 {
@@ -27,10 +27,10 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
         private const string TaskDescription = "Fetching callendar metadata from Microsoft API";
 
         private readonly GraphServiceClient _graphClient;
-        private readonly ITasksStatusesCache _tasksStatusesCache;
+        private readonly IGlobalStatusCache _tasksStatusesCache;
         private readonly ILogger<CalendarClient> _logger;
 
-        public CalendarClient(GraphServiceClient graphClient, ITasksStatusesCache tasksStatusesCache, ILogger<CalendarClient> logger)
+        public CalendarClient(GraphServiceClient graphClient, IGlobalStatusCache tasksStatusesCache, ILogger<CalendarClient> logger)
         {
             _graphClient = graphClient;
             _tasksStatusesCache = tasksStatusesCache;

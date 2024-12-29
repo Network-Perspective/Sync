@@ -10,7 +10,7 @@ using Microsoft.Graph.Models;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Mappers;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using InternalChat = NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models.Chat;
 using InternalChatMessageReaction = NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models.ChatMessageReaction;
@@ -28,10 +28,10 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
         private const string TaskDescription = "Fetching chat metadata from Microsoft API";
 
         private readonly GraphServiceClient _graphClient;
-        private readonly ITasksStatusesCache _tasksStatusesCache;
+        private readonly IGlobalStatusCache _tasksStatusesCache;
         private readonly ILogger<ChatsClient> _logger;
 
-        public ChatsClient(GraphServiceClient graphClient, ITasksStatusesCache tasksStatusesCache, ILogger<ChatsClient> logger)
+        public ChatsClient(GraphServiceClient graphClient, IGlobalStatusCache tasksStatusesCache, ILogger<ChatsClient> logger)
         {
             _graphClient = graphClient;
             _tasksStatusesCache = tasksStatusesCache;

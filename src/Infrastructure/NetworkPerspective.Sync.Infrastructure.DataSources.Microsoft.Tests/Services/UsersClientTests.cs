@@ -16,7 +16,7 @@ using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
 
@@ -31,7 +31,7 @@ public class UsersClientTests(MicrosoftClientBasicFixture microsoftClientFixture
     public async Task ShouldBeAbleToGetUsers()
     {
         // Arrange
-        var client = new UsersClient(microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _logger);
+        var client = new UsersClient(microsoftClientFixture.Client, Mock.Of<IGlobalStatusCache>(), _logger);
         var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
         var filter = new EmployeeFilter(["group:Sample Team Site"], Array.Empty<string>());
         var networkConfig = new ConnectorConfig(filter, CustomAttributesConfig.Empty);

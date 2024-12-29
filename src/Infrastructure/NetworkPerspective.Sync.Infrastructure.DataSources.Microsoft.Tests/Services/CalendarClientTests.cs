@@ -19,7 +19,7 @@ using NetworkPerspective.Sync.Worker.Application.Domain;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
 
@@ -36,7 +36,7 @@ public class CalendarClientTests(MicrosoftClientBasicFixture microsoftClientFixt
     {
         // Arrange
         var stream = new TestableInteractionStream();
-        var usersClient = new UsersClient(microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _usersClientlogger);
+        var usersClient = new UsersClient(microsoftClientFixture.Client, Mock.Of<IGlobalStatusCache>(), _usersClientlogger);
 
         var timeRange = new TimeRange(new DateTime(2023, 04, 10), new DateTime(2023, 04, 11));
         var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), timeRange);
@@ -44,7 +44,7 @@ public class CalendarClientTests(MicrosoftClientBasicFixture microsoftClientFixt
         var employees = EmployeesMapper.ToEmployees(users, HashFunction.Empty, EmployeeFilter.Empty, true);
 
         var interactionFactory = new MeetingInteractionFactory(HashFunction.Empty, employees, NullLogger<MeetingInteractionFactory>.Instance);
-        var calednarClient = new CalendarClient(microsoftClientFixture.Client, Mock.Of<ITasksStatusesCache>(), _calendarClientlogger);
+        var calednarClient = new CalendarClient(microsoftClientFixture.Client, Mock.Of<IGlobalStatusCache>(), _calendarClientlogger);
 
         // Act
         await calednarClient.SyncInteractionsAsync(syncContext, stream, users.Select(x => x.Mail), interactionFactory);

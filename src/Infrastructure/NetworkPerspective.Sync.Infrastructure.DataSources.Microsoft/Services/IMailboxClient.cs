@@ -11,7 +11,7 @@ using Microsoft.Graph.Users.Item.Messages;
 
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
 {
@@ -24,11 +24,11 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
     {
         private const string TaskCaption = "Synchronizing email interactions";
         private const string TaskDescription = "Fetching emails metadata from Microsoft API";
-        private readonly ITasksStatusesCache _tasksStatusesCache;
+        private readonly IGlobalStatusCache _tasksStatusesCache;
         private readonly GraphServiceClient _graphClient;
         private readonly ILogger<MailboxClient> _logger;
 
-        public MailboxClient(GraphServiceClient graphClient, ITasksStatusesCache tasksStatusesCache, ILogger<MailboxClient> logger)
+        public MailboxClient(GraphServiceClient graphClient, IGlobalStatusCache tasksStatusesCache, ILogger<MailboxClient> logger)
         {
             _tasksStatusesCache = tasksStatusesCache;
             _graphClient = graphClient;

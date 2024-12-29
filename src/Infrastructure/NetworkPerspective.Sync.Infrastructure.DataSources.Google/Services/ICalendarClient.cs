@@ -12,10 +12,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Extensions;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Credentials;
 using NetworkPerspective.Sync.Worker.Application.Domain.Meetings;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services
 {
@@ -30,12 +31,12 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services
         private const string TaskDescription = "Fetching callendar metadata from Google API";
 
         private readonly GoogleConfig _config;
-        private readonly ITasksStatusesCache _tasksStatusesCache;
+        private readonly IGlobalStatusCache _tasksStatusesCache;
         private readonly IRetryPolicyProvider _retryPolicyProvider;
         private readonly ILogger<CalendarClient> _logger;
-        private readonly ICredentialsProvider _credentialsProvider;
+        private readonly IImpesonificationCredentialsProvider _credentialsProvider;
 
-        public CalendarClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, IRetryPolicyProvider retryPolicyProvider, ICredentialsProvider credentialsProvider, ILogger<CalendarClient> logger)
+        public CalendarClient(IGlobalStatusCache tasksStatusesCache, IOptions<GoogleConfig> config, IRetryPolicyProvider retryPolicyProvider, IImpesonificationCredentialsProvider credentialsProvider, ILogger<CalendarClient> logger)
         {
             _config = config.Value;
             _tasksStatusesCache = tasksStatusesCache;
@@ -74,7 +75,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services
 
                 int interactionsCount = 0;
 
-                var credentials = await _credentialsProvider.GetForUserAsync(userEmail, stoppingToken);
+                var credentials = await _credentialsProvider.ImpersonificateAsync(userEmail, stoppingToken);
 
                 var calendarService = new CalendarService(new BaseClientService.Initializer
                 {
