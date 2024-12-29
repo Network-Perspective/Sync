@@ -19,7 +19,7 @@ using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
 
@@ -44,10 +44,10 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Servic
             var externalEmail = "maciej@networkperspective.io";
             var googleConfig = new GoogleConfig
             {
-                ApplicationName = "gmail_app",
+                ApplicationName = GoogleClientFixture.ApplicationName,
             };
 
-            var client = new CalendarClient(Mock.Of<ITasksStatusesCache>(), Options.Create(googleConfig), new RetryPolicyProvider(NullLogger<RetryPolicyProvider>.Instance), _googleClientFixture.CredentialProvider, NullLogger<CalendarClient>.Instance);
+            var client = new CalendarClient(Mock.Of<IGlobalStatusCache>(), Options.Create(googleConfig), new RetryPolicyProvider(NullLogger<RetryPolicyProvider>.Instance), _googleClientFixture.CredentialProvider, NullLogger<CalendarClient>.Instance);
             var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
             var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), timeRange);
 

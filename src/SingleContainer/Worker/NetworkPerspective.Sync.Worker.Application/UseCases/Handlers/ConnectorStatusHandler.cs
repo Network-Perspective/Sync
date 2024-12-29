@@ -7,10 +7,11 @@ using NetworkPerspective.Sync.Contract.V1.Dtos;
 using NetworkPerspective.Sync.Utils.CQS.Queries;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 namespace NetworkPerspective.Sync.Worker.Application.UseCases.Handlers;
 
-internal class ConnectorStatusHandler(IAuthTester authTester, ITasksStatusesCache tasksStatusesCache, ILogger<ConnectorStatusHandler> logger) : IRequestHandler<ConnectorStatusRequest, ConnectorStatusResponse>
+internal class ConnectorStatusHandler(IAuthTester authTester, IGlobalStatusCache tasksStatusesCache, ILogger<ConnectorStatusHandler> logger) : IRequestHandler<ConnectorStatusRequest, ConnectorStatusResponse>
 {
     public async Task<ConnectorStatusResponse> HandleAsync(ConnectorStatusRequest request, CancellationToken stoppingToken = default)
     {

@@ -17,7 +17,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.Fixtures;
 using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
 
@@ -40,7 +40,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.Service
             const string existingEmail = "maciej@networkperspective.io";
             var timeRange = new TimeRange(new DateTime(1970, 01, 01, 0, 0, 0, DateTimeKind.Utc), DateTime.UtcNow);
             var paginationHandler = new CursorPaginationHandler(NullLogger<CursorPaginationHandler>.Instance);
-            var chatclient = new ChatClient(Mock.Of<ITasksStatusesCache>(), NullLogger<ChatClient>.Instance);
+            var chatclient = new ChatClient(Mock.Of<IGlobalStatusCache>(), NullLogger<ChatClient>.Instance);
 
             var slackClientFacade = new SlackClientBotScopeFacade(_slackHttpClient, paginationHandler);
             var stream = new TestableInteractionStream();

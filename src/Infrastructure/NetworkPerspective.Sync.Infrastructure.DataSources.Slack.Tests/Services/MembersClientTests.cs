@@ -14,6 +14,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.Fixtures;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
 
@@ -39,7 +40,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Tests.Service
             var paginationHandler = new CursorPaginationHandler(paginationLogger);
 
             var slackClientFacade = new SlackClientBotScopeFacade(_slackHttpClient, paginationHandler);
-            var membersClient = new MembersClient(Mock.Of<ITasksStatusesCache>(), Mock.Of<IConnectorContextAccessor>(), clientLogger);
+            var membersClient = new MembersClient(Mock.Of<IGlobalStatusCache>(), Mock.Of<IConnectorContextAccessor>(), clientLogger);
 
             try
             {

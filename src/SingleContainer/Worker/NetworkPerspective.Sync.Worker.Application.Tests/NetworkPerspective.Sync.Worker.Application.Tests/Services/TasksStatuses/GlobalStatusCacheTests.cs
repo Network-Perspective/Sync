@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 using FluentAssertions;
 
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Worker.Application.Tests.Services;
+namespace NetworkPerspective.Sync.Worker.Application.Tests.Services.TasksStatuses;
 
-public class TasksStatusesCacheTests
+public class GlobalStatusCacheTests
 {
     [Fact]
     public async Task ShouldPersistStatusForNetwork()
@@ -18,7 +18,7 @@ public class TasksStatusesCacheTests
         // Arrange
         var connectorId = Guid.NewGuid();
         var status = new SingleTaskStatus("First task", "This is super important task", 33.3);
-        var cache = new TasksStatusesCache();
+        var cache = new GlobalStatusCache();
 
         // Act
         await cache.SetStatusAsync(connectorId, status);

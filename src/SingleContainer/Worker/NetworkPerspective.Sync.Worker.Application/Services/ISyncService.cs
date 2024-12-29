@@ -13,6 +13,7 @@ using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 namespace NetworkPerspective.Sync.Worker.Application.Services;
 
@@ -27,7 +28,7 @@ internal sealed class SyncService : ISyncService
     private readonly IDataSource _dataSource;
     private readonly INetworkPerspectiveCore _networkPerspectiveCore;
     private readonly IStatusLogger _statusLogger;
-    private readonly ITasksStatusesCache _tasksStatusesCache;
+    private readonly IGlobalStatusCache _tasksStatusesCache;
     private readonly IInteractionsFilterFactory _interactionFilterFactory;
     private readonly IConnectorTypesCollection _connectorTypes;
 
@@ -35,7 +36,7 @@ internal sealed class SyncService : ISyncService
                        IDataSource dataSource,
                        INetworkPerspectiveCore networkPerspectiveCore,
                        IStatusLogger statusLogger,
-                       ITasksStatusesCache tasksStatusesCache,
+                       IGlobalStatusCache tasksStatusesCache,
                        IInteractionsFilterFactory interactionFilterFactory,
                        IConnectorTypesCollection connectorTypes)
     {

@@ -12,11 +12,13 @@ using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Extensions;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Credentials;
 using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services
 {
@@ -33,14 +35,14 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services
 
         private readonly GoogleConfig _config;
         private readonly ILogger<MailboxClient> _logger;
-        private readonly ITasksStatusesCache _tasksStatusesCache;
-        private readonly ICredentialsProvider _credentialsProvider;
+        private readonly IGlobalStatusCache _tasksStatusesCache;
+        private readonly IImpesonificationCredentialsProvider _credentialsProvider;
         private readonly IRetryPolicyProvider _retryPolicyProvider;
         private readonly IStatusLogger _statusLogger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IClock _clock;
 
-        public MailboxClient(ITasksStatusesCache tasksStatusesCache, IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, IRetryPolicyProvider retryPolicyProvider, IStatusLogger statusLogger, ILoggerFactory loggerFactory, IClock clock)
+        public MailboxClient(IGlobalStatusCache tasksStatusesCache, IOptions<GoogleConfig> config, IImpesonificationCredentialsProvider credentialsProvider, IRetryPolicyProvider retryPolicyProvider, IStatusLogger statusLogger, ILoggerFactory loggerFactory, IClock clock)
         {
             _config = config.Value;
             _logger = loggerFactory.CreateLogger<MailboxClient>();
@@ -130,7 +132,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services
 
         private async Task<GmailService> InitializeGmailServiceAsync(string userEmail, CancellationToken stoppingToken)
         {
-            var credentials = await _credentialsProvider.GetForUserAsync(userEmail, stoppingToken);
+            var credentials = await _credentialsProvider.ImpersonificateAsync(userEmail, stoppingToken);
 
             return new GmailService(new BaseClientService.Initializer
             {

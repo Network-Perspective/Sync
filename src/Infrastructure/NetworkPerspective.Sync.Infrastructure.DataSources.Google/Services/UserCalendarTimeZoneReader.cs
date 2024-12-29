@@ -6,14 +6,13 @@ using System.Threading.Tasks;
 
 using Google;
 using Google.Apis.Admin.Directory.directory_v1.Data;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Infrastructure.DataSources.Google;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Credentials;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
@@ -25,12 +24,12 @@ public interface IUserCalendarTimeZoneReader
 
 internal class UserCalendarTimeZoneReader : IUserCalendarTimeZoneReader
 {
-    private readonly ICredentialsProvider _credentialsProvider;
+    private readonly IImpesonificationCredentialsProvider _credentialsProvider;
     private readonly IRetryPolicyProvider _retryPolicyProvider;
     private readonly ILogger<UserCalendarTimeZoneReader> _logger;
     private readonly GoogleConfig _config;
 
-    public UserCalendarTimeZoneReader(IOptions<GoogleConfig> config, ICredentialsProvider credentialsProvider, IRetryPolicyProvider retryPolicyProvider, ILogger<UserCalendarTimeZoneReader> logger)
+    public UserCalendarTimeZoneReader(IOptions<GoogleConfig> config, IImpesonificationCredentialsProvider credentialsProvider, IRetryPolicyProvider retryPolicyProvider, ILogger<UserCalendarTimeZoneReader> logger)
     {
         _credentialsProvider = credentialsProvider;
         _retryPolicyProvider = retryPolicyProvider;
@@ -68,7 +67,7 @@ internal class UserCalendarTimeZoneReader : IUserCalendarTimeZoneReader
 
     private async Task<string> ReadUserTimeZoneAsync(string userEmail, CancellationToken stoppingToken)
     {
-        var credentials = await _credentialsProvider.GetForUserAsync(userEmail, stoppingToken);
+        var credentials = await _credentialsProvider.ImpersonificateAsync(userEmail, stoppingToken);
 
         var calendarService = new CalendarService(new BaseClientService.Initializer
         {

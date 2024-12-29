@@ -12,7 +12,7 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Client.Mappers;
 using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
-using NetworkPerspective.Sync.Worker.Application.Services;
+using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services
 {
@@ -26,10 +26,10 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services
         private const string TaskCaption = "Synchronizing channels interactions";
         private const string TaskDescription = "Fetching channels metadata from Slack API";
 
-        private readonly ITasksStatusesCache _tasksStatusesCache;
+        private readonly IGlobalStatusCache _tasksStatusesCache;
         private readonly ILogger<ChatClient> _logger;
 
-        public ChatClient(ITasksStatusesCache tasksStatusesCache, ILogger<ChatClient> logger)
+        public ChatClient(IGlobalStatusCache tasksStatusesCache, ILogger<ChatClient> logger)
         {
             _tasksStatusesCache = tasksStatusesCache;
             _logger = logger;

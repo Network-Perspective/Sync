@@ -5,29 +5,28 @@ using System.Threading.Tasks;
 
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 
-namespace NetworkPerspective.Sync.Worker.Application.Services;
+namespace NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
-public interface ITasksStatusesCache
+public interface IGlobalStatusCache
 {
     Task<SingleTaskStatus> GetStatusAsync(Guid connectorId, CancellationToken stoppingToken = default);
     Task SetStatusAsync(Guid connectorId, SingleTaskStatus synchronizationTaskStatus, CancellationToken stoppingToken = default);
 }
 
-internal class TasksStatusesCache : ITasksStatusesCache
+internal class GlobalStatusCache : IGlobalStatusCache
 {
     private readonly Dictionary<Guid, SingleTaskStatus> _statuses = [];
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public async Task<SingleTaskStatus> GetStatusAsync(Guid connectorId, CancellationToken stoppingToken = default)
     {
+        await _semaphore.WaitAsync(stoppingToken);
+
         try
         {
-            await _semaphore.WaitAsync(stoppingToken);
-
-            if (_statuses.ContainsKey(connectorId))
-                return _statuses[connectorId];
-            else
-                return SingleTaskStatus.Empty;
+            return _statuses.TryGetValue(connectorId, out SingleTaskStatus value)
+                ? value
+                : SingleTaskStatus.Empty;
         }
         finally
         {
@@ -37,9 +36,10 @@ internal class TasksStatusesCache : ITasksStatusesCache
 
     public async Task SetStatusAsync(Guid connectorId, SingleTaskStatus synchronizationTaskStatus, CancellationToken stoppingToken = default)
     {
+        await _semaphore.WaitAsync(stoppingToken);
+
         try
         {
-            await _semaphore.WaitAsync(stoppingToken);
             _statuses[connectorId] = synchronizationTaskStatus;
         }
         finally

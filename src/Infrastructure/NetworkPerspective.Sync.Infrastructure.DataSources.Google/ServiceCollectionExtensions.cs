@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Clients;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Criterias;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Credentials;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
@@ -25,7 +26,10 @@ public static class ServiceCollectionExtensions
 
         services.AddTransient<IRetryPolicyProvider, RetryPolicyProvider>();
 
+        services.AddScoped<IImpesonificationCredentialsProvider, ImpersonificationCredentialsProvider>();
+        services.AddScoped<IUserCredentialsProvider, UserCredentialsProvider>();
         services.AddScoped<ICredentialsProvider, CredentialsProvider>();
+
         services.AddScoped<ICriteria, NonServiceUserCriteria>();
 
         services.AddScoped<IOAuthClient, OAuthClient>();
