@@ -32,7 +32,7 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
         var connectorProperties = context.GetConnectorProperties<GoogleNetworkProperties>();
 
         var credentials = await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
-        var users = await usersClient.GetUsersAsync(context.ConnectorId, credentials, context.NetworkConfig.EmailFilter, stoppingToken);
+        var users = await usersClient.GetUsersAsync(credentials, stoppingToken);
 
         var mapper = new EmployeesMapper(
             new CompanyStructureService(),
@@ -64,7 +64,7 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
         var connectorProperties = context.GetConnectorProperties<GoogleNetworkProperties>();
 
         var credentials = await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
-        var users = await usersClient.GetUsersAsync(context.ConnectorId, credentials, context.NetworkConfig.EmailFilter, stoppingToken);
+        var users = await usersClient.GetUsersAsync(credentials, stoppingToken);
 
         var timezonesPropsSource = await userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
 
@@ -86,7 +86,7 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
         var connectorProperties = context.GetConnectorProperties<GoogleNetworkProperties>();
 
         var credentials = await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
-        var users = await usersClient.GetUsersAsync(context.ConnectorId, credentials, context.NetworkConfig.EmailFilter, stoppingToken);
+        var users = await usersClient.GetUsersAsync(credentials, stoppingToken);
 
         var timezonesPropsSource = await userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
 

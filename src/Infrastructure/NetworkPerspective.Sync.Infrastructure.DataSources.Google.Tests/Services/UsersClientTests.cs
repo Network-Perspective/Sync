@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using FluentAssertions;
 
@@ -11,7 +10,6 @@ using Moq;
 using NetworkPerspective.Sync.Common.Tests;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Fixtures;
-using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
@@ -32,10 +30,10 @@ public class MemberProfilesClientTests(GoogleClientFixture googleClientFixture) 
 
         var retryPolicyProvider = new RetryPolicyProvider(NullLogger<RetryPolicyProvider>.Instance);
         var credentials = await googleClientFixture.CredentialProvider.ImpersonificateAsync(GoogleClientFixture.AdminEmail);
-        var client = new UsersClient(Mock.Of<IScopedStatusCache>(), Options.Create(googleConfig), [], retryPolicyProvider, NullLogger<UsersClient>.Instance);
+        var client = new UsersClient(Mock.Of<IScopedStatusCache>(), Options.Create(googleConfig), retryPolicyProvider, NullLogger<UsersClient>.Instance);
 
         // Act
-        var result = await client.GetUsersAsync(Guid.NewGuid(), credentials, EmployeeFilter.Empty);
+        var result = await client.GetUsersAsync(credentials);
 
         // Assert
         result.Should().NotBeNullOrEmpty();

@@ -53,7 +53,7 @@ internal sealed class SyncService : ISyncService
     {
         try
         {
-            var status = new SingleTaskStatus("Initializing synchronization", "The synchronization is starting", 0);
+            var status = SingleTaskStatus.New("Initializing synchronization", "The synchronization is starting", 0);
             await _tasksStatusesCache.SetStatusAsync(context.ConnectorId, status, stoppingToken);
             await _statusLogger.LogInfoAsync("Sync started", stoppingToken);
             _logger.LogInformation(
