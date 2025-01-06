@@ -7,15 +7,15 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Cre
 
 internal interface ICredentialsProvider
 {
-    Task<ServiceAccountCredential> ImpersonificateAsync(string email, CancellationToken stoppingToken = default);
-    Task<GoogleCredential> GetCurrentAsync(CancellationToken stoppingToken = default);
+    Task<ICredential> ImpersonificateAsync(string email, CancellationToken stoppingToken = default);
+    Task<ICredential> GetCurrentAsync(CancellationToken stoppingToken = default);
 }
 
 internal class CredentialsProvider(IImpesonificationCredentialsProvider impesonificationCredentialsProvider, IUserCredentialsProvider userCredentialsProvider) : ICredentialsProvider
 {
-    public Task<GoogleCredential> GetCurrentAsync(CancellationToken stoppingToken = default)
+    public Task<ICredential> GetCurrentAsync(CancellationToken stoppingToken = default)
         => userCredentialsProvider.GetCurrentAsync(stoppingToken);
 
-    public Task<ServiceAccountCredential> ImpersonificateAsync(string email, CancellationToken stoppingToken = default)
+    public Task<ICredential> ImpersonificateAsync(string email, CancellationToken stoppingToken = default)
         => impesonificationCredentialsProvider.ImpersonificateAsync(email, stoppingToken);
 }

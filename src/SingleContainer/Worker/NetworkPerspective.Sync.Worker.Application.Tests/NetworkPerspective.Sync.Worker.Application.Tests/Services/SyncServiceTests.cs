@@ -78,7 +78,7 @@ public class SyncServiceTests
 
         _dataSourceMock
             .Setup(x => x.SyncInteractionsAsync(It.IsAny<IInteractionsStream>(), context, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new SyncResult(10, 100, Enumerable.Empty<Exception>()));
+            .ReturnsAsync(new SyncResult(10, 100, []));
         var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
 
         // Act
@@ -138,7 +138,7 @@ public class SyncServiceTests
         var start = new DateTime(2022, 01, 01);
         var end = new DateTime(2022, 01, 02);
         var timeRange = new TimeRange(start, end);
-        var connectorProperties = new ConnectorProperties(true, false, null);
+        var connectorProperties = new ConnectorProperties(true, false, false, null);
         var context = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, connectorProperties.GetAll(), "foo".ToSecureString(), timeRange);
 
         var employeeId = EmployeeId.Create("foo", "bar");
