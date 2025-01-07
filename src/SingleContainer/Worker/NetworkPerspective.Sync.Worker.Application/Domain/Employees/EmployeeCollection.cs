@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using NetworkPerspective.Sync.Worker.Application.Domain;
-
 namespace NetworkPerspective.Sync.Worker.Application.Domain.Employees
 {
     public class EmployeeCollection

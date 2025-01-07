@@ -35,12 +35,12 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
             _config = config.Value;
         }
 
-        public Task<ConnectorConfig> GetNetworkConfigAsync(SecureString accessToken, CancellationToken stoppingToken = default)
+        public Task<ConnectorConfig> GetConnectorConfigAsync(SecureString accessToken, CancellationToken stoppingToken = default)
         {
             var customAttributes = new CustomAttributesConfig(
-                groupAttributes: new[] { "NP-Test.Role" },
-                propAttributes: new[] { "NP-Test.Employment_Date" },
-                relationships: new[] { new CustomAttributeRelationship("NP-Test.FormalSupervisor", "Boss") });
+                groupAttributes: ["NP-Test.Role"],
+                propAttributes: ["NP-Test.Employment_Date"],
+                relationships: [new CustomAttributeRelationship("NP-Test.FormalSupervisor", "Boss")]);
 
             return Task.FromResult(new ConnectorConfig(EmployeeFilter.Empty, customAttributes));
         }

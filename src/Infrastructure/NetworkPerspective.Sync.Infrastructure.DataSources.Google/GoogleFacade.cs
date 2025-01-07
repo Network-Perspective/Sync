@@ -29,10 +29,10 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
     {
         _logger.LogInformation("Getting interactions for connector '{connectorId}' for period {timeRange}", context.ConnectorId, context.TimeRange);
 
-        var connectorProperties = context.GetConnectorProperties<GoogleNetworkProperties>();
+        var connectorProperties = context.GetConnectorProperties<GoogleConnectorProperties>();
 
         var credentials = await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
-        var users = await usersClient.GetUsersAsync(context.ConnectorId, credentials, context.NetworkConfig.EmailFilter, stoppingToken);
+        var users = await usersClient.GetUsersAsync(credentials, stoppingToken);
 
         var mapper = new EmployeesMapper(
             new CompanyStructureService(),
@@ -61,10 +61,12 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
     {
         _logger.LogInformation("Getting employees for connector '{connectorId}'", context.ConnectorId);
 
-        var connectorProperties = context.GetConnectorProperties<GoogleNetworkProperties>();
+        var connectorProperties = context.GetConnectorProperties<GoogleConnectorProperties>();
 
-        var credentials = await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
-        var users = await usersClient.GetUsersAsync(context.ConnectorId, credentials, context.NetworkConfig.EmailFilter, stoppingToken);
+        var credentials = connectorProperties.UseUserToken
+            ? await credentialsProvider.GetCurrentAsync(stoppingToken)
+            : await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
+        var users = await usersClient.GetUsersAsync(credentials, stoppingToken);
 
         var timezonesPropsSource = await userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
 
@@ -83,10 +85,10 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
     {
         _logger.LogInformation("Getting hashed employees for connector '{connectorId}'", context.ConnectorId);
 
-        var connectorProperties = context.GetConnectorProperties<GoogleNetworkProperties>();
+        var connectorProperties = context.GetConnectorProperties<GoogleConnectorProperties>();
 
         var credentials = await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
-        var users = await usersClient.GetUsersAsync(context.ConnectorId, credentials, context.NetworkConfig.EmailFilter, stoppingToken);
+        var users = await usersClient.GetUsersAsync(credentials, stoppingToken);
 
         var timezonesPropsSource = await userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
 

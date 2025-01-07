@@ -13,7 +13,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Cre
 
 internal interface IUserCredentialsProvider
 {
-    Task<GoogleCredential> GetCurrentAsync(CancellationToken stoppingToken = default);
+    Task<ICredential> GetCurrentAsync(CancellationToken stoppingToken = default);
 }
 
 internal class UserCredentialsProvider(IVault vault, IConnectorContextAccessor connectorContextAccessor) : IUserCredentialsProvider
@@ -22,7 +22,7 @@ internal class UserCredentialsProvider(IVault vault, IConnectorContextAccessor c
     private GoogleCredential _credential = null;
 
 
-    public async Task<GoogleCredential> GetCurrentAsync(CancellationToken stoppingToken = default)
+    public async Task<ICredential> GetCurrentAsync(CancellationToken stoppingToken = default)
     {
         await _semaphore.WaitAsync(stoppingToken);
 

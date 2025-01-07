@@ -13,38 +13,44 @@ using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Fixtures
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Fixtures;
+
+internal static class ClientFactory
 {
-    internal static class ClientFactory
+    public static GraphServiceClient Create(bool syncMsTeams)
     {
-        public static GraphServiceClient Create(bool syncMsTeams)
+        var networkId = new Guid("bd1bc916-db78-4e1e-b93b-c6feb8cf729e");
+        var connectorId = new Guid("04C753D8-FF9A-479C-B857-5D28C1EAF6C1");
+        var secretRepository = TestableAzureKeyVaultClient.Create();
+
+        var resiliency = Options.Create(
+            new Resiliency
+            {
+                Retries = [TimeSpan.FromMilliseconds(100)]
+            });
+
+        var properties = new List<KeyValuePair<string, string>>
         {
-            var networkId = new Guid("bd1bc916-db78-4e1e-b93b-c6feb8cf729e");
-            var connectorId = new Guid("04C753D8-FF9A-479C-B857-5D28C1EAF6C1");
-            var secretRepository = TestableAzureKeyVaultClient.Create();
+            new(nameof(MicrosoftConnectorProperties.SyncMsTeams), syncMsTeams.ToString()),
+            new(nameof(MicrosoftConnectorProperties.SyncChats), true.ToString()),
+            new(nameof(MicrosoftConnectorProperties.SyncGroupAccess), true.ToString()),
+        };
 
-            var resiliency = Options.Create(
-                new Resiliency
-                {
-                    Retries = [TimeSpan.FromMilliseconds(100)]
-                });
+        var connectorProperties = ConnectorProperties.Create<MicrosoftConnectorProperties>(properties);
+        var connector = Connector<MicrosoftConnectorProperties>.Create(connectorId, connectorProperties, DateTime.UtcNow);
+        var hashingService = new Mock<IHashingService>();
+        hashingService
+            .Setup(x => x.Hash(It.IsAny<string>()))
+            .Returns<string>(x => x);
 
-            var networkProperties = new MicrosoftNetworkProperties(syncMsTeams, true, true, true, null);
-            var network = Connector<MicrosoftNetworkProperties>.Create(connectorId, networkProperties, DateTime.UtcNow);
-            var hashingService = new Mock<IHashingService>();
-            hashingService
-                .Setup(x => x.Hash(It.IsAny<string>()))
-                .Returns<string>(x => x);
+        var connectorInfo = new ConnectorContext(connectorId, "Office365", new Dictionary<string, string>());
 
-            var connectorInfo = new ConnectorContext(connectorId, "Office365", new Dictionary<string, string>());
+        var connectorInforProviederMock = new Mock<IConnectorContextAccessor>();
+        connectorInforProviederMock
+            .Setup(x => x.Context)
+            .Returns(connectorInfo);
 
-            var connectorInforProviederMock = new Mock<IConnectorContextAccessor>();
-            connectorInforProviederMock
-                .Setup(x => x.Context)
-                .Returns(connectorInfo);
-
-            var microsoftClientFactory = new MicrosoftClientFactory(secretRepository, connectorInforProviederMock.Object, resiliency, NullLoggerFactory.Instance);
-            return microsoftClientFactory.GetMicrosoftClientAsync().Result;
-        }
+        var microsoftClientFactory = new MicrosoftClientFactory(secretRepository, connectorInforProviederMock.Object, resiliency, NullLoggerFactory.Instance);
+        return microsoftClientFactory.GetMicrosoftClientAsync().Result;
     }
 }

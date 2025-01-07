@@ -14,7 +14,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Cre
 
 public interface IImpesonificationCredentialsProvider
 {
-    Task<ServiceAccountCredential> ImpersonificateAsync(string email, CancellationToken stoppingToken = default);
+    Task<ICredential> ImpersonificateAsync(string email, CancellationToken stoppingToken = default);
 }
 
 internal sealed class ImpersonificationCredentialsProvider(IVault vault) : IImpesonificationCredentialsProvider
@@ -29,7 +29,7 @@ internal sealed class ImpersonificationCredentialsProvider(IVault vault) : IImpe
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private GoogleCredential _credential = null;
 
-    public async Task<ServiceAccountCredential> ImpersonificateAsync(string email, CancellationToken stoppingToken = default)
+    public async Task<ICredential> ImpersonificateAsync(string email, CancellationToken stoppingToken = default)
     {
         var googleCredentials = await GetCredentialsAsync(stoppingToken);
 
