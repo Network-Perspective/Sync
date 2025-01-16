@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security;
 using System.Threading;
@@ -73,7 +72,7 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
             await vault.SetSecretAsync(refreshTokenKey, response.RefreshToken.ToSecureString(), stoppingToken);
         }
 
-        var connectorProperties = context.Connector.GetConnectorProperties<SlackConnectorProperties>();
+        var connectorProperties = new SlackConnectorProperties(context.Connector.Properties);
 
         if (connectorProperties.UsesAdminPrivileges)
         {
@@ -86,7 +85,7 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
 
     private string BuildSlackAuthUri(string state, OAuthContext context, SecureString slackClientId)
     {
-        var connectorProperties = context.Connector.GetConnectorProperties<SlackConnectorProperties>();
+        var connectorProperties = new SlackConnectorProperties(context.Connector.Properties);
 
         logger.LogDebug("Building slack auth path... The {parameter} is set to '{value}'", nameof(connectorProperties.UsesAdminPrivileges), connectorProperties.UsesAdminPrivileges);
 

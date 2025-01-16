@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
@@ -53,7 +54,8 @@ internal sealed class SyncService : ISyncService
     {
         try
         {
-            var status = new SingleTaskStatus("Initializing synchronization", "The synchronization is starting", 0);
+            var connectorProperties = new ConnectorProperties(context.ConnectorProperties);
+            var status = SingleTaskStatus.New("Initializing synchronization", "The synchronization is starting", 0);
             await _tasksStatusesCache.SetStatusAsync(context.ConnectorId, status, stoppingToken);
             await _statusLogger.LogInfoAsync("Sync started", stoppingToken);
             _logger.LogInformation(
@@ -62,17 +64,13 @@ internal sealed class SyncService : ISyncService
 
             await _networkPerspectiveCore.ReportSyncStartAsync(context.AccessToken, context.TimeRange, stoppingToken);
 
-            if (context.GetConnectorProperties().SyncGroups)
-                await SyncGroupsAsync(_dataSource, context, stoppingToken);
-            else
-                await _statusLogger.LogInfoAsync("Skipping sync groups", stoppingToken);
-
+            await SyncGroupsAsync(_dataSource, context, stoppingToken);
             await SyncUsersAsync(_dataSource, context, stoppingToken);
             await SyncEntitiesAsync(_dataSource, context, stoppingToken);
+
             var syncResult = await SyncInteractionsAsync(_dataSource, context, stoppingToken);
 
-            await _networkPerspectiveCore.ReportSyncSuccessfulAsync(context.AccessToken, context.TimeRange,
-                stoppingToken);
+            await _networkPerspectiveCore.ReportSyncSuccessfulAsync(context.AccessToken, context.TimeRange, stoppingToken);
             await _statusLogger.LogInfoAsync("Sync completed", stoppingToken);
             _logger.LogInformation("Synchronization completed for Connector '{connectorId}'", context.ConnectorId);
 
@@ -107,6 +105,12 @@ internal sealed class SyncService : ISyncService
 
     private async Task SyncUsersAsync(IDataSource dataSource, SyncContext context, CancellationToken stoppingToken)
     {
+        if (!new ConnectorProperties(context.ConnectorProperties).SyncEmployees)
+        {
+            await _statusLogger.LogInfoAsync("Skipping sync employees profiles", stoppingToken);
+            return;
+        }
+
         _logger.LogInformation("Synchronizing employees profiles for connector '{connectorId}'", context.ConnectorId);
         await _statusLogger.LogInfoAsync($"Synchronizing employees profiles...", stoppingToken);
 
@@ -122,6 +126,12 @@ internal sealed class SyncService : ISyncService
 
     private async Task SyncEntitiesAsync(IDataSource dataSource, SyncContext context, CancellationToken stoppingToken)
     {
+        if (!new ConnectorProperties(context.ConnectorProperties).SyncHashedEmployees)
+        {
+            await _statusLogger.LogInfoAsync("Skipping sync hashed employees profiles", stoppingToken);
+            return;
+        }
+
         _logger.LogInformation("Synchronizing hashed employees profiles for connector '{connectorId}'", context.ConnectorId);
         await _statusLogger.LogInfoAsync($"Synchronizing hashed employees profiles...", stoppingToken);
 
@@ -137,6 +147,12 @@ internal sealed class SyncService : ISyncService
 
     private async Task SyncGroupsAsync(IDataSource dataSource, SyncContext context, CancellationToken stoppingToken)
     {
+        if (!new ConnectorProperties(context.ConnectorProperties).SyncGroups)
+        {
+            await _statusLogger.LogInfoAsync("Skipping sync groups", stoppingToken);
+            return;
+        }
+
         _logger.LogInformation("Synchronizing groups for connector '{connectorId}'", context.ConnectorId);
         await _statusLogger.LogInfoAsync($"Synchronizing groups...", stoppingToken);
 
@@ -147,7 +163,7 @@ internal sealed class SyncService : ISyncService
             .SelectMany(x => x.Groups)          // flatten groups
             .ToHashSet(Group.EqualityComparer); // only distinct values
 
-        if (!context.GetConnectorProperties().SyncChannelsNames)
+        if (!new ConnectorProperties(context.ConnectorProperties).SyncChannelsNames)
         {
             groups = groups
                 .Where(x => x.Category != Group.ChannelCategory)
@@ -165,6 +181,12 @@ internal sealed class SyncService : ISyncService
 
     private async Task<SyncResult> SyncInteractionsAsync(IDataSource dataSource, SyncContext context, CancellationToken stoppingToken)
     {
+        if (!new ConnectorProperties(context.ConnectorProperties).SyncInteractions)
+        {
+            await _statusLogger.LogInfoAsync("Skipping sync interactions", stoppingToken);
+            return SyncResult.Empty;
+        }
+
         _logger.LogInformation("Synchronizing interactions for connector '{connectorId}' for period {period}", context.ConnectorId, context.TimeRange);
         await _statusLogger.LogInfoAsync($"Synchronizing interactions for period '{context.TimeRange}'...", stoppingToken);
 

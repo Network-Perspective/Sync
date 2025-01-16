@@ -41,7 +41,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
         {
             async Task ReportProgressCallbackAsync(double progressRate)
             {
-                var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, progressRate);
+                var taskStatus = SingleTaskStatus.New(TaskCaption, TaskDescription, progressRate);
                 await _tasksStatusesCache.SetStatusAsync(context.ConnectorId, taskStatus, stoppingToken);
             }
 

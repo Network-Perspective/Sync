@@ -17,7 +17,7 @@ public class GlobalStatusCacheTests
     {
         // Arrange
         var connectorId = Guid.NewGuid();
-        var status = new SingleTaskStatus("First task", "This is super important task", 33.3);
+        var status = SingleTaskStatus.New("First task", "This is super important task", 33.3);
         var cache = new GlobalStatusCache();
 
         // Act

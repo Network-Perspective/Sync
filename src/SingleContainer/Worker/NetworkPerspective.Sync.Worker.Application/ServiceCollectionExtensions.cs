@@ -26,8 +26,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICachedVault, CachedVault>();
 
         services.AddTransient<IClock, Clock>();
-        services.AddTransient<IHashingServiceFactory, HashingServiceFactory>();
-        services.AddScoped<IHashingService>(sp => sp.GetRequiredService<IHashingServiceFactory>().CreateAsync().Result);
+        services.AddTransient<IHashAlgorithmFactory, HashAlgorithmFactory>();
+        services.AddScoped<IHashingService, HashingService>();
         services.AddTransient<IInteractionsFilterFactory, InteractionsFilterFactory>();
         services.AddTransient<IAuthStateKeyFactory, AuthStateKeyFactory>();
 

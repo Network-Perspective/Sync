@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
@@ -23,64 +24,56 @@ using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Services
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Tests.Services;
+
+public class CalendarClientTests(GoogleClientFixture googleClientFixture) : IClassFixture<GoogleClientFixture>
 {
-    public class CalendarClientTests : IClassFixture<GoogleClientFixture>
+    [Fact]
+    [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
+    public async Task ShouldReturnInteractionsBasedOnGoogleCalendar()
     {
-        private readonly GoogleClientFixture _googleClientFixture;
-
-        public CalendarClientTests(GoogleClientFixture googleClientFixture)
+        // Arrange
+        var email1 = "nptestuser12@worksmartona.com";
+        var email2 = "john@worksmartona.com";
+        var externalEmail = "maciej@networkperspective.io";
+        var googleConfig = new GoogleConfig
         {
-            _googleClientFixture = googleClientFixture;
-        }
+            ApplicationName = GoogleClientFixture.ApplicationName,
+        };
 
-        [Fact]
-        [Trait(TestsConsts.TraitSkipInCiName, TestsConsts.TraitRequiredTrue)]
-        public async Task ShouldReturnInteractionsBasedOnGoogleCalendar()
-        {
-            // Arrange
-            var email1 = "nptestuser12@worksmartona.com";
-            var email2 = "john@worksmartona.com";
-            var externalEmail = "maciej@networkperspective.io";
-            var googleConfig = new GoogleConfig
-            {
-                ApplicationName = GoogleClientFixture.ApplicationName,
-            };
+        var client = new CalendarClient(Mock.Of<IGlobalStatusCache>(), Options.Create(googleConfig), new RetryPolicyProvider(NullLogger<RetryPolicyProvider>.Instance), googleClientFixture.CredentialProvider, NullLogger<CalendarClient>.Instance);
+        var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
+        var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, ImmutableDictionary<string, string>.Empty, new SecureString(), timeRange);
 
-            var client = new CalendarClient(Mock.Of<IGlobalStatusCache>(), Options.Create(googleConfig), new RetryPolicyProvider(NullLogger<RetryPolicyProvider>.Instance), _googleClientFixture.CredentialProvider, NullLogger<CalendarClient>.Instance);
-            var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
-            var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), timeRange);
+        var employees = new List<Employee>()
+            .Add(email1)
+            .Add(email2);
 
-            var employees = new List<Employee>()
-                .Add(email1)
-                .Add(email2);
+        var employeesCollection = new EmployeeCollection(employees, null);
 
-            var employeesCollection = new EmployeeCollection(employees, null);
+        var interactionFactory = new MeetingInteractionFactory((x) => $"{x}_hashed", employeesCollection, NullLogger<MeetingInteractionFactory>.Instance);
 
-            var interactionFactory = new MeetingInteractionFactory((x) => $"{x}_hashed", employeesCollection, NullLogger<MeetingInteractionFactory>.Instance);
+        var stream = new TestableInteractionStream();
 
-            var stream = new TestableInteractionStream();
+        // Act
+        await client.SyncInteractionsAsync(syncContext, stream, employeesCollection.GetAllInternal().Select(x => x.Id.PrimaryId), interactionFactory);
 
-            // Act
-            await client.SyncInteractionsAsync(syncContext, stream, employeesCollection.GetAllInternal().Select(x => x.Id.PrimaryId), interactionFactory);
+        // Assert
+        stream.SentInteractions.Should().HaveCount(8);
 
-            // Assert
-            stream.SentInteractions.Should().HaveCount(8);
+        var interactions_1 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2022, 12, 21, 08, 30, 00));
+        interactions_1.Should().HaveCount(6);
 
-            var interactions_1 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2022, 12, 21, 08, 30, 00));
-            interactions_1.Should().HaveCount(6);
+        var interaction_1_1 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{email1}_hashed" && x.Target.Id.PrimaryId == $"{email2}_hashed");
+        var interaction_1_2 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{email1}_hashed" && x.Target.Id.PrimaryId == $"{externalEmail}_hashed");
+        var interaction_1_3 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{email2}_hashed" && x.Target.Id.PrimaryId == $"{email1}_hashed");
+        var interaction_1_4 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{email2}_hashed" && x.Target.Id.PrimaryId == $"{externalEmail}_hashed");
+        var interaction_1_5 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{externalEmail}_hashed" && x.Target.Id.PrimaryId == $"{email1}_hashed");
+        var interaction_1_6 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{externalEmail}_hashed" && x.Target.Id.PrimaryId == $"{email2}_hashed");
 
-            var interaction_1_1 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{email1}_hashed" && x.Target.Id.PrimaryId == $"{email2}_hashed");
-            var interaction_1_2 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{email1}_hashed" && x.Target.Id.PrimaryId == $"{externalEmail}_hashed");
-            var interaction_1_3 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{email2}_hashed" && x.Target.Id.PrimaryId == $"{email1}_hashed");
-            var interaction_1_4 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{email2}_hashed" && x.Target.Id.PrimaryId == $"{externalEmail}_hashed");
-            var interaction_1_5 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{externalEmail}_hashed" && x.Target.Id.PrimaryId == $"{email1}_hashed");
-            var interaction_1_6 = interactions_1.Single(x => x.Source.Id.PrimaryId == $"{externalEmail}_hashed" && x.Target.Id.PrimaryId == $"{email2}_hashed");
-
-            var interactions_2 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2022, 12, 21, 14, 30, 00));
-            interactions_2.Should().HaveCount(2);
-            var interaction_2_1 = interactions_2.Single(x => x.Source.Id.PrimaryId == $"{email1}_hashed" && x.Target.Id.PrimaryId == $"{externalEmail}_hashed");
-            var interaction_2_2 = interactions_2.Single(x => x.Source.Id.PrimaryId == $"{externalEmail}_hashed" && x.Target.Id.PrimaryId == $"{email1}_hashed");
-        }
+        var interactions_2 = stream.SentInteractions.Where(x => x.Timestamp == new DateTime(2022, 12, 21, 14, 30, 00));
+        interactions_2.Should().HaveCount(2);
+        var interaction_2_1 = interactions_2.Single(x => x.Source.Id.PrimaryId == $"{email1}_hashed" && x.Target.Id.PrimaryId == $"{externalEmail}_hashed");
+        var interaction_2_2 = interactions_2.Single(x => x.Source.Id.PrimaryId == $"{externalEmail}_hashed" && x.Target.Id.PrimaryId == $"{email1}_hashed");
     }
 }
