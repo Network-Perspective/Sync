@@ -13,8 +13,6 @@ public class ConnectorProperties
     public virtual bool SyncInteractions { get; set; } = true;
     public virtual bool SyncChannelsNames { get; set; } = false;
     public virtual bool UseUserToken { get; set; } = false;
-    public virtual Uri ExternalKeyVaultUri { get; set; } = null;
-
 
     public ConnectorProperties(IDictionary<string, string> props)
     {
