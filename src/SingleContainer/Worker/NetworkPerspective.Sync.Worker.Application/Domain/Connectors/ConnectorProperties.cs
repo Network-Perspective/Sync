@@ -7,10 +7,10 @@ namespace NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 
 public class ConnectorProperties
 {
-    public virtual bool SyncEmployees { get; set; } = false;
-    public virtual bool SyncHashedEmployees { get; set; } = false;
+    public virtual bool SyncEmployees { get; set; } = true;
+    public virtual bool SyncHashedEmployees { get; set; } = true;
     public virtual bool SyncGroups { get; set; } = false;
-    public virtual bool SyncInteractions { get; set; } = false;
+    public virtual bool SyncInteractions { get; set; } = true;
     public virtual bool SyncChannelsNames { get; set; } = false;
     public virtual bool UseUserToken { get; set; } = false;
     public virtual Uri ExternalKeyVaultUri { get; set; } = null;
