@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 using FluentAssertions;
 
@@ -53,7 +54,7 @@ public class ServiceCollectionExtensionTests
         // Assert
         var services = serviceCollection.BuildServiceProvider();
         var timeRange = new TimeRange(DateTime.UtcNow, DateTime.UtcNow);
-        var syncContext = new SyncContext(Guid.NewGuid(), "Google", ConnectorConfig.Empty, [], "".ToSecureString(), timeRange);
+        var syncContext = new SyncContext(Guid.NewGuid(), "Google", ConnectorConfig.Empty, ImmutableDictionary<string, string>.Empty, "".ToSecureString(), timeRange);
         services.GetRequiredService<ISyncContextAccessor>().SyncContext = syncContext;
         var dataSource = services.GetRequiredKeyedService<IDataSource>(connectorType.GetKeyOf<IDataSource>());
         dataSource.Should().BeAssignableTo<GoogleFacade>();

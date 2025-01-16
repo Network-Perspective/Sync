@@ -38,7 +38,7 @@ internal class MembersClient(IGlobalStatusCache tasksStatusesCache, IConnectorCo
 
     private async Task<EmployeeCollection> GetEmployeesInternalAsync(ISlackClientBotScopeFacade slackClientFacade, EmployeeFilter emailFilter, HashFunction.Delegate hashFunc, CancellationToken stoppingToken = default)
     {
-        var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, 0);
+        var taskStatus = SingleTaskStatus.WithUnknownProgress(TaskCaption, TaskDescription);
         await tasksStatusesCache.SetStatusAsync(connectorContextProvider.Context.ConnectorId, taskStatus, stoppingToken);
 
         if (hashFunc == null)

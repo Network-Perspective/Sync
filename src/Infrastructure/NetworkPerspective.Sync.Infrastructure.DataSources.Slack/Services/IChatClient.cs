@@ -43,7 +43,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack.Services
 
             async Task ReportProgressCallbackAsync(double progressRate)
             {
-                var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, progressRate);
+                var taskStatus = SingleTaskStatus.New(TaskCaption, TaskDescription, progressRate);
                 await _tasksStatusesCache.SetStatusAsync(connectorId, taskStatus, stoppingToken);
             }
 

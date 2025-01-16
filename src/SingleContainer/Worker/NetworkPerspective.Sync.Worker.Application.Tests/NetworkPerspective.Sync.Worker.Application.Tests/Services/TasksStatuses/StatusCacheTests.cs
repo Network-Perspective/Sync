@@ -31,7 +31,7 @@ public class StatusCacheTests
 
         var connectorId = Guid.NewGuid();
         var connectorContext = new ConnectorContext(connectorId, "foo", new Dictionary<string, string>());
-        var status = new SingleTaskStatus("caption", "description", null);
+        var status = SingleTaskStatus.WithUnknownProgress("caption", "description");
 
         // Act
         using (var scope = servicesProvider.CreateScope())

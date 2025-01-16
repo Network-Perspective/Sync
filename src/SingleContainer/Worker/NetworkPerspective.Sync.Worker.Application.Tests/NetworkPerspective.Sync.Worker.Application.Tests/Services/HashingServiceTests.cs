@@ -21,11 +21,11 @@ public class HashingServiceTests
     [Theory]
     [InlineData("foo")]
     [InlineData("bar")]
-    public async Task ShouldBeDeterministic(string input)
+    public void ShouldBeDeterministic(string input)
     {
         // Arrange
         var hashingKey = Guid.NewGuid().ToString();
-        using var hashingService = await CreateHashingServiceAsync(hashingKey);
+        using var hashingService = CreateHashingService(hashingKey);
 
         // Act
         var hash1 = hashingService.Hash(input);
@@ -36,22 +36,22 @@ public class HashingServiceTests
     }
 
     [Fact]
-    public async Task ShouldBeThreadSafe()
+    public void ShouldBeThreadSafe()
     {
         // Arrange
         var hashingKey = Guid.NewGuid().ToString();
-        var hashingService = await CreateHashingServiceAsync(hashingKey);
+        var hashingService = CreateHashingService(hashingKey);
 
         // Act Assert
         Parallel.For(0, 10, i => hashingService.Hash(Guid.NewGuid().ToString()));
     }
 
     [Fact]
-    public async Task ShouldReturnNullForNullInput()
+    public void ShouldReturnNullForNullInput()
     {
         // Arrange
         var hashingKey = Guid.NewGuid().ToString();
-        var hashingService = await CreateHashingServiceAsync(hashingKey);
+        var hashingService = CreateHashingService(hashingKey);
 
         // Act
         var hash1 = hashingService.Hash(null);
@@ -60,7 +60,7 @@ public class HashingServiceTests
         hash1.Should().Be(null);
     }
 
-    private static async Task<IHashingService> CreateHashingServiceAsync(string hashingKey)
+    private static HashingService CreateHashingService(string hashingKey)
     {
         var secretRepositoryMock = new Mock<IVault>();
 
@@ -68,7 +68,7 @@ public class HashingServiceTests
             .Setup(x => x.GetSecretAsync(string.Format(Keys.HashingKey), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new NetworkCredential(string.Empty, hashingKey).SecurePassword);
 
-        var hashingServiceFactory = new HashingServiceFactory(secretRepositoryMock.Object, NullLoggerFactory.Instance);
-        return await hashingServiceFactory.CreateAsync();
+        var hashingServiceFactory = new HashAlgorithmFactory(secretRepositoryMock.Object, NullLogger<HashAlgorithmFactory>.Instance);
+        return new HashingService(hashingServiceFactory, NullLogger<HashingService>.Instance);
     }
 }
