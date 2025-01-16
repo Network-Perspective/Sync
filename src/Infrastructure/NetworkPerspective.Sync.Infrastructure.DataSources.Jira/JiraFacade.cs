@@ -18,7 +18,7 @@ internal class JiraFacade(IHashingService hashingService, IJiraAuthorizedFacade 
     public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
     {
         var projectMembers = await context.EnsureSetAsync(() => GetProjectMembersAsync(stoppingToken));
-        var connectorProperties = context.GetConnectorProperties<JiraConnectorProperties>();
+        var connectorProperties = new JiraConnectorProperties(context.ConnectorProperties);
 
         return EmployeesMapper.ToEmployees(projectMembers, hashingService.Hash, context.NetworkConfig.EmailFilter, connectorProperties.SyncGroupAccess);
     }

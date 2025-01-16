@@ -21,8 +21,6 @@ internal class SlackSecretRoationService(IVault secretRepository, ISlackClientFa
 
         logger.LogInformation("Rotating token for connector {connectorId}", connectorContext.ConnectorId);
 
-        var connectorProperties = connectorContext.GetConnectorProperties();
-
         var slackClient = slackClientFacadeFactory.CreateUnauthorized();
 
         var accessTokenKey = string.Format(SlackKeys.BotTokenKeyPattern, connectorContext.ConnectorId);

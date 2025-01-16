@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Security;
 
 using Moq;
@@ -20,7 +21,7 @@ public class SyncContextTests
         // Arrange
         var mock = new Mock<IDisposable>();
         var hashingServiceMock = new Mock<IHashingService>();
-        var context = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), new TimeRange(DateTime.UtcNow, DateTime.Now));
+        var context = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, ImmutableSortedDictionary<string, string>.Empty, new SecureString(), new TimeRange(DateTime.UtcNow, DateTime.Now));
         context.EnsureSet(() => mock.Object);
 
         // Act

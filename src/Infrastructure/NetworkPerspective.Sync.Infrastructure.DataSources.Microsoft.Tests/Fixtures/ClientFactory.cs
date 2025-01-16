@@ -29,14 +29,14 @@ internal static class ClientFactory
                 Retries = [TimeSpan.FromMilliseconds(100)]
             });
 
-        var properties = new List<KeyValuePair<string, string>>
+        var properties = new Dictionary<string, string>
         {
-            new(nameof(MicrosoftConnectorProperties.SyncMsTeams), syncMsTeams.ToString()),
-            new(nameof(MicrosoftConnectorProperties.SyncChats), true.ToString()),
-            new(nameof(MicrosoftConnectorProperties.SyncGroupAccess), true.ToString()),
+            { nameof(MicrosoftConnectorProperties.SyncMsTeams), syncMsTeams.ToString() },
+            { nameof(MicrosoftConnectorProperties.SyncChats), true.ToString() },
+            { nameof(MicrosoftConnectorProperties.SyncGroupAccess), true.ToString() },
         };
 
-        var connectorProperties = ConnectorProperties.Create<MicrosoftConnectorProperties>(properties);
+        var connectorProperties = new ConnectorProperties(properties);
         var connector = Connector<MicrosoftConnectorProperties>.Create(connectorId, connectorProperties, DateTime.UtcNow);
         var hashingService = new Mock<IHashingService>();
         hashingService

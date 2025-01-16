@@ -30,7 +30,7 @@ internal sealed class MicrosoftFacade(
     {
         _logger.LogInformation("Getting employees for connector '{connectorId}'", context.ConnectorId);
 
-        var connectorProperties = context.GetConnectorProperties<MicrosoftConnectorProperties>();
+        var connectorProperties = new MicrosoftConnectorProperties(context.ConnectorProperties);
 
         var employees = await context.EnsureSetAsync(async () =>
         {
@@ -45,7 +45,7 @@ internal sealed class MicrosoftFacade(
     {
         _logger.LogInformation("Getting hashed employees for connector '{connectorId}'", context.ConnectorId);
 
-        var connectorProperties = context.GetConnectorProperties<MicrosoftConnectorProperties>();
+        var connectorProperties = new MicrosoftConnectorProperties(context.ConnectorProperties);
 
         IEnumerable<Channel> channels = connectorProperties.SyncMsTeams == true
             ? await context.EnsureSetAsync(() => teamsClient.GetAllChannelsAsync(stoppingToken))
@@ -58,7 +58,7 @@ internal sealed class MicrosoftFacade(
     public async Task<SyncResult> SyncInteractionsAsync(IInteractionsStream stream, SyncContext context, CancellationToken stoppingToken = default)
     {
         _logger.LogInformation("Getting interactions for connector '{connectorId}' for period {timeRange}", context.ConnectorId, context.TimeRange);
-        var connectorProperties = context.GetConnectorProperties<MicrosoftConnectorProperties>();
+        var connectorProperties = new MicrosoftConnectorProperties(context.ConnectorProperties);
 
         IEnumerable<Channel> channels = connectorProperties.SyncMsTeams == true
             ? await context.EnsureSetAsync(() => teamsClient.GetAllChannelsAsync(stoppingToken))

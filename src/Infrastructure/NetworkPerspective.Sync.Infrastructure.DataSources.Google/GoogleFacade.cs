@@ -29,7 +29,7 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
     {
         _logger.LogInformation("Getting interactions for connector '{connectorId}' for period {timeRange}", context.ConnectorId, context.TimeRange);
 
-        var connectorProperties = context.GetConnectorProperties<GoogleConnectorProperties>();
+        var connectorProperties = new GoogleConnectorProperties(context.ConnectorProperties);
 
         var credentials = await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
         var users = await usersClient.GetUsersAsync(credentials, stoppingToken);
@@ -61,7 +61,7 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
     {
         _logger.LogInformation("Getting employees for connector '{connectorId}'", context.ConnectorId);
 
-        var connectorProperties = context.GetConnectorProperties<GoogleConnectorProperties>();
+        var connectorProperties = new GoogleConnectorProperties(context.ConnectorProperties);
 
         var credentials = connectorProperties.UseUserToken
             ? await credentialsProvider.GetCurrentAsync(stoppingToken)
@@ -85,7 +85,7 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
     {
         _logger.LogInformation("Getting hashed employees for connector '{connectorId}'", context.ConnectorId);
 
-        var connectorProperties = context.GetConnectorProperties<GoogleConnectorProperties>();
+        var connectorProperties = new GoogleConnectorProperties(context.ConnectorProperties);
 
         var credentials = await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
         var users = await usersClient.GetUsersAsync(credentials, stoppingToken);

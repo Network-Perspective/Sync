@@ -31,7 +31,8 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
         var stateExpirationTimestamp = DateTimeOffset.UtcNow.AddMinutes(AuthorizationStateExpirationTimeInMinutes);
         cache.Set(stateKey, context, stateExpirationTimestamp);
 
-        var clientId = await GetClientIdAsync(context.Connector.GetConnectorProperties<MicrosoftConnectorProperties>().SyncMsTeams, stoppingToken);
+        var connectorProperties = new MicrosoftConnectorProperties(context.Connector.Properties);
+        var clientId = await GetClientIdAsync(connectorProperties.SyncMsTeams, stoppingToken);
         var authUri = BuildMicrosoftAuthUri(clientId, stateKey, context.CallbackUri);
 
         logger.LogInformation("Micorosoft admin consent process started. Unique state id: '{state}'", stateKey);

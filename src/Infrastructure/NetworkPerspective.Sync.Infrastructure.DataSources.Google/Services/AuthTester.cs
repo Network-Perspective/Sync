@@ -25,7 +25,7 @@ internal class AuthTester(IOptions<GoogleConfig> config, IImpesonificationCreden
         try
         {
             logger.LogInformation("Checking if connector '{connectorId}' is authorized", connectorContext);
-            var googleNetworkProperties = connectorContext.GetConnectorProperties<GoogleConnectorProperties>();
+            var googleNetworkProperties = new GoogleConnectorProperties(connectorContext.Properties);
 
             var userCredentials = await credentialsProvider.ImpersonificateAsync(googleNetworkProperties.AdminEmail, stoppingToken);
 

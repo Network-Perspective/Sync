@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,7 +55,7 @@ public class FilteredUserClientDecoratorTests
             .ReturnsAsync(users);
 
         var timeRange = new TimeRange(null, null);
-        var syncContext = new SyncContext(Guid.NewGuid(), "test", ConnectorConfig.Empty, [], "foo".ToSecureString(), timeRange);
+        var syncContext = new SyncContext(Guid.NewGuid(), "test", ConnectorConfig.Empty, ImmutableDictionary<string, string>.Empty, "foo".ToSecureString(), timeRange);
 
         var contextAccessor = new SyncContextAccessor() { SyncContext = syncContext };
 
@@ -92,7 +93,7 @@ public class FilteredUserClientDecoratorTests
         var timeRange = new TimeRange(null, null);
         var employeeFilter = new EmployeeFilter(["*"], [user2Email]);
         var connectorConfig = new ConnectorConfig(employeeFilter, CustomAttributesConfig.Empty);
-        var syncContext = new SyncContext(Guid.NewGuid(), "test", connectorConfig, [], "foo".ToSecureString(), timeRange);
+        var syncContext = new SyncContext(Guid.NewGuid(), "test", connectorConfig, ImmutableDictionary<string, string>.Empty, "foo".ToSecureString(), timeRange);
 
         var contextAccessor = new SyncContextAccessor() { SyncContext = syncContext };
 

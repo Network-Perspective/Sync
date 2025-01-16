@@ -63,7 +63,7 @@ internal class MicrosoftClientFactory : IMicrosoftClientFactory
         var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, _connectorContextProvider.Context.ConnectorId);
         var tenantId = await _secretRepository.GetSecretAsync(tenantIdKey, stoppingToken);
 
-        var connectorProperties = _connectorContextProvider.Context.GetConnectorProperties<MicrosoftConnectorProperties>();
+        var connectorProperties = new MicrosoftConnectorProperties(_connectorContextProvider.Context.Properties);
 
         var clientIdKey = connectorProperties.SyncMsTeams == true
             ? MicrosoftKeys.MicrosoftClientTeamsIdKey

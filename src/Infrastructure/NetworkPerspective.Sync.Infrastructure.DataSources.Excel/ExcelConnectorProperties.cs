@@ -2,10 +2,7 @@
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Excel;
 
-public class ExcelConnectorProperties : ConnectorProperties
+public class ExcelConnectorProperties(IDictionary<string, string> props) : ConnectorProperties(props)
 {
-    private new const bool DefaultSyncGroups = true;
-
-    public ExcelConnectorProperties() : base(DefaultSyncGroups, DefaultSyncChannelsNames, DefaultUseUserToken, null)
-    { }
+    public override bool SyncGroups { get; set; } = true;
 }

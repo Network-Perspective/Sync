@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
@@ -53,6 +54,7 @@ internal sealed class SyncService : ISyncService
     {
         try
         {
+            var connectorProperties = new ConnectorProperties(context.ConnectorProperties);
             var status = SingleTaskStatus.New("Initializing synchronization", "The synchronization is starting", 0);
             await _tasksStatusesCache.SetStatusAsync(context.ConnectorId, status, stoppingToken);
             await _statusLogger.LogInfoAsync("Sync started", stoppingToken);
@@ -62,7 +64,7 @@ internal sealed class SyncService : ISyncService
 
             await _networkPerspectiveCore.ReportSyncStartAsync(context.AccessToken, context.TimeRange, stoppingToken);
 
-            if (context.GetConnectorProperties().SyncGroups)
+            if (connectorProperties.SyncGroups)
                 await SyncGroupsAsync(_dataSource, context, stoppingToken);
             else
                 await _statusLogger.LogInfoAsync("Skipping sync groups", stoppingToken);
@@ -147,7 +149,7 @@ internal sealed class SyncService : ISyncService
             .SelectMany(x => x.Groups)          // flatten groups
             .ToHashSet(Group.EqualityComparer); // only distinct values
 
-        if (!context.GetConnectorProperties().SyncChannelsNames)
+        if (!new ConnectorProperties(context.ConnectorProperties).SyncChannelsNames)
         {
             groups = groups
                 .Where(x => x.Category != Group.ChannelCategory)
