@@ -8,7 +8,7 @@ using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Worker.Application.Tests.Domain.Networks;
+namespace NetworkPerspective.Sync.Worker.Application.Tests.Domain.Connectors;
 
 public class ConnectorPropertiesTests
 {
