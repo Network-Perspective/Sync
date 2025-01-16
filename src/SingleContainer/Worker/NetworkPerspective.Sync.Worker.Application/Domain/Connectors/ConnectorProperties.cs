@@ -1,60 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace NetworkPerspective.Sync.Worker.Application.Domain.Connectors
+using Microsoft.Extensions.Configuration;
+
+namespace NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+
+public class ConnectorProperties
 {
-    public class ConnectorProperties
+    public virtual bool SyncEmployees { get; set; } = true;
+    public virtual bool SyncHashedEmployees { get; set; } = true;
+    public virtual bool SyncGroups { get; set; } = false;
+    public virtual bool SyncInteractions { get; set; } = true;
+    public virtual bool SyncChannelsNames { get; set; } = false;
+    public virtual bool UseUserToken { get; set; } = false;
+
+    public ConnectorProperties(IDictionary<string, string> props)
     {
-        protected const bool DefaultSyncGroups = false;
-        protected const bool DefaultSyncChannelsNames = false;
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(props)
+            .Build();
 
-        public bool SyncGroups { get; private set; } = DefaultSyncGroups;
-        public bool SyncChannelsNames { get; private set; } = DefaultSyncChannelsNames;
-
-        public Uri ExternalKeyVaultUri { get; private set; } = null;
-
-        public ConnectorProperties()
-        { }
-
-        public ConnectorProperties(bool syncGroups, bool syncChannelsNames, Uri externalKeyVaultUri)
-        {
-            SyncGroups = syncGroups;
-            SyncChannelsNames = syncChannelsNames;
-            ExternalKeyVaultUri = externalKeyVaultUri;
-        }
-
-        public static TProperties Create<TProperties>(IEnumerable<KeyValuePair<string, string>> properties) where TProperties : ConnectorProperties, new()
-        {
-            var networkProperties = new TProperties();
-            networkProperties.Bind(properties);
-            return networkProperties;
-        }
-
-        public virtual void Bind(IEnumerable<KeyValuePair<string, string>> properties)
-        {
-            if (properties.Any(x => x.Key == nameof(SyncGroups)))
-                SyncGroups = bool.Parse(properties.Single(x => x.Key == nameof(SyncGroups)).Value);
-
-            if (properties.Any(x => x.Key == nameof(SyncChannelsNames)))
-                SyncChannelsNames = bool.Parse(properties.Single(x => x.Key == nameof(SyncChannelsNames)).Value);
-
-            if (properties.Any(x => x.Key == nameof(ExternalKeyVaultUri)))
-                ExternalKeyVaultUri = new Uri(properties.Single(x => x.Key == nameof(ExternalKeyVaultUri)).Value);
-        }
-
-        public virtual IEnumerable<KeyValuePair<string, string>> GetAll()
-        {
-            var result = new List<KeyValuePair<string, string>>
-            {
-                new(nameof(SyncGroups), SyncGroups.ToString()),
-                new(nameof(SyncChannelsNames), SyncChannelsNames.ToString())
-            };
-
-            if (ExternalKeyVaultUri is not null)
-                result.Add(new KeyValuePair<string, string>(nameof(ExternalKeyVaultUri), ExternalKeyVaultUri?.ToString()));
-
-            return result;
-        }
+        config.Bind(this);
     }
 }

@@ -77,7 +77,7 @@ public class OAuthServiceTests
 
             var connectorProperties = new Dictionary<string, string>
             {
-                { "UsesAdminPrivileges", "false" }
+                { nameof(SlackConnectorProperties.UsesAdminPrivileges), "false" }
             };
             var connectorInfo = new ConnectorContext(Guid.NewGuid(), "Slack", connectorProperties);
             // Act
@@ -119,7 +119,7 @@ public class OAuthServiceTests
 
             var connectorProperties = new Dictionary<string, string>
             {
-                { "UsesAdminPrivileges", "true" }
+                { nameof(SlackConnectorProperties.UsesAdminPrivileges), "true" }
             };
             var connectorInfo = new ConnectorContext(Guid.NewGuid(), "Slack", connectorProperties);
 

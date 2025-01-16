@@ -25,7 +25,7 @@ internal class AuthTester(IOptions<GoogleConfig> config, IImpesonificationCreden
         try
         {
             logger.LogInformation("Checking if connector '{connectorId}' is authorized", connectorContext);
-            var googleNetworkProperties = connectorContext.GetConnectorProperties<GoogleNetworkProperties>();
+            var googleNetworkProperties = new GoogleConnectorProperties(connectorContext.Properties);
 
             var userCredentials = await credentialsProvider.ImpersonificateAsync(googleNetworkProperties.AdminEmail, stoppingToken);
 
@@ -38,7 +38,7 @@ internal class AuthTester(IOptions<GoogleConfig> config, IImpesonificationCreden
             var request = service.Users.List();
             request.MaxResults = 10;
             request.Customer = currentAccountCustomer;
-            var response = await request.ExecuteAsync();
+            var response = await request.ExecuteAsync(stoppingToken);
             return response.UsersValue != null;
         }
         catch (Exception ex)

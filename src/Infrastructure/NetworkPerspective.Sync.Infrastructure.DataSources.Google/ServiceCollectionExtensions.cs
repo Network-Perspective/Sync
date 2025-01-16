@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
             return new CapabilityTester(connectorType, logger);
         });
 
+        services.AddTransient<ICompanyStructureService, CompanyStructureService>();
         services.AddTransient<IRetryPolicyProvider, RetryPolicyProvider>();
 
         services.AddScoped<IImpesonificationCredentialsProvider, ImpersonificationCredentialsProvider>();
@@ -36,6 +37,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMailboxClient, MailboxClient>();
         services.AddScoped<ICalendarClient, CalendarClient>();
         services.AddScoped<IUsersClient, UsersClient>();
+        services.Decorate<IUsersClient, FilteredUserClientDecorator>();
         services.AddScoped<IUserCalendarTimeZoneReader, UserCalendarTimeZoneReader>();
 
         services.AddKeyedScoped<IOAuthService, OAuthService>(connectorType.GetKeyOf<IOAuthService>());

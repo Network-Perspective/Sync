@@ -30,7 +30,7 @@ internal class UsersClient(GraphServiceClient graphClient, IGlobalStatusCache ta
     {
         logger.LogDebug("Fetching users for connector '{connectorId}'...", context.ConnectorId);
 
-        var taskStatus = new SingleTaskStatus(TaskCaption, TaskDescription, 0);
+        var taskStatus = SingleTaskStatus.WithUnknownProgress(TaskCaption, TaskDescription);
         await tasksStatusesCache.SetStatusAsync(context.ConnectorId, taskStatus, stoppingToken);
 
         var result = new List<User>();

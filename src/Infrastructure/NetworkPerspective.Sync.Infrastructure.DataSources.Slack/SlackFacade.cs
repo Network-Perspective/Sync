@@ -49,9 +49,11 @@ internal class SlackFacade : IDataSource
 
         var interactionFactory = new InteractionFactory(_hashingService.Hash, employees);
 
-        if (context.GetConnectorProperties<SlackConnectorProperties>().AutoJoinChannels)
+        var connectorProperties = new SlackConnectorProperties(context.ConnectorProperties);
+
+        if (connectorProperties.AutoJoinChannels)
         {
-            if (context.GetConnectorProperties<SlackConnectorProperties>().UsesAdminPrivileges)
+            if (connectorProperties.UsesAdminPrivileges)
             {
                 var slackClientAdminFacade = _slackClientFacadeFactory.CreateWithUserToken(stoppingToken);
                 var joiner = new PrivilegedChatJoiner(slackClientBotFacade, slackClientAdminFacade, _loggerFactory.CreateLogger<PrivilegedChatJoiner>());

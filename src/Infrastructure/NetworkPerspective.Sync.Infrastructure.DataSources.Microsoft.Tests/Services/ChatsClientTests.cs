@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
@@ -36,7 +37,7 @@ public class ChatsClientTests(MicrosoftClientWithTeamsFixture microsoftClientFix
         var usersClient = new UsersClient(microsoftClientFixture.Client, Mock.Of<IGlobalStatusCache>(), _usersClientLogger);
 
         var timeRange = new TimeRange(new DateTime(2021, 01, 01), new DateTime(2024, 12, 11));
-        var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), timeRange);
+        var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, ImmutableDictionary<string, string>.Empty, new SecureString(), timeRange);
         var users = await usersClient.GetUsersAsync(syncContext);
         var employees = EmployeesMapper.ToEmployees(users, x => $"{x}_hashed", EmployeeFilter.Empty, true);
         var interactionsFactory = new ChatInteractionFactory(x => $"{x}_hashed", employees);

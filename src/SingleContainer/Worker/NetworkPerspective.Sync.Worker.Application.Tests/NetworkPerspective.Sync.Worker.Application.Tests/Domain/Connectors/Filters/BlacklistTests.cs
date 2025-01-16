@@ -5,7 +5,7 @@ using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Worker.Application.Tests.Domain.Networks.Filters
+namespace NetworkPerspective.Sync.Worker.Application.Tests.Domain.Connectors.Filters
 {
     public class BlacklistTests
     {
