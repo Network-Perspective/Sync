@@ -6,6 +6,6 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Slack;
 
 public class SlackConnectorProperties(IDictionary<string, string> props) : ConnectorProperties(props)
 {
-    public bool AutoJoinChannels { get; private set; } = true;
-    public bool UsesAdminPrivileges { get; private set; } = false;
+    public bool AutoJoinChannels { get; set; } = true;
+    public bool UsesAdminPrivileges { get; set; } = false;
 }
