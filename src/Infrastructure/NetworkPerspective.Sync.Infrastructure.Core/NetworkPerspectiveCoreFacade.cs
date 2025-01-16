@@ -127,7 +127,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             }
         }
 
-        public async Task<ConnectorConfig> GetNetworkConfigAsync(SecureString accessToken, CancellationToken stoppingToken = default)
+        public async Task<ConnectorConfig> GetConnectorConfigAsync(SecureString accessToken, CancellationToken stoppingToken = default)
         {
             try
             {

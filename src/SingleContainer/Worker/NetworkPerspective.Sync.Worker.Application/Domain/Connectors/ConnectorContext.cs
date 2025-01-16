@@ -5,7 +5,7 @@ namespace NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 
 public class ConnectorContext
 {
-    private readonly IDictionary<string, string> _properties;
+    public IDictionary<string, string> Properties { get; }
 
     public Guid ConnectorId { get; }
     public string Type { get; }
@@ -14,12 +14,6 @@ public class ConnectorContext
     {
         ConnectorId = id;
         Type = type;
-        _properties = properties;
+        Properties = properties;
     }
-
-    public T GetConnectorProperties<T>() where T : ConnectorProperties, new()
-        => ConnectorProperties.Create<T>(_properties);
-
-    public ConnectorProperties GetConnectorProperties()
-        => ConnectorProperties.Create<ConnectorProperties>(_properties);
 }

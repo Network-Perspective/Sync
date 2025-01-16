@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
@@ -39,7 +40,7 @@ public class CalendarClientTests(MicrosoftClientBasicFixture microsoftClientFixt
         var usersClient = new UsersClient(microsoftClientFixture.Client, Mock.Of<IGlobalStatusCache>(), _usersClientlogger);
 
         var timeRange = new TimeRange(new DateTime(2023, 04, 10), new DateTime(2023, 04, 11));
-        var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), timeRange);
+        var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, ImmutableDictionary<string, string>.Empty, new SecureString(), timeRange);
         var users = await usersClient.GetUsersAsync(syncContext);
         var employees = EmployeesMapper.ToEmployees(users, HashFunction.Empty, EmployeeFilter.Empty, true);
 

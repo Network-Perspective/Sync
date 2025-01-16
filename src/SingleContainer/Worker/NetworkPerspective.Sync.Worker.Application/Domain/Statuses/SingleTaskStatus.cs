@@ -8,12 +8,18 @@ public class SingleTaskStatus
     public string Description { get; set; }
     public double? CompletionRate { get; set; }
 
-    public SingleTaskStatus(string caption, string description, double? completionRate)
+    private SingleTaskStatus(string caption, string description, double? completionRate)
     {
         Caption = caption;
         Description = description;
         CompletionRate = completionRate;
     }
+
+    public static SingleTaskStatus New(string caption, string description, double? completionRate)
+        => new(caption, description, completionRate);
+
+    public static SingleTaskStatus WithUnknownProgress(string caption, string description)
+        => new(caption, description, null);
 
     public override string ToString()
     {

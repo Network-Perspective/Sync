@@ -113,7 +113,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Tests
                 var facade = new NetworkPerspectiveCoreFacade(_clientMock.Object, options, _loggerFactory);
 
                 // Act
-                var result = await facade.GetNetworkConfigAsync("foo".ToSecureString());
+                var result = await facade.GetConnectorConfigAsync("foo".ToSecureString());
 
                 // Assert
                 var expectedResult = new ConnectorConfig(EmployeeFilter.Empty, CustomAttributesConfig.Empty);

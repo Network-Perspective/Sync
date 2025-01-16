@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,8 +10,6 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Criterias;
-using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
@@ -21,33 +17,26 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 
 internal interface IUsersClient
 {
-    Task<IEnumerable<User>> GetUsersAsync(Guid connectorId, ICredential credentials, EmployeeFilter employeeFilter, CancellationToken stoppingToken = default);
+    Task<IEnumerable<User>> GetUsersAsync(ICredential credentials, CancellationToken stoppingToken = default);
 }
 
-internal sealed class UsersClient(IScopedStatusCache statusCache, IOptions<GoogleConfig> config, IEnumerable<ICriteria> criterias, IRetryPolicyProvider retryPolicyProvider, ILogger<UsersClient> logger) : IUsersClient
+internal class UsersClient(IScopedStatusCache statusCache, IOptions<GoogleConfig> config, IRetryPolicyProvider retryPolicyProvider, ILogger<UsersClient> logger) : IUsersClient
 {
     private const string TaskCaption = "Synchronizing users";
     private const string TaskDescription = "Fetching users data from Google API";
 
     private readonly GoogleConfig _config = config.Value;
 
-    public async Task<IEnumerable<User>> GetUsersAsync(Guid connectorId, ICredential credentials, EmployeeFilter employeeFilter, CancellationToken stoppingToken = default)
+    public async Task<IEnumerable<User>> GetUsersAsync(ICredential credentials, CancellationToken stoppingToken = default)
     {
-        logger.LogDebug("Fetching users for connector '{connectorId}'...", connectorId);
+        logger.LogDebug("Fetching users...");
 
-        await statusCache.SetStatusAsync(new SingleTaskStatus(TaskCaption, TaskDescription, null), stoppingToken);
+        await statusCache.SetStatusAsync(SingleTaskStatus.WithUnknownProgress(TaskCaption, TaskDescription), stoppingToken);
 
         var retryPolicy = retryPolicyProvider.GetSecretRotationRetryPolicy();
         var users = await retryPolicy.ExecuteAsync(() => GetAllGoogleUsers(credentials, stoppingToken));
 
-        var filteredUsers = FilterUsers(employeeFilter, users);
-
-        if (!filteredUsers.Any())
-            logger.LogWarning("No users found in connector '{connectorId}'", connectorId);
-        else
-            logger.LogDebug("Fetching employees for network '{connectorId}' completed. '{count}' employees found", connectorId, filteredUsers.Count());
-
-        return filteredUsers;
+        return users;
     }
 
     private async Task<IList<User>> GetAllGoogleUsers(ICredential credentials, CancellationToken stoppingToken)
@@ -82,17 +71,5 @@ internal sealed class UsersClient(IScopedStatusCache statusCache, IOptions<Googl
         } while (!string.IsNullOrEmpty(nextPageToken) && !stoppingToken.IsCancellationRequested);
 
         return result;
-    }
-
-    private IEnumerable<User> FilterUsers(EmployeeFilter emailFilter, IList<User> employeesProfiles)
-    {
-        foreach (var criteria in criterias)
-            employeesProfiles = criteria.MeetCriteria(employeesProfiles);
-
-        var filteredProfiles = employeesProfiles
-            .Where(x => emailFilter.IsInternal(x.PrimaryEmail)
-                || x.Aliases != null && x.Aliases.Any(emailFilter.IsInternal));
-
-        return filteredProfiles;
     }
 }

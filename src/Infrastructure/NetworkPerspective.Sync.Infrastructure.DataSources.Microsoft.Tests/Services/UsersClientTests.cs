@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Security;
 using System.Threading.Tasks;
 
@@ -35,7 +36,7 @@ public class UsersClientTests(MicrosoftClientBasicFixture microsoftClientFixture
         var timeRange = new TimeRange(new DateTime(2022, 12, 21), new DateTime(2022, 12, 22));
         var filter = new EmployeeFilter(["group:Sample Team Site"], Array.Empty<string>());
         var networkConfig = new ConnectorConfig(filter, CustomAttributesConfig.Empty);
-        var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, networkConfig, [], new SecureString(), timeRange);
+        var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, networkConfig, ImmutableDictionary<string, string>.Empty, new SecureString(), timeRange);
 
         // Act
         var result = await client.GetUsersAsync(syncContext);

@@ -19,7 +19,7 @@ internal class SyncContextFactory(INetworkPerspectiveCore networkPerspectiveCore
 {
     public async Task<SyncContext> CreateAsync(Guid connectorId, string type, IDictionary<string, string> properties, TimeRange timeRange, SecureString accessToken, CancellationToken stoppingToken = default)
     {
-        var networkConfig = await networkPerspectiveCore.GetNetworkConfigAsync(accessToken, stoppingToken);
+        var networkConfig = await networkPerspectiveCore.GetConnectorConfigAsync(accessToken, stoppingToken);
 
         return new SyncContext(connectorId, type, networkConfig, properties, accessToken, timeRange);
     }

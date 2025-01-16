@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
@@ -53,10 +54,10 @@ public class MailboxClientTests(GoogleClientFixture googleClientFixture) : IClas
         var interactionFactory = new EmailInteractionFactory((x) => $"{x}_hashed", employeesCollection, clock, NullLogger<EmailInteractionFactory>.Instance);
         var stream = new TestableInteractionStream();
         var timeRange = new TimeRange(new DateTime(2022, 11, 01), new DateTime(2022, 12, 31));
-        var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), timeRange);
+        var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, ImmutableDictionary<string, string>.Empty, new SecureString(), timeRange);
 
         // Act
-        await mailboxClient.SyncInteractionsAsync(syncContext, stream, new[] { userEmail }, interactionFactory);
+        await mailboxClient.SyncInteractionsAsync(syncContext, stream, [userEmail], interactionFactory);
 
         // Assert
 
