@@ -11,7 +11,7 @@ namespace NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 public sealed class SyncContext : IDisposable
 {
     private readonly Dictionary<Type, object> _container = [];
-    private readonly IEnumerable<KeyValuePair<string, string>> _connectorProperties;
+    public IDictionary<string, string> ConnectorProperties { get; }
 
     public Guid ConnectorId { get; }
     public string ConnectorType { get; }
@@ -19,21 +19,15 @@ public sealed class SyncContext : IDisposable
     public SecureString AccessToken { get; }
     public TimeRange TimeRange { get; }
 
-    public SyncContext(Guid connectorId, string connectorType, ConnectorConfig networkConfig, IEnumerable<KeyValuePair<string, string>> connectorProperties, SecureString accessToken, TimeRange timeRange)
+    public SyncContext(Guid connectorId, string connectorType, ConnectorConfig networkConfig, IDictionary<string, string> connectorProperties, SecureString accessToken, TimeRange timeRange)
     {
         ConnectorId = connectorId;
         ConnectorType = connectorType;
         NetworkConfig = networkConfig;
-        _connectorProperties = connectorProperties;
+        ConnectorProperties = connectorProperties;
         AccessToken = accessToken;
         TimeRange = timeRange;
     }
-
-    public T GetConnectorProperties<T>() where T : ConnectorProperties, new()
-        => ConnectorProperties.Create<T>(_connectorProperties);
-
-    public ConnectorProperties GetConnectorProperties()
-        => ConnectorProperties.Create<ConnectorProperties>(_connectorProperties);
 
     public T EnsureSet<T>(Func<T> obj)
     {

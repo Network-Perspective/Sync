@@ -15,8 +15,9 @@ internal class AuthTester(IConnectorContextAccessor connectorContextProvider, IS
     public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
     {
         var connectorContext = connectorContextProvider.Context;
+        var connectorProperties = new SlackConnectorProperties(connectorContext.Properties);
 
-        if (connectorContext.GetConnectorProperties<SlackConnectorProperties>().UsesAdminPrivileges)
+        if (connectorProperties.UsesAdminPrivileges)
         {
             var isUserTokenOk = await TestUserTokenAsync(connectorContext.ConnectorId, stoppingToken);
             var isBotTokenOk = await TestBotTokenAsync(connectorContext.ConnectorId, stoppingToken);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
@@ -45,7 +46,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Tests.Ser
             var usersClient = new UsersClient(_microsoftClientFixture.Client, Mock.Of<IGlobalStatusCache>(), _usersClientlogger);
 
             var timeRange = new TimeRange(new DateTime(2021, 12, 01), new DateTime(2021, 12, 02));
-            var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, [], new SecureString(), timeRange);
+            var syncContext = new SyncContext(Guid.NewGuid(), string.Empty, ConnectorConfig.Empty, ImmutableDictionary<string, string>.Empty, new SecureString(), timeRange);
             var users = await usersClient.GetUsersAsync(syncContext);
             var employees = EmployeesMapper.ToEmployees(users, x => x, EmployeeFilter.Empty, true);
 

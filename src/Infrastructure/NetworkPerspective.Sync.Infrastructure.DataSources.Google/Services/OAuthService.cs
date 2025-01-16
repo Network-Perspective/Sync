@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
+using Google.Apis.Admin.Directory.directory_v1;
 using Google.Apis.Auth.OAuth2;
 
 using Microsoft.Extensions.Caching.Memory;
@@ -21,8 +22,8 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
 {
     private const int AuthorizationCodeExpirationTimeInMinutes = 10;
     private readonly string[] _scopes = [
-        // TODO To be defined
-        ];
+        DirectoryService.Scope.AdminDirectoryUserReadonly,
+    ];
 
     public async Task<InitializeOAuthResult> InitializeOAuthAsync(OAuthContext context, CancellationToken stoppingToken = default)
     {

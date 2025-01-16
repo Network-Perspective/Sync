@@ -12,17 +12,10 @@ public interface IHashingService : IDisposable
     string Hash(string input);
 }
 
-internal class HashingService : IHashingService
+internal sealed class HashingService(IHashAlgorithmFactory hashAlgorithmFactory, ILogger<HashingService> logger) : IHashingService
 {
-    private readonly HashAlgorithm _hashAlgorithm;
-    private readonly ILogger<HashingService> _logger;
+    private HashAlgorithm _hashAlgorithm;
     private readonly SemaphoreSlim _semaphoreSlim = new(1);
-
-    public HashingService(HashAlgorithm hashAlgorithm, ILogger<HashingService> logger)
-    {
-        _hashAlgorithm = hashAlgorithm;
-        _logger = logger;
-    }
 
     public void Dispose()
     {
@@ -35,9 +28,12 @@ internal class HashingService : IHashingService
         try
         {
             _semaphoreSlim.Wait();
+
+            _hashAlgorithm ??= hashAlgorithmFactory.CreateAsync().Result;
+
             if (input == null)
             {
-                _logger.LogTrace("Skipping hashing null object");
+                logger.LogTrace("Skipping hashing null object");
                 return null;
             }
 
