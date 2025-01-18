@@ -19,7 +19,7 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
                     IUsersClient usersClient,
                     IUserCalendarTimeZoneReader userCalendarTimeZoneReader,
                     IHashingService hashingService,
-                    ICredentialsProvider credentialsProvider,
+                    ICredentialsService credentialsService,
                     IClock clock,
                     IEmployeesMapper employeesMapper,
                     IHashedEmployeesMapper hashedEmployeesMapper,
@@ -33,7 +33,7 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
 
         var connectorProperties = new GoogleConnectorProperties(context.ConnectorProperties);
 
-        var credentials = await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
+        var credentials = await credentialsService.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
         var users = await usersClient.GetUsersAsync(credentials, stoppingToken);
 
         var timezonesPropsSource = await userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
@@ -61,9 +61,12 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
 
         var connectorProperties = new GoogleConnectorProperties(context.ConnectorProperties);
 
+        if (connectorProperties.UseUserToken)
+            await credentialsService.TryRefreshUserAccessTokenAsync(stoppingToken);
+
         var credentials = connectorProperties.UseUserToken
-            ? await credentialsProvider.GetCurrentAsync(stoppingToken)
-            : await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
+            ? await credentialsService.GetUserCredentialsAsync(stoppingToken)
+            : await credentialsService.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
         var users = await usersClient.GetUsersAsync(credentials, stoppingToken);
 
         var timezonesPropsSource = await userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
@@ -78,7 +81,13 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
 
         var connectorProperties = new GoogleConnectorProperties(context.ConnectorProperties);
 
-        var credentials = await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
+        if (connectorProperties.UseUserToken)
+            await credentialsService.TryRefreshUserAccessTokenAsync(stoppingToken);
+
+        var credentials = connectorProperties.UseUserToken
+            ? await credentialsService.GetUserCredentialsAsync(stoppingToken)
+            : await credentialsService.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
+
         var users = await usersClient.GetUsersAsync(credentials, stoppingToken);
 
         var timezonesPropsSource = await userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
