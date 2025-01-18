@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Clients;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Criterias;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Mappers;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Credentials;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
@@ -32,6 +33,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICredentialsProvider, CredentialsProvider>();
 
         services.AddScoped<ICriteria, NonServiceUserCriteria>();
+        services.AddScoped<ICompanyStructureService, CompanyStructureService>();
+        services.AddScoped<ICustomAttributesService, CustomAttributesService>();
+        services.AddScoped<IEmployeesMapper, EmployeesMapper>();
+        services.AddScoped<IHashedEmployeesMapper, HashedEmployeesMapper>();
 
         services.AddScoped<IOAuthClient, OAuthClient>();
         services.AddScoped<IMailboxClient, MailboxClient>();

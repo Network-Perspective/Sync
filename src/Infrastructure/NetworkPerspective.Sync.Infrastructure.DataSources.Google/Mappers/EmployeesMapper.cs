@@ -6,99 +6,90 @@ using Google.Apis.Admin.Directory.directory_v1.Data;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Extensions;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
-using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Group = NetworkPerspective.Sync.Worker.Application.Domain.Employees.Group;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Mappers
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Mappers;
+
+internal interface IEmployeesMapper
 {
-    internal class EmployeesMapper : IEmployeesMapper
+    EmployeeCollection ToEmployees(IEnumerable<User> users, IEmployeePropsSource employeePropsSource);
+}
+
+internal class EmployeesMapper(ICompanyStructureService companyStructureService, ICustomAttributesService customAttributesService, ISyncContextAccessor syncContextAccessor, IHashingService hashingService) : IEmployeesMapper
+{
+    public EmployeeCollection ToEmployees(IEnumerable<User> users, IEmployeePropsSource employeePropsSource)
     {
-        private readonly ICompanyStructureService _companyStructureService;
-        private readonly ICustomAttributesService _customAttributesService;
-        private readonly IEmployeePropsSource _employeePropsSource;
-        private readonly EmployeeFilter _emailFilter;
+        var connectorProperties = new GoogleConnectorProperties(syncContextAccessor.SyncContext.ConnectorProperties);
 
-        public EmployeesMapper(
-            ICompanyStructureService companyStructureService,
-            ICustomAttributesService customAttributesService,
-            IEmployeePropsSource employeePropsSource,
-            EmployeeFilter emailFilter)
+        var employees = new List<Employee>();
+
+        var organizationGroups = companyStructureService
+            .CreateGroups(users.Select(x => x.OrgUnitPath));
+
+        foreach (var user in users)
         {
-            _companyStructureService = companyStructureService;
-            _customAttributesService = customAttributesService;
-            _employeePropsSource = employeePropsSource;
-            _emailFilter = emailFilter;
+            var employeeGroups = GetEmployeeGroups(user, organizationGroups);
+            var groupAccess = connectorProperties.SyncGroupAccess
+                ? employeeGroups.Select(x => hashingService.Hash(x.Id))
+                : null;
+            var employeeProps = GetEmployeeProps(user, employeePropsSource);
+            var employeeRelations = GetEmployeeRelations(user);
+
+            var employeeAliases = user.Emails.Select(x => x.Address).ToHashSet();
+            var employeeId = EmployeeId.CreateWithAliases(user.PrimaryEmail, user.Id, employeeAliases, syncContextAccessor.SyncContext.NetworkConfig.EmailFilter);
+            var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations, groupAccess);
+
+            employees.Add(employee);
         }
 
-        public EmployeeCollection ToEmployees(IEnumerable<User> users)
+        return new EmployeeCollection(employees, null);
+    }
+
+    private static List<Group> GetEmployeeGroups(User user, ISet<Group> organizationGroups)
+    {
+        var userGroups = user
+            .GetDepartmentGroups()
+            .ToList();
+
+        var userOrganizationGroupsIds = user.GetOrganizationGroupsIds();
+        var userOrganizationGroups = organizationGroups.Where(x => userOrganizationGroupsIds.Any(y => y == x.Id));
+        userGroups.AddRange(userOrganizationGroups);
+
+        return userGroups;
+    }
+
+    private IDictionary<string, object> GetEmployeeProps(User user, IEmployeePropsSource employeePropsSource)
+    {
+        var props = customAttributesService.GetPropsForEmployee(user.GetCustomAttrs());
+        props.Add(Employee.PropKeyName, user.GetFullName());
+
+        var accCreationDate = user.GetAccountCreationDate();
+
+        if (accCreationDate.HasValue)
         {
-            var employees = new List<Employee>();
-
-            var organizationGroups = _companyStructureService
-                .CreateGroups(users.Select(x => x.OrgUnitPath));
-
-            foreach (var user in users)
-            {
-                var employeeGroups = GetEmployeeGroups(user, organizationGroups);
-                var employeeProps = GetEmployeeProps(user);
-                var employeeRelations = GetEmployeeRelations(user);
-
-                var employeeAliases = user.Emails.Select(x => x.Address).ToHashSet();
-                var employeeId = EmployeeId.CreateWithAliases(user.PrimaryEmail, user.Id, employeeAliases, _emailFilter);
-                var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations);
-
-                employees.Add(employee);
-            }
-
-            return new EmployeeCollection(employees, null);
+            var bucketAccCreationDate = new DateTime(accCreationDate.Value.Year, accCreationDate.Value.Month, 1);
+            props.Add(Employee.PropKeyCreationTime, bucketAccCreationDate);
         }
 
-        private static IEnumerable<Group> GetEmployeeGroups(User user, ISet<Group> organizationGroups)
-        {
-            var userGroups = user
-                .GetDepartmentGroups()
-                .ToList();
+        props = employeePropsSource.EnrichProps(user.PrimaryEmail, props);
 
-            var userOrganizationGroupsIds = user.GetOrganizationGroupsIds();
-            var userOrganizationGroups = organizationGroups.Where(x => userOrganizationGroupsIds.Any(y => y == x.Id));
-            userGroups.AddRange(userOrganizationGroups);
+        return props;
+    }
 
-            return userGroups;
-        }
+    private RelationsCollection GetEmployeeRelations(User user)
+    {
+        var customAttrs = user.GetCustomAttrs();
 
-        private IDictionary<string, object> GetEmployeeProps(User user)
-        {
-            var props = _customAttributesService.GetPropsForEmployee(user.GetCustomAttrs());
-            props.Add(Employee.PropKeyName, user.GetFullName());
+        var relations = customAttributesService.GetRelations(customAttrs);
 
-            var accCreationDate = user.GetAccountCreationDate();
+        var managerEmail = user.GetManagerEmail();
 
-            if (accCreationDate.HasValue)
-            {
-                var bucketAccCreationDate = new DateTime(accCreationDate.Value.Year, accCreationDate.Value.Month, 1);
-                props.Add(Employee.PropKeyCreationTime, bucketAccCreationDate);
-            }
+        if (!string.IsNullOrEmpty(managerEmail))
+            relations.Add(Relation.Create(Relation.SupervisorRelationName, managerEmail));
 
-            props = _employeePropsSource.EnrichProps(user.PrimaryEmail, props);
-
-            return props;
-        }
-
-        private RelationsCollection GetEmployeeRelations(User user)
-        {
-            var customAttrs = user.GetCustomAttrs();
-
-            var relations = _customAttributesService.GetRelations(customAttrs);
-
-            var managerEmail = user.GetManagerEmail();
-
-            if (!string.IsNullOrEmpty(managerEmail))
-                relations.Add(Relation.Create(Relation.SupervisorRelationName, managerEmail));
-
-            return new RelationsCollection(relations);
-        }
+        return new RelationsCollection(relations);
     }
 }

@@ -5,6 +5,8 @@ namespace NetworkPerspective.Sync.Utils.Models;
 
 public sealed class TimeRange : IEquatable<TimeRange>
 {
+    public static TimeRange Empty => new(null, null);
+
     public const string DefaultDateTimeFormat = "yyyy-MM-dd HH:mm";
 
     public DateTime Start { get; }

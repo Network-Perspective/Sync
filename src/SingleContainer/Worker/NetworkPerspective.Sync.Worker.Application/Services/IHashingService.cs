@@ -7,12 +7,12 @@ using Microsoft.Extensions.Logging;
 
 namespace NetworkPerspective.Sync.Worker.Application.Services;
 
-public interface IHashingService : IDisposable
+public interface IHashingService
 {
     string Hash(string input);
 }
 
-internal sealed class HashingService(IHashAlgorithmFactory hashAlgorithmFactory, ILogger<HashingService> logger) : IHashingService
+internal sealed class HashingService(IHashAlgorithmFactory hashAlgorithmFactory, ILogger<HashingService> logger) : IHashingService, IDisposable
 {
     private HashAlgorithm _hashAlgorithm;
     private readonly SemaphoreSlim _semaphoreSlim = new(1);

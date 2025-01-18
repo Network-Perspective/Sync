@@ -5,98 +5,82 @@ using Google.Apis.Admin.Directory.directory_v1.Data;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Extensions;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
-using NetworkPerspective.Sync.Worker.Application.Domain;
-using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Group = NetworkPerspective.Sync.Worker.Application.Domain.Employees.Group;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Mappers
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Mappers;
+
+internal interface IHashedEmployeesMapper
 {
-    internal class HashedEmployeesMapper : IEmployeesMapper
+    EmployeeCollection ToEmployees(IEnumerable<User> users, IEmployeePropsSource employeePropsSource);
+}
+
+internal class HashedEmployeesMapper(ICompanyStructureService companyStructureService, ICustomAttributesService customAttributesService, ISyncContextAccessor syncContextAccessor, IHashingService hashingService) : IHashedEmployeesMapper
+{
+
+    public EmployeeCollection ToEmployees(IEnumerable<User> users, IEmployeePropsSource employeePropsSource)
     {
-        private readonly ICompanyStructureService _companyStructureService;
-        private readonly ICustomAttributesService _customAttributesService;
-        private readonly IEmployeePropsSource _employeePropsSource;
-        private readonly HashFunction.Delegate _hashFunc;
-        private readonly EmployeeFilter _emailFilter;
+        var employees = new List<Employee>();
 
-        public HashedEmployeesMapper(ICompanyStructureService companyStructureService,
-            ICustomAttributesService customAttributesService,
-            IEmployeePropsSource employeePropsSource,
-            HashFunction.Delegate hashFunc,
-            EmployeeFilter emailFilter)
+        var organizationGroups = companyStructureService
+            .CreateGroups(users.Select(x => x.OrgUnitPath));
+
+        foreach (var user in users)
         {
-            _companyStructureService = companyStructureService;
-            _customAttributesService = customAttributesService;
-            _employeePropsSource = employeePropsSource;
-            _hashFunc = hashFunc;
-            _emailFilter = emailFilter;
+            var customAttr = user.GetCustomAttrs();
+
+            var employeeGroups = GetEmployeeGroups(user, organizationGroups);
+            var employeeProps = GetEmployeeProps(user, employeePropsSource);
+            var employeeRelations = GetEmployeeRelations(user);
+
+            var employeeAliases = user.Emails.Select(x => x.Address).ToHashSet();
+            var employeeId = EmployeeId.CreateWithAliases(user.PrimaryEmail, user.Id, employeeAliases, syncContextAccessor.SyncContext.NetworkConfig.EmailFilter);
+            var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations);
+
+            employees.Add(employee);
         }
 
-        public EmployeeCollection ToEmployees(IEnumerable<User> users)
-        {
-            var employees = new List<Employee>();
+        return new EmployeeCollection(employees, hashingService.Hash);
+    }
 
-            var organizationGroups = _companyStructureService
-                .CreateGroups(users.Select(x => x.OrgUnitPath));
+    private IEnumerable<Group> GetEmployeeGroups(User user, ISet<Group> organizationGroups)
+    {
+        var userGroups = user
+            .GetDepartmentGroups()
+            .ToList();
 
-            foreach (var user in users)
-            {
-                var customAttr = user.GetCustomAttrs();
+        var userOrganizationGroupsIds = user.GetOrganizationGroupsIds();
+        var userOrganizationGroups = organizationGroups.Where(x => userOrganizationGroupsIds.Any(y => y == x.Id));
+        userGroups.AddRange(userOrganizationGroups);
 
-                var employeeGroups = GetEmployeeGroups(user, organizationGroups);
-                var employeeProps = GetEmployeeProps(user);
-                var employeeRelations = GetEmployeeRelations(user);
+        var customAttributesGroups = customAttributesService.GetGroupsForHashedEmployee(user.GetCustomAttrs());
+        userGroups.AddRange(customAttributesGroups);
 
-                var employeeAliases = user.Emails.Select(x => x.Address).ToHashSet();
-                var employeeId = EmployeeId.CreateWithAliases(user.PrimaryEmail, user.Id, employeeAliases, _emailFilter);
-                var employee = Employee.CreateInternal(employeeId, employeeGroups, employeeProps, employeeRelations);
+        return userGroups;
+    }
 
-                employees.Add(employee);
-            }
+    private IDictionary<string, object> GetEmployeeProps(User user, IEmployeePropsSource employeePropsSource)
+    {
+        var props = customAttributesService.GetPropsForHashedEmployee(user.GetCustomAttrs());
 
-            return new EmployeeCollection(employees, _hashFunc);
-        }
+        props = employeePropsSource.EnrichProps(user.PrimaryEmail, props);
 
-        private IEnumerable<Group> GetEmployeeGroups(User user, ISet<Group> organizationGroups)
-        {
-            var userGroups = user
-                .GetDepartmentGroups()
-                .ToList();
+        return props;
+    }
 
-            var userOrganizationGroupsIds = user.GetOrganizationGroupsIds();
-            var userOrganizationGroups = organizationGroups.Where(x => userOrganizationGroupsIds.Any(y => y == x.Id));
-            userGroups.AddRange(userOrganizationGroups);
+    private RelationsCollection GetEmployeeRelations(User user)
+    {
+        var customAttrs = user.GetCustomAttrs();
 
-            var customAttributesGroups = _customAttributesService.GetGroupsForHashedEmployee(user.GetCustomAttrs());
-            userGroups.AddRange(customAttributesGroups);
+        var relations = customAttributesService.GetRelations(customAttrs);
 
-            return userGroups;
-        }
+        var managerEmail = user.GetManagerEmail();
 
-        private IDictionary<string, object> GetEmployeeProps(User user)
-        {
-            var props = _customAttributesService.GetPropsForHashedEmployee(user.GetCustomAttrs());
+        if (!string.IsNullOrEmpty(managerEmail))
+            relations.Add(Relation.Create(Relation.SupervisorRelationName, managerEmail));
 
-            props = _employeePropsSource.EnrichProps(user.PrimaryEmail, props);
-
-            return props;
-        }
-
-        private RelationsCollection GetEmployeeRelations(User user)
-        {
-            var customAttrs = user.GetCustomAttrs();
-
-            var relations = _customAttributesService.GetRelations(customAttrs);
-
-            var managerEmail = user.GetManagerEmail();
-
-            if (!string.IsNullOrEmpty(managerEmail))
-                relations.Add(Relation.Create(Relation.SupervisorRelationName, managerEmail));
-
-            return new RelationsCollection(relations);
-        }
+        return new RelationsCollection(relations);
     }
 }
