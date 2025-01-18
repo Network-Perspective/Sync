@@ -29,8 +29,8 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IRetryPolicyProvider, RetryPolicyProvider>();
 
         services.AddScoped<IImpesonificationCredentialsProvider, ImpersonificationCredentialsProvider>();
-        services.AddScoped<IUserCredentialsProvider, UserCredentialsProvider>();
-        services.AddScoped<ICredentialsProvider, CredentialsProvider>();
+        services.AddScoped<IUserCredentialsService, UserCredentialsService>();
+        services.AddScoped<ICredentialsService, CredentialsService>();
 
         services.AddScoped<ICriteria, NonServiceUserCriteria>();
         services.AddScoped<ICompanyStructureService, CompanyStructureService>();

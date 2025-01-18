@@ -5,18 +5,20 @@ using System.Threading.Tasks;
 
 using Google.Apis.Auth.OAuth2;
 
+using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Clients;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Credentials;
 
-internal interface IUserCredentialsProvider
+internal interface IUserCredentialsService
 {
     Task<ICredential> GetCurrentAsync(CancellationToken stoppingToken = default);
+    Task RefreshTokenAsync(CancellationToken stoppingToken = default);
 }
 
-internal class UserCredentialsProvider(IVault vault, IConnectorContextAccessor connectorContextAccessor) : IUserCredentialsProvider
+internal class UserCredentialsService(IVault vault, IOAuthClient oAuthClient, IConnectorContextAccessor connectorContextAccessor) : IUserCredentialsService
 {
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private GoogleCredential _credential = null;
@@ -42,6 +44,8 @@ internal class UserCredentialsProvider(IVault vault, IConnectorContextAccessor c
         }
     }
 
+
+
     private async Task<SecureString> GetAccessTokenAsync(CancellationToken stoppingToken)
     {
         try
@@ -54,5 +58,23 @@ internal class UserCredentialsProvider(IVault vault, IConnectorContextAccessor c
         {
             throw new Exception("Unable to get access token", ex);
         }
+    }
+
+    public async Task RefreshTokenAsync(CancellationToken stoppingToken = default)
+    {
+        var clientId = await vault.GetSecretAsync(GoogleKeys.GoogleClientIdKey, stoppingToken);
+        var clientSecret = await vault.GetSecretAsync(GoogleKeys.GoogleClientSecretKey, stoppingToken);
+
+        var connectorId = connectorContextAccessor.Context.ConnectorId;
+
+        var refreshTokenKey = string.Format(GoogleKeys.GoogleRefreshTokenPattern, connectorId);
+        var refreshToken = await vault.GetSecretAsync(refreshTokenKey, stoppingToken);
+
+        var response = await oAuthClient.RefreshTokenAsync(refreshToken.ToSystemString(), clientId.ToSystemString(), clientSecret.ToSystemString(), CancellationToken.None);
+
+        await vault.SetSecretAsync(refreshTokenKey, response.RefreshToken.ToSecureString(), CancellationToken.None);
+
+        var accessTokenKey = string.Format(GoogleKeys.GoogleAccessTokenKeyPattern, connectorId);
+        await vault.SetSecretAsync(accessTokenKey, response.AccessToken.ToSecureString(), CancellationToken.None);
     }
 }
