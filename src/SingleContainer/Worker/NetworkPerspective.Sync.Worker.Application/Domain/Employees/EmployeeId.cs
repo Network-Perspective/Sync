@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using NetworkPerspective.Sync.Worker.Application.Domain;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 
 namespace NetworkPerspective.Sync.Worker.Application.Domain.Employees

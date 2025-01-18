@@ -8,5 +8,4 @@ public class JiraConnectorProperties(IDictionary<string, string> props) : Connec
 {
     public override bool SyncGroups { get; set; } = true;
     public override bool UseUserToken { get; set; } = true;
-    public bool SyncGroupAccess { get; set; } = false;
 }

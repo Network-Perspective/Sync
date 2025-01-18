@@ -12,12 +12,12 @@ public class EmployeePropsSource : IEmployeePropsSource
 {
     public static EmployeePropsSource Empty => new();
 
-    private readonly Dictionary<string, Dictionary<string, object>> _props = new();
+    private readonly Dictionary<string, Dictionary<string, object>> _props = [];
 
     public void AddPropForUser(string primaryId, string key, object value)
     {
         if (!_props.ContainsKey(primaryId))
-            _props.Add(primaryId, new Dictionary<string, object>());
+            _props.Add(primaryId, []);
 
         _props[primaryId].Add(key, value);
     }
