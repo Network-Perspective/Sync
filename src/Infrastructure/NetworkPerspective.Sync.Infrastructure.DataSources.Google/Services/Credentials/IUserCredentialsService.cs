@@ -70,11 +70,11 @@ internal class UserCredentialsService(IVault vault, IOAuthClient oAuthClient, IC
         var refreshTokenKey = string.Format(GoogleKeys.GoogleRefreshTokenPattern, connectorId);
         var refreshToken = await vault.GetSecretAsync(refreshTokenKey, stoppingToken);
 
-        var response = await oAuthClient.RefreshTokenAsync(refreshToken.ToSystemString(), clientId.ToSystemString(), clientSecret.ToSystemString(), stoppingToken);
+        var response = await oAuthClient.RefreshTokenAsync(refreshToken.ToSystemString(), clientId.ToSystemString(), clientSecret.ToSystemString(), CancellationToken.None);
 
-        await vault.SetSecretAsync(refreshTokenKey, response.RefreshToken.ToSecureString(), stoppingToken);
+        await vault.SetSecretAsync(refreshTokenKey, response.RefreshToken.ToSecureString(), CancellationToken.None);
 
         var accessTokenKey = string.Format(GoogleKeys.GoogleAccessTokenKeyPattern, connectorId);
-        await vault.SetSecretAsync(accessTokenKey, response.AccessToken.ToSecureString(), stoppingToken);
+        await vault.SetSecretAsync(accessTokenKey, response.AccessToken.ToSecureString(), CancellationToken.None);
     }
 }
