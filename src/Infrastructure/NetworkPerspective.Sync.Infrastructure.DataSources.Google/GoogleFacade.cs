@@ -21,6 +21,8 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
                     IHashingService hashingService,
                     ICredentialsProvider credentialsProvider,
                     IClock clock,
+                    IEmployeesMapper employeesMapper,
+                    IHashedEmployeesMapper hashedEmployeesMapper,
                     ILoggerFactory loggerFactory) : IDataSource
 {
     private readonly ILogger<GoogleFacade> _logger = loggerFactory.CreateLogger<GoogleFacade>();
@@ -34,13 +36,9 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
         var credentials = await credentialsProvider.ImpersonificateAsync(connectorProperties.AdminEmail, stoppingToken);
         var users = await usersClient.GetUsersAsync(credentials, stoppingToken);
 
-        var mapper = new EmployeesMapper(
-            new CompanyStructureService(),
-            new CustomAttributesService(context.NetworkConfig.CustomAttributes),
-            EmployeePropsSource.Empty,
-            context.NetworkConfig.EmailFilter);
+        var timezonesPropsSource = await userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
 
-        var employeesCollection = context.EnsureSet(() => mapper.ToEmployees(users));
+        var employeesCollection = context.EnsureSet(() => employeesMapper.ToEmployees(users, timezonesPropsSource));
 
         var emailInteractionFactory = new EmailInteractionFactory(hashingService.Hash, employeesCollection, clock, loggerFactory.CreateLogger<EmailInteractionFactory>());
         var meetingInteractionFactory = new MeetingInteractionFactory(hashingService.Hash, employeesCollection, loggerFactory.CreateLogger<MeetingInteractionFactory>());
@@ -70,14 +68,7 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
 
         var timezonesPropsSource = await userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
 
-        var mapper = new EmployeesMapper(
-            new CompanyStructureService(),
-            new CustomAttributesService(context.NetworkConfig.CustomAttributes),
-            timezonesPropsSource,
-            context.NetworkConfig.EmailFilter
-        );
-
-        var employeesCollection = context.EnsureSet(() => mapper.ToEmployees(users));
+        var employeesCollection = context.EnsureSet(() => employeesMapper.ToEmployees(users, timezonesPropsSource));
         return employeesCollection;
     }
 
@@ -92,15 +83,7 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
 
         var timezonesPropsSource = await userCalendarTimeZoneReader.FetchTimeZoneInformation(users, stoppingToken);
 
-        var mapper = new HashedEmployeesMapper(
-            new CompanyStructureService(),
-            new CustomAttributesService(context.NetworkConfig.CustomAttributes),
-            timezonesPropsSource,
-            hashingService.Hash,
-            context.NetworkConfig.EmailFilter
-        );
-
-        var employees = mapper.ToEmployees(users);
+        var employees = hashedEmployeesMapper.ToEmployees(users, timezonesPropsSource);
 
         return employees;
     }

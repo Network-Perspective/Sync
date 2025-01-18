@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 using FluentAssertions;
 
+using NetworkPerspective.Sync.Utils.Extensions;
+using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
+using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
+using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Xunit;
@@ -13,21 +18,21 @@ namespace NetworkPerspective.Sync.Worker.Application.Tests.Services;
 
 public class CustomAttributesServiceTests
 {
-    const string propAttributeName1 = "prop_attribute_name_1";
-    const string propAttributeName2 = "prop_attribute_name_2";
+    const string PropAttributeName1 = "prop_attribute_name_1";
+    const string PropAttributeName2 = "prop_attribute_name_2";
 
-    const string groupAttributeName1 = "group_attribute_name_1";
-    const string groupAttributeName2 = "group_attribute_name_2";
-    const string groupAttributeName3 = "group_attribute_name_3";
-    const string groupAttributeName4 = "group_attribute_name_4";
+    const string GroupAttributeName1 = "group_attribute_name_1";
+    const string GroupAttributeName2 = "group_attribute_name_2";
+    const string GroupAttributeName3 = "group_attribute_name_3";
+    const string GroupAttributeName4 = "group_attribute_name_4";
 
-    static readonly IEnumerable<string> groupAttributes = [groupAttributeName1, groupAttributeName2, groupAttributeName3, groupAttributeName4];
-    static readonly IEnumerable<string> propAttributes = [propAttributeName1, propAttributeName2];
+    private static readonly IEnumerable<string> GroupAttributes = [GroupAttributeName1, GroupAttributeName2, GroupAttributeName3, GroupAttributeName4];
+    private static readonly IEnumerable<string> PropAttributes = [PropAttributeName1, PropAttributeName2];
 
-    readonly CustomAttributesConfig config = new CustomAttributesConfig(
-        groupAttributes: groupAttributes,
-        propAttributes: propAttributes,
-        relationships: Array.Empty<CustomAttributeRelationship>());
+    private readonly CustomAttributesConfig _config = new(
+        groupAttributes: GroupAttributes,
+        propAttributes: PropAttributes,
+        relationships: []);
 
     public class GetGroupsForHashedEmployee : CustomAttributesServiceTests
     {
@@ -37,19 +42,21 @@ public class CustomAttributesServiceTests
             // Arrange
             var customAttributesValues = new[]
             {
-                CustomAttr.CreateMultiValue(groupAttributeName1, "value1_1"),
-                CustomAttr.CreateMultiValue(groupAttributeName1, "value1_2"),
-                CustomAttr.Create(groupAttributeName2, "value2")
+                CustomAttr.CreateMultiValue(GroupAttributeName1, "value1_1"),
+                CustomAttr.CreateMultiValue(GroupAttributeName1, "value1_2"),
+                CustomAttr.Create(GroupAttributeName2, "value2")
             };
 
             var expectedGroups = new[]
             {
-                Group.Create($"{groupAttributeName1}:value1_1", "value1_1", groupAttributeName1),
-                Group.Create($"{groupAttributeName1}:value1_2", "value1_2", groupAttributeName1),
-                Group.Create($"{groupAttributeName2}:value2", "value2", groupAttributeName2),
+                Group.Create($"{GroupAttributeName1}:value1_1", "value1_1", GroupAttributeName1),
+                Group.Create($"{GroupAttributeName1}:value1_2", "value1_2", GroupAttributeName1),
+                Group.Create($"{GroupAttributeName2}:value2", "value2", GroupAttributeName2),
             };
 
-            var service = new CustomAttributesService(config);
+            var syncContextAccessor = CreateSyncContextAccessor(_config);
+
+            var service = new CustomAttributesService(syncContextAccessor);
 
             // Act
             var actualGroups = service.GetGroupsForHashedEmployee(customAttributesValues);
@@ -68,19 +75,21 @@ public class CustomAttributesServiceTests
             // Arrange
             var customAttributesValues = new[]
             {
-                CustomAttr.Create(propAttributeName1, "value1"),
-                CustomAttr.Create(propAttributeName2, "value2"),
-                CustomAttr.CreateMultiValue(groupAttributeName1, "value3"),
-                CustomAttr.CreateMultiValue(groupAttributeName1, "value4"),
+                CustomAttr.Create(PropAttributeName1, "value1"),
+                CustomAttr.Create(PropAttributeName2, "value2"),
+                CustomAttr.CreateMultiValue(GroupAttributeName1, "value3"),
+                CustomAttr.CreateMultiValue(GroupAttributeName1, "value4"),
             };
 
             var expectedProps = new Dictionary<string, object>
             {
-                { propAttributeName1, "value1" },
-                { propAttributeName2, "value2" },
+                { PropAttributeName1, "value1" },
+                { PropAttributeName2, "value2" },
             };
 
-            var service = new CustomAttributesService(config);
+            var syncContextAccessor = CreateSyncContextAccessor(_config);
+
+            var service = new CustomAttributesService(syncContextAccessor);
 
             // Act
             var actualProps = service.GetPropsForHashedEmployee(customAttributesValues);
@@ -98,21 +107,23 @@ public class CustomAttributesServiceTests
             // Arrange
             var customAttributesValues = new[]
             {
-                CustomAttr.Create(propAttributeName1, "value1"),
-                CustomAttr.CreateMultiValue(groupAttributeName1, "value2"),
-                CustomAttr.CreateMultiValue(groupAttributeName1, "value3"),
-                CustomAttr.Create(groupAttributeName2, "value4"),
-                CustomAttr.CreateMultiValue(groupAttributeName3, "value5")
+                CustomAttr.Create(PropAttributeName1, "value1"),
+                CustomAttr.CreateMultiValue(GroupAttributeName1, "value2"),
+                CustomAttr.CreateMultiValue(GroupAttributeName1, "value3"),
+                CustomAttr.Create(GroupAttributeName2, "value4"),
+                CustomAttr.CreateMultiValue(GroupAttributeName3, "value5")
             };
 
             var expectedProps = new Dictionary<string, object>
             {
-                { groupAttributeName1, new[] {"value2", "value3" } },
-                { groupAttributeName2, "value4"},
-                { groupAttributeName3, new[] {"value5"} }
+                { GroupAttributeName1, new[] {"value2", "value3" } },
+                { GroupAttributeName2, "value4"},
+                { GroupAttributeName3, new[] {"value5"} }
             };
 
-            var service = new CustomAttributesService(config);
+            var syncContextAccessor = CreateSyncContextAccessor(_config);
+
+            var service = new CustomAttributesService(syncContextAccessor);
 
             // Act
             var actualProps = service.GetPropsForEmployee(customAttributesValues);
@@ -120,6 +131,12 @@ public class CustomAttributesServiceTests
             // Assert
             actualProps.Should().BeEquivalentTo(expectedProps);
         }
+    }
+
+    private ISyncContextAccessor CreateSyncContextAccessor(CustomAttributesConfig customAttributesConfig)
+    {
+        var syncContext = new SyncContext(Guid.NewGuid(), "foo", new ConnectorConfig(EmployeeFilter.Empty, _config), ImmutableDictionary<string, string>.Empty, "bar".ToSecureString(), TimeRange.Empty);
+        return new SyncContextAccessor { SyncContext = syncContext };
     }
 
 }

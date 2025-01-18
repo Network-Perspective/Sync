@@ -10,5 +10,4 @@ public class MicrosoftConnectorProperties(IDictionary<string, string> props) : C
 
     public bool SyncMsTeams { get; set; } = true;
     public bool SyncChats { get; set; } = true;
-    public bool SyncGroupAccess { get; set; } = false;
 }

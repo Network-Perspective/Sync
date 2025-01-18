@@ -63,21 +63,21 @@ namespace NetworkPerspective.Sync.Worker.Application.Tests.Domain.Employees
         public void ShouldCorrectlyEvaluteHierarchy()
         {
             // Arrange
-            var ic1 = Employee.CreateInternal(EmployeeId.Create("ic1", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "manager1") }));
-            var ic2 = Employee.CreateInternal(EmployeeId.Create("ic2", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "manager1_1") }));
-            var ic3 = Employee.CreateInternal(EmployeeId.Create("ic3", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "manager2") }));
-            var ic4 = Employee.CreateInternal(EmployeeId.Create("ic4", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "manager3") }));
-            var ic5 = Employee.CreateInternal(EmployeeId.Create("ic5", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "director1") }));
+            var ic1 = Employee.CreateInternal(EmployeeId.Create("ic1", string.Empty), [], null, new RelationsCollection([Relation.Create(Relation.SupervisorRelationName, "manager1")]));
+            var ic2 = Employee.CreateInternal(EmployeeId.Create("ic2", string.Empty), [], null, new RelationsCollection([Relation.Create(Relation.SupervisorRelationName, "manager1_1")]));
+            var ic3 = Employee.CreateInternal(EmployeeId.Create("ic3", string.Empty), [], null, new RelationsCollection([Relation.Create(Relation.SupervisorRelationName, "manager2")]));
+            var ic4 = Employee.CreateInternal(EmployeeId.Create("ic4", string.Empty), [], null, new RelationsCollection([Relation.Create(Relation.SupervisorRelationName, "manager3")]));
+            var ic5 = Employee.CreateInternal(EmployeeId.Create("ic5", string.Empty), [], null, new RelationsCollection([Relation.Create(Relation.SupervisorRelationName, "director1")]));
 
-            var manager1 = Employee.CreateInternal(EmployeeId.CreateWithAliases("manager1", string.Empty, new[] { "manager1_1" }, EmployeeFilter.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "director1") }));
-            var manager2 = Employee.CreateInternal(EmployeeId.Create("manager2", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "director2") }));
-            var manager3 = Employee.CreateInternal(EmployeeId.Create("manager3", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "board2") }));
+            var manager1 = Employee.CreateInternal(EmployeeId.CreateWithAliases("manager1", string.Empty, ["manager1_1"], EmployeeFilter.Empty), [], null, new RelationsCollection([Relation.Create(Relation.SupervisorRelationName, "director1")]));
+            var manager2 = Employee.CreateInternal(EmployeeId.Create("manager2", string.Empty), [], null, new RelationsCollection([Relation.Create(Relation.SupervisorRelationName, "director2")]));
+            var manager3 = Employee.CreateInternal(EmployeeId.Create("manager3", string.Empty), [], null, new RelationsCollection([Relation.Create(Relation.SupervisorRelationName, "board2")]));
 
-            var director1 = Employee.CreateInternal(EmployeeId.Create("director1", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "board1") }));
-            var director2 = Employee.CreateInternal(EmployeeId.Create("director2", string.Empty), Array.Empty<Group>(), null, new RelationsCollection(new[] { Relation.Create(Relation.SupervisorRelationName, "board1") }));
+            var director1 = Employee.CreateInternal(EmployeeId.Create("director1", string.Empty), [], null, new RelationsCollection([Relation.Create(Relation.SupervisorRelationName, "board1")]));
+            var director2 = Employee.CreateInternal(EmployeeId.Create("director2", string.Empty), [], null, new RelationsCollection([Relation.Create(Relation.SupervisorRelationName, "board1")]));
 
-            var board1 = Employee.CreateInternal(EmployeeId.Create("board1", string.Empty), Array.Empty<Group>(), null, RelationsCollection.Empty);
-            var board2 = Employee.CreateInternal(EmployeeId.Create("board2", string.Empty), Array.Empty<Group>(), null, RelationsCollection.Empty);
+            var board1 = Employee.CreateInternal(EmployeeId.Create("board1", string.Empty), [], null, RelationsCollection.Empty);
+            var board2 = Employee.CreateInternal(EmployeeId.Create("board2", string.Empty), [], null, RelationsCollection.Empty);
 
             // Act
             var employees = new[] { ic1, ic2, ic3, ic4, ic5, manager1, manager2, manager3, director1, director2, board1, board2 };

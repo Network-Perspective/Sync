@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Credentials;
+using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
@@ -22,20 +23,9 @@ public interface IUserCalendarTimeZoneReader
     Task<IEmployeePropsSource> FetchTimeZoneInformation(IEnumerable<User> users, CancellationToken stoppingToken = default);
 }
 
-internal class UserCalendarTimeZoneReader : IUserCalendarTimeZoneReader
+internal class UserCalendarTimeZoneReader(IOptions<GoogleConfig> config, IImpesonificationCredentialsProvider credentialsProvider, IRetryPolicyProvider retryPolicyProvider, ILogger<UserCalendarTimeZoneReader> logger) : IUserCalendarTimeZoneReader
 {
-    private readonly IImpesonificationCredentialsProvider _credentialsProvider;
-    private readonly IRetryPolicyProvider _retryPolicyProvider;
-    private readonly ILogger<UserCalendarTimeZoneReader> _logger;
-    private readonly GoogleConfig _config;
-
-    public UserCalendarTimeZoneReader(IOptions<GoogleConfig> config, IImpesonificationCredentialsProvider credentialsProvider, IRetryPolicyProvider retryPolicyProvider, ILogger<UserCalendarTimeZoneReader> logger)
-    {
-        _credentialsProvider = credentialsProvider;
-        _retryPolicyProvider = retryPolicyProvider;
-        _logger = logger;
-        _config = config.Value;
-    }
+    private readonly GoogleConfig _config = config.Value;
 
     public async Task<IEmployeePropsSource> FetchTimeZoneInformation(IEnumerable<User> users, CancellationToken stoppingToken = default)
     {
@@ -46,10 +36,10 @@ internal class UserCalendarTimeZoneReader : IUserCalendarTimeZoneReader
             if (stoppingToken.IsCancellationRequested) break;
             try
             {
-                var retryPolicy = _retryPolicyProvider.GetSecretRotationRetryPolicy();
+                var retryPolicy = retryPolicyProvider.GetSecretRotationRetryPolicy();
                 var timezone = await retryPolicy.ExecuteAsync(() => ReadUserTimeZoneAsync(user.PrimaryEmail, stoppingToken));
                 if (timezone != null)
-                    result.AddPropForUser(user.PrimaryEmail, "Timezone", timezone);
+                    result.AddPropForUser(user.PrimaryEmail, Employee.PropKeyTimezone, timezone);
             }
             catch (GoogleApiException apiException)
                 when (apiException.Error?.Errors?.Any(e => e.Reason == "notACalendarUser") == true)
@@ -58,7 +48,7 @@ internal class UserCalendarTimeZoneReader : IUserCalendarTimeZoneReader
             }
             catch (Exception e)
             {
-                _logger.LogInformation("Failed to read timezone: {exception}", e);
+                logger.LogInformation("Failed to read timezone: {exception}", e);
             }
         }
 
@@ -67,7 +57,7 @@ internal class UserCalendarTimeZoneReader : IUserCalendarTimeZoneReader
 
     private async Task<string> ReadUserTimeZoneAsync(string userEmail, CancellationToken stoppingToken)
     {
-        var credentials = await _credentialsProvider.ImpersonificateAsync(userEmail, stoppingToken);
+        var credentials = await credentialsProvider.ImpersonificateAsync(userEmail, stoppingToken);
 
         var calendarService = new CalendarService(new BaseClientService.Initializer
         {
