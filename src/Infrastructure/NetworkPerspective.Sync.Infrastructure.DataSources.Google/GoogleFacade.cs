@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using FluentValidation;
+
 using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Mappers;
@@ -95,5 +97,11 @@ internal sealed class GoogleFacade(IMailboxClient mailboxClient,
         var employees = hashedEmployeesMapper.ToEmployees(users, timezonesPropsSource);
 
         return employees;
+    }
+
+    public async Task ValidateAsync(SyncContext context, CancellationToken stoppingToken = default)
+    {
+        var props = new GoogleConnectorProperties(context.ConnectorProperties);
+        await new GoogleConnectorProperties.Validator().ValidateAndThrowAsync(props, stoppingToken);
     }
 }

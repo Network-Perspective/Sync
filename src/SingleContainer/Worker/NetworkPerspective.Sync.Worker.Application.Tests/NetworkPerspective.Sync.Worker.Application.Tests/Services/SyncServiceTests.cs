@@ -91,6 +91,25 @@ public class SyncServiceTests
     }
 
     [Fact]
+    [Trait(TestsConsts.TraitTestKind, TestsConsts.TraitAcceptance)]
+    public async Task ShouldValidate()
+    {
+        // Arrange
+        var start = new DateTime(2022, 01, 01);
+        var end = new DateTime(2022, 01, 02);
+        var timeRange = new TimeRange(start, end);
+        var context = new SyncContext(Guid.NewGuid(), ConnectorTypeName, ConnectorConfig.Empty, ImmutableSortedDictionary<string, string>.Empty, "foo".ToSecureString(), timeRange);
+
+        var syncService = new SyncService(_logger, _dataSourceMock.Object, _networkPerspectiveCoreMock.Object, Mock.Of<IStatusLogger>(), _tasksStatusesCache.Object, _interactionsFilterFactoryMock.Object, _connectorTypes);
+
+        // Act
+        await syncService.SyncAsync(context);
+
+        // Assert
+        _dataSourceMock.Verify(x => x.ValidateAsync(context, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
     public async Task ShouldAttemptToReportSyncFailedOnException()
     {
         // Arrange
