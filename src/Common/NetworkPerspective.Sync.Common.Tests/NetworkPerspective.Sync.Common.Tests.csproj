@@ -17,7 +17,7 @@
         <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.0" />
         <PackageReference Include="System.Runtime.Caching" Version="8.0.1" />
         <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
-        <PackageReference Include="WireMock.Net" Version="1.6.6" />
+        <PackageReference Include="WireMock.Net" Version="1.7.0" />
     </ItemGroup>
 
     <ItemGroup>
