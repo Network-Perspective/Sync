@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
@@ -14,7 +13,7 @@ namespace NetworkPerspective.Sync.Worker.Application;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddWorkerApplication(this IServiceCollection services, IConfigurationSection configurationSection, IEnumerable<ConnectorType> connectorTypes)
+    public static IServiceCollection AddWorkerApplication(this IServiceCollection services, IEnumerable<ConnectorType> connectorTypes)
     {
         services.AddSingleton(new ConnectorTypesCollection(connectorTypes) as IConnectorTypesCollection);
 
