@@ -10,6 +10,7 @@ using Moq;
 using NetworkPerspective.Sync.Common.Tests.Factories;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
@@ -21,10 +22,11 @@ internal static class ClientFactory
     {
         var networkId = new Guid("bd1bc916-db78-4e1e-b93b-c6feb8cf729e");
         var connectorId = new Guid("04C753D8-FF9A-479C-B857-5D28C1EAF6C1");
-        var secretRepository = TestableAzureKeyVaultClient.Create();
+        var vault = TestableAzureKeyVaultClient.Create();
+        var cachedVault = new CachedVault(vault, NullLogger<CachedVault>.Instance);
 
         var resiliency = Options.Create(
-            new Resiliency
+            new ResiliencyConfig
             {
                 Retries = [TimeSpan.FromMilliseconds(100)]
             });
@@ -50,7 +52,7 @@ internal static class ClientFactory
             .Setup(x => x.Context)
             .Returns(connectorInfo);
 
-        var microsoftClientFactory = new MicrosoftClientFactory(secretRepository, connectorInforProviederMock.Object, resiliency, NullLoggerFactory.Instance);
+        var microsoftClientFactory = new MicrosoftClientFactory(cachedVault, connectorInforProviederMock.Object, null, resiliency, NullLoggerFactory.Instance);
         return microsoftClientFactory.GetMicrosoftClientAsync().Result;
     }
 }

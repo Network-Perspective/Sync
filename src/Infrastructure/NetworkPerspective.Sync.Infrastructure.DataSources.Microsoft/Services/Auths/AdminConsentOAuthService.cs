@@ -13,15 +13,11 @@ using NetworkPerspective.Sync.Worker.Application.Domain.OAuth;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services.Auths;
 
-internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, IMemoryCache cache, ILogger<OAuthService> logger) : IOAuthService
+internal class AdminConsentOAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, IMemoryCache cache, ILogger<AdminConsentOAuthService> logger) : IOAuthService
 {
     private const int AuthorizationStateExpirationTimeInMinutes = 10;
-
-    private const string MicrosoftTenantIdPattern = "microsoft-tenant-id-{0}";
-    public const string MicrosoftClientBasicIdKey = "microsoft-client-basic-id";
-    private const string MicrosoftClientTeamsIdKey = "microsoft-client-with-teams-id";
 
     public async Task<InitializeOAuthResult> InitializeOAuthAsync(OAuthContext context, CancellationToken stoppingToken = default)
     {
@@ -44,7 +40,7 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
     {
         logger.LogInformation("Received admin consent callback.");
 
-        var tenantIdKey = string.Format(MicrosoftTenantIdPattern, context.Connector.ConnectorId);
+        var tenantIdKey = string.Format(MicrosoftKeys.MicrosoftTenantIdPattern, context.Connector.ConnectorId);
         await vault.SetSecretAsync(tenantIdKey, tenantId.ToSecureString(), stoppingToken);
     }
 
@@ -54,13 +50,13 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
         {
             logger.LogInformation("Network property '{PropertyName}' is set to '{Value}'. Using Teams Microsoft Enterprise Application for authorization",
                 nameof(syncMsTeams), syncMsTeams);
-            return await vault.GetSecretAsync(MicrosoftClientTeamsIdKey, stoppingToken);
+            return await vault.GetSecretAsync(MicrosoftKeys.MicrosoftClientTeamsIdKey, stoppingToken);
         }
         else
         {
             logger.LogInformation("Network property '{PropertyName}' is set to '{Value}'. Using Basic Microsoft Enterprise Application for authorization",
                 nameof(syncMsTeams), syncMsTeams);
-            return await vault.GetSecretAsync(MicrosoftClientBasicIdKey, stoppingToken);
+            return await vault.GetSecretAsync(MicrosoftKeys.MicrosoftClientBasicIdKey, stoppingToken);
         }
     }
 

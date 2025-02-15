@@ -35,7 +35,6 @@ public class ServiceCollectionExtensionTests
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string>
             {
-                { "Connector:Sync:DefaultSyncLookbackInDays", "5" },
                 { "Infrastructure:Google:ApplicationName", "app_connector" },
                 { "Infrastructure:Google:AdminEmail", "admin@networkperspective.io" }
             })
@@ -46,7 +45,7 @@ public class ServiceCollectionExtensionTests
         serviceCollection.AddSingleton(Mock.Of<INetworkPerspectiveCore>());
         serviceCollection.AddSingleton(Mock.Of<IOrchestratorHubClient>());
         var connectorType = new ConnectorType { Name = "Google", DataSourceId = "GSuiteId" };
-        serviceCollection.AddWorkerApplication(config.GetSection("Connector"), [connectorType]);
+        serviceCollection.AddWorkerApplication([connectorType]);
 
         // Act
         serviceCollection.AddGoogle(config.GetSection("Infrastructure:Google"), connectorType);
