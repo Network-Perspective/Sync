@@ -41,8 +41,8 @@ internal class UsersClient(GraphServiceClient graphClient, IGlobalStatusCache ta
             {
                 x.QueryParameters = new UsersRequestBuilder.UsersRequestBuilderGetQueryParameters
                 {
-                    Select = new[]
-                    {
+                    Select =
+                    [
                         nameof(User.Id),
                         nameof(User.Mail),
                         nameof(User.OtherMails),
@@ -50,13 +50,13 @@ internal class UsersClient(GraphServiceClient graphClient, IGlobalStatusCache ta
                         nameof(User.DisplayName),
                         nameof(User.Department),
                         nameof(User.CreatedDateTime)
-                    },
+                    ],
                     Filter = "userType eq 'Member'",
                     Top = MaxPageSize,
-                    Expand = new[]
-                    {
+                    Expand =
+                    [
                         nameof(User.Manager)
-                    }
+                    ]
                 };
             }, stoppingToken);
 
@@ -72,10 +72,10 @@ internal class UsersClient(GraphServiceClient graphClient, IGlobalStatusCache ta
                     {
                         x.QueryParameters = new()
                         {
-                            Select = new[]
-                            {
+                            Select =
+                            [
                                 nameof(Group.DisplayName),
-                            }
+                            ]
                         };
                     });
 
