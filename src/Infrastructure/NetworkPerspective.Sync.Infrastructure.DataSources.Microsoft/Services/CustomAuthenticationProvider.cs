@@ -1,18 +1,19 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
+using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services.Auths;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
-using NetworkPerspective.Sync.Worker.Application.Services;
-using Microsoft.Kiota.Abstractions;
-using System.Collections.Generic;
-using Microsoft.Extensions.Options;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
 using NetworkPerspective.Sync.Worker.Application.Extensions;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services.Auths;
+using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
 
@@ -37,7 +38,7 @@ internal class CustomAuthenticationProvider(IConfidentialClientAppProvider appPr
         {
             logger.LogError(ex, "Unable to authenticate request");
             await statusLogger.LogErrorAsync("Request authentication failed. Please perform OAuth process", stoppingToken);
-            
+
         }
     }
 }

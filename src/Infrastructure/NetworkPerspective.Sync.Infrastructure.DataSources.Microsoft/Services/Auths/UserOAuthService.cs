@@ -6,13 +6,13 @@ using System.Web;
 
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Domain.OAuth;
 using NetworkPerspective.Sync.Worker.Application.Services;
-using Microsoft.Extensions.Options;
-using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services.Auths;
 
