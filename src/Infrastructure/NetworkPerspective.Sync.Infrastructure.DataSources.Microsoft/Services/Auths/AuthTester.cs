@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Worker.Application.Services;
 
-namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
+namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services.Auths;
 
 internal class AuthTester(IConnectorContextAccessor connectorInfoProvider, IMicrosoftClientFactory clientFactory, ILogger<AuthTester> logger) : IAuthTester
 {
