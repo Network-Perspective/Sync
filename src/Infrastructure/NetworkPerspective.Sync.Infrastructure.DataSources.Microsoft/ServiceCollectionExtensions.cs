@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services.Auths;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
@@ -13,9 +14,10 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddMicrosoft(this IServiceCollection services, IConfigurationSection configurationSection, ConnectorType connectorType)
+    public static IServiceCollection AddMicrosoft(this IServiceCollection services, IConfiguration configuration, ConnectorType connectorType)
     {
-        services.Configure<Resiliency>(configurationSection.GetSection("Resiliency"));
+        services.Configure<ResiliencyConfig>(configuration.GetSection("Resiliency"));
+        services.Configure<AuthConfig>(configuration.GetSection("Auth"));
 
         services.AddTransient<ICapabilityTester>(x =>
         {
@@ -33,10 +35,24 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICalendarClient, CalendarClient>();
         services.AddScoped<IChannelsClient, ChannelsClient>();
         services.AddScoped<IChatsClient, ChatsClient>();
+        services.AddScoped<IConfidentialClientAppProvider, ConfidentialClientAppProvider>();
+        services.AddScoped<IUserTokenCacheVaultBinder, UserTokenCacheVaultBinder>();
+        services.AddScoped<CustomAuthenticationProvider>();
 
         services.AddKeyedScoped<IAuthTester, AuthTester>(connectorType.GetKeyOf<IAuthTester>());
         services.AddKeyedScoped<IDataSource, MicrosoftFacade>(connectorType.GetKeyOf<IDataSource>());
-        services.AddKeyedScoped<IOAuthService, OAuthService>(connectorType.GetKeyOf<IOAuthService>());
+
+        services.AddScoped<UserOAuthService>();
+        services.AddScoped<AdminConsentOAuthService>();
+        services.AddKeyedScoped<IOAuthService>(connectorType.GetKeyOf<IOAuthService>(), (sp, key) =>
+        {
+            var connectorContextAccessor = sp.GetRequiredService<IConnectorContextAccessor>();
+            var properties = new ConnectorProperties(connectorContextAccessor.Context.Properties);
+
+            return properties.UseUserToken
+                ? sp.GetRequiredService<UserOAuthService>()
+                : sp.GetRequiredService<AdminConsentOAuthService>();
+        });
 
         services.AddMemoryCache();
 

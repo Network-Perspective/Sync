@@ -1,6 +1,7 @@
+using FluentValidation;
+
 using Mapster;
 
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
@@ -10,8 +11,8 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Orchestrator.Application;
-using NetworkPerspective.Sync.Orchestrator.ApplicationInsights;
 using NetworkPerspective.Sync.Orchestrator.Controllers;
+using NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
@@ -49,6 +50,10 @@ public class Program
 
         builder.Services
             .AddMemoryCache();
+
+        builder.Services
+            .AddScoped<IValidator<CreateWorkerDto>, CreateWorkerDto.Validator>()
+            .AddScoped<IValidator<CreateConnectorDto>, CreateConnectorDto.Validator>();
 
         builder.Services.AddControllers(options =>
         {
