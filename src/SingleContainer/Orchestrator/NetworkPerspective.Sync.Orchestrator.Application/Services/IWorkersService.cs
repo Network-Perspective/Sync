@@ -9,6 +9,7 @@ using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
@@ -44,7 +45,7 @@ internal class WorkersService : IWorkersService
     {
         const int workerProtocolVersion = 1;
 
-        _logger.LogInformation("Creating new worker '{name}'...", name);
+        _logger.LogInformation("Creating new worker '{name}'...", name.Sanitize());
 
         var keySalt = _cryptoService.GenerateSalt();
         var hashedSecret = _cryptoService.HashPassword(secret, keySalt);

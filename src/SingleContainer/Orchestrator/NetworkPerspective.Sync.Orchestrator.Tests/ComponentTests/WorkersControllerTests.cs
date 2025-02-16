@@ -14,27 +14,20 @@ using Xunit;
 namespace NetworkPerspective.Sync.Orchestrator.Tests.ComponentTests;
 
 [Collection(TestsCollection.Name)]
-public class WorkersControllerTests
+public class WorkersControllerTests(OrchestratorServiceFixture service)
 {
-    private readonly OrchestratorServiceFixture _service;
-
-    public WorkersControllerTests(OrchestratorServiceFixture service)
-    {
-        _service = service;
-    }
-
     [Fact]
     public async Task ShouldReturnCreatedWorkers()
     {
         // Arrange
-        var httpClient = _service.CreateDefaultClient();
+        var httpClient = service.CreateDefaultClient();
 
         var client = new WorkersClient(httpClient);
 
         // Act
-        await client.CreateAsync(new CreateWorkerDto { Name = "worker1", Secret = "secret1" });
-        await client.CreateAsync(new CreateWorkerDto { Name = "worker2", Secret = "secret2" });
-        await client.CreateAsync(new CreateWorkerDto { Name = "worker3", Secret = "secret3" });
+        await client.CreateAsync(new CreateWorkerDto { Id = Guid.NewGuid(), Name = "worker1", Secret = "secret1" });
+        await client.CreateAsync(new CreateWorkerDto { Id = Guid.NewGuid(), Name = "worker2", Secret = "secret2" });
+        await client.CreateAsync(new CreateWorkerDto { Id = Guid.NewGuid(), Name = "worker3", Secret = "secret3" });
 
         var current = await client.GetAllAsync();
 
@@ -58,7 +51,7 @@ public class WorkersControllerTests
     public async Task ShouldReturn401OnInvalidApiKey()
     {
         // Arrange
-        var httpClient = _service.CreateDefaultClient();
+        var httpClient = service.CreateDefaultClient();
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Guid.NewGuid().ToString());
 
         var client = new WorkersClient(httpClient);
