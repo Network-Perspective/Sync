@@ -27,6 +27,7 @@ internal class ConnectorsService(IUnitOfWork unitOfWork, IClock clock, ILogger<C
 {
     public async Task CreateAsync(Guid id, Guid networkId, string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default)
     {
+        // codeql [suppress] cs/log-forging: User input is validated and sanitized
         logger.LogInformation("Creating new connector '{id}' of '{type}'...", id, type.Sanitize());
 
         var worker = await unitOfWork

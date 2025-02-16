@@ -1,0 +1,2 @@
+# Ignore generated client
+src/Infrastructure/NetworkPerspective.Sync.Infrastructure.Core.HttpClients/obj/v1Client.cs
