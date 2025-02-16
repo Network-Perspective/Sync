@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using FluentValidation;
+
 using Mapster;
 
 using Microsoft.AspNetCore.Authorization;
@@ -15,16 +17,15 @@ using NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Auth.ApiKey;
 using NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
-using NetworkPerspective.Sync.Orchestrator.Dtos;
+using NetworkPerspective.Sync.Orchestrator.Extensions;
 using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [Route("api/connectors")]
 [Authorize(AuthenticationSchemes = ApiKeyAuthOptions.DefaultScheme)]
-public class ConnectorsController(IConnectorsService connectorsService, ISyncScheduler syncScheduler, ITokenService tokenService, ILogger<ConnectorsController> logger) : ControllerBase
+public class ConnectorsController(IValidator<CreateConnectorDto> validator, IConnectorsService connectorsService, ISyncScheduler syncScheduler, ITokenService tokenService, ILogger<ConnectorsController> logger) : ControllerBase
 {
-
     /// <summary>
     /// Creates new connector for selected worker instance with specified properties
     /// </summary>
@@ -41,7 +42,14 @@ public class ConnectorsController(IConnectorsService connectorsService, ISyncSch
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateAsync([FromBody] CreateConnectorDto request, CancellationToken stoppingToken = default)
     {
-        logger.LogDebug("Received request to create new connector '{type}' for worker '{workerId}'", request.Type, request.WorkerId);
+        var validationResult = await validator.ValidateAsync(request, stoppingToken);
+        if (!validationResult.IsValid)
+        {
+            validationResult.AddToModelState(ModelState);
+            return BadRequest(ModelState);
+        }
+
+        logger.LogDebug("Received request to create new connector '{type}' for worker '{workerId}'", request.Type.Sanitize(), request.WorkerId);
 
         var properties = request.Properties.ToDictionary(p => p.Key, p => p.Value);
         await connectorsService.CreateAsync(request.Id, request.NetworkId, request.Type, request.WorkerId, properties, stoppingToken);
