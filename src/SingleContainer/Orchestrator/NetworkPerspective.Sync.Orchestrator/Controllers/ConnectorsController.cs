@@ -49,6 +49,7 @@ public class ConnectorsController(IValidator<CreateConnectorDto> validator, ICon
             return BadRequest(ModelState);
         }
 
+        // codeql [suppress] cs/log-forging: User input is validated and sanitized
         logger.LogDebug("Received request to create new connector '{type}' for worker '{workerId}'", request.Type.Sanitize(), request.WorkerId);
 
         var properties = request.Properties.ToDictionary(p => p.Key, p => p.Value);
