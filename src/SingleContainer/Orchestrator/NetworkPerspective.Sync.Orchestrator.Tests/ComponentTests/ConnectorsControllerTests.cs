@@ -13,25 +13,18 @@ using Xunit;
 namespace NetworkPerspective.Sync.Orchestrator.Tests.ComponentTests;
 
 [Collection(TestsCollection.Name)]
-public class ConnectorsControllerTests
+public class ConnectorsControllerTests(OrchestratorServiceFixture service)
 {
-    private readonly OrchestratorServiceFixture _service;
-
-    public ConnectorsControllerTests(OrchestratorServiceFixture service)
-    {
-        _service = service;
-    }
-
     [Fact]
     public async Task ShouldReturnCreatedConnectors()
     {
         // Arrange
         var workerName = Guid.NewGuid().ToString();
-        var httpClient = _service.CreateDefaultClient();
+        var httpClient = service.CreateDefaultClient();
 
         var wokrersClient = new WorkersClient(httpClient);
         var connectorsClient = new ConnectorsClient(httpClient);
-        await wokrersClient.CreateAsync(new CreateWorkerDto { Name = workerName, Secret = "secret1" });
+        await wokrersClient.CreateAsync(new CreateWorkerDto { Id = Guid.NewGuid(), Name = workerName, Secret = "secret1" });
 
         var workers = await wokrersClient.GetAllAsync();
         var workerId = workers.Single(x => x.Name == workerName).Id;
@@ -41,6 +34,7 @@ public class ConnectorsControllerTests
         {
             Id = Guid.NewGuid(),
             WorkerId = workerId,
+            NetworkId = Guid.NewGuid(),
             Type = "Google",
             Properties =
             [
