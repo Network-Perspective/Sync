@@ -80,7 +80,8 @@ public class AuthController(IConnectorsService connectorsService, IWorkerRouter 
     /// <summary>
     /// Microsoft OAuth callback
     /// </summary>
-    /// <param name="tenant">Tenant id</param>
+    /// <param name="tenant">Tenant id - only for Admin Consent</param>
+    /// <param name="code">Authorization code - only for User OAuth</param>
     /// <param name="state">Anti-forgery unique value</param>
     /// <param name="error">Error</param>
     /// <param name="error_description">Error description</param>
@@ -94,7 +95,7 @@ public class AuthController(IConnectorsService connectorsService, IWorkerRouter 
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> HandleMicrosoftCallback(Guid tenant, string state, string error, string error_description, CancellationToken stoppingToken = default)
+    public async Task<IActionResult> HandleMicrosoftCallback(Guid tenant, string code, string state, string error, string error_description, CancellationToken stoppingToken = default)
     {
         if (error is not null || error_description is not null)
             throw new OAuthException(error, error_description);
@@ -102,9 +103,13 @@ public class AuthController(IConnectorsService connectorsService, IWorkerRouter 
         if (!cache.TryGetValue(state, out string workerName))
             throw new OAuthException("State does not match initialized value");
 
-        await workerRouter.HandleOAuthCallbackAsync(workerName, tenant.ToString(), state);
+        var codeRequest = tenant == Guid.Empty
+            ? code
+            : tenant.ToString();
 
-        return Ok("Admin consent completed!");
+        await workerRouter.HandleOAuthCallbackAsync(workerName, codeRequest, state);
+
+        return Ok("Auth completed");
     }
 
     /// <summary>

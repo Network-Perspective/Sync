@@ -35,7 +35,7 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
         var stateExpirationTimestamp = DateTimeOffset.UtcNow.AddMinutes(AuthorizationCodeExpirationTimeInMinutes);
         cache.Set(stateKey, context, stateExpirationTimestamp);
 
-        var authUri = BuildAuthUri(stateKey, context, clientId);
+        var authUri = BuildAuthUri(stateKey, context.CallbackUri, clientId);
 
         logger.LogInformation("Google authentication process started. Unique state id: '{state}'", stateKey);
 
@@ -58,14 +58,14 @@ internal class OAuthService(IVault vault, IAuthStateKeyFactory stateKeyFactory, 
         await vault.SetSecretAsync(refreshTokenKey, tokenResponse.RefreshToken.ToSecureString(), stoppingToken);
     }
 
-    private string BuildAuthUri(string state, OAuthContext context, SecureString clientId)
+    private string BuildAuthUri(string state, string callbackUri, SecureString clientId)
     {
         logger.LogDebug("Building google auth path...'");
 
         var queryParameters = HttpUtility.ParseQueryString(string.Empty);
         queryParameters["client_id"] = clientId.ToSystemString();
         queryParameters["scope"] = string.Join(' ', _scopes);
-        queryParameters["redirect_uri"] = context.CallbackUri.ToString();
+        queryParameters["redirect_uri"] = callbackUri.ToString();
         queryParameters["state"] = state;
         queryParameters["response_type"] = "code";
         queryParameters["access_type"] = "offline";
