@@ -24,25 +24,19 @@ using Xunit;
 namespace NetworkPerspective.Sync.Orchestrator.Tests.ComponentTests;
 
 [Collection(TestsCollection.Name)]
-public class WorkersHubTests
+public class WorkersHubTests(OrchestratorServiceFixture service)
 {
-    private readonly OrchestratorServiceFixture _service;
-
-    public WorkersHubTests(OrchestratorServiceFixture service)
-    {
-        _service = service;
-    }
-
     [Fact]
     public async Task ShouldConnectWithValidCredentials()
     {
         // Arrange
         var workerName = "client_1";
         var workerSecret = "pass1";
-        var workersClient = new WorkersClient(_service.CreateDefaultClient());
+        var workersClient = new WorkersClient(service.CreateDefaultClient());
 
         await workersClient.CreateAsync(new CreateWorkerDto
         {
+            Id = Guid.NewGuid(),
             Name = workerName,
             Secret = workerSecret,
         });
@@ -51,19 +45,19 @@ public class WorkersHubTests
 
         var config = Options.Create(new OrchestratorHubClientConfig
         {
-            BaseUrl = _service.Server.BaseAddress.ToString()
+            BaseUrl = service.Server.BaseAddress.ToString()
         });
         var hubClient = new OrchestratorHubClient(Mock.Of<IMediator>(), config, NullLogger<OrchestratorHubClient>.Instance);
 
         // Act
-        await hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
+        await hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{service.Server.BaseAddress}ws/v1/workers-hub", options =>
         {
             options.AccessTokenProvider = () =>
             {
                 var bytes = Encoding.UTF8.GetBytes($"{workerName}:{workerSecret}");
                 return Task.FromResult(Convert.ToBase64String(bytes));
             };
-            options.HttpMessageHandlerFactory = _ => _service.Server.CreateHandler();
+            options.HttpMessageHandlerFactory = _ => service.Server.CreateHandler();
         }));
 
         // Assert
@@ -79,10 +73,11 @@ public class WorkersHubTests
         // Arrange
         var workerName = "client_1";
         var workerSecret = "invalid-pass";
-        var workersClient = new WorkersClient(_service.CreateDefaultClient());
+        var workersClient = new WorkersClient(service.CreateDefaultClient());
 
         await workersClient.CreateAsync(new CreateWorkerDto
         {
+            Id = Guid.NewGuid(),
             Name = workerName,
             Secret = workerSecret,
         });
@@ -91,14 +86,14 @@ public class WorkersHubTests
 
         var config = Options.Create(new OrchestratorHubClientConfig
         {
-            BaseUrl = _service.Server.BaseAddress.ToString()
+            BaseUrl = service.Server.BaseAddress.ToString()
         });
         var hubClient = new OrchestratorHubClient(Mock.Of<IMediator>(), config, NullLogger<OrchestratorHubClient>.Instance);
 
         // Act
-        Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
+        Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{service.Server.BaseAddress}ws/v1/workers-hub", options =>
         {
-            options.HttpMessageHandlerFactory = _ => _service.Server.CreateHandler();
+            options.HttpMessageHandlerFactory = _ => service.Server.CreateHandler();
         }));
 
         // Assert
@@ -114,10 +109,11 @@ public class WorkersHubTests
         // Arrange
         var workerName = "client_1";
         var workerSecret = "pass1";
-        var workersClient = new WorkersClient(_service.CreateDefaultClient());
+        var workersClient = new WorkersClient(service.CreateDefaultClient());
 
         await workersClient.CreateAsync(new CreateWorkerDto
         {
+            Id = Guid.NewGuid(),
             Name = workerName,
             Secret = workerSecret,
         });
@@ -125,19 +121,19 @@ public class WorkersHubTests
 
         var config = Options.Create(new OrchestratorHubClientConfig
         {
-            BaseUrl = _service.Server.BaseAddress.ToString()
+            BaseUrl = service.Server.BaseAddress.ToString()
         });
         var hubClient = new OrchestratorHubClient(Mock.Of<IMediator>(), config, NullLogger<OrchestratorHubClient>.Instance);
 
         // Act
-        Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{_service.Server.BaseAddress}ws/v1/workers-hub", options =>
+        Func<Task> func = () => hubClient.ConnectAsync(connectionConfiguration: x => x.WithUrl($"{service.Server.BaseAddress}ws/v1/workers-hub", options =>
         {
             options.AccessTokenProvider = () =>
             {
                 var bytes = Encoding.UTF8.GetBytes($"{workerName}:{workerSecret}");
                 return Task.FromResult(Convert.ToBase64String(bytes));
             };
-            options.HttpMessageHandlerFactory = _ => _service.Server.CreateHandler();
+            options.HttpMessageHandlerFactory = _ => service.Server.CreateHandler();
         }));
 
         // Assert
