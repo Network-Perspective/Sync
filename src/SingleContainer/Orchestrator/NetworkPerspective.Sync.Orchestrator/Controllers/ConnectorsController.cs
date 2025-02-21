@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,7 +40,6 @@ public class ConnectorsController(IValidator<CreateConnectorDto> validator, ICon
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [SuppressMessage("CodeQL", "cs/log-forging", Justification = "User input is validated and sanitized before logging")]
     public async Task<IActionResult> CreateAsync([FromBody] CreateConnectorDto request, CancellationToken stoppingToken = default)
     {
         var validationResult = await validator.ValidateAsync(request, stoppingToken);
@@ -50,7 +48,6 @@ public class ConnectorsController(IValidator<CreateConnectorDto> validator, ICon
             validationResult.AddToModelState(ModelState);
             return BadRequest(ModelState);
         }
-
         logger.LogDebug("Received request to create new connector '{type}' for worker '{workerId}'", request.Type.Sanitize(), request.WorkerId);
 
         var properties = request.Properties.ToDictionary(p => p.Key, p => p.Value);
