@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,9 +24,9 @@ namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 public class WorkersController(IValidator<CreateWorkerDto> validator, IWorkersService workersService, ILogger<WorkersController> logger) : ControllerBase
 {
     [HttpGet("{name}")]
-    [SuppressMessage("CodeQL", "cs/log-forging", Justification = "User input is validated and sanitized before logging")]
     public async Task<WorkerDto> GetAsync(string name, CancellationToken stoppingToken = default)
     {
+        // codeql [CS/Log/Forging] - false positive, input is sanitized elsewhere
         logger.LogDebug("Received request to get worker '{Name}'", name.Sanitize());
         var worker = await workersService.GetAsync(name, stoppingToken);
         return worker.Adapt<WorkerDto>();
@@ -43,7 +42,6 @@ public class WorkersController(IValidator<CreateWorkerDto> validator, IWorkersSe
     }
 
     [HttpPost]
-    [SuppressMessage("CodeQL", "cs/log-forging", Justification = "User input is validated and sanitized before logging")]
     public async Task<IActionResult> CreateAsync([FromBody] CreateWorkerDto request, CancellationToken stoppingToken = default)
     {
         var validationResult = await validator.ValidateAsync(request, stoppingToken);
@@ -52,6 +50,7 @@ public class WorkersController(IValidator<CreateWorkerDto> validator, IWorkersSe
             validationResult.AddToModelState(ModelState);
             return BadRequest(ModelState);
         }
+        // codeql [CS/Log/Forging] - false positive, input is sanitized elsewhere
         logger.LogDebug("Received request to create new worker '{Name}'", request.Name.Sanitize());
         await workersService.CreateAsync(request.Id, request.Name, request.Secret, stoppingToken);
 
