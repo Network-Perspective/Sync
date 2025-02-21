@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,7 +25,6 @@ public interface IConnectorsService
 
 internal class ConnectorsService(IUnitOfWork unitOfWork, IClock clock, ILogger<ConnectorsService> logger) : IConnectorsService
 {
-    [SuppressMessage("CodeQL", "cs/log-forging", Justification = "User input is validated and sanitized before logging")]
     public async Task CreateAsync(Guid id, Guid networkId, string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default)
     {
         logger.LogInformation("Creating new connector '{id}' of '{type}'...", id, type.Sanitize());

@@ -28,7 +28,7 @@ public class CreateConnectorDto
                 .NotEmpty();
 
             RuleFor(x => x.Type)
-                .Matches(@"^[a-zA-Z]+$")
+                .Matches(@"^[a-zA-Z0-9]+$")
                 .WithMessage($"{nameof(Type)} may contain only alpha-numeric characters");
         }
     }

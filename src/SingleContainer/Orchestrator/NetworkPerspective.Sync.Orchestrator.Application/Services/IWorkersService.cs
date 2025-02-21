@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,7 +28,6 @@ internal class WorkersService(IUnitOfWork unitOfWork, IWorkerRouter workerRouter
 {
     private readonly ILogger<IWorkersService> _logger = logger;
 
-    [SuppressMessage("CodeQL", "cs/log-forging", Justification = "User input is validated and sanitized before logging")]
     public async Task CreateAsync(Guid id, string name, string secret, CancellationToken stoppingToken = default)
     {
         const int workerProtocolVersion = 1;
@@ -50,7 +48,6 @@ internal class WorkersService(IUnitOfWork unitOfWork, IWorkerRouter workerRouter
 
         await unitOfWork.CommitAsync(stoppingToken);
 
-        // codeql [suppress] cs/log-forging: User input is validated and sanitized
         _logger.LogInformation("New worker '{name}' has been created", name.Sanitize());
     }
 
