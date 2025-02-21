@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
@@ -22,75 +24,65 @@ public interface IConnectorsService
     Task ValidateExists(Guid id, CancellationToken stoppingToken = default);
 }
 
-internal class ConnectorsService : IConnectorsService
+internal class ConnectorsService(IUnitOfWork unitOfWork, IClock clock, ILogger<ConnectorsService> logger) : IConnectorsService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IClock _clock;
-    private readonly ILogger<ConnectorsService> _logger;
-
-    public ConnectorsService(IUnitOfWork unitOfWork, IClock clock, ILogger<ConnectorsService> logger)
-    {
-        _unitOfWork = unitOfWork;
-        _clock = clock;
-        _logger = logger;
-    }
-
+    [SuppressMessage("CodeQL", "cs/log-forging", Justification = "User input is validated and sanitized before logging")]
     public async Task CreateAsync(Guid id, Guid networkId, string type, Guid workerId, IDictionary<string, string> properties, CancellationToken stoppingToken = default)
     {
-        _logger.LogInformation("Creating new connector '{id}' of '{type}'...", id, type);
+        logger.LogInformation("Creating new connector '{id}' of '{type}'...", id, type.Sanitize());
 
-        var worker = await _unitOfWork
+        var worker = await unitOfWork
             .GetWorkerRepository()
             .GetAsync(workerId, stoppingToken);
 
-        var now = _clock.UtcNow();
+        var now = clock.UtcNow();
         var connector = new Connector(id, type, properties, worker, networkId, now);
 
-        await _unitOfWork
+        await unitOfWork
             .GetConnectorRepository()
             .AddAsync(connector, stoppingToken);
 
-        await _unitOfWork.CommitAsync(stoppingToken);
+        await unitOfWork.CommitAsync(stoppingToken);
 
-        _logger.LogInformation("New connector '{id}' has been created", id);
+        logger.LogInformation("New connector '{id}' has been created", id);
     }
 
     public async Task RemoveAsync(Guid id, CancellationToken stoppingToken = default)
     {
-        _logger.LogInformation("Deleting new connector '{id}'", id);
+        logger.LogInformation("Deleting new connector '{id}'", id);
 
         await ValidateExists(id, stoppingToken);
 
-        await _unitOfWork
+        await unitOfWork
             .GetConnectorRepository()
             .RemoveAsync(id, stoppingToken);
 
-        await _unitOfWork.CommitAsync(stoppingToken);
+        await unitOfWork.CommitAsync(stoppingToken);
 
-        _logger.LogInformation("New connector '{id}' has been removed", id);
+        logger.LogInformation("New connector '{id}' has been removed", id);
     }
 
     public async Task<IEnumerable<Connector>> GetAllAsync(CancellationToken stoppingToken = default)
     {
-        _logger.LogInformation("Getting all connectors...");
+        logger.LogInformation("Getting all connectors...");
 
-        return await _unitOfWork
+        return await unitOfWork
             .GetConnectorRepository()
             .GetAllAsync(stoppingToken);
     }
 
     public async Task<IEnumerable<Connector>> GetAllOfWorkerAsync(Guid workerId, CancellationToken stoppingToken = default)
     {
-        _logger.LogInformation("Getting all connectors of worker '{workerId}'...", workerId);
+        logger.LogInformation("Getting all connectors of worker '{workerId}'...", workerId);
 
-        return await _unitOfWork
+        return await unitOfWork
             .GetConnectorRepository()
             .GetAllOfWorkerAsync(workerId, stoppingToken);
     }
 
     public async Task<Connector> GetAsync(Guid id, CancellationToken stoppingToken = default)
     {
-        var connector = await _unitOfWork
+        var connector = await unitOfWork
             .GetConnectorRepository()
             .FindAsync(id, stoppingToken);
 
@@ -104,15 +96,15 @@ internal class ConnectorsService : IConnectorsService
     {
         await ValidateExists(id, stoppingToken);
 
-        await _unitOfWork.GetConnectorPropertyRepository()
+        await unitOfWork.GetConnectorPropertyRepository()
             .SetAsync(id, properties, stoppingToken);
 
-        await _unitOfWork.CommitAsync(stoppingToken);
+        await unitOfWork.CommitAsync(stoppingToken);
     }
 
     public async Task ValidateExists(Guid id, CancellationToken stoppingToken = default)
     {
-        var connector = await _unitOfWork
+        var connector = await unitOfWork
             .GetConnectorRepository()
             .FindAsync(id, stoppingToken);
 

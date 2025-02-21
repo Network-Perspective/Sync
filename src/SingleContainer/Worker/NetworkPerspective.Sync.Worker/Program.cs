@@ -59,7 +59,7 @@ public class Program
                 .ValidateOnStart();
 
             builder.Services
-                .AddWorkerApplication(builder.Configuration.GetSection("App"), connectorTypes)
+                .AddWorkerApplication(connectorTypes)
                 .AddNetworkPerspectiveCore(builder.Configuration.GetSection("Infrastructure:Core"), healthChecksBuilder)
                 .AddVault(builder.Configuration.GetSection("Infrastructure:Vaults"), healthChecksBuilder)
                 .AddSlack(builder.Configuration.GetSection("Infrastructure:DataSources:Slack"), slackConnector)

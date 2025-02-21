@@ -10,6 +10,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 public interface ICachedVault : IVault
 {
     Task ClearCacheAsync(CancellationToken stoppingToken = default);
+    Task ClearCacheAsync(string key, CancellationToken stoppingToken = default);
 }
 
 public class CachedVault(IVault secretRepository, ILogger<CachedVault> logger) : ICachedVault
@@ -25,6 +26,31 @@ public class CachedVault(IVault secretRepository, ILogger<CachedVault> logger) :
             logger.LogDebug("Clearing cache...");
             _cachedSecrets.Clear();
             logger.LogDebug("Cache cleared");
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    public async Task ClearCacheAsync(string key, CancellationToken stoppingToken = default)
+    {
+        await _semaphore.WaitAsync(stoppingToken);
+        try
+        {
+            logger.LogDebug("Clearing key '{Key}' in cache...", key);
+
+            if (_cachedSecrets.ContainsKey(key))
+            {
+                _cachedSecrets.Remove(key);
+                logger.LogDebug("Cache key '{Key}' cleared", key);
+            }
+            else
+            {
+                logger.LogDebug("Key '{Key}' does not exist in cache. Nothing to clear", key);
+                return;
+            }
+
         }
         finally
         {
