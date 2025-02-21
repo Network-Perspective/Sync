@@ -9,6 +9,7 @@ using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Exceptions;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
+using NetworkPerspective.Sync.Utils.Extensions;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
@@ -23,65 +24,52 @@ public interface IWorkersService
     Task EnsureRemoved(Guid id, CancellationToken stoppingToken = default);
 }
 
-internal class WorkersService : IWorkersService
+internal class WorkersService(IUnitOfWork unitOfWork, IWorkerRouter workerRouter, IClock clock, ICryptoService cryptoService, ILogger<WorkersService> logger) : IWorkersService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IWorkerRouter _workerRouter;
-    private readonly IClock _clock;
-    private readonly ICryptoService _cryptoService;
-    private readonly ILogger<IWorkersService> _logger;
-
-    public WorkersService(IUnitOfWork unitOfWork, IWorkerRouter workerRouter, IClock clock, ICryptoService cryptoService, ILogger<WorkersService> logger)
-    {
-        _unitOfWork = unitOfWork;
-        _workerRouter = workerRouter;
-        _clock = clock;
-        _cryptoService = cryptoService;
-        _logger = logger;
-    }
+    private readonly ILogger<IWorkersService> _logger = logger;
 
     public async Task CreateAsync(Guid id, string name, string secret, CancellationToken stoppingToken = default)
     {
         const int workerProtocolVersion = 1;
 
-        _logger.LogInformation("Creating new worker '{name}'...", name);
+        _logger.LogInformation("Creating new worker '{name}'...", name.Sanitize());
 
-        var keySalt = _cryptoService.GenerateSalt();
-        var hashedSecret = _cryptoService.HashPassword(secret, keySalt);
+        var keySalt = cryptoService.GenerateSalt();
+        var hashedSecret = cryptoService.HashPassword(secret, keySalt);
         var keySaltBase64 = Convert.ToBase64String(keySalt);
         var hashedSecretBase64 = Convert.ToBase64String(hashedSecret);
-        var now = _clock.UtcNow();
+        var now = clock.UtcNow();
 
         var worker = new Worker(id, workerProtocolVersion, name, hashedSecretBase64, keySaltBase64, false, now);
 
-        await _unitOfWork
+        await unitOfWork
             .GetWorkerRepository()
             .AddAsync(worker, stoppingToken);
 
-        await _unitOfWork.CommitAsync(stoppingToken);
+        await unitOfWork.CommitAsync(stoppingToken);
 
-        _logger.LogInformation("New worker '{id}' has been created", id);
+        _logger.LogInformation("New worker '{name}' has been created", name.Sanitize());
     }
 
     public async Task AuthorizeAsync(Guid id, CancellationToken stoppingToken = default)
     {
-        var repo = _unitOfWork
+        var repo = unitOfWork
             .GetWorkerRepository();
 
         var worker = await repo.GetAsync(id, stoppingToken);
         worker.Authorize();
         await repo.UpdateAsync(worker, stoppingToken);
 
-        await _unitOfWork.CommitAsync(stoppingToken);
+        await unitOfWork.CommitAsync(stoppingToken);
     }
 
     public async Task<Worker> AuthenticateAsync(string name, string password, CancellationToken stoppingToken = default)
     {
-        var worker = await _unitOfWork
+        var worker = await unitOfWork
             .GetWorkerRepository()
             .GetAsync(name, stoppingToken);
 
-        var isPasswordValid = _cryptoService.VerifyPassword(password, worker.SecretHash, worker.SecretSalt);
+        var isPasswordValid = cryptoService.VerifyPassword(password, worker.SecretHash, worker.SecretSalt);
 
         if (!isPasswordValid)
             throw new InvalidCredentialsException();
@@ -96,13 +84,13 @@ internal class WorkersService : IWorkersService
     {
         _logger.LogInformation("Deleting worker '{id}'...", id);
 
-        var repository = _unitOfWork.GetWorkerRepository();
+        var repository = unitOfWork.GetWorkerRepository();
         var exists = await repository.ExistsAsync(id, stoppingToken);
 
         if (exists)
         {
             await repository.RemoveAsync(id, stoppingToken);
-            await _unitOfWork.CommitAsync(stoppingToken);
+            await unitOfWork.CommitAsync(stoppingToken);
             _logger.LogDebug("Worker '{id}' has been removed", id);
         }
 
@@ -111,7 +99,7 @@ internal class WorkersService : IWorkersService
 
     public async Task<IEnumerable<Worker>> GetAllAsync(CancellationToken stoppingToken = default)
     {
-        var workers = await _unitOfWork
+        var workers = await unitOfWork
             .GetWorkerRepository()
             .GetAllAsync(stoppingToken);
 
@@ -125,7 +113,7 @@ internal class WorkersService : IWorkersService
 
     public async Task<Worker> GetAsync(Guid id, CancellationToken stoppingToken = default)
     {
-        var worker = await _unitOfWork
+        var worker = await unitOfWork
             .GetWorkerRepository()
             .GetAsync(id, stoppingToken);
 
@@ -136,7 +124,7 @@ internal class WorkersService : IWorkersService
 
     public async Task<Worker> GetAsync(string name, CancellationToken stoppingToken = default)
     {
-        var worker = await _unitOfWork
+        var worker = await unitOfWork
             .GetWorkerRepository()
             .GetAsync(name, stoppingToken);
 
@@ -147,12 +135,12 @@ internal class WorkersService : IWorkersService
 
     private async Task<Worker> SetConnectionPropertiesAsync(Worker worker)
     {
-        var isOnline = _workerRouter.IsConnected(worker.Name);
+        var isOnline = workerRouter.IsConnected(worker.Name);
         worker.SetOnlineStatus(isOnline);
 
         if (isOnline)
         {
-            var supportedConnectorTypes = await _workerRouter.GetSupportedConnectorTypesAsync(worker.Name);
+            var supportedConnectorTypes = await workerRouter.GetSupportedConnectorTypesAsync(worker.Name);
             worker.SetSupportedConnectorTypes(supportedConnectorTypes);
         }
 
