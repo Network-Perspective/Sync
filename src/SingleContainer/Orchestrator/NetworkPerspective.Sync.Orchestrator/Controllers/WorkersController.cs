@@ -26,7 +26,6 @@ public class WorkersController(IValidator<CreateWorkerDto> validator, IWorkersSe
     [HttpGet("{name}")]
     public async Task<WorkerDto> GetAsync(string name, CancellationToken stoppingToken = default)
     {
-        // codeql [CS/Log/Forging] - false positive, input is sanitized elsewhere
         logger.LogDebug("Received request to get worker '{Name}'", name.Sanitize());
         var worker = await workersService.GetAsync(name, stoppingToken);
         return worker.Adapt<WorkerDto>();
@@ -50,7 +49,6 @@ public class WorkersController(IValidator<CreateWorkerDto> validator, IWorkersSe
             validationResult.AddToModelState(ModelState);
             return BadRequest(ModelState);
         }
-        // codeql [CS/Log/Forging] - false positive, input is sanitized elsewhere
         logger.LogDebug("Received request to create new worker '{Name}'", request.Name.Sanitize());
         await workersService.CreateAsync(request.Id, request.Name, request.Secret, stoppingToken);
 
