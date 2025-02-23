@@ -14,21 +14,14 @@ using NetworkPerspective.Sync.Orchestrator.Persistence.Mappers;
 
 namespace NetworkPerspective.Sync.Orchestrator.Persistence.Repositories;
 
-internal class StatusLogRepository : IStatusLogRepository
+internal class StatusLogRepository(DbSet<StatusLogEntity> dbSet) : IStatusLogRepository
 {
-    private readonly DbSet<StatusLogEntity> _dbSet;
-
-    public StatusLogRepository(DbSet<StatusLogEntity> dbSet)
-    {
-        _dbSet = dbSet;
-    }
-
     public async Task AddAsync(StatusLog log, CancellationToken stoppingToken = default)
     {
         try
         {
             var entity = StatusLogMapper.DomainModelToEntity(log);
-            await _dbSet.AddAsync(entity, stoppingToken);
+            await dbSet.AddAsync(entity, stoppingToken);
         }
         catch (Exception ex)
         {
@@ -36,14 +29,14 @@ internal class StatusLogRepository : IStatusLogRepository
         }
     }
 
-    public async Task<IEnumerable<StatusLog>> GetListAsync(Guid networkId, CancellationToken stoppingToken = default)
+    public async Task<IEnumerable<StatusLog>> GetListAsync(Guid networkId, StatusLogLevel severity, CancellationToken stoppingToken = default)
     {
         const int count = 50;
 
         try
         {
-            var entities = await _dbSet
-                .Where(x => x.ConnectorId == networkId)
+            var entities = await dbSet
+                .Where(x => x.ConnectorId == networkId && x.Level >= (int)severity)
                 .OrderByDescending(x => x.TimeStamp)
                 .Take(count)
                 .ToListAsync(stoppingToken);

@@ -1,6 +1,6 @@
 ﻿using System;
 
-using NetworkPerspective.Sync.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 
 namespace NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
 
