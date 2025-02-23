@@ -19,9 +19,9 @@ internal class ConnectorScopedLoggingMiddleware(IStatusLogger statusLogger) : IM
 
         try
         {
-            await statusLogger.LogInfoAsync($"Running action '{request.UserFriendlyName}'", cancellationToken);
+            await statusLogger.LogDebugAsync($"Running action '{request.UserFriendlyName}'", cancellationToken);
             var result = await next(request, cancellationToken);
-            await statusLogger.LogInfoAsync($"Action completed '{request.UserFriendlyName}'", cancellationToken);
+            await statusLogger.LogDebugAsync($"Action completed '{request.UserFriendlyName}'", cancellationToken);
             return result;
         }
         catch (Exception)

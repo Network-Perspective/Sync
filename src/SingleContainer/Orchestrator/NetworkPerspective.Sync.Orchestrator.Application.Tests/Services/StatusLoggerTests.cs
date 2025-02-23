@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using FluentAssertions;
-
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 
@@ -64,24 +62,27 @@ public class StatusLoggerTests
         // Act
         await statusLogger.AddLogAsync(connectorId, message1, StatusLogLevel.Error);
         await statusLogger.AddLogAsync(connectorId, message2, StatusLogLevel.Info);
+        await statusLogger.AddLogAsync(connectorId, message2, StatusLogLevel.Debug);
 
         // Assert
         var result = await uowFactory
             .Create()
             .GetStatusLogRepository()
-            .GetListAsync(connectorId);
+            .GetListAsync(connectorId, StatusLogLevel.Info);
+
+        Assert.Equal(2, result.Count());
 
         var log1 = result.First(x => x.Level == StatusLogLevel.Error);
-        log1.ConnectorId.Should().Be(connectorId);
-        log1.Message.Should().Be(message1);
-        log1.Level.Should().Be(StatusLogLevel.Error);
-        log1.TimeStamp.Should().Be(timeStamp1);
+        Assert.Equal(connectorId, log1.ConnectorId);
+        Assert.Equal(message1, log1.Message);
+        Assert.Equal(StatusLogLevel.Error, log1.Level);
+        Assert.Equal(timeStamp1, log1.TimeStamp);
 
         var log2 = result.First(x => x.Level == StatusLogLevel.Info);
-        log2.ConnectorId.Should().Be(connectorId);
-        log2.Message.Should().Be(message2);
-        log2.Level.Should().Be(StatusLogLevel.Info);
-        log2.TimeStamp.Should().Be(timeStamp2);
+        Assert.Equal(connectorId, log2.ConnectorId);
+        Assert.Equal(message2, log2.Message);
+        Assert.Equal(StatusLogLevel.Info, log2.Level);
+        Assert.Equal(timeStamp2, log2.TimeStamp);
     }
 
     [Fact]
@@ -92,9 +93,9 @@ public class StatusLoggerTests
 
         var statusLogger = new StatusLogger(unitOfWorkFactory, new Clock(), NullLogger);
 
-        Func<Task> func = async () => await statusLogger.AddLogAsync(Guid.NewGuid(), "Dummy message Error", StatusLogLevel.Error);
+        var excetion = await Record.ExceptionAsync(() => statusLogger.AddLogAsync(Guid.NewGuid(), "Dummy message Error", StatusLogLevel.Error));
 
         // Act Assert
-        await func.Should().NotThrowAsync();
+        Assert.Null(excetion);
     }
 }

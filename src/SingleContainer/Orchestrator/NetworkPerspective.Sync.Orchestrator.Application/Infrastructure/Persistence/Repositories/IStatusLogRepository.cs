@@ -9,6 +9,6 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persis
 
 public interface IStatusLogRepository
 {
-    Task<IEnumerable<StatusLog>> GetListAsync(Guid networkId, CancellationToken stoppingToken = default);
+    Task<IEnumerable<StatusLog>> GetListAsync(Guid networkId, StatusLogLevel severity, CancellationToken stoppingToken = default);
     Task AddAsync(StatusLog log, CancellationToken stoppingToken = default);
 }

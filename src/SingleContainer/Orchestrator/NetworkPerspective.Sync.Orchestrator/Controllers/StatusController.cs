@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 using NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
 
@@ -15,19 +16,13 @@ namespace NetworkPerspective.Sync.Orchestrator.Controllers;
 
 [Route("api/connectors/{connectorId:guid}/status")]
 [Authorize]
-public class StatusController : ControllerBase
+public class StatusController(IStatusService statusService) : ControllerBase
 {
-    private readonly IStatusService _statusService;
-
-    public StatusController(IStatusService statusService)
-    {
-        _statusService = statusService;
-    }
-
     /// <summary>
     /// Connector status
     /// </summary>
     /// <param name="connectorId">Connector Id</param>
+    /// <param name="logsSeverity">Filter logs severity level</param>
     /// <param name="stoppingToken">Stopping token</param>
     /// <response code="200">Status</response>
     /// <response code="400">Request cancelled</response>
@@ -41,9 +36,9 @@ public class StatusController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<StatusDto> GetStatus([FromRoute] Guid connectorId, CancellationToken stoppingToken = default)
+    public async Task<StatusDto> GetStatus([FromRoute] Guid connectorId, [FromQuery] StatusLogLevel logsSeverity = StatusLogLevel.Info, CancellationToken stoppingToken = default)
     {
-        var status = await _statusService.GetStatusAsync(connectorId, stoppingToken);
+        var status = await statusService.GetStatusAsync(connectorId, logsSeverity, stoppingToken);
 
         return status.Adapt<StatusDto>();
     }
