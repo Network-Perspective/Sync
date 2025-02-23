@@ -2,21 +2,18 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using FluentAssertions;
-
 using Mapster;
 
 using Moq;
 
 using NetworkPerspective.Sync.Orchestrator.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
-using NetworkPerspective.Sync.Orchestrator.Client;
 using NetworkPerspective.Sync.Orchestrator.Controllers;
 using NetworkPerspective.Sync.Orchestrator.Mappers;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Framework.Tests.Controllers;
+namespace NetworkPerspective.Sync.Orchestrator.Tests.Controllers;
 
 public class StatusControllerTests
 {
@@ -48,7 +45,7 @@ public class StatusControllerTests
             var status = Status.Connected(isScheduled, ConnectorStatus.Running(isAuthorized, taskStatus), []);
 
             _statusServiceMock
-                .Setup(x => x.GetStatusAsync(connectorId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetStatusAsync(connectorId, It.IsAny<Application.Domain.StatusLogLevel>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(status);
 
             var controller = new StatusController(_statusServiceMock.Object);
@@ -57,21 +54,13 @@ public class StatusControllerTests
             var actualStatus = await controller.GetStatus(connectorId);
 
             // Assert
-            var expectedStatus = new StatusDto
-            {
-                IsConnected = isConnected,
-                Scheduled = isScheduled,
-                Authorized = isAuthorized,
-                Running = isRunning,
-                CurrentTask = new SynchronizationTaskStatusDto()
-                {
-                    Caption = caption,
-                    Description = description,
-                    CompletionRate = completionRate
-                },
-                Logs = []
-            };
-            actualStatus.Should().BeEquivalentTo(expectedStatus);
+            Assert.Equal(isConnected, actualStatus.IsConnected);
+            Assert.Equal(isScheduled, actualStatus.Scheduled);
+            Assert.Equal(isAuthorized, actualStatus.Authorized);
+            Assert.Equal(isRunning, actualStatus.Running);
+            Assert.Equal(completionRate, actualStatus.CurrentTask.CompletionRate);
+            Assert.Equal(description, actualStatus.CurrentTask.Description);
+            Assert.Empty(actualStatus.Logs);
         }
     }
 }

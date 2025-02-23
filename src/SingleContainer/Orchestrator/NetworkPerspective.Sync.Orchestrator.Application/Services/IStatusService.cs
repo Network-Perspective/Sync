@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
@@ -13,12 +14,12 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Services;
 
 public interface IStatusService
 {
-    public Task<Status> GetStatusAsync(Guid connectorId, CancellationToken stoppingToken = default);
+    public Task<Status> GetStatusAsync(Guid connectorId, StatusLogLevel logsSeverity, CancellationToken stoppingToken = default);
 }
 
 internal class StatusService(IWorkerRouter workerRouter, IUnitOfWork unitOfWork, ISyncScheduler scheduler, ILogger<StatusService> logger) : IStatusService
 {
-    public async Task<Status> GetStatusAsync(Guid connectorId, CancellationToken stoppingToken = default)
+    public async Task<Status> GetStatusAsync(Guid connectorId, StatusLogLevel logsSeverity, CancellationToken stoppingToken = default)
     {
         logger.LogDebug("Checking status of connector '{connectorId}'", connectorId);
 
@@ -28,7 +29,7 @@ internal class StatusService(IWorkerRouter workerRouter, IUnitOfWork unitOfWork,
 
         var logs = await unitOfWork
             .GetStatusLogRepository()
-            .GetListAsync(connectorId, stoppingToken);
+            .GetListAsync(connectorId, logsSeverity, stoppingToken);
 
         var isScheduled = await scheduler.IsScheduledAsync(connectorId, stoppingToken);
         var isConnected = workerRouter.IsConnected(connector.Worker.Name);

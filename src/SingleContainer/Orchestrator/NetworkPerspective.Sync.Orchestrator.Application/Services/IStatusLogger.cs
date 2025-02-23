@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 

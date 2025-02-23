@@ -1,7 +1,5 @@
 ﻿using System;
 
-using NetworkPerspective.Sync.Application.Domain.Statuses;
-
 namespace NetworkPerspective.Sync.Orchestrator.Application.Domain;
 
 public class StatusLog

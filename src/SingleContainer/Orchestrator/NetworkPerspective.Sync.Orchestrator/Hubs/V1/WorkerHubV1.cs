@@ -208,11 +208,12 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
         return capabilities.SupportedConnectorTypes;
     }
 
-    private static Sync.Application.Domain.Statuses.StatusLogLevel ToDomainStatusLogLevel(StatusLogLevel level)
+    private static Application.Domain.StatusLogLevel ToDomainStatusLogLevel(Contract.V1.Dtos.StatusLogLevel level)
         => level switch
         {
-            StatusLogLevel.Error => Sync.Application.Domain.Statuses.StatusLogLevel.Error,
-            StatusLogLevel.Warning => Sync.Application.Domain.Statuses.StatusLogLevel.Warning,
-            _ => Sync.Application.Domain.Statuses.StatusLogLevel.Info,
+            Contract.V1.Dtos.StatusLogLevel.Error => Application.Domain.StatusLogLevel.Error,
+            Contract.V1.Dtos.StatusLogLevel.Warning => Application.Domain.StatusLogLevel.Warning,
+            Contract.V1.Dtos.StatusLogLevel.Debug => Application.Domain.StatusLogLevel.Debug,
+            _ => Application.Domain.StatusLogLevel.Info,
         };
 }

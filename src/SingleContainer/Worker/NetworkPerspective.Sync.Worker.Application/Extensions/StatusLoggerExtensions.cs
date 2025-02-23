@@ -16,4 +16,7 @@ public static class StatusLoggerExtensions
 
     public static Task LogInfoAsync(this IStatusLogger service, string message, CancellationToken stoppingToken = default)
         => service.AddLogAsync(message, StatusLogLevel.Info, stoppingToken);
+
+    public static Task LogDebugAsync(this IStatusLogger service, string message, CancellationToken stoppingToken = default)
+        => service.AddLogAsync(message, StatusLogLevel.Debug, stoppingToken);
 }
