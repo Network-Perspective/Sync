@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence.Exceptions;
@@ -41,10 +40,11 @@ public class StatusServiceTests
 
         var service = new StatusService(_workerRouterMock.Object, uowFactory.Create(), _schedulerMock.Object, _logger);
 
-        Func<Task<Status>> func = () => service.GetStatusAsync(Guid.NewGuid());
+        // Act
+        var exception = await Record.ExceptionAsync(() => service.GetStatusAsync(Guid.NewGuid(), StatusLogLevel.Info));
 
-        // Act Assert
-        await func.Should().ThrowExactlyAsync<EntityNotFoundException<Connector>>();
+        // Assert
+        Assert.IsType<EntityNotFoundException<Connector>>(exception);
     }
 
     [Fact]
@@ -86,12 +86,12 @@ public class StatusServiceTests
         var service = new StatusService(_workerRouterMock.Object, uowFactory.Create(), _schedulerMock.Object, _logger);
 
         // Act
-        var status = await service.GetStatusAsync(connector.Id);
+        var status = await service.GetStatusAsync(connector.Id, StatusLogLevel.Info);
 
         // Assert
-        status.WorkerStatus.IsConnected.Should().BeFalse();
-        status.WorkerStatus.IsScheduled.Should().BeTrue();
-        status.ConnectorStatus.Should().BeEquivalentTo(ConnectorStatus.Unknown);
+        Assert.False(status.WorkerStatus.IsConnected);
+        Assert.True(status.WorkerStatus.IsScheduled);
+        Assert.Equal(ConnectorStatus.Unknown, status.ConnectorStatus);
         status.Logs.Should().BeEquivalentTo([log1, log2, log3]);
     }
 
@@ -140,7 +140,7 @@ public class StatusServiceTests
         var service = new StatusService(_workerRouterMock.Object, uowFactory.Create(), _schedulerMock.Object, _logger);
 
         // Act
-        var status = await service.GetStatusAsync(connector.Id);
+        var status = await service.GetStatusAsync(connector.Id, StatusLogLevel.Info);
 
         // Assert
         status.WorkerStatus.IsConnected.Should().BeTrue();

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using NetworkPerspective.Sync.Application.Domain.Statuses;
+using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 
 namespace NetworkPerspective.Sync.Orchestrator.Application.Extensions;
