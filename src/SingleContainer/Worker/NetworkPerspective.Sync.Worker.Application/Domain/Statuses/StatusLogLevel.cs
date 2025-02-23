@@ -2,7 +2,8 @@
 
 public enum StatusLogLevel
 {
-    Info,
-    Warning,
-    Error
+    Debug = -1,
+    Info = 0,
+    Warning = 1,
+    Error = 2
 }

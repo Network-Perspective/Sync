@@ -23,6 +23,7 @@ internal class StatusLogger(IConnectorContextAccessor connectorContextProvider, 
         {
             DomainStatusLogLevel.Error => ContractStatusLogLevel.Error,
             DomainStatusLogLevel.Warning => ContractStatusLogLevel.Warning,
+            DomainStatusLogLevel.Debug => ContractStatusLogLevel.Debug,
             _ => ContractStatusLogLevel.Info,
         };
 
