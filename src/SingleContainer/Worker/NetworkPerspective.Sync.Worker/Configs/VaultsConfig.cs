@@ -19,25 +19,25 @@ public class VaultsConfig
         public Validator(string configPath)
         {
             RuleFor(x => x.AzureKeyVault)
-                .SetValidator(new AzureKeyVaultConfig.Validator($"{configPath}:{nameof(AzureKeyVault)}"))
+                .SetValidator(new AzureKeyVaultConfig.Validator($"{configPath}__{nameof(AzureKeyVault)}"))
                 .Unless(x => x.HcpVault is not null)
                 .Unless(x => x.AmazonSecretsManager is not null)
                 .Unless(x => x.GoogleSecretManager is not null);
 
             RuleFor(x => x.HcpVault)
-                .SetValidator(new HcpVaultConfig.Validator($"{configPath}:{nameof(HcpVault)}"))
+                .SetValidator(new HcpVaultConfig.Validator($"{configPath}__{nameof(HcpVault)}"))
                 .Unless(x => x.AzureKeyVault is not null)
                 .Unless(x => x.AmazonSecretsManager is not null)
                 .Unless(x => x.GoogleSecretManager is not null);
 
             RuleFor(x => x.AmazonSecretsManager)
-                .SetValidator(new AmazonSecretsManagerConfig.Validator($"{configPath}:{nameof(AmazonSecretsManager)}"))
+                .SetValidator(new AmazonSecretsManagerConfig.Validator($"{configPath}__{nameof(AmazonSecretsManager)}"))
                 .Unless(x => x.AzureKeyVault is not null)
                 .Unless(x => x.HcpVault is not null)
                 .Unless(x => x.GoogleSecretManager is not null);
 
             RuleFor(x => x.GoogleSecretManager)
-                .SetValidator(new GoogleSecretManagerConfig.Validator($"{configPath}:{nameof(GoogleSecretManager)}"))
+                .SetValidator(new GoogleSecretManagerConfig.Validator($"{configPath}__{nameof(GoogleSecretManager)}"))
                 .Unless(x => x.AzureKeyVault is not null)
                 .Unless(x => x.HcpVault is not null)
                 .Unless(x => x.AmazonSecretsManager is not null);
