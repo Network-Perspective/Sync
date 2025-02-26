@@ -16,23 +16,28 @@ public class HcpVaultConfig
         {
             RuleFor(x => x.BaseUrl)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(BaseUrl)}");
+                .WithName($"{configPath}__{nameof(BaseUrl)}")
+                .WithMessage("Please provide url to HashiCorpVault with environment variable '{PropertyName}'");
 
             RuleFor(x => x.TestSecretName)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(TestSecretName)}");
+                .WithName($"{configPath}__{nameof(TestSecretName)}")
+                .WithMessage("Please provide test secret name with environment variable '{PropertyName}'");
 
             RuleFor(x => x.Token)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(Token)}");
+                .WithName($"{configPath}__{nameof(Token)}")
+                .WithMessage("Please provide token to HashiCorpVault with environment variable '{PropertyName}'");
 
             RuleFor(x => x.VaultRole)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(VaultRole)}");
+                .WithName($"{configPath}__{nameof(VaultRole)}")
+                .WithMessage("Please provide vault role with environment variable '{PropertyName}'");
 
             RuleFor(x => x.MountPoint)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(MountPoint)}");
+                .WithName($"{configPath}__{nameof(MountPoint)}")
+                .WithMessage("Please provide secret engine mounting point with environment variable '{PropertyName}'");
         }
     }
 }
