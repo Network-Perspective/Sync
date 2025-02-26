@@ -1,0 +1,41 @@
+{
+  "display_information": {
+    "name": "Network Perspective",
+    "description": "Npbot is leveraging Slack data to find a smarter way to work for your team",
+    "background_color": "#536fb0",
+    "long_description": "Npbot is using Slack data to feedback your team about collaboration overload linked to Slack IMs with strong ethics upfront: meta-data only & no content download, all records hashed, no PII, aggregate analytics & reports only (min. 5 people)"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "npbot",
+      "always_online": false
+    }
+  },
+  "oauth_config": {
+    "redirect_urls": [
+      "https://app.networkperspective.io/sync/callback/slack"
+    ],
+    "scopes": {
+      "user": [
+        "identify"
+      ],
+      "bot": [
+        "channels:history",
+        "channels:join",
+        "channels:read",
+        "groups:history",
+        "reactions:read",
+        "usergroups:read",
+        "users.profile:read",
+        "users:read",
+        "users:read.email",
+        "groups:read"
+      ]
+    }
+  },
+  "settings": {
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": false,
+    "token_rotation_enabled": true
+  }
+}
