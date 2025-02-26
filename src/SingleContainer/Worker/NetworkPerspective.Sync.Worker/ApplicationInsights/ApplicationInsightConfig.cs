@@ -15,18 +15,21 @@ public class ApplicationInsightConfig : ApplicationInsightsServiceOptions
         {
             RuleFor(x => x.ConnectionString)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(ApplicationInsightConfig)}:{nameof(ConnectionString)}")
+                .WithName($"{configPath}__{nameof(ApplicationInsightConfig)}__{nameof(ConnectionString)}")
+                .WithMessage("Please provide connection string to ApplicationInsights with environment variable '{PropertyName}'")
                 .WithSeverity(Severity.Warning);
 
             RuleFor(x => x.RoleName)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(ApplicationInsightConfig)}:{nameof(RoleName)}")
+                .WithName($"{configPath}__{nameof(ApplicationInsightConfig)}__{nameof(RoleName)}")
+                .WithMessage("Please role name in ApplicationInsights with environment variable '{PropertyName}'")
                 .WithSeverity(Severity.Warning)
                 .Unless(x => string.IsNullOrEmpty(x.ConnectionString));
 
             RuleFor(x => x.RoleInstance)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(ApplicationInsightConfig)}:{nameof(RoleInstance)}")
+                .WithName($"{configPath}__{nameof(ApplicationInsightConfig)}__{nameof(RoleInstance)}")
+                .WithMessage("Please provide role instance in ApplicationInsights with environment variable '{PropertyName}'")
                 .WithSeverity(Severity.Warning)
                 .Unless(x => string.IsNullOrEmpty(x.ConnectionString));
         }

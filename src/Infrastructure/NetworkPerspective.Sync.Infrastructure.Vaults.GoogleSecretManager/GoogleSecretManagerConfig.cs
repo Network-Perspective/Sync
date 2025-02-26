@@ -12,7 +12,8 @@ public class GoogleSecretManagerConfig
         {
             RuleFor(x => x.ProjectId)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(ProjectId)}");
+                .WithName($"{configPath}__{nameof(ProjectId)}")
+                .WithMessage("Please provide project id of GoogleSecretManager with environment variable '{PropertyName}'");
         }
     }
 }
