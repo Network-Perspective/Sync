@@ -18,14 +18,7 @@ Param(
 # Constants
 $appCallbackUri = "https://app.networkperspective.io/sync/callback/office365"
 
-# Function to generate a unique random looking, yet deterministic string
-function Get-UniqueString ([string]$id, $length=13)
-{
-    $hashArray = (new-object System.Security.Cryptography.SHA512Managed).ComputeHash($id.ToCharArray())
-        -join ($hashArray[1..$length] | ForEach-Object { [char]($_ % 26 + [byte][char]'a') })
-}
-
-function Register-Appliation 
+function Register-Application 
 {
     Param(
         [string]$appName,
@@ -99,8 +92,8 @@ function Register-Appliation
 
 Write-Host "Registering EntraId applications -------------------------------------"
 Write-Host
-$appIdBasic     = Register-Appliation -appName $appNameBasic -keyVaultName $keyVaultName -teamsPermissions $false -secretPrefix "microsoft-client-basic"
-$appIdWithTeams = Register-Appliation -appName $appNameWithTeams -keyVaultName $keyVaultName -teamsPermissions $true -secretPrefix "microsoft-client-with-teams"
+$appIdBasic     = Register-Application -appName $appNameBasic -keyVaultName $keyVaultName -teamsPermissions $false -secretPrefix "microsoft-client-basic"
+$appIdWithTeams = Register-Application -appName $appNameWithTeams -keyVaultName $keyVaultName -teamsPermissions $true -secretPrefix "microsoft-client-with-teams"
 
 # Print info about manual steps
 Write-Host 
