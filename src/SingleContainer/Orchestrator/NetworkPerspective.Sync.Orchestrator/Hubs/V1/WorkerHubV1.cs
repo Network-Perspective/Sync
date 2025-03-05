@@ -137,7 +137,8 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
             .Client(connection.Id)
             .InitializeOAuthAsync(requestDto);
 
-        var result = new OAuthInitializationResult(responseDto.AuthUri, responseDto.State, responseDto.StateExpirationTimestamp);
+        var result = new OAuthInitializationResult(responseDto.AuthUri, responseDto.State,
+            DateTime.SpecifyKind(responseDto.StateExpirationTimestamp, DateTimeKind.Utc));
 
         return result;
     }
