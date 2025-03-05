@@ -48,7 +48,7 @@ public class AuthController(IConnectorsService connectorsService, IWorkerRouter 
             : new Uri(callbackUrl);
 
         var result = await workerRouter.InitializeOAuthAsync(connector.Worker.Name, connectorId, connector.Type, callbackUri.ToString(), connector.Properties);
-        cache.Set(result.State, connector.Worker.Name, new DateTimeOffset(result.StateExpirationTimestamp));
+        cache.Set(result.State, connector.Worker.Name, new MemoryCacheEntryOptions { AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(10) });
 
         return Ok(result.AuthUri);
     }
