@@ -186,7 +186,7 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
 
     public async Task<AckDto> AddLogAsync(AddLogDto dto)
     {
-        if(dto.ConnectorId == Guid.Empty)
+        if (dto.ConnectorId == Guid.Empty)
         {
             // TODO worker-scoped logs
             logger.LogWarning("Received request to set worker-scoped status log. Currently only connector-scoped status logs are handled. Igrnoring.");
