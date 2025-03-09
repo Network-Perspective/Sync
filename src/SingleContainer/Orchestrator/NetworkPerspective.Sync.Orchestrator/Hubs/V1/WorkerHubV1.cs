@@ -186,8 +186,17 @@ public class WorkerHubV1(IConnectionsLookupTable connectionsLookupTable, IStatus
 
     public async Task<AckDto> AddLogAsync(AddLogDto dto)
     {
-        var domainStatusLogLevel = ToDomainStatusLogLevel(dto.Level);
-        await statusLogger.AddLogAsync(dto.ConnectorId, dto.Message, domainStatusLogLevel);
+        if(dto.ConnectorId == Guid.Empty)
+        {
+            // TODO worker-scoped logs
+            logger.LogWarning("Received request to set worker-scoped status log. Currently only connector-scoped status logs are handled. Igrnoring.");
+        }
+        else
+        {
+            var domainStatusLogLevel = ToDomainStatusLogLevel(dto.Level);
+            await statusLogger.AddLogAsync(dto.ConnectorId, dto.Message, domainStatusLogLevel);
+        }
+
         return new AckDto { CorrelationId = dto.CorrelationId };
     }
 
