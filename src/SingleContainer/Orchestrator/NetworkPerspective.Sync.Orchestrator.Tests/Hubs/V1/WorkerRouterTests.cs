@@ -24,28 +24,26 @@ using Xunit;
 
 namespace NetworkPerspective.Sync.Orchestrator.Tests.Hubs.V1;
 
-public class WorkerHubV1Tests
+public class WorkerRouterTests
 {
     private const string WorkerName = "worker-name";
     private const string ConnectionId = "connection-id";
 
+    private readonly ILogger<WorkerRouter> _logger = NullLogger<WorkerRouter>.Instance;
+
     private readonly Mock<IConnectionsLookupTable> _connectionsLookupTableMock = new();
-    private readonly Mock<IStatusLogger> _statusLoggerMock = new();
-    private readonly Mock<IServiceProvider> _serviceProviderMock = new();
-    private readonly Mock<IClock> _clockMock = new();
-    private readonly ILogger<WorkerHubV1> _logger = NullLogger<WorkerHubV1>.Instance;
+    private readonly Mock<IHubClients<IWorkerClient>> _mockClients = new();
+    private readonly Mock<IWorkerClient> _mockClientProxy = new();
+    private readonly Mock<IHubContext<WorkerHubV1, IWorkerClient>> _mockHubContext = new();
 
-    private readonly Mock<IHubCallerClients<IWorkerClient>> _clientsMock = new();
-    private readonly Mock<IWorkerClient> _clientProxyMock = new();
-
-    public WorkerHubV1Tests()
+    public WorkerRouterTests()
     {
-        HubV1MapsterConfig.RegisterMappings(TypeAdapterConfig.GlobalSettings);
-
         _connectionsLookupTableMock.Reset();
-        _statusLoggerMock.Reset();
-        _serviceProviderMock.Reset();
-        _clockMock.Reset();
+        _mockClients.Reset();
+        _mockClientProxy.Reset();
+        _mockHubContext.Reset();
+
+        HubV1MapsterConfig.RegisterMappings(TypeAdapterConfig.GlobalSettings);
 
         var workerConnection = new WorkerConnection(WorkerName, ConnectionId);
 
@@ -53,13 +51,20 @@ public class WorkerHubV1Tests
             .Setup(x => x.Get(It.IsAny<string>()))
             .Returns(workerConnection);
 
-        _clientsMock
+        _mockHubContext
+            .Setup(x => x.Clients)
+            .Returns(_mockClients.Object);
+
+        _mockClients
+            .Setup(x => x.All)
+            .Returns(_mockClientProxy.Object);
+
+        _mockClients
             .Setup(x => x.Client(ConnectionId))
-            .Returns(_clientProxyMock.Object);
+            .Returns(_mockClientProxy.Object);
     }
 
-
-    public class GetConnectorStatus : WorkerHubV1Tests
+    public class GetConnectorStatus : WorkerRouterTests
     {
         [Fact]
         public async Task ShouldReturnIdleStatus()
@@ -67,12 +72,9 @@ public class WorkerHubV1Tests
             // Arrange
             var isAuthorized = false;
 
-            var hub = new WorkerHubV1(_connectionsLookupTableMock.Object, _statusLoggerMock.Object, _serviceProviderMock.Object, _clockMock.Object, _logger)
-            {
-                Clients = _clientsMock.Object
-            };
+            var hub = new WorkerRouter(_mockHubContext.Object, _connectionsLookupTableMock.Object, _logger);
 
-            _clientProxyMock
+            _mockClientProxy
                 .Setup(x => x.GetConnectorStatusAsync(It.IsAny<ConnectorStatusRequest>()))
                 .ReturnsAsync(new ConnectorStatusResponse()
                 {
@@ -97,12 +99,9 @@ public class WorkerHubV1Tests
             var description = "description";
             var completionRate = 42.42;
 
-            var hub = new WorkerHubV1(_connectionsLookupTableMock.Object, _statusLoggerMock.Object, _serviceProviderMock.Object, _clockMock.Object, _logger)
-            {
-                Clients = _clientsMock.Object
-            };
+            var hub = new WorkerRouter(_mockHubContext.Object, _connectionsLookupTableMock.Object, _logger);
 
-            _clientProxyMock
+            _mockClientProxy
                 .Setup(x => x.GetConnectorStatusAsync(It.IsAny<ConnectorStatusRequest>()))
                 .ReturnsAsync(new ConnectorStatusResponse()
                 {
