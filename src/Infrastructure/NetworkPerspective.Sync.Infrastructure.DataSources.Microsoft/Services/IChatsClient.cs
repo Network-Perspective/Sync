@@ -9,11 +9,16 @@ using Microsoft.Graph;
 using Microsoft.Graph.Models;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Mappers;
+using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Extensions;
+using NetworkPerspective.Sync.Worker.Application.Services;
 using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using InternalChat = NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models.Chat;
+using MicrosoftChat = Microsoft.Graph.Models.Chat;
+using MicrosoftChatMessage = Microsoft.Graph.Models.ChatMessage;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
 
@@ -22,7 +27,7 @@ internal interface IChatsClient
     Task<SyncResult> SyncInteractionsAsync(SyncContext context, IInteractionsStream stream, IEnumerable<string> usersEmails, IChatInteractionFactory interactionFactory, CancellationToken stoppingToken = default);
 }
 
-internal class ChatsClient(GraphServiceClient graphClient, IGlobalStatusCache tasksStatusesCache, ILogger<ChatsClient> logger) : IChatsClient
+internal class ChatsClient(GraphServiceClient graphClient, IGlobalStatusCache tasksStatusesCache, IStatusLogger statusLogger, ILogger<ChatsClient> logger) : IChatsClient
 {
     private const string TaskCaption = "Synchronizing chat interactions";
     private const string TaskDescription = "Fetching chat metadata from Microsoft API";
@@ -46,31 +51,41 @@ internal class ChatsClient(GraphServiceClient graphClient, IGlobalStatusCache ta
         return result;
     }
 
-    public async Task<IEnumerable<InternalChat>> GetAllChatsAsync(IEnumerable<string> usersEmails, Utils.Models.TimeRange timeRange, CancellationToken stoppingToken = default)
+    private async Task<IEnumerable<InternalChat>> GetAllChatsAsync(IEnumerable<string> usersEmails, Utils.Models.TimeRange timeRange, CancellationToken stoppingToken = default)
     {
         logger.LogDebug("Getting all Chats of all Employees...");
 
         var tasks = usersEmails
             .Select(x => TryGetSingleUserChatsAsync(x, timeRange, stoppingToken));
-        var uniqueChats = (await Task.WhenAll(tasks))
-            .SelectMany(x => x)     // Flatten
-            .DistinctBy(x => x.Id); // Unique chats
 
-        logger.LogDebug("Got {count} chats", uniqueChats.Count());
+        var chatsResults = await Task.WhenAll(tasks);
+
+        var uniqueChats = chatsResults
+            .SelectMany(x => x.Chats)   // Flatten
+            .DistinctBy(x => x.Id)      // Unique chats
+            .ToList();
+
+        var failedTasks = chatsResults.Where(x => x.Exception is not null);
+
+        if (failedTasks.Any())
+            await statusLogger.LogDebugAsync($"Encountered problems while retrieving chats. Couldn't list chats for {failedTasks.Count()}/{usersEmails.Count()} users", stoppingToken);
+
+        logger.LogDebug("Got {count} chats", uniqueChats.Count);
 
         return uniqueChats;
     }
 
-    private async Task<IEnumerable<InternalChat>> TryGetSingleUserChatsAsync(string userEmail, Utils.Models.TimeRange timeRange, CancellationToken stoppingToken)
+    private async Task<GetChatsResults> TryGetSingleUserChatsAsync(string userEmail, Utils.Models.TimeRange timeRange, CancellationToken stoppingToken)
     {
         try
         {
-            return await GetSingleUserChatsAsync(userEmail, timeRange, stoppingToken);
+            var chats = await GetSingleUserChatsAsync(userEmail, timeRange, stoppingToken);
+            return GetChatsResults.Success(chats);
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Unable to get chat from a user");
-            return [];
+            return GetChatsResults.Error(ex);
         }
     }
 
@@ -89,7 +104,7 @@ internal class ChatsClient(GraphServiceClient graphClient, IGlobalStatusCache ta
                     {
                         Expand =
                         [
-                            nameof(Chat.Members)
+                            nameof(MicrosoftChat.Members)
                         ],
                         Filter = filterString,
                         Top = maxPageSize
@@ -120,7 +135,7 @@ internal class ChatsClient(GraphServiceClient graphClient, IGlobalStatusCache ta
                 };
             }, stoppingToken);
 
-        var pageIterator = PageIterator<ChatMessage, ChatMessageCollectionResponse>
+        var pageIterator = PageIterator<MicrosoftChatMessage, ChatMessageCollectionResponse>
             .CreatePageIterator(graphClient, messagesResponse,
             async message =>
             {
