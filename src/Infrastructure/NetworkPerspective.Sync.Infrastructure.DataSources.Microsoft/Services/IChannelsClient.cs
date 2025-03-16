@@ -64,7 +64,7 @@ internal class ChannelsClient(GraphServiceClient graphClient, IGlobalStatusCache
 
         var result = new List<InternalChannel>();
 
-        var teams = await GetAllTeamsAsync(stoppingToken);
+        var teams = await TryGetAllTeamsAsync(stoppingToken);
         var tasks = teams.Select(x => TryGetAllChannelsInSingleTeamAsync(x, stoppingToken));
 
         var channelsResults = await Task.WhenAll(tasks);
