@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using InternalChat = NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models.Chat;
-
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Models;
 
 internal class GetChatsResults
 {
-    public IEnumerable<InternalChat> Chats { get; }
+    public IEnumerable<Chat> Chats { get; }
     public Exception Exception { get; }
 
-    private GetChatsResults(IEnumerable<InternalChat> chats, Exception exception)
+    private GetChatsResults(IEnumerable<Chat> chats, Exception exception)
     {
         Chats = chats;
         Exception = exception;
@@ -19,6 +17,6 @@ internal class GetChatsResults
     public static GetChatsResults Error(Exception exception)
         => new([], exception);
 
-    public static GetChatsResults Success(IEnumerable<InternalChat> chats)
+    public static GetChatsResults Success(IEnumerable<Chat> chats)
         => new(chats, null);
 }
