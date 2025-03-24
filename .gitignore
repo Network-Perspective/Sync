@@ -198,6 +198,7 @@ Data/
 *.db-shm
 *.db-wal
 appsettings.development.json
+appsettings.staging.json
 swagger.json
 openapi.json
 src/NetworkPerspective.Sync.Cli/sample-data.bat
