@@ -36,7 +36,7 @@ internal class JiraAuthorizedFacade(IJiraHttpClient httpClient, PaginationHandle
     public async Task<IReadOnlyCollection<GetBulkUsersPaginatedResponse.SingleUser>> GetUsersDetailsAsync(Guid cloudId, IEnumerable<string> usersIds, CancellationToken stoppingToken = default)
     {
         Task<GetBulkUsersPaginatedResponse> CallApi(int startAt, CancellationToken stoppingToken)
-            => _usersClient.GetUsersDetailsAsync(cloudId, startAt, 1, usersIds, stoppingToken);
+            => _usersClient.GetUsersDetailsAsync(cloudId, startAt, 50, usersIds, stoppingToken);
 
         var result = await paginationHandler.GetAllAsync<GetBulkUsersPaginatedResponse.SingleUser, GetBulkUsersPaginatedResponse>(CallApi, stoppingToken);
         return result.ToList().AsReadOnly();
@@ -45,7 +45,7 @@ internal class JiraAuthorizedFacade(IJiraHttpClient httpClient, PaginationHandle
     public async Task<IReadOnlyCollection<GetProjectsPaginatedResponse.SingleProject>> GetProjectsAsync(Guid cloudId, CancellationToken stoppingToken = default)
     {
         Task<GetProjectsPaginatedResponse> CallApi(int startAt, CancellationToken stoppingToken)
-            => _projectsClient.GetProjectsAsync(cloudId, startAt, 1, stoppingToken);
+            => _projectsClient.GetProjectsAsync(cloudId, startAt, 50, stoppingToken);
 
         var result = await paginationHandler.GetAllAsync<GetProjectsPaginatedResponse.SingleProject, GetProjectsPaginatedResponse>(CallApi, stoppingToken);
         return result.ToList().AsReadOnly();
