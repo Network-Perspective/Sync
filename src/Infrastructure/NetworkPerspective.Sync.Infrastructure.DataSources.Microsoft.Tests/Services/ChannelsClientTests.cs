@@ -16,6 +16,7 @@ using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Services;
 using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
@@ -41,7 +42,7 @@ public class ChannelsClientTests(MicrosoftClientWithTeamsFixture microsoftClient
         var employees = EmployeesMapper.ToEmployees(users, x => $"{x}_hashed", EmployeeFilter.Empty, true);
         var interactionsFactory = new ChannelInteractionFactory(x => $"{x}_hashed", employees);
 
-        var channelsClient = new ChannelsClient(microsoftClientFixture.Client, Mock.Of<IGlobalStatusCache>(), _loggerFactory);
+        var channelsClient = new ChannelsClient(microsoftClientFixture.Client, Mock.Of<IGlobalStatusCache>(), Mock.Of<IStatusLogger>(), _loggerFactory);
 
         // Act
         var channels = await channelsClient.GetAllChannelsAsync();
