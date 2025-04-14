@@ -25,8 +25,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddHub(this IServiceCollection services)
     {
         services
-            .AddSingleton<WorkerHubV1>()
-            .AddSingleton<IWorkerRouter>(sp => sp.GetRequiredService<WorkerHubV1>())
+            .AddTransient<WorkerHubV1>()
+            .AddTransient<IWorkerRouter, WorkerRouter>()
             .AddSignalR();
 
         return services;

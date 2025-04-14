@@ -41,7 +41,7 @@ Param(
     [string] $firewallIp = "20.79.225.18/32",
 
     [Parameter()]
-    [string] $appCallbackUri = "https://app.networkperspective.io/sync/Office365Sync/Callback",
+    [string] $appCallbackUri = "https://app.networkperspective.io/sync/callback/office365",
 
     [Parameter()]
     [string] $npServicePrincipalName = "Network Perspective Connectors",
@@ -85,7 +85,11 @@ function Create-AzureResources
         az keyvault update --name $keyVaultName --resource-group $resourceGroupName --default-action Allow | Out-Null
     } else {    
         $keyVault = az keyvault create --name $keyVaultName --resource-group $resourceGroupName --location $location | ConvertFrom-Json
-        Write-Host "✅ KeyVault created"
+        # Get current user's Object ID
+        $currentUserObjectId = az ad signed-in-user show --query id -o tsv
+        # Assign Key Vault Secrets Officer role to current user (allows get/set operations)
+        az role assignment create --assignee $currentUserObjectId --role "Key Vault Secrets Officer" --scope $keyVault.id
+        Write-Host "✅ KeyVault created with RBAC role assigned to current user"
     }
 
     # Create the KeyVault secrets
@@ -116,7 +120,8 @@ function Create-AzureResources
 
     # Grant permissions to the service principal
     Write-Host "Granting permissions to access the KeyVault"
-    az keyvault set-policy --name $keyVault.name --spn $npServicePrincipalId --secret-permissions get list set | Out-Null
+    az role assignment create --assignee $npServicePrincipalId --role "Key Vault Secrets Officer" --scope $keyVault.id
+
     Write-Host "✅ Permissions granted"
 
     return @{

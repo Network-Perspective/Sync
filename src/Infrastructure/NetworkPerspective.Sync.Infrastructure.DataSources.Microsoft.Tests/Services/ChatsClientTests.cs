@@ -17,6 +17,7 @@ using NetworkPerspective.Sync.Utils.Models;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors.Filters;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Services;
 using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 using Xunit;
@@ -42,7 +43,7 @@ public class ChatsClientTests(MicrosoftClientWithTeamsFixture microsoftClientFix
         var employees = EmployeesMapper.ToEmployees(users, x => $"{x}_hashed", EmployeeFilter.Empty, true);
         var interactionsFactory = new ChatInteractionFactory(x => $"{x}_hashed", employees);
 
-        var chatsClient = new ChatsClient(microsoftClientFixture.Client, Mock.Of<IGlobalStatusCache>(), _chatsClientLogger);
+        var chatsClient = new ChatsClient(microsoftClientFixture.Client, Mock.Of<IGlobalStatusCache>(), Mock.Of<IStatusLogger>(), _chatsClientLogger);
         var emails = employees.GetAllInternal().Select(x => x.Id.PrimaryId);
 
         // Act

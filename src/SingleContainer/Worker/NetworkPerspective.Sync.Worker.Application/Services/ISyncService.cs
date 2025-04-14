@@ -9,12 +9,10 @@ using Microsoft.Extensions.Logging;
 using NetworkPerspective.Sync.Utils.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Domain.Connectors;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
-using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
 using NetworkPerspective.Sync.Worker.Application.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.Core;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
-using NetworkPerspective.Sync.Worker.Application.Services.TasksStatuses;
 
 namespace NetworkPerspective.Sync.Worker.Application.Services;
 
@@ -27,7 +25,6 @@ internal sealed class SyncService(ILogger<SyncService> logger,
                    IDataSource dataSource,
                    INetworkPerspectiveCore networkPerspectiveCore,
                    IStatusLogger statusLogger,
-                   IGlobalStatusCache tasksStatusesCache,
                    IInteractionsFilterFactory interactionFilterFactory,
                    IConnectorTypesCollection connectorTypes) : ISyncService
 {
@@ -37,8 +34,6 @@ internal sealed class SyncService(ILogger<SyncService> logger,
         {
             await dataSource.ValidateAsync(context, stoppingToken);
             var connectorProperties = new ConnectorProperties(context.ConnectorProperties);
-            var status = SingleTaskStatus.New("Initializing synchronization", "The synchronization is starting", 0);
-            await tasksStatusesCache.SetStatusAsync(context.ConnectorId, status, stoppingToken);
             await statusLogger.LogInfoAsync("Sync started", stoppingToken);
             logger.LogInformation(
                 "Executing synchronization for Connector '{connectorId}' for timerange '{timeRange}'",
@@ -85,10 +80,6 @@ internal sealed class SyncService(ILogger<SyncService> logger,
             logger.LogError(ex, "Cannot complete synchronization job for Connector {connectorId}.\n{exceptionMessage}", context.ConnectorId, ex.Message);
             await statusLogger.LogErrorAsync("Sync failed", CancellationToken.None);
             return SyncResult.Empty;
-        }
-        finally
-        {
-            await tasksStatusesCache.SetStatusAsync(context.ConnectorId, SingleTaskStatus.Empty, stoppingToken);
         }
     }
 

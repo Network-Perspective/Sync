@@ -5,6 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AWSSDK.SecurityToken" Version="3.7.401.55" />
         <PackageReference Include="FluentValidation" Version="11.10.0" />
         <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
