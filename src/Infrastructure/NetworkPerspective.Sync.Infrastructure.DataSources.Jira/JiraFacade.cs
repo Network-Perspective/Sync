@@ -1,19 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Client;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Mappers;
 using NetworkPerspective.Sync.Infrastructure.DataSources.Jira.Model;
 using NetworkPerspective.Sync.Worker.Application.Domain.Employees;
 using NetworkPerspective.Sync.Worker.Application.Domain.Sync;
+using NetworkPerspective.Sync.Worker.Application.Extensions;
 using NetworkPerspective.Sync.Worker.Application.Infrastructure.DataSources;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Jira;
 
-internal class JiraFacade(IHashingService hashingService, IJiraAuthorizedFacade jiraFacade) : IDataSource
+internal class JiraFacade(IHashingService hashingService, IJiraAuthorizedFacade jiraFacade, IStatusLogger statusLogger, ILogger<JiraFacade> logger) : IDataSource
 {
     public async Task<EmployeeCollection> GetEmployeesAsync(SyncContext context, CancellationToken stoppingToken = default)
     {
@@ -37,28 +41,36 @@ internal class JiraFacade(IHashingService hashingService, IJiraAuthorizedFacade 
     {
         var projectMembers = new List<ProjectMember>();
 
-        var accessibleResources = await jiraFacade.GetAccessibleResourcesAsync(stoppingToken);
+        var resources = await jiraFacade.GetAccessibleResourcesAsync(stoppingToken);
 
-        foreach (var accessibleResource in accessibleResources)
+        foreach (var resource in resources)
         {
-            var projectContainer = new ProjectContainer(accessibleResource.Id);
-            var jiraProjects = await jiraFacade.GetProjectsAsync(accessibleResource.Id, stoppingToken);
-
-            foreach (var jiraProject in jiraProjects)
+            try
             {
-                var project = new Project(jiraProject.Key, jiraProject.Name, projectContainer);
+                var projectContainer = new ProjectContainer(resource.Id);
+                var jiraProjects = await jiraFacade.GetProjectsAsync(resource.Id, stoppingToken);
 
-                var jiraUsers = await jiraFacade.GetProjectsUsersAsync(accessibleResource.Id, jiraProject.Key, stoppingToken);
-                var jiraUsersIds = jiraUsers.Select(x => x.Id);
-                var jiraUsersDetails = await jiraFacade.GetUsersDetailsAsync(accessibleResource.Id, jiraUsersIds, stoppingToken);
-
-                foreach (var jiraUserDetails in jiraUsersDetails)
+                foreach (var jiraProject in jiraProjects)
                 {
-                    if (!projectMembers.Any(x => x.Id == jiraUserDetails.Id))
-                        projectMembers.Add(new ProjectMember(jiraUserDetails.Id, jiraUserDetails.Email));
+                    var project = new Project(jiraProject.Key, jiraProject.Name, projectContainer);
 
-                    projectMembers.Single(x => x.Id == jiraUserDetails.Id).Projects.Add(project);
+                    var jiraUsers = await jiraFacade.GetProjectsUsersAsync(resource.Id, jiraProject.Key, stoppingToken);
+                    var jiraUsersIds = jiraUsers.Select(x => x.Id);
+                    var jiraUsersDetails = await jiraFacade.GetUsersDetailsAsync(resource.Id, jiraUsersIds, stoppingToken);
+
+                    foreach (var jiraUserDetails in jiraUsersDetails)
+                    {
+                        if (!projectMembers.Any(x => x.Id == jiraUserDetails.Id))
+                            projectMembers.Add(new ProjectMember(jiraUserDetails.Id, jiraUserDetails.Email));
+
+                        projectMembers.Single(x => x.Id == jiraUserDetails.Id).Projects.Add(project);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Unable to sync '{Name}'", resource.Name);
+                await statusLogger.LogDebugAsync($"Unable to sync '{resource.Name}'. {ex.Message}", stoppingToken: stoppingToken);
             }
         }
 

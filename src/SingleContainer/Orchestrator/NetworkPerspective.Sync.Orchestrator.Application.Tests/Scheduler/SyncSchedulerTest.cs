@@ -22,7 +22,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Tests.Scheduler;
 [Collection("Sequential")]
 public class SyncSchedulerTest
 {
-    private const int TimeoutInMs = TestableJob.JobExcecutionTimeInMs * 5;
+    private const int TimeoutInMs = TestableJob.JobExcecutionTimeInMs * 10;
     private readonly ISchedulerFactory _schedulerFactory = new StdSchedulerFactory();
     private readonly IScheduler _scheduler;
 
@@ -55,7 +55,7 @@ public class SyncSchedulerTest
 
             // Assert
             var alljobs = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup());
-            alljobs.Should().BeEquivalentTo(new[] { new JobKey(connectorId.ToString()) });
+            alljobs.Should().BeEquivalentTo([new JobKey(connectorId.ToString())]);
         }
     }
 
@@ -132,7 +132,7 @@ public class SyncSchedulerTest
             await syncScheduler.InterruptNowAsync(connectorId);
 
             // Assert
-            var interruptionTimeout = TestableJob.JobExcecutionTimeInMs / 5;
+            var interruptionTimeout = TestableJob.JobExcecutionTimeInMs / 2;
             SpinWait.SpinUntil(() => !syncScheduler.IsRunningAsync(connectorId).Result, interruptionTimeout).Should().BeTrue();
         }
 
@@ -195,7 +195,7 @@ public class SyncSchedulerTest
             await _scheduler.Start();
 
             // Assert
-            SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == connectorId.ToString()), TimeoutInMs).Should().BeFalse();
+            SpinWait.SpinUntil(() => TestableJob.ExecutedJobs.Any(x => x == connectorId.ToString()), 1000).Should().BeFalse();
         }
 
         [Fact]

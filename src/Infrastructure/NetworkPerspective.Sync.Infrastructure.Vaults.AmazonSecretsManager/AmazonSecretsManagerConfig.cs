@@ -13,11 +13,13 @@ public class AmazonSecretsManagerConfig
         {
             RuleFor(x => x.SecretsPrefix)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(SecretsPrefix)}");
+                .WithName($"{configPath}__{nameof(SecretsPrefix)}")
+                .WithMessage("Please provide secret prefix with environment variable '{PropertyName}'");
 
             RuleFor(x => x.Region)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(Region)}");
+                .WithName($"{configPath}__{nameof(Region)}")
+                .WithMessage("Please provide region of AmazonSecretsManager with environment variable '{PropertyName}'");
         }
     }
 }

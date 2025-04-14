@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Moq;
 
-using NetworkPerspective.Sync.Orchestrator.Application.Domain;
 using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Workers;
 using NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
@@ -18,7 +17,7 @@ using Quartz;
 
 using Xunit;
 
-namespace NetworkPerspective.Sync.Scheduler.Tests;
+namespace NetworkPerspective.Sync.Orchestrator.Application.Tests.Scheduler;
 
 public class SyncJobTests
 {
