@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Credentials;
+using NetworkPerspective.Sync.Worker.Application.Domain.Statuses;
 using NetworkPerspective.Sync.Worker.Application.Services;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services;
@@ -17,14 +18,14 @@ internal class AuthTester(IOptions<GoogleConfig> config, IImpesonificationCreden
 {
     private readonly GoogleConfig _config = config.Value;
 
-    public async Task<bool> IsAuthorizedAsync(CancellationToken stoppingToken = default)
+    public async Task<AuthStatus> GetStatusAsync(CancellationToken stoppingToken = default)
     {
         const string currentAccountCustomer = "my_customer";
 
         var connectorContext = connectorContextProvider.Context;
         try
         {
-            logger.LogInformation("Checking if connector '{connectorId}' is authorized", connectorContext);
+            logger.LogInformation("Checking if connector '{connectorId}' is authorized", connectorContext.ConnectorId);
             var googleNetworkProperties = new GoogleConnectorProperties(connectorContext.Properties);
 
             var userCredentials = await credentialsProvider.ImpersonificateAsync(googleNetworkProperties.AdminEmail, stoppingToken);
@@ -39,12 +40,13 @@ internal class AuthTester(IOptions<GoogleConfig> config, IImpesonificationCreden
             request.MaxResults = 10;
             request.Customer = currentAccountCustomer;
             var response = await request.ExecuteAsync(stoppingToken);
-            return response.UsersValue != null;
+            bool isAuthorized = response.UsersValue != null;
+            return AuthStatus.Create(isAuthorized);
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", connectorContext);
-            return false;
+            logger.LogInformation(ex, "Connector '{connectorId}' is not authorized", connectorContext.ConnectorId);
+            return AuthStatus.Create(false);
         }
     }
 }
