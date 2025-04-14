@@ -13,7 +13,8 @@ public class AzureKeyVaultConfig
         {
             RuleFor(x => x.BaseUrl)
                 .NotEmpty()
-                .WithName($"{configPath}:{nameof(BaseUrl)}");
+                .WithName($"{configPath}__{nameof(BaseUrl)}")
+                .WithMessage("Please provide url to AzureKeyVault with environment variable '{PropertyName}'");
         }
     }
 }
