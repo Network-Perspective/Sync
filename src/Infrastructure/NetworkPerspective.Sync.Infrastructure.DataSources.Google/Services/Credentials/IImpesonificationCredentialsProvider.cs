@@ -53,7 +53,7 @@ internal sealed class ImpersonificationCredentialsProvider(IVault vault) : IImpe
     {
         var googleKey = await vault.GetSecretAsync(GoogleKeys.TokenKey, stoppingToken);
         using var doc = JsonDocument.Parse(googleKey.ToSystemString());
-        var clientId = doc.RootElement.GetProperty("client_id").GetString();
+        var clientId = doc.RootElement.GetProperty("google-auth-client-id").GetString();
         return clientId;
     }
 

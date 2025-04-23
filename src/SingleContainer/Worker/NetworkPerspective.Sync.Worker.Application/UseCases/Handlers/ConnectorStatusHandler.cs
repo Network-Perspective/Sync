@@ -29,6 +29,7 @@ internal class ConnectorStatusHandler(IAuthTester authTester, IGlobalStatusCache
             CorrelationId = request.Connector.Id,
             IsAuthorized = authStatus.IsAuthorized,
             IsRunning = isRunning,
+            CustomProps = authStatus.Properties,
             CurrentTaskCaption = taskStatus.Caption,
             CurrentTaskDescription = taskStatus.Description,
             CurrentTaskCompletionRate = taskStatus.CompletionRate
