@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,6 +16,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Google.Services.Cre
 public interface IImpesonificationCredentialsProvider
 {
     Task<ICredential> ImpersonificateAsync(string email, CancellationToken stoppingToken = default);
+    Task<string> GetClientIdAsync(CancellationToken stoppingToken = default);
 }
 
 internal sealed class ImpersonificationCredentialsProvider(IVault vault) : IImpesonificationCredentialsProvider
@@ -45,6 +47,14 @@ internal sealed class ImpersonificationCredentialsProvider(IVault vault) : IImpe
             .AddUnsuccessfulResponseHandler(handler);
 
         return userCredentials;
+    }
+
+    public async Task<string> GetClientIdAsync(CancellationToken stoppingToken = default)
+    {
+        var googleKey = await vault.GetSecretAsync(GoogleKeys.TokenKey, stoppingToken);
+        using var doc = JsonDocument.Parse(googleKey.ToSystemString());
+        var clientId = doc.RootElement.GetProperty("client_id").GetString();
+        return clientId;
     }
 
     private async Task ClearCachedCredentialsAsync()

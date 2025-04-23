@@ -16,6 +16,7 @@ internal interface ICredentialsService
     Task<ICredential> ImpersonificateAsync(string email, CancellationToken stoppingToken = default);
     Task<ICredential> GetUserCredentialsAsync(CancellationToken stoppingToken = default);
     Task TryRefreshUserAccessTokenAsync(CancellationToken stoppingToken = default);
+    Task<string> GetServiceAccountClientIdAsync(CancellationToken stoppingToken = default);
 }
 
 internal class CredentialsService(IImpesonificationCredentialsProvider impesonificationCredentialsProvider, IUserCredentialsService userCredentialsProvider, IStatusLogger statusLogger, ILogger<CredentialsService> logger) : ICredentialsService
@@ -38,4 +39,7 @@ internal class CredentialsService(IImpesonificationCredentialsProvider impesonif
             await statusLogger.LogWarningAsync("Unable to refresh token. Please try to re-authenticate", stoppingToken);
         }
     }
+
+    public Task<string> GetServiceAccountClientIdAsync(CancellationToken stoppingToken = default)
+        => impesonificationCredentialsProvider.GetClientIdAsync(stoppingToken);
 }
