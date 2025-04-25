@@ -31,6 +31,11 @@ public class StatusDto
     public bool? Running { get; set; }
 
     /// <summary>
+    /// Custom properties
+    /// </summary>
+    public IEnumerable<KeyValuePair<string, string>> Props { get; set; }
+
+    /// <summary>
     /// Current task status, available only if connector is connected and currently is running
     /// </summary>
     public SynchronizationTaskStatusDto CurrentTask { get; set; }
