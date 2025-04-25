@@ -1,4 +1,6 @@
-﻿namespace NetworkPerspective.Sync.Orchestrator.Application.Domain.Statuses;
+﻿using System.Collections.Generic;
+
+namespace NetworkPerspective.Sync.Orchestrator.Application.Domain.Statuses;
 
 public class ConnectorStatus
 {
@@ -6,6 +8,7 @@ public class ConnectorStatus
 
     public bool IsAuthorized { get; set; }
     public bool IsRunning { get; set; }
+    public IEnumerable<KeyValuePair<string, string>> CustomProps { get; set; }
     public ConnectorTaskStatus CurrentTask { get; set; }
 
     private ConnectorStatus(bool isAuthorized, bool isRunning, ConnectorTaskStatus currentTask)
