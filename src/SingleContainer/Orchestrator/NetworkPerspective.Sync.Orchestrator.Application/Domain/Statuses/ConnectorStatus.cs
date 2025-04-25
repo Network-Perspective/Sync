@@ -22,5 +22,5 @@ public class ConnectorStatus
         => new(isAuthorized, true, currentTask);
 
     public static ConnectorStatus Idle(bool isAuthorized)
-    => new(isAuthorized, false, ConnectorTaskStatus.Empty);
+        => new(isAuthorized, false, ConnectorTaskStatus.Empty);
 }

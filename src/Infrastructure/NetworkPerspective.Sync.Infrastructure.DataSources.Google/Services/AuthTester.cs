@@ -66,12 +66,12 @@ internal class AuthTester(IOptions<GoogleConfig> config, ICredentialsService cre
 
             return new Dictionary<string, string>
             {
-                { "client-id", clientId },
+                { "google-auth-client-id", clientId },
             };
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Unable to '{key}'", GoogleKeys.TokenKey);
+            logger.LogWarning(ex, "Unable to get '{key}'", GoogleKeys.TokenKey);
             return [];
         }
     }
