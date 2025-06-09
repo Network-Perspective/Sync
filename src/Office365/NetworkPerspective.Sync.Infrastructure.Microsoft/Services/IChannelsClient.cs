@@ -140,10 +140,18 @@ namespace NetworkPerspective.Sync.Infrastructure.Microsoft.Services
                 .CreatePageIterator(_graphClient, channelsResponse,
                 async channel =>
                 {
-                    var userIds = await GetChannelMembersIdsAsync(team.Id, channel.Id, stoppingToken);
-                    var internalChannel = new InternalChannel(channel.Id, channel.DisplayName, team, userIds);
+                    try
+                    {
+                        var userIds = await GetChannelMembersIdsAsync(team.Id, channel.Id, stoppingToken);
+                        var internalChannel = new InternalChannel(channel.Id, channel.DisplayName, team, userIds);
 
-                    result.Add(internalChannel);
+                        result.Add(internalChannel);
+                    } 
+                    catch (Exception ex)
+                    {
+                        _logger.LogInformation(ex, "Failed to get channel members");
+                    }
+
                     return true;
                 },
                 request =>
