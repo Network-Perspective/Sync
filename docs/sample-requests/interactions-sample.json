@@ -1,0 +1,62 @@
+﻿{
+  "connectorId": "d08146e6-f912-41f3-8aae-4f38a2bee6fd",
+  "interactions": [
+    {
+      "interactionId": "2a7b414ddd0c03550f029ce936a52412",
+      "when": "2025-06-15T13:55:00+00:00",
+      "sourceIds": {
+        "Email": "external",
+        "Office365Id": "external"
+      },
+      "targetIds": {
+        "Email": "BdSygKnboovR2jN3N8tkoZkUR0pEU76ng3dHED6HlTY=",
+        "Office365Id": "eAkWJKORNRLC1Nvi03NJTkv0A09xbUPF6BCibWVn4ek=",
+        "Username": "5jmLP5dvgF/soqS+7fvkqO8hbCi+w1WrS/uaALF6gM8="
+      },
+      "eventId": "wq+CRz1/0MSIj4flBgbjEqqUB6SPWKxf5YC5v3mrYVM=",
+      "label": [
+        "Email"
+      ]
+    },
+    {
+      "interactionId": "00d090e6b40f5bd404e97b56ee7d06a7",
+      "when": "2025-02-18T18:40:00+01:00",
+      "sourceIds": {
+        "Email": "yP43yHPveLdzh68NR9irr8U6CsQXHX2EjOEjAA2jtQ8=",
+        "Office365Id": "+ReGKKgHWmxdATS+5058l25uhukZbv3RSQxmPu4ae5Y=",
+        "Username": "RjmPt5EKR3H8jC8tXnjmuWel7XTZ8+MWbhzuaTKvHG8="
+      },
+      "targetIds": {
+        "Email": "RrmgUWjOw9e8b9Wx5G37DKTFPvyOe0T03tXKhmxNcc8=",
+        "Office365Id": "P4yF7SMz9F891XpR6HIa9WO6v3mDwCYx0lRlRhr/3gs=",
+        "Username": "g9Sdxx6ftwwQm1oX8h5y1towpDwOlVG7ta5HpF1PTQ0="
+      },
+      "eventId": "Q5W8YJv1D+YoAShQT9a0YCVF5hhDNSkkJ0yRDb6ffkc=",
+      "channelId": "Q5W8YJv1D+YoAShQT9a0YCVF5hhDNSkkJ0yRDb6ffkc=",
+      "durationMinutes": 0,
+      "label": [
+        "Chat",
+        "NewThread"
+      ]
+    },
+    {
+      "interactionId": "e739d35447b4b4a3f86de105a04060f2",
+      "when": "2025-01-27T13:00:00+01:00",
+      "sourceIds": {
+        "Email": "external",
+        "Office365Id": "external"
+      },
+      "targetIds": {
+        "Email": "yP43yHPveLdzh68NR9irr8U6CsQXHX2EjOEjAA2jtQ8=",
+        "Office365Id": "+ReGKKgHWmxdATS+5058l25uhukZbv3RSQxmPu4ae5Y=",
+        "Username": "RjmPt5EKR3H8jC8tXnjmuWel7XTZ8+MWbhzuaTKvHG8="
+      },
+      "eventId": "Th9LbibHoVp4ZvznmI77MQvmXJYwV2Eo+BG7DEuJjeA=",
+      "durationMinutes": 30,
+      "label": [
+        "RecurringWeekly",
+        "Meeting"
+      ]
+    }    
+  ]
+}
