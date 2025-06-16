@@ -1,0 +1,33 @@
+﻿{
+  "connectorId": "905e1b9e-0a9a-46db-a8cc-7503d73ed8bc",
+  "users": [
+    {
+      "email": "AlexW@M365x95678378.OnMicrosoft.com",
+      "ids": {
+        "Email": "AlexW@M365x95678378.OnMicrosoft.com",
+        "Office365Id": "957afa2d-04fe-4f7b-b206-f2d94725df52",
+        "Username": "AlexW"
+      },
+      "props": {
+        "Name": "Alex Wilber",
+        "Department": [
+          "IT"
+        ]
+      }
+    },    
+    {
+      "email": "AllanD@M365x95678378.OnMicrosoft.com",
+      "ids": {
+        "Email": "AllanD@M365x95678378.OnMicrosoft.com",
+        "Office365Id": "492cbdde-569b-44da-9131-2d85b8655ea6",
+        "Username": "AllanD"
+      },
+      "props": {
+        "Name": "Allan Deyoung",
+        "Department": [
+          "Marketing"
+        ]
+      }
+    }    
+  ]
+}

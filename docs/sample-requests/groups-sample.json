@@ -1,0 +1,15 @@
+﻿{
+  "connectorId": "d08146e6-f912-41f3-8aae-4f38a2bee6fd",
+  "groups": [
+    {
+      "id": "kPRukINjRWvNEzRyAo0Jb/cFsIy3mI8o0nzHfyZ4r6o=",
+      "name": "IT",
+      "category": "Department"
+    },
+    {
+      "id": "6EWRHbjfhPWAHdT0CAQxsLLHGTyF4iT2R3J3NymAfxc=",
+      "name": "Marketing",
+      "category": "Department"
+    }
+  ]
+}
