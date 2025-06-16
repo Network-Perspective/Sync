@@ -1,0 +1,72 @@
+﻿{
+  "connectorId": "d08146e6-f912-41f3-8aae-4f38a2bee6fd",
+  "entites": [    
+    {
+      "changeDate": "2025-06-15T00:00:01.7612955+00:00",
+      "ids": {
+        "Email": "NDAkvUQUxlOAcUEos257UdKCUPXmSUB1AgyIfxDgwjI=",
+        "Office365Id": "jjlT2QDxCK2o6Vq+dlJe21TYkpsRUk4ch8L4ktHTTU4=",
+        "Username": "f2nre78jeU/mf6QepOwAenbhYNDeELZzE+bGhH1PNk0="
+      },
+      "groups": [
+        "2fG1R2NOVZPGy7NrWYC2G9OJyvatfZKbqAscMyujId4=",
+        "cAaAR7jBqzPs6J0WSuWt6Zz83md4PsIFXB3FAAWsbcw=",
+        "Lal8vi2iDr1+jFvqt2omebc018c1JspKsmQGHTRMy6M=",
+        "HufVULWC3aqXxFU2pHgL7EGRZfOK5iqJTQAIP2h1H/E=",
+        "0Wz13fT4fQSf3Yd5F9YGYploQhiirQZJ02T4zlHm0/Y="
+      ],
+      "relationships": [
+        {
+          "relationshipName": "Supervisor",
+          "targetIds": {
+            "Email": "+dEsTG1FyJuDmpgcMRM92HyHk5RSih/jSkpTUcB+ep8=",
+            "Office365Id": "zLd432aCnvYBK/4SRkxi8boLXOpa5eElT6h8Utd/9qY=",
+            "Username": "WcdBRpQPeIrCPfPBMs/8HtufT+PwIfcwTTBHaExcTNs="
+          }
+        }
+      ]
+    },
+    {
+      "changeDate": "2025-06-15T00:00:01.7612955+00:00",
+      "ids": {
+        "Email": "+dEsTG1FyJuDmpgcMRM92HyHk5RSih/jSkpTUcB+ep8=",
+        "Office365Id": "zLd432aCnvYBK/4SRkxi8boLXOpa5eElT6h8Utd/9qY=",
+        "Username": "WcdBRpQPeIrCPfPBMs/8HtufT+PwIfcwTTBHaExcTNs="
+      },
+      "groups": []
+    },
+    {
+      "changeDate": "2025-06-15T00:00:01.7612955+00:00",
+      "ids": {
+        "Email": "MVxP0Hhdg+1O256FW/GlDDjZTbvbD6f3rb3o35SVI/c=",
+        "Office365Id": "3jEsgi8P01WBGpTs9kfi8SomytzGIqB4aIdMLtLZsi8=",
+        "Username": "o9PpyEqmy43RQG5qugPu8dngkz68Patiy8Ra9VUTn7w="
+      },
+      "groups": [
+        "Lal8vi2iDr1+jFvqt2omebc018c1JspKsmQGHTRMy6M="
+      ]
+    },
+    {
+      "changeDate": "2025-06-15T00:00:01.7612955+00:00",
+      "ids": {
+        "Email": "qW4wI6DNS/T9Wk7aSqq0xQdzptgUH8eUEv//BkMCAA8=",
+        "Office365Id": "qPOdmW7AfULCU2AVK28SxrR+Pths3KYez9lLZVXtsDs=",
+        "Username": "Gdv2CUp1Hqzv14nrChf2SQBBrSGs/DOZhfdYXKrYGrY="
+      },
+      "groups": []
+    },
+    {
+      "changeDate": "2025-06-15T00:00:01.7612955+00:00",
+      "ids": {
+        "Email": "hvEqmjMT1GDrxv5lL5kdELLGSw4qSdK0xcqD4rIHF/E=",
+        "Office365Id": "U7ewdy+oWozapm8R4mHrn0BoVqSc6adKZeYUXmPBKrk=",
+        "Username": "CeOa2o2upAMRcCwufH7p5qVAdR+/YgiBi0F39g3nZ84="
+      },
+      "groups": [
+        "2fG1R2NOVZPGy7NrWYC2G9OJyvatfZKbqAscMyujId4=",
+        "cAaAR7jBqzPs6J0WSuWt6Zz83md4PsIFXB3FAAWsbcw=",
+        "Lal8vi2iDr1+jFvqt2omebc018c1JspKsmQGHTRMy6M="
+      ]
+    }
+  ]
+}
