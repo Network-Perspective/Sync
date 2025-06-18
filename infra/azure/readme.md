@@ -1,120 +1,137 @@
-# Deploy-OfficeConnector.ps1
+# Network Perspective Worker Azure Deployment
 
 ## Overview
 
-This script automates the creation of Azure Entra ID (formerly Azure Active Directory) applications required for syncing Office 365 data with Network Perspective. It registers two applications:
+This deployment solution automates the provisioning of Network Perspective Worker as an Azure Container Instance with secure network configuration and KeyVault integration. The PowerShell deployment script creates all necessary resources based on a YAML configuration file.
 
-- **Network Perspective Office 365 Sync**: For syncing Mail and Calendar metadata.
-- **Network Perspective Office 365 Teams Sync**: For syncing Teams metadata.
+The deployment includes:
 
-The script also guides you through the necessary manual steps to complete the setup, including generating secrets and granting admin consent.
+1. **Virtual Network** with NAT Gateway for outbound internet access
+2. **Azure KeyVault** with network security (accessible only from the container subnet)
+3. **Container Instance** running the worker with a managed identity to access KeyVault
+4. **EntraID Application** registration with required API permissions
 
 ## Prerequisites
 
-Before running the script, ensure you have:
+Before deployment, ensure you have:
 
-- **Azure CLI** installed and logged in with sufficient permissions to create Azure AD applications.
-- **PowerShell** environment to run the script.
-- Permissions to create and manage Azure AD applications and to grant admin consent.
+- **Azure CLI** (v2.0+) installed and logged in with sufficient permissions
+- **PowerShell** with the PowerShell-YAML module (automatically installed if missing)
+- Access to the Network Perspective Azure Container Registry
+- **Global Administrator** or **Application Administrator** role in your Microsoft Entra ID tenant (for app registration)
 
-## Usage
+The script was tested from Azure Cloud Shell that should meet the requirements by default.
 
-Run the script using the following command:
+## Files
 
-    ./Deploy-OfficeConnector.ps1
+- `deploy-worker.ps1`: The main PowerShell deployment script
+- `configuration.yaml`: YAML configuration file for all deployment parameters
+- `np-worker.bicep`: The Bicep template defining the infrastructure resources
 
-### Parameters
+## Configuration
 
-The script accepts the following optional parameters:
+The `configuration.yaml` file contains all settings required for the deployment:
 
-- `-appNameBasic` (string): The display name for the basic Office 365 sync application. Default is `"Network Perspective Office 365 Sync"`.
-- `-appNameWithTeams` (string): The display name for the Teams sync application. Default is `"Network Perspective Office 365 Teams Sync"`.
+```yaml
+configuration:  
+  resourceGroupName: "RG-Np-Worker"      # Azure resource group name (created if it doesn't exist)
+  region: "eastus"                       # Azure region for deployment
 
-**Example:**
+  # Container registry settings
+  registryUsername: "placeholder"        # Username for Network Perspective container registry
+  registryPassword: "placeholder"        # Password for Network Perspective container registry
+  containerImageTag: "latest"            # Container image tag to deploy
 
-    ./Deploy-OfficeConnector.ps1 -appNameBasic "My Basic App" -appNameWithTeams "My Teams App"
+  # EntraID application settings
+  entraAppName: "Network Perspective Office 365 Sync"  # Name for the registered application
+  entraAppCallbackUri: "https://app.networkperspective.io/sync/callback/office365"  # Callback URL
 
-## Script Steps
+  # Application settings
+  networkPerspectiveApiUrl: "https://app.networkperspective.io/" # NP API endpoint
+  applicationInsightsConnectionString: "placeholder"            # Optional App Insights
+  applicationInsightsRoleInstance: "placeholder"                # Optional App Insights
+    
+  teamsPermissions: true  # Whether to include Teams API permissions for the app
 
-1. **Register Entra ID Applications**: The script registers two applications in Azure Entra ID.
-   - Checks if applications with the specified names already exist.
-   - Offers the option to delete and recreate existing applications or use them as is.
-2. **Add Permissions**: The script adds the required permissions to each application.
-   - For the basic app:
-     - `User.Read.All`
-     - `Calendars.ReadBasic.All`
-     - `Mail.ReadBasic.All`
-     - `GroupMember.Read.All`
-   - For the Teams app (in addition to the above):
-     - `Team.ReadBasic.All`
-     - `Channel.ReadBasic.All`
-     - `ChannelMember.Read.All`
-     - `ChannelMessage.Read.All`
-     - `Chat.Read.All`
-3. **Output Instructions**: After registering the applications and adding permissions, the script outputs manual steps to:
-   - Generate client secrets for each application.
-   - Save the application IDs and secrets in a Key Vault.
-   - Grant admin consent for the applications.
+# KeyVault secrets to be created
+keyvault:    
+  orchestrator-client-secret: "placeholder"  # Client secret for the orchestrator
+  orchestrator-client-name: "placeholder"     # Client ID for the orchestrator
+```
 
-## Manual Steps
+Replace placeholder values with your actual configuration settings before deployment.
 
-### 1. Generate Client Secrets
+## Deployment Instructions
 
-For each application, generate a client secret using the Azure CLI.
+1. **Configure the YAML File**
 
-#### Basic App
+   Edit `configuration.yaml` to set all required parameters as described above.
 
-    az ad app credential reset --id <appIdBasic> --display-name "app-secret"
+2. **Login to Azure CLI**
 
-#### Teams App
+   ```powershell
+   az login
+   ```
 
-    az ad app credential reset --id <appIdWithTeams> --display-name "app-secret"
+3. **Run the Deployment Script**
 
-Replace `<appIdBasic>` and `<appIdWithTeams>` with the application IDs provided by the script.
+   ```powershell
+   ./deploy-worker.ps1 -configurationFile "./configuration.yaml"
+   ```
 
-### 2. Save Credentials in Key Vault
+4. **Grant Admin Consent**
 
-Save the following values in your Key Vault:
+   After deployment completes, you'll need to grant admin consent for the registered EntraID application from the Network Perspective Admin panel.
 
-- `microsoft-client-basic-id`: `<appIdBasic>`
-- `microsoft-client-basic-secret`: The secret generated for the basic app.
-- `microsoft-client-with-teams-id`: `<appIdWithTeams>`
-- `microsoft-client-with-teams-secret`: The secret generated for the Teams app.
+## Deployed Resources
 
-### 3. Grant Admin Consent
+The deployment script creates the following Azure resources:
 
-Grant admin consent for each application by opening the following URLs in a web browser:
+### Core Infrastructure
+- **Resource Group**: Creates if it doesn't exist (specified in configuration)
+- **Virtual Network**: Address space 10.0.0.0/16 with two subnets:
+  - Container Subnet: 10.0.0.0/24 with ACI delegation and KeyVault service endpoint
+  - KeyVault Subnet: 10.0.1.0/24 
+- **NAT Gateway**: Provides outbound internet access for the container
 
-#### Basic App (Mail & Calendar Metadata Sync)
+### Security & Identity
+- **Azure KeyVault**: Secured with RBAC authorization and network ACLs
+- **User-Assigned Managed Identity**: Used by the container to access KeyVault
+- **KeyVault Role Assignment**: Grants the container identity access to KeyVault secrets
+- **EntraID Application**: Registered with required Microsoft Graph API permissions
 
-    https://login.microsoftonline.com/common/adminconsent?client_id=<appIdBasic>
+### Container Instance
+- **Container Group**: Deployed in private VNet with managed identity
+- **Container Configuration**: 
+  - Image: networkperspective.azurecr.io/connectors/worker:<tag>
+  - Resources: 1 vCPU, 1 GB RAM
+  - Network: Private subnet with NAT Gateway for outbound traffic
 
-#### Teams App (Teams Metadata Sync)
+## Resource Security
 
-    https://login.microsoftonline.com/common/adminconsent?client_id=<appIdWithTeams>
+The deployment implements several security best practices:
 
-Sign in with an account that has global administrator permissions to grant the necessary consents.
+- **Managed Identity**: Container uses a user-assigned managed identity rather than stored credentials
+- **KeyVault RBAC**: Uses modern RBAC authorization instead of access policies 
+- **Network Security**: KeyVault is only accessible from the container subnet via service endpoint
+- **Secure Environment Variables**: Sensitive settings are stored in KeyVault, not in container configuration
+
+## Accessing Deployed Resources
+
+After deployment, the following outputs are available from the Bicep template:
+
+- **containerGroupId**: The resource ID of the deployed container group
+- **containerIPAddress**: The private IP address of the container
+- **keyVaultUri**: The URI of the deployed KeyVault
+
+To access the container logs:
+
+```powershell
+az container logs --resource-group "RG-Np-Worker" --name "np-worker-<uniqueId>-cg"
+```
+
+Where `<uniqueId>` is the generated unique identifier for your deployment.
 
 ## Troubleshooting
 
-- **Insufficient Permissions**: Ensure you have the necessary permissions to create Azure AD applications and grant admin consent.
-- **Azure CLI Errors**: Make sure you have the latest version of Azure CLI installed and that you're logged into the correct Azure account.
-- **Application Already Exists**: If the application already exists and you choose not to delete it, ensure it has the correct permissions and settings as specified.
-
-## Notes
-
-- The script uses the Azure CLI to interact with Azure AD. Ensure that Azure CLI is installed and accessible in your PowerShell environment.
-- Application IDs and secrets are sensitive information. Handle them securely and avoid exposing them in public repositories or logs.
-- The script requires an interactive session to confirm deletion of existing applications if found.
-
-## Support
-
-For any issues or questions, please contact [contact@networkperspective.io](mailto:contact@networkperspective.io).
-
----
-
-**Example Execution:**
-
-    ./Deploy-OfficeConnector.ps1
-
-Upon running the script, follow the prompts and complete the manual steps as instructed.
+The script is idempotent and will not fail if the resources already exist. Should it fail please try to run it again and share the error message with the Network Perspective support team.
