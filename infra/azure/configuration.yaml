@@ -1,0 +1,22 @@
+ 
+configuration:  
+  resourceGroupName: "RG-Np-Worker"
+  region: "eastus"  
+
+  # Container registry
+  registryUsername: "placeholder"
+  registryPassword: "placeholder"
+  containerImageTag: "latest"
+
+  entraAppName: "Network Perspective Office 365 Sync"
+  entraAppCallbackUri: "https://app.networkperspective.io/sync/callback/office365"
+
+  networkPerspectiveApiUrl: "https://app.networkperspective.io/"
+  applicationInsightsConnectionString: "placeholder"
+  applicationInsightsRoleInstance: "placeholder"  
+    
+  teamsPermissions: true
+
+keyvault:    
+  orchestrator-client-secret: "placeholder"
+  orchestrator-client-name: "placeholder"
