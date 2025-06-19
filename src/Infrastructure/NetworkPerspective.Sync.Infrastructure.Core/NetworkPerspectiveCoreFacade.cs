@@ -198,7 +198,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
             }
         }
 
-        public async Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default)
+        public async Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, string message = null, CancellationToken stoppingToken = default)
         {
             try
             {
@@ -210,7 +210,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core
                     SyncPeriodStart = timeRange.Start,
                     SyncPeriodEnd = timeRange.End,
                     Success = true,
-                    Message = string.Empty
+                    Message = message ?? string.Empty
                 };
 
                 await _client.ReportCompletedAsync(command, stoppingToken);

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,8 +11,12 @@ using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
+using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Authentication.Azure;
+using Microsoft.Kiota.Http.HttpClientLibrary;
+using Microsoft.Kiota.Http.HttpClientLibrary.Middleware;
+using Microsoft.Kiota.Http.HttpClientLibrary.Middleware.Options;
 
 using NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Configs;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
@@ -19,6 +25,7 @@ using NetworkPerspective.Sync.Worker.Application.Services;
 
 using Polly;
 using Polly.Extensions.Http;
+using Polly.Timeout;
 
 namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services;
 
@@ -45,12 +52,21 @@ internal class MicrosoftClientFactory : IMicrosoftClientFactory
         {
             retryLogger.LogInformation(result.Exception, "Problem occured on calling graph api. Next attempt in {timespan}", timespan);
         };
-
-        var policy = HttpPolicyExtensions
+        var attemptTimeout = Policy.TimeoutAsync<HttpResponseMessage>(
+            TimeSpan.FromSeconds(60),                    
+            TimeoutStrategy.Pessimistic);               
+        
+        var retry = HttpPolicyExtensions
             .HandleTransientHttpError()
+            .Or<TimeoutRejectedException>() 
+            .Or<TimeoutException>()
+            .Or<TaskCanceledException>(ex => ex.InnerException is TimeoutException)
+            .Or<OperationCanceledException>(ex => ex.InnerException is TimeoutException)
             .WaitAndRetryAsync(resiliencyOptions.Value.Retries, OnRetry);
 
-        _retryHandler = new PolicyHttpMessageHandler(policy);
+        var resiliency = Policy.WrapAsync(retry, attemptTimeout);
+
+        _retryHandler = new PolicyHttpMessageHandler(resiliency);
     }
 
     public async Task<GraphServiceClient> GetMicrosoftClientAsync(CancellationToken stoppingToken = default)
@@ -96,8 +112,19 @@ internal class MicrosoftClientFactory : IMicrosoftClientFactory
 
     private HttpClient BuildHttpClient()
     {
-        var handlers = GraphClientFactory.CreateDefaultHandlers();
-        handlers.Add(_retryHandler);
-        return GraphClientFactory.Create(handlers);
+        var handlers = KiotaClientFactory.CreateDefaultHandlers();
+        
+        // remove kiota retry handler
+        handlers = handlers.Where(h=>h is not RetryHandler).ToList();
+        // insert polly
+        handlers.Insert(0, _retryHandler);
+        handlers.Add(new GraphTelemetryHandler()); 
+        
+        var httpClient = GraphClientFactory.Create(handlers);
+        
+        // Increase total timeout 
+        httpClient.Timeout = TimeSpan.FromMinutes(5);
+        
+        return httpClient;
     }
 }

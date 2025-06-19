@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,7 +48,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
                 => TryGetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on mailbox for timerange {timerange} for {count} users...", context.TimeRange, usersEmails.Count());
-            var result = await ParallelSyncTask<string>.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+            var result = await ParallelSyncTask<string>.RunSequentialAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
             _logger.LogInformation("Evaluation of interactions based on mailbox for timerange '{timerange}' completed", context.TimeRange);
 
             return result;
@@ -77,7 +78,8 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
             {
                 x.QueryParameters = new MessagesRequestBuilder.MessagesRequestBuilderGetQueryParameters
                 {
-                    Filter = filterString
+                    Filter = filterString,
+                    Top = 500
                 };
                 x.Headers.Add("Prefer", "IdType=\"ImmutableId\"");
             }, stoppingToken);
@@ -86,9 +88,17 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
                 .CreatePageIterator(_graphClient, mailsResponse,
                 async mail =>
                 {
-                    var interactions = interactionFactory.CreateForUser(mail, userEmail);
-                    var sentInteractionsCount = await stream.SendAsync(interactions);
-                    interactionsCount += sentInteractionsCount;
+                    try
+                    {
+                        var interactions = interactionFactory.CreateForUser(mail, userEmail);
+                        var sentInteractionsCount = await stream.SendAsync(interactions);
+                        interactionsCount += sentInteractionsCount;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error processing email page", userEmail);
+                    }
+
                     return true;
                 },
                 request =>
