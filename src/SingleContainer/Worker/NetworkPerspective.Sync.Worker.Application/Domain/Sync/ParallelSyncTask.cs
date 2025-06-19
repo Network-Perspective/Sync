@@ -33,7 +33,7 @@ namespace NetworkPerspective.Sync.Worker.Application.Domain.Sync
             _stoppingToken = stoppingToken;
             _parallelOptions = new ParallelOptions
             {
-                CancellationToken = stoppingToken, 
+                CancellationToken = stoppingToken,
                 MaxDegreeOfParallelism = maxDegreeOfParallelism
             };
         }
@@ -42,12 +42,12 @@ namespace NetworkPerspective.Sync.Worker.Application.Domain.Sync
         {
             return await RunAsync(ids, updateStatus, singleTask, 4, stoppingToken);
         }
-        
+
         public static async Task<SyncResult> RunSequentialAsync(IEnumerable<T> ids, Func<double, Task> updateStatus, SingleSyncTask singleTask, CancellationToken stoppingToken = default)
         {
             return await RunAsync(ids, updateStatus, singleTask, 1, stoppingToken);
         }
-        
+
         public static async Task<SyncResult> RunAsync(IEnumerable<T> ids, Func<double, Task> updateStatus, SingleSyncTask singleTask, int maxDegreeOfParallelism, CancellationToken stoppingToken = default)
         {
             var fetcher = new ParallelSyncTask<T>(ids, updateStatus, singleTask, maxDegreeOfParallelism, stoppingToken);

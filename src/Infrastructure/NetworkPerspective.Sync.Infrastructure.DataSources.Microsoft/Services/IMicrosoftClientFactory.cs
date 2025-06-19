@@ -51,14 +51,15 @@ internal class MicrosoftClientFactory : IMicrosoftClientFactory
         void OnRetry(DelegateResult<HttpResponseMessage> result, TimeSpan timespan)
         {
             retryLogger.LogInformation(result.Exception, "Problem occured on calling graph api. Next attempt in {timespan}", timespan);
-        };
+        }
+        ;
         var attemptTimeout = Policy.TimeoutAsync<HttpResponseMessage>(
-            TimeSpan.FromSeconds(60),                    
-            TimeoutStrategy.Pessimistic);               
-        
+            TimeSpan.FromSeconds(60),
+            TimeoutStrategy.Pessimistic);
+
         var retry = HttpPolicyExtensions
             .HandleTransientHttpError()
-            .Or<TimeoutRejectedException>() 
+            .Or<TimeoutRejectedException>()
             .Or<TimeoutException>()
             .Or<TaskCanceledException>(ex => ex.InnerException is TimeoutException)
             .Or<OperationCanceledException>(ex => ex.InnerException is TimeoutException)
@@ -113,18 +114,18 @@ internal class MicrosoftClientFactory : IMicrosoftClientFactory
     private HttpClient BuildHttpClient()
     {
         var handlers = KiotaClientFactory.CreateDefaultHandlers();
-        
+
         // remove kiota retry handler
-        handlers = handlers.Where(h=>h is not RetryHandler).ToList();
+        handlers = handlers.Where(h => h is not RetryHandler).ToList();
         // insert polly
         handlers.Insert(0, _retryHandler);
-        handlers.Add(new GraphTelemetryHandler()); 
-        
+        handlers.Add(new GraphTelemetryHandler());
+
         var httpClient = GraphClientFactory.Create(handlers);
-        
+
         // Increase total timeout 
         httpClient.Timeout = TimeSpan.FromMinutes(5);
-        
+
         return httpClient;
     }
 }
