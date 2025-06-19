@@ -19,7 +19,7 @@ public interface INetworkPerspectiveCore
     Task PushGroupsAsync(SecureString accessToken, IEnumerable<Group> groups, CancellationToken stoppingToken = default);
     Task<ConnectorConfig> GetConnectorConfigAsync(SecureString accessToken, CancellationToken stoppingToken = default);
     Task ReportSyncStartAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default);
-    Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default);
+    Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, string message = null, CancellationToken stoppingToken = default);
     Task TryReportSyncFailedAsync(SecureString accessToken, TimeRange timeRange, string message, CancellationToken stoppingToken = default);
     Task<CoreTokenValidationResult> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default);
 }

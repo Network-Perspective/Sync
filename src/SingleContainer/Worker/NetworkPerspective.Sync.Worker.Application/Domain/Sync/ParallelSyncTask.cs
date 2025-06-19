@@ -24,19 +24,33 @@ namespace NetworkPerspective.Sync.Worker.Application.Domain.Sync
         private readonly ParallelOptions _parallelOptions;
         private readonly CancellationToken _stoppingToken;
 
-        private ParallelSyncTask(IEnumerable<T> ids, Func<double, Task> updateStatus, SingleSyncTask singleTask, CancellationToken stoppingToken = default)
+        private ParallelSyncTask(IEnumerable<T> ids, Func<double, Task> updateStatus, SingleSyncTask singleTask, int maxDegreeOfParallelism = 4, CancellationToken stoppingToken = default)
         {
             _tasksCount = ids.Count();
             _ids = ids;
             _updateStatus = updateStatus;
             _singleTask = singleTask;
             _stoppingToken = stoppingToken;
-            _parallelOptions = new ParallelOptions { CancellationToken = stoppingToken };
+            _parallelOptions = new ParallelOptions
+            {
+                CancellationToken = stoppingToken,
+                MaxDegreeOfParallelism = maxDegreeOfParallelism
+            };
         }
 
         public static async Task<SyncResult> RunAsync(IEnumerable<T> ids, Func<double, Task> updateStatus, SingleSyncTask singleTask, CancellationToken stoppingToken = default)
         {
-            var fetcher = new ParallelSyncTask<T>(ids, updateStatus, singleTask, stoppingToken);
+            return await RunAsync(ids, updateStatus, singleTask, 4, stoppingToken);
+        }
+
+        public static async Task<SyncResult> RunSequentialAsync(IEnumerable<T> ids, Func<double, Task> updateStatus, SingleSyncTask singleTask, CancellationToken stoppingToken = default)
+        {
+            return await RunAsync(ids, updateStatus, singleTask, 1, stoppingToken);
+        }
+
+        public static async Task<SyncResult> RunAsync(IEnumerable<T> ids, Func<double, Task> updateStatus, SingleSyncTask singleTask, int maxDegreeOfParallelism, CancellationToken stoppingToken = default)
+        {
+            var fetcher = new ParallelSyncTask<T>(ids, updateStatus, singleTask, maxDegreeOfParallelism, stoppingToken);
             return await fetcher.RunAsync();
         }
 

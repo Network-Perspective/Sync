@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,7 +50,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
                 => TryGetSingleUserInteractionsAsync(context, stream, userEmail, interactionFactory, stoppingToken);
 
             _logger.LogInformation("Evaluating interactions based on callendar for '{timerange}' for {count} users...", context.TimeRange, usersEmails.Count());
-            var result = await ParallelSyncTask<string>.RunAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+            var result = await ParallelSyncTask<string>.RunSequentialAsync(usersEmails, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
             _logger.LogInformation("Evaluation of interactions based on callendar for '{timerange}' completed", context.TimeRange);
 
             return result;
@@ -96,26 +97,35 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
                 .CreatePageIterator(_graphClient, mailsResponse,
                 async @event =>
                 {
-                    if (!string.IsNullOrEmpty(@event.SeriesMasterId))
+                    try
                     {
-                        var recurrenceSerie = await _graphClient
-                            .Users[userEmail]
-                            .Calendar
-                            .Events[@event.SeriesMasterId]
-                            .GetAsync(x =>
-                            {
-                                x.QueryParameters = new EventItemRequestBuilder.EventItemRequestBuilderGetQueryParameters()
+                        if (!string.IsNullOrEmpty(@event.SeriesMasterId))
+                        {
+                            var recurrenceSerie = await _graphClient
+                                .Users[userEmail]
+                                .Calendar
+                                .Events[@event.SeriesMasterId]
+                                .GetAsync(x =>
                                 {
-                                    Select = new[] { "recurrence" }
-                                };
-                            });
+                                    x.QueryParameters =
+                                        new EventItemRequestBuilder.EventItemRequestBuilderGetQueryParameters()
+                                        {
+                                            Select = new[] { "recurrence" }
+                                        };
+                                });
 
-                        @event.Recurrence = recurrenceSerie.Recurrence;
+                            @event.Recurrence = recurrenceSerie.Recurrence;
+                        }
+
+                        var interactions = interactionFactory.CreateForUser(@event, userEmail);
+                        var sentInteractionsCount = await stream.SendAsync(interactions);
+                        interactionsCount += sentInteractionsCount;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error while processing calendar");
                     }
 
-                    var interactions = interactionFactory.CreateForUser(@event, userEmail);
-                    var sentInteractionsCount = await stream.SendAsync(interactions);
-                    interactionsCount += sentInteractionsCount;
                     return true;
                 },
                 request =>

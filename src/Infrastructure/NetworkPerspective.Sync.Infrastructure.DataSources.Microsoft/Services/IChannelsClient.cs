@@ -52,7 +52,7 @@ internal class ChannelsClient(GraphServiceClient graphClient, IGlobalStatusCache
             .Filter(channels, context.NetworkConfig.EmailFilter);
 
         _logger.LogInformation("Evaluating interactions based on {count} channels for '{timerange}'...", filteredChannels.Count, context.TimeRange);
-        var result = await ParallelSyncTask<InternalChannel>.RunAsync(filteredChannels, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+        var result = await ParallelSyncTask<InternalChannel>.RunSequentialAsync(filteredChannels, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
         _logger.LogInformation("Evaluation of interactions based on {count} channels for '{timerange}' completed", filteredChannels.Count, context.TimeRange);
 
         return result;
@@ -203,7 +203,7 @@ internal class ChannelsClient(GraphServiceClient graphClient, IGlobalStatusCache
             interactionsCount += sentThreadInteractionsCount;
 
             var replies = await GetThreadsRepliesAsync(channel, thread, stoppingToken);
-            var repliesInteractions = interactionFactory.CreateFromThreadRepliesMessage(replies, channel.Id, thread.Id, thread.From.User.Id, timeRange);
+            var repliesInteractions = interactionFactory.CreateFromThreadRepliesMessage(replies, channel.Id, thread.Id, thread.From?.User?.Id, timeRange);
             var sentRepliesInteractionsCount = await stream.SendAsync(repliesInteractions);
             interactionsCount += sentRepliesInteractionsCount;
         }
