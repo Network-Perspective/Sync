@@ -49,13 +49,16 @@ internal sealed class SyncService(ILogger<SyncService> logger,
 
             var message = $"Sync completed successfully. Success rate: {syncResult.SuccessRate}. TasksCount: {syncResult.TasksCount}. FailedTasksCount: {syncResult.FailedTasksCount}. TotalInteractionsCount: {syncResult.TotalInteractionsCount}";
 
-            var errors = syncResult.Exceptions
+            var errors = syncResult.Exceptions?
                 .Select(e => $"{e.GetType().FullName}:{e.Message}:{e.StackTrace}")
                 .GroupBy(e => e)
                 .Select(e => $"Exception | Count: {e.Count()} | Stacktrace: {e.Key} \n")
                 .ToList();
 
-            message += string.Join("\n", errors);
+            if (errors != null && errors.Any())
+            {
+                message += string.Join("\n", errors);
+            }
 
             await networkPerspectiveCore.ReportSyncSuccessfulAsync(context.AccessToken, context.TimeRange, message, stoppingToken);
             await statusLogger.LogInfoAsync("Sync completed", stoppingToken);
