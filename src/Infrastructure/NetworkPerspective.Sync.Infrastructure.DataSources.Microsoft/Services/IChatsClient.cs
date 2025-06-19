@@ -45,7 +45,7 @@ internal class ChatsClient(GraphServiceClient graphClient, IGlobalStatusCache ta
 
         var chats = await GetAllChatsAsync(usersEmails, context.TimeRange, stoppingToken);
         logger.LogInformation("Evaluating interactions based on chat for '{timerange}' for {count} users...", context.TimeRange, usersEmails.Count());
-        var result = await ParallelSyncTask<InternalChat>.RunAsync(chats, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
+        var result = await ParallelSyncTask<InternalChat>.RunSequentialAsync(chats, ReportProgressCallbackAsync, SingleTaskAsync, stoppingToken);
         logger.LogInformation("Evaluation of interactions based on chat for '{timerange}' completed", context.TimeRange);
 
         return result;
@@ -139,24 +139,33 @@ internal class ChatsClient(GraphServiceClient graphClient, IGlobalStatusCache ta
             .CreatePageIterator(graphClient, messagesResponse,
             async message =>
             {
-                if (message.MessageType == ChatMessageType.Message)
+                try
                 {
-                    var chatMessage = ChatMessageMapper.ToInternalChatMessage(message, chat);
-                    var chatMessageInteractions = interactionFactory.CreateFromChatMessage(chatMessage);
-                    var chatMessageInteractionsCount = await stream.SendAsync(chatMessageInteractions);
-                    interactionsCount += chatMessageInteractionsCount;
-
-                    var reactions = message.Reactions is null
-                        ? []
-                        : message.Reactions.Select(x => ChatMessageReactionMapper.ToInternalChatMessageReaction(x, chatMessage));
-
-                    foreach (var reaction in reactions)
+                    if (message.MessageType == ChatMessageType.Message)
                     {
-                        var reactionInteractions = interactionFactory.CreateFromChatMessageReaction(reaction);
-                        var reactionInteractionsCount = await stream.SendAsync(reactionInteractions);
-                        interactionsCount += reactionInteractionsCount;
+                        var chatMessage = ChatMessageMapper.ToInternalChatMessage(message, chat);
+                        var chatMessageInteractions = interactionFactory.CreateFromChatMessage(chatMessage);
+                        var chatMessageInteractionsCount = await stream.SendAsync(chatMessageInteractions);
+                        interactionsCount += chatMessageInteractionsCount;
+
+                        var reactions = message.Reactions is null
+                            ? []
+                            : message.Reactions.Select(x =>
+                                ChatMessageReactionMapper.ToInternalChatMessageReaction(x, chatMessage));
+
+                        foreach (var reaction in reactions)
+                        {
+                            var reactionInteractions = interactionFactory.CreateFromChatMessageReaction(reaction);
+                            var reactionInteractionsCount = await stream.SendAsync(reactionInteractions);
+                            interactionsCount += reactionInteractionsCount;
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Error processing chat messages");
+                }
+
                 return true;
             },
             request =>

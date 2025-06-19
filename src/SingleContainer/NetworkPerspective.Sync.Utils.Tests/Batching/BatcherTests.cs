@@ -26,7 +26,8 @@ public class BatcherTests
         {
             result.AddRange(args.BatchItems);
             return Task.CompletedTask;
-        };
+        }
+        ;
 
         var buffer = new Batcher<int>(size);
         buffer.OnBatchReady(Callback);
@@ -54,7 +55,8 @@ public class BatcherTests
             result.AddRange(args.BatchItems);
             cancellationTokenSource.Cancel();
             return Task.CompletedTask;
-        };
+        }
+        ;
 
         var buffer = new Batcher<int>(size);
         buffer.OnBatchReady(Callback);
@@ -80,7 +82,8 @@ public class BatcherTests
         {
             result.AddRange(args.BatchItems);
             return Task.CompletedTask;
-        };
+        }
+        ;
 
         var buffer = new Batcher<int>(size);
         buffer.OnBatchReady(Callback);
@@ -107,7 +110,8 @@ public class BatcherTests
         {
             invokedCallback = true;
             return Task.CompletedTask;
-        };
+        }
+        ;
 
         var buffer = new Batcher<int>(size);
         buffer.OnBatchReady(Callback);
@@ -142,7 +146,8 @@ public class BatcherTests
         {
             batchNumbers.Add(args.BatchNumber);
             return Task.CompletedTask;
-        };
+        }
+        ;
 
         var buffer = new Batcher<int>(size);
         buffer.OnBatchReady(Callback);

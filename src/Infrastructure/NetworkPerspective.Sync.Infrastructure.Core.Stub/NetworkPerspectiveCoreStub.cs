@@ -122,7 +122,7 @@ namespace NetworkPerspective.Sync.Infrastructure.Core.Stub
             => Task.CompletedTask;
 
 
-        public Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, CancellationToken stoppingToken = default)
+        public Task ReportSyncSuccessfulAsync(SecureString accessToken, TimeRange timeRange, string message = null, CancellationToken stoppingToken = default)
             => Task.CompletedTask;
 
         public Task<CoreTokenValidationResult> ValidateTokenAsync(SecureString accessToken, CancellationToken stoppingToken = default)

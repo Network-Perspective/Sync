@@ -85,7 +85,7 @@ public class SyncServiceTests
 
         // Assert
         _networkPerspectiveCoreMock.Verify(x => x.ReportSyncStartAsync(It.IsAny<SecureString>(), context.TimeRange, It.IsAny<CancellationToken>()), Times.Once);
-        _networkPerspectiveCoreMock.Verify(x => x.ReportSyncSuccessfulAsync(It.IsAny<SecureString>(), context.TimeRange, It.IsAny<CancellationToken>()), Times.Once);
+        _networkPerspectiveCoreMock.Verify(x => x.ReportSyncSuccessfulAsync(It.IsAny<SecureString>(), context.TimeRange, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
