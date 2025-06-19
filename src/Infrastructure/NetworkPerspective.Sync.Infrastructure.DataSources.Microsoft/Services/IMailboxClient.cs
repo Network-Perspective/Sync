@@ -96,7 +96,7 @@ namespace NetworkPerspective.Sync.Infrastructure.DataSources.Microsoft.Services
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error processing email page", userEmail);
+                        _logger.LogError(ex, "Error processing email page");
                     }
 
                     return true;
