@@ -33,6 +33,30 @@ public static class EmployeeDtoMapper
             {
                 foreach (var prop in dto.Props)
                 {
+                    if (string.IsNullOrWhiteSpace(prop.Name)) continue;
+                    if (props.ContainsKey(prop.Name))
+                    {
+                        // handle multivalue props by converting string to  
+                        // a list of strings if second value appears in source data
+                        var currentObjValue = props[prop.Name];
+                        switch (currentObjValue)
+                        {
+                            case string currentStringValue:
+                                props[prop.Name] = new List<string> { currentStringValue, prop.Value };
+                                break;
+                            case List<string> list:
+                                list.Add(prop.Value);
+                                break;
+                            default:
+                                // todo log - though shouldn't happen as the source prop.value is always string
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        // new property just set the value
+                        props[prop.Name] = prop.Value;
+                    }
                     props.TryAdd(prop.Name, prop.Value);
                 }
             }
