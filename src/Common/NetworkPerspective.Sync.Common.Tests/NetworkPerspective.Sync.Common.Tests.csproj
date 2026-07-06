@@ -5,20 +5,24 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="6.0.2">
+        <PackageReference Include="coverlet.collector" Version="6.0.4">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.10" />
-        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.28" />
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.28" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.28" />
         <PackageReference Include="Moq" Version="4.20.72" />
-        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.0" />
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.18.2" />
+        <PackageReference Include="OpenTelemetry.Api" Version="1.16.0" />
+        <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.16.0" />
+        <PackageReference Include="Scriban.Signed" Version="7.2.5" />
+        <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
         <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.0.2" />
         <PackageReference Include="System.Runtime.Caching" Version="8.0.1" />
         <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
-        <PackageReference Include="WireMock.Net" Version="1.7.0" />
+        <PackageReference Include="WireMock.Net" Version="1.25.0" />
     </ItemGroup>
 
     <ItemGroup>
