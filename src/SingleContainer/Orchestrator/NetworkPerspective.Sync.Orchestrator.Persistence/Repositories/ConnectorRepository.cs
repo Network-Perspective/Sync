@@ -62,7 +62,7 @@ internal class ConnectorRepository(DbSet<ConnectorEntity> dbSet) : IConnectorRep
     public async Task<Connector> GetAsync(Guid id, CancellationToken stoppingToken = default)
     {
         if (!await ExistsAsync(id, stoppingToken))
-            throw new EntityNotFoundException<Connector>();
+            throw new EntityNotFoundException<Connector>(id.ToString());
 
         try
         {
