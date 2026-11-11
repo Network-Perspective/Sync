@@ -5,10 +5,10 @@
     "aspNetCoreToOpenApi": {
       "project": "$(input)",
       "msBuildProjectExtensionsPath": null,
-      "configuration": null,
+      "configuration": "$(configuration)",
       "runtime": null,
       "targetFramework": null,
-      "noBuild": false,
+      "noBuild": true,
       "verbose": true,
       "workingDirectory": null,
       "requireParametersWithoutDefault": false,

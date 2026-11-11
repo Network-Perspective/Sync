@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="11.12.0" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.28" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+        <PackageReference Include="VaultSharp" Version="1.17.5.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\SingleContainer\NetworkPerspective.Sync.Utils\NetworkPerspective.Sync.Utils.csproj" />
+        <ProjectReference Include="..\NetworkPerspective.Sync.Infrastructure.Vaults.Contract\NetworkPerspective.Sync.Infrastructure.Vaults.Contract.csproj" />
+    </ItemGroup>
+
+</Project>

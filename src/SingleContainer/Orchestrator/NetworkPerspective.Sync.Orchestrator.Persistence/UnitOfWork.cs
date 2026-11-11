@@ -40,7 +40,12 @@ public class UnitOfWork : IUnitOfWork
         => new DbSecretRepository(_dbContext.SecretEntities);
 
     public Task MigrateAsync()
-        => _dbContext.Database.MigrateAsync();
+    {
+        if (_dbContext.Database.IsNpgsql())
+            throw new System.InvalidOperationException("PostgreSQL schema changes require a separately reviewed schema script; startup migration is disabled.");
+
+        return _dbContext.Database.MigrateAsync();
+    }
 
     public void Dispose()
         => _dbContext?.Dispose();

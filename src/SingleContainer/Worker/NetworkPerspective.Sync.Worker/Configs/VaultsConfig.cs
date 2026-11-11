@@ -4,6 +4,7 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.AmazonSecretsManager;
 using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 using NetworkPerspective.Sync.Infrastructure.Vaults.GoogleSecretManager;
 using NetworkPerspective.Sync.Infrastructure.Vaults.HashiCorpVault;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Ovh;
 
 namespace NetworkPerspective.Sync.Worker.Configs;
 
@@ -11,6 +12,7 @@ public class VaultsConfig
 {
     public AzureKeyVaultConfig AzureKeyVault { get; set; }
     public HcpVaultConfig HcpVault { get; set; }
+    public OvhVaultConfig OvhVault { get; set; }
     public AmazonSecretsManagerConfig AmazonSecretsManager { get; set; }
     public GoogleSecretManagerConfig GoogleSecretManager { get; set; }
 
@@ -18,6 +20,9 @@ public class VaultsConfig
     {
         public Validator(string configPath)
         {
+            RuleFor(x => x.OvhVault)
+                .SetValidator(new OvhVaultConfig.Validator($"{configPath}__{nameof(OvhVault)}"));
+
             RuleFor(x => x.AzureKeyVault)
                 .SetValidator(new AzureKeyVaultConfig.Validator($"{configPath}__{nameof(AzureKeyVault)}"))
                 .Unless(x => x.HcpVault is not null)

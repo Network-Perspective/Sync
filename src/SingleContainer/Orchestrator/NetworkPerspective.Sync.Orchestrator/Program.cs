@@ -1,3 +1,5 @@
+using System;
+
 using FluentValidation;
 
 using Mapster;
@@ -8,9 +10,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using NetworkPerspective.Sync.Infrastructure.Vaults.AzureKeyVault;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Orchestrator.Application;
+using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Controllers;
 using NetworkPerspective.Sync.Orchestrator.Controllers.Dtos;
 using NetworkPerspective.Sync.Orchestrator.Extensions;
@@ -18,6 +20,7 @@ using NetworkPerspective.Sync.Orchestrator.Hubs.V1;
 using NetworkPerspective.Sync.Orchestrator.Hubs.V1.Mappers;
 using NetworkPerspective.Sync.Orchestrator.Mappers;
 using NetworkPerspective.Sync.Orchestrator.Persistence;
+using NetworkPerspective.Sync.Orchestrator.Persistence.Schema;
 
 namespace NetworkPerspective.Sync.Orchestrator;
 
@@ -25,6 +28,14 @@ public class Program
 {
     private static void Main(string[] args)
     {
+        if (Array.Exists(args, arg => arg == "--ovh-schema-script"))
+        {
+            if (args.Length != 1)
+                throw new ArgumentException("--ovh-schema-script takes no other arguments and only emits SQL.");
+            Console.Write(PostgreSqlSchema.GenerateScript());
+            return;
+        }
+
         ControllersMapsterConfig.RegisterMappings(TypeAdapterConfig.GlobalSettings);
         HubV1MapsterConfig.RegisterMappings(TypeAdapterConfig.GlobalSettings);
 
@@ -32,18 +43,19 @@ public class Program
         builder.Logging.ClearProviders().AddConsole();
 
         var dbConnectionString = builder.Configuration.GetConnectionString("Database");
+        var databaseProvider = builder.Configuration.GetDatabaseProvider();
 
         builder.Services
-            .AddStartupDbInitializer();
+            .AddStartupDbInitializer(databaseProvider);
 
         var healthcheckBuilder = builder.Services
             .AddHealthChecks();
 
         builder.Services
             .AddDocumentation(typeof(Program).Assembly)
-            .AddApplication(builder.Configuration.GetSection("App"), dbConnectionString)
+            .AddApplication(builder.Configuration.GetSection("App"), dbConnectionString, databaseProvider)
             .AddPersistence(healthcheckBuilder)
-            .AddAzureKeyVault(builder.Configuration.GetSection("Infrastructure:Vault"), healthcheckBuilder)
+            .AddRuntimeVault(builder.Configuration.GetSection("Infrastructure:Vault"), healthcheckBuilder)
             .AddSingleton<ICachedVault, CachedVault>()
             .AddAuth()
             .AddHub();

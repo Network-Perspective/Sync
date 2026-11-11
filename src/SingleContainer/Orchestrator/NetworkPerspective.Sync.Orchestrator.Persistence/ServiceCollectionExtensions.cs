@@ -24,6 +24,11 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddStartupDbInitializer(this IServiceCollection services)
-        => services.AddTransient<IHostedService, DbInitializerHostedService>();
+    public static IServiceCollection AddStartupDbInitializer(this IServiceCollection services, DatabaseProvider provider = DatabaseProvider.SqlServer)
+    {
+        if (provider == DatabaseProvider.SqlServer)
+            services.AddTransient<IHostedService, DbInitializerHostedService>();
+
+        return services;
+    }
 }

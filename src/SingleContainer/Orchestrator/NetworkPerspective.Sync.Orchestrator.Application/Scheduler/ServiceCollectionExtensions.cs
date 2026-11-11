@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Application.Scheduler.SecretRotation;
 using NetworkPerspective.Sync.Orchestrator.Application.Scheduler.Sync;
 
@@ -10,7 +11,7 @@ namespace NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
 
 internal static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddScheduler(this IServiceCollection services, IConfiguration configuration, string dbConnectionString)
+    public static IServiceCollection AddScheduler(this IServiceCollection services, IConfiguration configuration, string dbConnectionString, DatabaseProvider provider = DatabaseProvider.SqlServer)
     {
         var schedulerConfig = new SchedulerConfig();
         configuration.Bind(schedulerConfig);
@@ -25,10 +26,10 @@ internal static class ServiceCollectionExtensions
                 {
                     store.UseProperties = true;
                     store.UseNewtonsoftJsonSerializer();
-                    store.UseSqlServer(db =>
-                    {
-                        db.ConnectionString = dbConnectionString;
-                    });
+                    if (provider == DatabaseProvider.PostgreSql)
+                        store.UsePostgres(db => db.ConnectionString = dbConnectionString);
+                    else
+                        store.UseSqlServer(db => db.ConnectionString = dbConnectionString);
                 });
             }
             else

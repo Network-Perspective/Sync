@@ -12,6 +12,7 @@ using NetworkPerspective.Sync.Infrastructure.Vaults.Contract.Exceptions;
 using NetworkPerspective.Sync.Infrastructure.Vaults.ExternalAzureKeyVault;
 using NetworkPerspective.Sync.Infrastructure.Vaults.GoogleSecretManager;
 using NetworkPerspective.Sync.Infrastructure.Vaults.HashiCorpVault;
+using NetworkPerspective.Sync.Infrastructure.Vaults.Ovh;
 using NetworkPerspective.Sync.Worker.ApplicationInsights;
 
 namespace NetworkPerspective.Sync.Worker;
@@ -22,20 +23,34 @@ internal static class ServiceCollectionExtensions
     {
         const string azureKeyVaultConfigSection = "AzureKeyVault";
         const string hcpVaultConfigSection = "HcpVault";
+        const string ovhVaultConfigSection = "OvhVault";
         const string googleSecretManagerConfigSection = "GoogleSecretManager";
         const string amazonSecretsManagerConfigSection = "AmazonSecretsManager";
 
-        var configurationSections = configuration.GetChildren();
+        var containsAzureKeyVault = configuration.GetSection(azureKeyVaultConfigSection).Exists();
+        var containsHcpVault = configuration.GetSection(hcpVaultConfigSection).Exists();
+        var containsOvhVault = configuration.GetSection(ovhVaultConfigSection).Exists();
+        var containsGoogleSecretManagerConfigSection = configuration.GetSection(googleSecretManagerConfigSection).Exists();
+        var containsAmazonSecretsManager = configuration.GetSection(amazonSecretsManagerConfigSection).Exists();
 
-        var containsAzureKeyVault = configurationSections.Any(x => x.Key == azureKeyVaultConfigSection);
-        var containsHcpVault = configurationSections.Any(x => x.Key == hcpVaultConfigSection);
-        var containsGoogleSecretManagerConfigSection = configurationSections.Any(x => x.Key == googleSecretManagerConfigSection);
-        var containsAmazonSecretsManager = configurationSections.Any(x => x.Key == amazonSecretsManagerConfigSection);
+        var providerCount = new[]
+        {
+            containsAzureKeyVault,
+            containsHcpVault,
+            containsOvhVault,
+            containsGoogleSecretManagerConfigSection,
+            containsAmazonSecretsManager
+        }.Count(configured => configured);
 
-        if (containsAzureKeyVault)
+        if (providerCount > 1)
+            throw new InvalidVaultConfigurationException("Only one primary vault provider may be configured.");
+
+        if (containsOvhVault)
+            services.AddOvhKeyVault(configuration.GetSection(ovhVaultConfigSection), healthChecksBuilder);
+        else if (containsAzureKeyVault)
             services.AddAzureKeyVault(configuration.GetSection(azureKeyVaultConfigSection), healthChecksBuilder);
         else if (containsHcpVault)
-            services.AddHcpKeyVault(configuration.GetSection(azureKeyVaultConfigSection));
+            services.AddHcpKeyVault(configuration.GetSection(hcpVaultConfigSection));
         else if (containsGoogleSecretManagerConfigSection)
             services.AddGoogleSecretManager(configuration.GetSection(googleSecretManagerConfigSection));
         else if (containsAmazonSecretsManager)

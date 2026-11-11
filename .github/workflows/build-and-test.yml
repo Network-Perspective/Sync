@@ -3,7 +3,12 @@
 
 name: .NET
 
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - 'ovh/**'
+    tags:
+      - '**'
 
 jobs:
   build_and_test:

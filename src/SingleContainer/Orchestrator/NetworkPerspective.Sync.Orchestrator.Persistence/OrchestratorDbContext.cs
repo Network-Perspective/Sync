@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 using NetworkPerspective.Sync.Orchestrator.Persistence.Entities;
 
@@ -17,5 +20,19 @@ public class OrchestratorDbContext : DbContext
     { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-        => modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrchestratorDbContext).Assembly);
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrchestratorDbContext).Assembly);
+
+        if (Database.IsNpgsql())
+        {
+            // SQL Server returned Unspecified values; the application's persisted timestamps represent UTC.
+            var utc = new ValueConverter<DateTime, DateTime>(
+                value => value.Kind == DateTimeKind.Local ? value.ToUniversalTime() : DateTime.SpecifyKind(value, DateTimeKind.Utc),
+                value => DateTime.SpecifyKind(value, DateTimeKind.Utc));
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+                foreach (var property in entity.GetProperties())
+                    if (property.ClrType == typeof(DateTime))
+                        property.SetValueConverter(utc);
+        }
+    }
 }

@@ -14,10 +14,20 @@ public class UnitOfWorkFactory : IUnitOfWorkFactory
     {
         var connectionString = configuration.GetConnectionString("Database");
 
-        var migrationsAssemblyName = typeof(DesignTimeDbContextFactory).Assembly.GetName().Name;
-        _options = new DbContextOptionsBuilder<OrchestratorDbContext>()
-          .UseSqlServer(connectionString, x => x.MigrationsAssembly(migrationsAssemblyName))
-          .Options;
+        _options = CreateOptions(configuration.GetDatabaseProvider(), connectionString);
+    }
+
+    public static DbContextOptions<OrchestratorDbContext> CreateOptions(DatabaseProvider provider, string connectionString)
+    {
+        var builder = new DbContextOptionsBuilder<OrchestratorDbContext>();
+        if (provider == DatabaseProvider.PostgreSql)
+            builder.UseNpgsql(connectionString);
+        else if (provider == DatabaseProvider.SqlServer)
+            builder.UseSqlServer(connectionString, x => x.MigrationsAssembly(typeof(DesignTimeDbContextFactory).Assembly.GetName().Name));
+        else
+            throw new System.ArgumentOutOfRangeException(nameof(provider));
+
+        return builder.Options;
     }
 
     public IUnitOfWork Create()

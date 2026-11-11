@@ -16,12 +16,15 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.28" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.28" />
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="8.0.28" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
     </ItemGroup>
 
     <ItemGroup>
+      <EmbeddedResource Include="Schema\Quartz_PostgreSql.sql" />
+      <None Update="Schema\Quartz-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
       <None Update="Migrations\Scripts\Quartz_SqlServer_down.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

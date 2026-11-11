@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using NetworkPerspective.Sync.Orchestrator.Application.Infrastructure.Persistence;
 using NetworkPerspective.Sync.Orchestrator.Application.Scheduler;
 using NetworkPerspective.Sync.Orchestrator.Application.Services;
 
@@ -8,9 +9,9 @@ namespace NetworkPerspective.Sync.Orchestrator.Application;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration config, string dbConnectionString)
+    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration config, string dbConnectionString, DatabaseProvider provider = DatabaseProvider.SqlServer)
     {
-        services.AddScheduler(config.GetSection("Scheduler"), dbConnectionString);
+        services.AddScheduler(config.GetSection("Scheduler"), dbConnectionString, provider);
 
         services.AddTransient<IClock, Clock>();
 

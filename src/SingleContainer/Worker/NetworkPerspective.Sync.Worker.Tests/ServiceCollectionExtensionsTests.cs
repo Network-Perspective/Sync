@@ -5,11 +5,13 @@ using FluentAssertions;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 using Moq;
 
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract;
 using NetworkPerspective.Sync.Infrastructure.Vaults.Contract.Exceptions;
+using NetworkPerspective.Sync.Infrastructure.Vaults.HashiCorpVault;
 
 using Xunit;
 
@@ -17,8 +19,10 @@ namespace NetworkPerspective.Sync.Worker.Tests;
 
 public class ServiceCollectionExtensionsTests
 {
-    [Fact]
-    public void ShouldUseAzureKeyVault()
+    [Theory]
+    [InlineData("AzureKeyVault")]
+    [InlineData("azurekeyvault")]
+    public void ShouldUseAzureKeyVault(string sectionName)
     {
         // Arrange
         var services = new ServiceCollection();
@@ -27,8 +31,8 @@ public class ServiceCollectionExtensionsTests
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string>
             {
-                { "Infrastructure:AzureKeyVault:BaseUrl", "https://networkperspective.io/" },
-                { "Infrastructure:AzureKeyVault:TestSecretName", "test-key" }
+                { $"Infrastructure:{sectionName}:BaseUrl", "https://networkperspective.io/" },
+                { $"Infrastructure:{sectionName}:TestSecretName", "test-key" }
             })
             .Build();
 
@@ -46,8 +50,10 @@ public class ServiceCollectionExtensionsTests
         vault.GetType().Name.Should().Be("AzureKeyVaultClient");
     }
 
-    [Fact]
-    public void ShouldUseHcpVault()
+    [Theory]
+    [InlineData("HcpVault")]
+    [InlineData("hcpvault")]
+    public void ShouldUseHcpVault(string sectionName)
     {
         // Arrange
         var services = new ServiceCollection();
@@ -56,8 +62,8 @@ public class ServiceCollectionExtensionsTests
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string>
             {
-                { "Infrastructure:HcpVault:BaseUrl", "https://networkperspective.io/" },
-                { "Infrastructure:HcpVault:TestSecretName", "test-key" }
+                { $"Infrastructure:{sectionName}:BaseUrl", "https://networkperspective.io/" },
+                { $"Infrastructure:{sectionName}:TestSecretName", "test-key" }
             })
             .Build();
 
@@ -73,6 +79,10 @@ public class ServiceCollectionExtensionsTests
 
         // Assert
         vault.GetType().Name.Should().Be("HcpVaultClient");
+        var options = serviceProvider.GetRequiredService<IOptions<HcpVaultConfig>>().Value;
+        options.BaseUrl.Should().Be("https://networkperspective.io/");
+        options.TestSecretName.Should().Be("test-key");
+        services.Should().NotContain(x => x.ServiceType == typeof(IValidateOptions<HcpVaultConfig>));
     }
 
     [Fact]
@@ -105,8 +115,10 @@ public class ServiceCollectionExtensionsTests
         vault.GetType().Name.Should().Be("ExternalAzureKeyVaultClient");
     }
 
-    [Fact]
-    public void ShouldUseGoogleSecretManager()
+    [Theory]
+    [InlineData("GoogleSecretManager")]
+    [InlineData("googlesecretmanager")]
+    public void ShouldUseGoogleSecretManager(string sectionName)
     {
         // Arrange
         var services = new ServiceCollection();
@@ -115,7 +127,7 @@ public class ServiceCollectionExtensionsTests
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string>
             {
-                { "Infrastructure:GoogleSecretManager:ProjectId", "42" },
+                { $"Infrastructure:{sectionName}:ProjectId", "42" },
 
             })
             .Build();
@@ -133,8 +145,10 @@ public class ServiceCollectionExtensionsTests
         vault.GetType().Name.Should().Be("GoogleSecretManagerClient");
     }
 
-    [Fact]
-    public void ShouldUseAmazonSecretsManager()
+    [Theory]
+    [InlineData("AmazonSecretsManager")]
+    [InlineData("amazonsecretsmanager")]
+    public void ShouldUseAmazonSecretsManager(string sectionName)
     {
         // Arrange
         var services = new ServiceCollection();
@@ -143,8 +157,8 @@ public class ServiceCollectionExtensionsTests
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string>
             {
-                { "Infrastructure:AmazonSecretsManager:Region", "eu-central-1" },
-                { "Infrastructure:AmazonSecretsManager:SecretsPrefix", "test/connectors" },
+                { $"Infrastructure:{sectionName}:Region", "eu-central-1" },
+                { $"Infrastructure:{sectionName}:SecretsPrefix", "test/connectors" },
 
             })
             .Build();
@@ -162,8 +176,43 @@ public class ServiceCollectionExtensionsTests
         vault.GetType().Name.Should().Be("AmazonSecretsManagerClient");
     }
 
-    [Fact]
-    public void ShouldThrowOnNotConfigured()
+    public static IEnumerable<object[]> PrimaryProviderPairs()
+    {
+        var providers = new[] { "AzureKeyVault", "HcpVault", "OvhVault", "GoogleSecretManager", "AmazonSecretsManager" };
+        for (var i = 0; i < providers.Length; i++)
+        {
+            for (var j = i + 1; j < providers.Length; j++)
+            {
+                yield return new object[] { providers[i], providers[j] };
+                yield return new object[] { providers[i], providers[j].ToLowerInvariant() };
+            }
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(PrimaryProviderPairs))]
+    public void ShouldRejectMultiplePrimaryProvidersBeforeRegisteringAnyVault(string first, string second)
+    {
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
+        {
+            [$"{first}:BaseUrl"] = "https://synthetic.example.invalid/",
+            [$"{second}:BaseUrl"] = "https://synthetic.example.invalid/"
+        }).Build();
+        var services = new ServiceCollection();
+        var healthChecks = services.AddHealthChecks();
+
+        Action register = () => services.AddVault(config, healthChecks);
+
+        register.Should().Throw<InvalidVaultConfigurationException>()
+            .WithMessage("Only one primary vault provider may be configured.");
+        services.Should().NotContain(x => x.ServiceType == typeof(IVault));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("ExternalAzureKeyVault")]
+    [InlineData("UnknownVault")]
+    public void ShouldThrowWithoutPrimaryProvider(string otherSection)
     {
         // Arrange
         var services = new ServiceCollection();
@@ -174,6 +223,9 @@ public class ServiceCollectionExtensionsTests
             .Build();
 
         var healthCheckBuilder = Mock.Of<IHealthChecksBuilder>();
+
+        if (otherSection is not null)
+            config[$"Infrastructure:{otherSection}:BaseUrl"] = "https://synthetic.example.invalid/";
 
         Func<IServiceCollection> func = () => services.AddVault(config.GetSection("Infrastructure"), healthCheckBuilder);
 
