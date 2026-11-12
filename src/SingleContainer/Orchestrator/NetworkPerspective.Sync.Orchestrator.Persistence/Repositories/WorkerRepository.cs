@@ -86,7 +86,7 @@ internal class WorkerRepository : IWorkerRepository
     public async Task<Worker> GetAsync(Guid id, CancellationToken stoppingToken = default)
     {
         if (!await ExistsAsync(id, stoppingToken))
-            throw new EntityNotFoundException<Worker>();
+            throw new EntityNotFoundException<Worker>(id.ToString());
 
         try
         {
@@ -104,7 +104,7 @@ internal class WorkerRepository : IWorkerRepository
     public async Task<Worker> GetAsync(string name, CancellationToken stoppingToken = default)
     {
         if (!await ExistsAsync(name, stoppingToken))
-            throw new EntityNotFoundException<Worker>();
+            throw new EntityNotFoundException<Worker>(name);
 
         try
         {
@@ -122,7 +122,7 @@ internal class WorkerRepository : IWorkerRepository
     public async Task RemoveAsync(Guid id, CancellationToken stoppingToken = default)
     {
         if (!await ExistsAsync(id, stoppingToken))
-            throw new EntityNotFoundException<Worker>();
+            throw new EntityNotFoundException<Worker>(id.ToString());
 
         try
         {
@@ -143,7 +143,7 @@ internal class WorkerRepository : IWorkerRepository
                 .FirstOrDefaultAsync(x => x.Id == worker.Id, stoppingToken);
 
             if (current is null)
-                throw new EntityNotFoundException<Worker>();
+                throw new EntityNotFoundException<Worker>(worker.Id.ToString());
 
             var entity = WorkerMapper.DomainModelToEntity(worker);
 
